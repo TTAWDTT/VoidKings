@@ -3,3 +3,113 @@ proj.linux
 proj.ohos
 .vs
 proj.win32/Debug.win32
+
+# Build directories
+build/
+out/
+bin/
+obj/
+
+# Debug and Release directories
+**/Debug/
+**/Release/
+**/Debug.win32/
+**/Release.win32/
+
+# IDE files
+.vscode/
+*.suo
+*.user
+*.aps
+*.pch
+*.vspscc
+*_i.c
+*_p.c
+*.ncb
+*.suo
+*.tlb
+*.tlh
+*.tmp
+*.tmp_proj
+*.log
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.log
+*.svclog
+*.scc
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Compiled binaries
+*.exe
+*.dll
+*.lib
+*.pdb
+*.idb
+*.ilk
+*.obj
+*.o
+*.a
+*.so
+*.dylib
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.bak
+*~
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+
+# Visual Studio
+.vs/
+*.vcxproj.filters
+*.vcxproj.user
+
+# Xcode
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.moved-aside
+*.xccheckout
+*.xcscmblueprint
+
+# Android
+proj.android/build/
+*.apk
+*.ap_
+
+# iOS
+proj.ios_mac/build/
+*.ipa
+
+# Windows
+proj.win32/Debug.win32/
+proj.win32/Release.win32/
+
+# Cocos2d-x specific
+cocos2d/external/*/prebuilt/
+cocos2d/external/*/build/
