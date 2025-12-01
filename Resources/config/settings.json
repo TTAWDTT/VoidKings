@@ -1,0 +1,56 @@
+{
+    "gameSettings": {
+        "version": "1.0.0",
+        "displayName": "Void Kings",
+        "displayName_cn": "虚空之王",
+        
+        "window": {
+            "designWidth": 1280,
+            "designHeight": 720,
+            "minWidth": 960,
+            "minHeight": 540,
+            "resizable": true,
+            "fps": 60
+        },
+        
+        "map": {
+            "gridSize": 32,
+            "mapWidth": 40,
+            "mapHeight": 30
+        },
+        
+        "battle": {
+            "maxDuration": 180,
+            "deployBorderSize": 5,
+            "starThresholds": {
+                "oneStar": 50,
+                "twoStar": 100,
+                "threeStar": 100
+            }
+        },
+        
+        "initialResources": {
+            "gold": 500,
+            "elixir": 500,
+            "maxGold": 5000,
+            "maxElixir": 5000,
+            "workers": 2,
+            "maxWorkers": 5,
+            "population": 0,
+            "maxPopulation": 20
+        },
+        
+        "economy": {
+            "buildingRefundRate": 0.5,
+            "trainingRefundRate": 0.5,
+            "destructionLootRate": 0.3
+        },
+        
+        "colors": {
+            "player": {"r": 0.2, "g": 0.6, "b": 0.8},
+            "enemy": {"r": 0.8, "g": 0.2, "b": 0.2},
+            "gold": {"r": 1.0, "g": 0.84, "b": 0.0},
+            "elixir": {"r": 0.6, "g": 0.2, "b": 0.8}
+        }
+    }
+}

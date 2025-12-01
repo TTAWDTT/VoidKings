@@ -10,6 +10,60 @@ Void Kings 是一款基于 Cocos2d-x 3.17.2 开发的类《部落冲突》策略
 - **兵种养成**: 训练各种兵种，组建进攻部队
 - **攻防对战**: 进攻敌方基地，掠夺资源
 
+### 技术规格
+- **引擎**: Cocos2d-x 3.17.2
+- **开发语言**: C++
+- **目标平台**: Windows 32位
+- **设计分辨率**: 1280 x 720
+- **帧率**: 60 FPS
+
+---
+
+## 目录结构
+
+```
+VoidKings/
+├── Classes/
+│   ├── Core/                    # 核心系统
+│   │   ├── GameDefines.h        # 游戏定义和常量
+│   │   ├── ResourceManager.h    # 资源管理器头文件
+│   │   └── ResourceManager.cpp  # 资源管理器实现
+│   ├── Buildings/               # 建筑系统
+│   │   ├── Building.h/cpp       # 建筑基类
+│   │   ├── DefenseBuilding.h/cpp      # 防御建筑
+│   │   ├── ProductionBuilding.h/cpp   # 生产建筑
+│   │   ├── StorageBuilding.h/cpp      # 存储建筑
+│   │   └── Barracks.h/cpp       # 兵营
+│   ├── Units/                   # 兵种系统
+│   │   └── Unit.h/cpp           # 单位类
+│   ├── Projectiles/             # 投射物系统
+│   │   └── Projectile.h/cpp     # 投射物类
+│   ├── Potions/                 # 药水系统
+│   │   └── Potion.h/cpp         # 药水类
+│   ├── Scenes/                  # 场景系统
+│   │   ├── MainMenuScene.h/cpp  # 主菜单
+│   │   ├── BaseScene.h/cpp      # 基地场景
+│   │   └── BattleScene.h/cpp    # 战斗场景
+│   ├── AppDelegate.h/cpp        # 应用入口
+│   └── HelloWorldScene.h/cpp    # 原始场景(保留)
+├── Resources/
+│   ├── config/                  # 配置文件
+│   │   ├── buildings.json       # 建筑配置
+│   │   ├── units.json           # 兵种配置
+│   │   ├── potions.json         # 药水配置
+│   │   └── settings.json        # 游戏设置
+│   ├── textures/                # 纹理资源目录
+│   │   ├── buildings/           # 建筑纹理
+│   │   ├── units/               # 单位纹理
+│   │   └── ui/                  # UI纹理
+│   └── fonts/                   # 字体文件
+├── proj.win32/                  # Windows项目文件
+├── cocos2d/                     # Cocos2d-x引擎
+└── docs/                        # 文档
+    ├── 文档.md                  # 原始设计文档
+    └── GameDocumentation.md     # 开发文档
+```
+
 ---
 
 ## 类功能说明

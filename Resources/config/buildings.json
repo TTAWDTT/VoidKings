@@ -1,0 +1,174 @@
+{
+    "buildings": [
+        {
+            "type": "TOWN_HALL",
+            "name": "Town Hall",
+            "name_cn": "大本营",
+            "gridWidth": 4,
+            "gridHeight": 4,
+            "maxLevel": 10,
+            "texturePath": "textures/buildings/townhall.png",
+            "levels": [
+                {"level": 1, "hp": 1500, "goldCost": 0, "elixirCost": 0, "buildTime": 0},
+                {"level": 2, "hp": 1700, "goldCost": 1000, "elixirCost": 0, "buildTime": 300},
+                {"level": 3, "hp": 1900, "goldCost": 3000, "elixirCost": 0, "buildTime": 600},
+                {"level": 4, "hp": 2100, "goldCost": 8000, "elixirCost": 0, "buildTime": 1200},
+                {"level": 5, "hp": 2400, "goldCost": 15000, "elixirCost": 0, "buildTime": 1800}
+            ]
+        },
+        {
+            "type": "CANNON",
+            "name": "Cannon",
+            "name_cn": "加农炮",
+            "gridWidth": 3,
+            "gridHeight": 3,
+            "maxLevel": 15,
+            "texturePath": "textures/buildings/cannon.png",
+            "attackRange": 250,
+            "attackSpeed": 0.8,
+            "canAttackAir": false,
+            "damageType": "SINGLE",
+            "projectileType": "STRAIGHT",
+            "levels": [
+                {"level": 1, "hp": 400, "damage": 60, "goldCost": 250, "elixirCost": 0, "buildTime": 60},
+                {"level": 2, "hp": 450, "damage": 70, "goldCost": 500, "elixirCost": 0, "buildTime": 120},
+                {"level": 3, "hp": 510, "damage": 80, "goldCost": 1000, "elixirCost": 0, "buildTime": 300},
+                {"level": 4, "hp": 580, "damage": 95, "goldCost": 2000, "elixirCost": 0, "buildTime": 600},
+                {"level": 5, "hp": 660, "damage": 110, "goldCost": 4000, "elixirCost": 0, "buildTime": 1200}
+            ]
+        },
+        {
+            "type": "ARCHER_TOWER",
+            "name": "Archer Tower",
+            "name_cn": "箭塔",
+            "gridWidth": 3,
+            "gridHeight": 3,
+            "maxLevel": 15,
+            "texturePath": "textures/buildings/archer_tower.png",
+            "attackRange": 300,
+            "attackSpeed": 1.2,
+            "canAttackAir": true,
+            "damageType": "SINGLE",
+            "projectileType": "STRAIGHT",
+            "levels": [
+                {"level": 1, "hp": 380, "damage": 40, "goldCost": 500, "elixirCost": 0, "buildTime": 120},
+                {"level": 2, "hp": 420, "damage": 48, "goldCost": 1000, "elixirCost": 0, "buildTime": 300},
+                {"level": 3, "hp": 470, "damage": 56, "goldCost": 2000, "elixirCost": 0, "buildTime": 600},
+                {"level": 4, "hp": 530, "damage": 65, "goldCost": 4000, "elixirCost": 0, "buildTime": 1200},
+                {"level": 5, "hp": 590, "damage": 75, "goldCost": 8000, "elixirCost": 0, "buildTime": 2400}
+            ]
+        },
+        {
+            "type": "MORTAR",
+            "name": "Mortar",
+            "name_cn": "迫击炮",
+            "gridWidth": 3,
+            "gridHeight": 3,
+            "maxLevel": 10,
+            "texturePath": "textures/buildings/mortar.png",
+            "attackRange": 400,
+            "attackSpeed": 0.3,
+            "canAttackAir": false,
+            "damageType": "AREA",
+            "damageRadius": 50,
+            "projectileType": "PARABOLIC",
+            "levels": [
+                {"level": 1, "hp": 400, "damage": 80, "goldCost": 5000, "elixirCost": 0, "buildTime": 300},
+                {"level": 2, "hp": 450, "damage": 95, "goldCost": 10000, "elixirCost": 0, "buildTime": 600},
+                {"level": 3, "hp": 510, "damage": 110, "goldCost": 20000, "elixirCost": 0, "buildTime": 1200}
+            ]
+        },
+        {
+            "type": "GOLD_MINE",
+            "name": "Gold Mine",
+            "name_cn": "金矿",
+            "gridWidth": 3,
+            "gridHeight": 3,
+            "maxLevel": 12,
+            "texturePath": "textures/buildings/gold_mine.png",
+            "productionType": "GOLD",
+            "levels": [
+                {"level": 1, "hp": 400, "productionRate": 0.5, "maxStorage": 500, "goldCost": 0, "elixirCost": 150, "buildTime": 60},
+                {"level": 2, "hp": 440, "productionRate": 0.75, "maxStorage": 750, "goldCost": 0, "elixirCost": 300, "buildTime": 120},
+                {"level": 3, "hp": 480, "productionRate": 1.0, "maxStorage": 1000, "goldCost": 0, "elixirCost": 600, "buildTime": 300}
+            ]
+        },
+        {
+            "type": "ELIXIR_COLLECTOR",
+            "name": "Elixir Collector",
+            "name_cn": "圣水收集器",
+            "gridWidth": 3,
+            "gridHeight": 3,
+            "maxLevel": 12,
+            "texturePath": "textures/buildings/elixir_collector.png",
+            "productionType": "ELIXIR",
+            "levels": [
+                {"level": 1, "hp": 400, "productionRate": 0.5, "maxStorage": 500, "goldCost": 150, "elixirCost": 0, "buildTime": 60},
+                {"level": 2, "hp": 440, "productionRate": 0.75, "maxStorage": 750, "goldCost": 300, "elixirCost": 0, "buildTime": 120},
+                {"level": 3, "hp": 480, "productionRate": 1.0, "maxStorage": 1000, "goldCost": 600, "elixirCost": 0, "buildTime": 300}
+            ]
+        },
+        {
+            "type": "GOLD_STORAGE",
+            "name": "Gold Storage",
+            "name_cn": "金库",
+            "gridWidth": 3,
+            "gridHeight": 3,
+            "maxLevel": 12,
+            "texturePath": "textures/buildings/gold_storage.png",
+            "storageType": "GOLD",
+            "levels": [
+                {"level": 1, "hp": 600, "capacity": 1500, "goldCost": 0, "elixirCost": 300, "buildTime": 120},
+                {"level": 2, "hp": 700, "capacity": 3000, "goldCost": 0, "elixirCost": 600, "buildTime": 300},
+                {"level": 3, "hp": 800, "capacity": 6000, "goldCost": 0, "elixirCost": 1200, "buildTime": 600}
+            ]
+        },
+        {
+            "type": "ELIXIR_STORAGE",
+            "name": "Elixir Storage",
+            "name_cn": "圣水库",
+            "gridWidth": 3,
+            "gridHeight": 3,
+            "maxLevel": 12,
+            "texturePath": "textures/buildings/elixir_storage.png",
+            "storageType": "ELIXIR",
+            "levels": [
+                {"level": 1, "hp": 600, "capacity": 1500, "goldCost": 300, "elixirCost": 0, "buildTime": 120},
+                {"level": 2, "hp": 700, "capacity": 3000, "goldCost": 600, "elixirCost": 0, "buildTime": 300},
+                {"level": 3, "hp": 800, "capacity": 6000, "goldCost": 1200, "elixirCost": 0, "buildTime": 600}
+            ]
+        },
+        {
+            "type": "BARRACKS",
+            "name": "Barracks",
+            "name_cn": "兵营",
+            "gridWidth": 3,
+            "gridHeight": 3,
+            "maxLevel": 10,
+            "texturePath": "textures/buildings/barracks.png",
+            "levels": [
+                {"level": 1, "hp": 500, "queueCapacity": 5, "goldCost": 0, "elixirCost": 200, "buildTime": 180, "unlockedUnits": ["BARBARIAN"]},
+                {"level": 2, "hp": 550, "queueCapacity": 6, "goldCost": 0, "elixirCost": 400, "buildTime": 360, "unlockedUnits": ["BARBARIAN", "ARCHER"]},
+                {"level": 3, "hp": 600, "queueCapacity": 7, "goldCost": 0, "elixirCost": 800, "buildTime": 600, "unlockedUnits": ["BARBARIAN", "ARCHER", "GIANT"]},
+                {"level": 4, "hp": 660, "queueCapacity": 8, "goldCost": 0, "elixirCost": 1600, "buildTime": 1200, "unlockedUnits": ["BARBARIAN", "ARCHER", "GIANT", "GOBLIN"]},
+                {"level": 5, "hp": 720, "queueCapacity": 10, "goldCost": 0, "elixirCost": 3200, "buildTime": 2400, "unlockedUnits": ["BARBARIAN", "ARCHER", "GIANT", "GOBLIN", "WIZARD"]}
+            ]
+        },
+        {
+            "type": "WALL",
+            "name": "Wall",
+            "name_cn": "城墙",
+            "gridWidth": 1,
+            "gridHeight": 1,
+            "maxLevel": 12,
+            "texturePath": "textures/buildings/wall.png",
+            "levels": [
+                {"level": 1, "hp": 300, "goldCost": 50, "elixirCost": 0, "buildTime": 1},
+                {"level": 2, "hp": 500, "goldCost": 100, "elixirCost": 0, "buildTime": 1},
+                {"level": 3, "hp": 700, "goldCost": 200, "elixirCost": 0, "buildTime": 1},
+                {"level": 4, "hp": 900, "goldCost": 500, "elixirCost": 0, "buildTime": 1},
+                {"level": 5, "hp": 1400, "goldCost": 1000, "elixirCost": 0, "buildTime": 1}
+            ]
+        }
+    ]
+}

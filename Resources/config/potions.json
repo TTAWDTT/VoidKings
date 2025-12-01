@@ -1,0 +1,68 @@
+{
+    "potions": [
+        {
+            "type": "HEAL",
+            "name": "Heal Spell",
+            "name_cn": "治疗药水",
+            "description": "A healing spell that creates a ring of healing. All friendly troops inside the ring will be healed.",
+            "description_cn": "创造一个治疗光环，范围内的所有友军将获得治疗。",
+            "texturePath": "textures/potions/heal.png",
+            "effectColor": {"r": 0.2, "g": 1.0, "b": 0.2, "a": 0.3},
+            "levels": [
+                {"level": 1, "radius": 120, "duration": 8, "healPerSecond": 30, "goldCost": 0, "elixirCost": 1000, "population": 2, "craftTime": 120},
+                {"level": 2, "radius": 130, "duration": 9, "healPerSecond": 40, "goldCost": 0, "elixirCost": 1500, "population": 2, "craftTime": 120},
+                {"level": 3, "radius": 140, "duration": 10, "healPerSecond": 55, "goldCost": 0, "elixirCost": 2000, "population": 2, "craftTime": 120},
+                {"level": 4, "radius": 150, "duration": 11, "healPerSecond": 70, "goldCost": 0, "elixirCost": 2500, "population": 2, "craftTime": 120},
+                {"level": 5, "radius": 160, "duration": 12, "healPerSecond": 90, "goldCost": 0, "elixirCost": 3000, "population": 2, "craftTime": 120}
+            ]
+        },
+        {
+            "type": "RAGE",
+            "name": "Rage Spell",
+            "name_cn": "狂暴药水",
+            "description": "Enrages friendly troops and makes them stronger. Increases damage and movement speed.",
+            "description_cn": "激怒友军使其变得更强。增加伤害和移动速度。",
+            "texturePath": "textures/potions/rage.png",
+            "effectColor": {"r": 1.0, "g": 0.2, "b": 0.8, "a": 0.3},
+            "levels": [
+                {"level": 1, "radius": 100, "duration": 10, "damageBoost": 1.3, "speedBoost": 1.2, "goldCost": 0, "elixirCost": 1500, "population": 2, "craftTime": 180},
+                {"level": 2, "radius": 110, "duration": 11, "damageBoost": 1.4, "speedBoost": 1.25, "goldCost": 0, "elixirCost": 2000, "population": 2, "craftTime": 180},
+                {"level": 3, "radius": 120, "duration": 12, "damageBoost": 1.5, "speedBoost": 1.3, "goldCost": 0, "elixirCost": 2500, "population": 2, "craftTime": 180},
+                {"level": 4, "radius": 130, "duration": 13, "damageBoost": 1.6, "speedBoost": 1.35, "goldCost": 0, "elixirCost": 3000, "population": 2, "craftTime": 180},
+                {"level": 5, "radius": 140, "duration": 14, "damageBoost": 1.7, "speedBoost": 1.4, "goldCost": 0, "elixirCost": 3500, "population": 2, "craftTime": 180}
+            ]
+        },
+        {
+            "type": "LIGHTNING",
+            "name": "Lightning Spell",
+            "name_cn": "闪电法术",
+            "description": "Strikes the enemy with bolts of lightning. Deals instant damage to all targets in the area.",
+            "description_cn": "用闪电攻击敌人，对区域内所有目标造成即时伤害。",
+            "texturePath": "textures/potions/lightning.png",
+            "effectColor": {"r": 1.0, "g": 1.0, "b": 0.2, "a": 0.5},
+            "levels": [
+                {"level": 1, "radius": 80, "duration": 0, "damage": 300, "goldCost": 0, "elixirCost": 2000, "population": 2, "craftTime": 240},
+                {"level": 2, "radius": 85, "duration": 0, "damage": 400, "goldCost": 0, "elixirCost": 2500, "population": 2, "craftTime": 240},
+                {"level": 3, "radius": 90, "duration": 0, "damage": 500, "goldCost": 0, "elixirCost": 3000, "population": 2, "craftTime": 240},
+                {"level": 4, "radius": 95, "duration": 0, "damage": 600, "goldCost": 0, "elixirCost": 3500, "population": 2, "craftTime": 240},
+                {"level": 5, "radius": 100, "duration": 0, "damage": 720, "goldCost": 0, "elixirCost": 4000, "population": 2, "craftTime": 240}
+            ]
+        },
+        {
+            "type": "FREEZE",
+            "name": "Freeze Spell",
+            "name_cn": "冰冻法术",
+            "description": "Freezes enemy troops and buildings in place, rendering them unable to move or attack.",
+            "description_cn": "冻结敌方单位和建筑，使其无法移动或攻击。",
+            "texturePath": "textures/potions/freeze.png",
+            "effectColor": {"r": 0.2, "g": 0.6, "b": 1.0, "a": 0.3},
+            "levels": [
+                {"level": 1, "radius": 90, "duration": 4, "goldCost": 0, "elixirCost": 2500, "population": 1, "craftTime": 300},
+                {"level": 2, "radius": 95, "duration": 4.5, "goldCost": 0, "elixirCost": 3000, "population": 1, "craftTime": 300},
+                {"level": 3, "radius": 100, "duration": 5, "goldCost": 0, "elixirCost": 3500, "population": 1, "craftTime": 300},
+                {"level": 4, "radius": 105, "duration": 5.5, "goldCost": 0, "elixirCost": 4000, "population": 1, "craftTime": 300},
+                {"level": 5, "radius": 110, "duration": 6, "goldCost": 0, "elixirCost": 4500, "population": 1, "craftTime": 300}
+            ]
+        }
+    ]
+}
