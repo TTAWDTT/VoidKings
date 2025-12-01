@@ -785,22 +785,28 @@ void BattleScene::onBackToBase(Ref* sender) {
 
 bool BattleScene::canDeployAt(const Vec2& position) {
     // 检查是否在部署区域内
+    // 部署区域是地图边缘的一圈区域
     float mapWidth = MAP_WIDTH * GRID_SIZE;
     float mapHeight = MAP_HEIGHT * GRID_SIZE;
     int borderSize = 5 * GRID_SIZE;
     
-    // 检查边缘区域
-    if (position.x < borderSize ||
-        position.x > mapWidth - borderSize ||
-        position.y < borderSize ||
-        position.y > mapHeight - borderSize) {
-        return true;
+    // 检查是否在地图范围内
+    if (position.x < 0 || position.x > mapWidth ||
+        position.y < 0 || position.y > mapHeight) {
+        return false;
     }
     
-    // 检查四个角落和边缘
-    if (position.x < borderSize || position.x > mapWidth - borderSize) return true;
-    if (position.y < borderSize || position.y > mapHeight - borderSize) return true;
+    // 检查是否在边缘部署区域
+    // 左边缘
+    if (position.x < borderSize) return true;
+    // 右边缘
+    if (position.x > mapWidth - borderSize) return true;
+    // 下边缘
+    if (position.y < borderSize) return true;
+    // 上边缘
+    if (position.y > mapHeight - borderSize) return true;
     
+    // 不在任何边缘区域，不可部署
     return false;
 }
 

@@ -83,13 +83,13 @@ protected:
     virtual void createVisualEffect();
     
     // 应用效果
-    virtual void applyEffect();
+    virtual void applyEffect(float dt);
     
     // 治疗效果
-    virtual void applyHealEffect();
+    virtual void applyHealEffect(float dt);
     
     // 狂暴效果
-    virtual void applyRageEffect();
+    virtual void applyRageEffect(float dt);
     
     // 闪电效果
     virtual void applyLightningEffect();

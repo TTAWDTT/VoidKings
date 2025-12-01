@@ -98,9 +98,9 @@ void DefenseBuilding::initDefenseAttributes() {
     }
     
     // 根据等级调整属性
-    float levelMultiplier = 1.0f + (_level - 1) * 0.1f;
+    float levelMultiplier = 1.0f + (_level - 1) * LEVEL_DAMAGE_MULTIPLIER;
     _damage = (int)(_damage * levelMultiplier);
-    _attackRange *= (1.0f + (_level - 1) * 0.02f);
+    _attackRange *= (1.0f + (_level - 1) * LEVEL_RANGE_MULTIPLIER);
 }
 
 // ==================== 攻击范围显示 ====================

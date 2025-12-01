@@ -505,7 +505,7 @@ std::vector<Vec2> Unit::findPath(const Vec2& target) {
     return path;
 }
 
-void Unit::moveAlongPath() {
+void Unit::moveAlongPath(float dt) {
     if (_path.empty() || _pathIndex >= (int)_path.size()) {
         stopMoving();
         return;
@@ -527,7 +527,7 @@ void Unit::moveAlongPath() {
     
     // 移动
     direction.normalize();
-    Vec2 newPos = myPos + direction * _moveSpeed * 0.016f;  // 假设60fps
+    Vec2 newPos = myPos + direction * _moveSpeed * dt;  // 使用dt实现帧率无关的移动
     this->setPosition(newPos);
     
     // 更新朝向
@@ -604,7 +604,7 @@ void Unit::updateStateMachine(float dt) {
             
         case UnitState::MOVING:
             // 移动状态：沿路径移动
-            moveAlongPath();
+            moveAlongPath(dt);
             
             // 检查是否有更近的目标
             if (_currentTarget) {

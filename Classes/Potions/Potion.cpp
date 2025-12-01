@@ -122,8 +122,10 @@ void Potion::use(const Vec2& position) {
     // 创建视觉效果
     createVisualEffect();
     
-    // 应用效果
-    applyEffect();
+    // 应用即时效果(对于闪电等即时生效的法术)
+    if (_potionType == PotionType::LIGHTNING) {
+        applyEffect(0);  // 即时效果不需要dt
+    }
     
     // 如果是持续效果，启用更新
     if (_duration > 0) {
@@ -266,13 +268,13 @@ void Potion::createVisualEffect() {
 
 // ==================== 效果应用 ====================
 
-void Potion::applyEffect() {
+void Potion::applyEffect(float dt) {
     switch (_potionType) {
         case PotionType::HEAL:
-            applyHealEffect();
+            applyHealEffect(dt);
             break;
         case PotionType::RAGE:
-            applyRageEffect();
+            applyRageEffect(dt);
             break;
         case PotionType::LIGHTNING:
             applyLightningEffect();
@@ -285,7 +287,7 @@ void Potion::applyEffect() {
     }
 }
 
-void Potion::applyHealEffect() {
+void Potion::applyHealEffect(float dt) {
     Vec2 myPos = this->getPosition();
     
     for (auto unit : _friendlyUnits) {
@@ -293,14 +295,15 @@ void Potion::applyHealEffect() {
         
         float distance = myPos.distance(unit->getPosition());
         if (distance <= _radius) {
-            // 在范围内，进行治疗
-            int healAmount = (int)(_effectValue * (1.0f / 60.0f));  // 每帧治疗量
+            // 在范围内，进行治疗 - 使用dt实现帧率无关的治疗
+            int healAmount = (int)(_effectValue * dt);
+            if (healAmount < 1) healAmount = 1;  // 确保至少治疗1点
             unit->heal(healAmount);
         }
     }
 }
 
-void Potion::applyRageEffect() {
+void Potion::applyRageEffect(float dt) {
     // 狂暴效果：在update中持续检测范围内单位
     // 实际实现需要给单位添加buff系统
     Vec2 myPos = this->getPosition();
@@ -379,6 +382,6 @@ void Potion::update(float dt) {
     
     // 持续应用效果
     if (_potionType == PotionType::HEAL || _potionType == PotionType::RAGE) {
-        applyEffect();
+        applyEffect(dt);
     }
 }

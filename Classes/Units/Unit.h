@@ -184,7 +184,7 @@ protected:
     virtual std::vector<Vec2> findPath(const Vec2& target);
     
     // 沿路径移动
-    virtual void moveAlongPath();
+    virtual void moveAlongPath(float dt);
     
     // ==================== 成员变量 ====================
     

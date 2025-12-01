@@ -27,6 +27,26 @@ const int MAP_HEIGHT = 30; // 地图高度(格子数)
 // 游戏更新间隔
 const float GAME_UPDATE_INTERVAL = 1.0f / 60.0f;
 
+// UI常量
+const int UI_OUTLINE_WIDTH = 2;          // UI边框宽度
+const int UI_HEALTH_BAR_HEIGHT = 6;      // 血条高度
+const int UI_PROGRESS_BAR_HEIGHT = 8;    // 进度条高度
+
+// 升级系数
+const float LEVEL_HP_MULTIPLIER = 0.1f;        // 每级血量增加比例
+const float LEVEL_DAMAGE_MULTIPLIER = 0.1f;    // 每级伤害增加比例
+const float LEVEL_RANGE_MULTIPLIER = 0.02f;    // 每级攻击范围增加比例
+const float LEVEL_COST_MULTIPLIER = 0.5f;      // 每级费用增加比例
+const float LEVEL_TIME_MULTIPLIER = 0.3f;      // 每级建造时间增加比例
+
+// 战斗常量
+const int BATTLE_DEPLOY_BORDER = 5;            // 战斗部署边界(格子数)
+const float BATTLE_MAX_TIME = 180.0f;          // 战斗最大时间(秒)
+
+// 资源常量
+const float BUILDING_REFUND_RATE = 0.5f;       // 建筑拆除返还比例
+const float TRAINING_REFUND_RATE = 0.5f;       // 训练取消返还比例
+
 // Z-Order层级定义
 enum ZOrder {
     Z_BACKGROUND = 0,      // 背景层
