@@ -138,6 +138,9 @@ protected:
     // 进入战斗
     void onAttack(Ref* sender);
     
+    // 显示帮助信息
+    void onHelp(Ref* sender);
+    
     // 返回主菜单
     void onBackToMenu(Ref* sender);
     

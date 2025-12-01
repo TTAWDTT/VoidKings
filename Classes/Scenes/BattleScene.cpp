@@ -11,6 +11,7 @@
 #include "../Buildings/StorageBuilding.h"
 #include "../Units/Unit.h"
 #include "../Potions/Potion.h"
+#include <algorithm>
 
 // ==================== 场景创建 ====================
 
@@ -235,10 +236,21 @@ void BattleScene::createUnitBar() {
     
     _unitBar = Node::create();
     
+    // 统一常量
+    const float barHeight = 85;
+    const float buttonSize = 55;
+    const float buttonSpacing = 85;
+    const float startX = 55;
+    const float buttonCenterY = barHeight / 2;
+    
     // 背景
     auto bg = DrawNode::create();
-    bg->drawSolidRect(Vec2(0, 0), Vec2(visibleSize.width, 80), Color4F(0.1f, 0.1f, 0.1f, 0.9f));
-    bg->drawLine(Vec2(0, 80), Vec2(visibleSize.width, 80), Color4F(0.5f, 0.5f, 0.5f, 1.0f));
+    bg->drawSolidRect(Vec2(0, 0), Vec2(visibleSize.width, barHeight), 
+                      Color4F(0.08f, 0.08f, 0.1f, 0.95f));
+    bg->drawLine(Vec2(0, barHeight), Vec2(visibleSize.width, barHeight), 
+                 Color4F(0.4f, 0.4f, 0.5f, 1.0f));
+    bg->drawLine(Vec2(0, barHeight - 1), Vec2(visibleSize.width, barHeight - 1),
+                 Color4F(0.3f, 0.3f, 0.4f, 0.5f));
     _unitBar->addChild(bg);
     
     // 兵种按钮
@@ -257,18 +269,25 @@ void BattleScene::createUnitBar() {
         {UnitType::GOBLIN, "Goblin", Color4F(0.2f, 0.6f, 0.2f, 1.0f)}
     };
     
-    float buttonSize = 60;
-    float spacing = 80;
-    float startX = 60;
-    
     for (size_t i = 0; i < options.size(); i++) {
         auto& opt = options[i];
         
         auto itemNode = Node::create();
         
+        // 按钮背景框
+        auto btnBg = DrawNode::create();
+        btnBg->drawSolidRect(Vec2(-buttonSize/2 - 5, -buttonSize/2 - 12), 
+                             Vec2(buttonSize/2 + 5, buttonSize/2 + 5),
+                             Color4F(0.15f, 0.15f, 0.2f, 0.9f));
+        btnBg->drawRect(Vec2(-buttonSize/2 - 5, -buttonSize/2 - 12), 
+                        Vec2(buttonSize/2 + 5, buttonSize/2 + 5),
+                        Color4F(0.4f, 0.4f, 0.5f, 1.0f));
+        itemNode->addChild(btnBg, -1);
+        
         // 图标
         auto icon = DrawNode::create();
-        icon->drawSolidCircle(Vec2(0, 5), buttonSize/2 - 5, 0, 20, opt.color);
+        icon->drawSolidCircle(Vec2(0, 5), buttonSize/2 - 8, 0, 20, opt.color);
+        icon->drawCircle(Vec2(0, 5), buttonSize/2 - 8, 0, 20, false, Color4F(0.0f, 0.0f, 0.0f, 0.5f));
         itemNode->addChild(icon);
         
         // 数量标签
@@ -278,8 +297,8 @@ void BattleScene::createUnitBar() {
             count = _availableUnits[opt.type];
         }
         snprintf(countStr, sizeof(countStr), "x%d", count);
-        auto countLabel = Label::createWithSystemFont(countStr, "Arial", 14);
-        countLabel->setPosition(Vec2(0, -25));
+        auto countLabel = Label::createWithSystemFont(countStr, "Arial", 13);
+        countLabel->setPosition(Vec2(0, -buttonSize/2 + 2));
         countLabel->setColor(Color3B::WHITE);
         countLabel->setName("countLabel");
         itemNode->addChild(countLabel);
@@ -289,21 +308,28 @@ void BattleScene::createUnitBar() {
             [this, opt](Ref* sender) {
                 this->selectUnitType(opt.type);
             });
-        button->setContentSize(Size(buttonSize, buttonSize + 20));
+        button->setContentSize(Size(buttonSize + 10, buttonSize + 17));
         button->addChild(itemNode);
         
-        button->setPosition(Vec2(startX + i * spacing, 40));
+        button->setPosition(Vec2(startX + i * buttonSpacing, buttonCenterY));
         unitButtons.pushBack(button);
     }
     
-    // 撤退按钮
+    // 撤退按钮 - 右侧对齐
+    const float retreatBtnWidth = 100;
+    const float retreatBtnHeight = 40;
     auto retreatLabel = Label::createWithSystemFont("Retreat", "Arial", 18);
     retreatLabel->setColor(Color3B::WHITE);
     auto retreatButton = MenuItemLabel::create(retreatLabel, CC_CALLBACK_1(BattleScene::onRetreat, this));
     auto retreatBg = DrawNode::create();
-    retreatBg->drawSolidRect(Vec2(-50, -20), Vec2(50, 20), Color4F(0.6f, 0.2f, 0.2f, 1.0f));
+    retreatBg->drawSolidRect(Vec2(-retreatBtnWidth/2, -retreatBtnHeight/2), 
+                             Vec2(retreatBtnWidth/2, retreatBtnHeight/2), 
+                             Color4F(0.6f, 0.2f, 0.2f, 1.0f));
+    retreatBg->drawRect(Vec2(-retreatBtnWidth/2, -retreatBtnHeight/2), 
+                        Vec2(retreatBtnWidth/2, retreatBtnHeight/2), 
+                        Color4F(0.8f, 0.3f, 0.3f, 1.0f));
     retreatButton->addChild(retreatBg, -1);
-    retreatButton->setPosition(Vec2(visibleSize.width - 80, 40));
+    retreatButton->setPosition(Vec2(visibleSize.width - retreatBtnWidth/2 - 15, buttonCenterY));
     unitButtons.pushBack(retreatButton);
     
     auto menu = Menu::createWithArray(unitButtons);
@@ -320,22 +346,34 @@ void BattleScene::createBattleInfo() {
     
     _battleInfoPanel = Node::create();
     
+    // 统一常量
+    const float panelWidth = 320;
+    const float panelHeight = 65;
+    const float margin = 10;
+    
     // 背景
     auto bg = DrawNode::create();
-    bg->drawSolidRect(Vec2(0, 0), Vec2(300, 60), Color4F(0, 0, 0, 0.7f));
+    bg->drawSolidRect(Vec2(0, 0), Vec2(panelWidth, panelHeight), 
+                      Color4F(0.08f, 0.08f, 0.12f, 0.9f));
+    bg->drawRect(Vec2(0, 0), Vec2(panelWidth, panelHeight), 
+                 Color4F(0.4f, 0.4f, 0.5f, 1.0f));
+    bg->drawLine(Vec2(2, panelHeight - 1), Vec2(panelWidth - 2, panelHeight - 1),
+                 Color4F(0.5f, 0.5f, 0.6f, 0.5f));
     _battleInfoPanel->addChild(bg);
     
-    // 摧毁百分比
-    _percentLabel = Label::createWithSystemFont("0%", "Arial", 32);
-    _percentLabel->setPosition(Vec2(60, 30));
+    // 摧毁百分比 - 左侧居中
+    _percentLabel = Label::createWithSystemFont("0%", "Arial", 30);
+    _percentLabel->setPosition(Vec2(55, panelHeight / 2));
     _percentLabel->setColor(Color3B(255, 215, 0));
     _battleInfoPanel->addChild(_percentLabel);
     
-    // 星级显示(3颗星)
+    // 星级显示(3颗星) - 中间
+    const float starStartX = 115;
+    const float starSpacing = 28;
+    const float starY = panelHeight / 2;
     for (int i = 0; i < 3; i++) {
         auto star = DrawNode::create();
-        // 简化的星星形状(五角星)
-        float r = 12;
+        float r = 11;
         Vec2 points[10];
         for (int j = 0; j < 10; j++) {
             float angle = M_PI / 2 + j * M_PI / 5;
@@ -343,42 +381,59 @@ void BattleScene::createBattleInfo() {
             points[j] = Vec2(cos(angle) * radius, sin(angle) * radius);
         }
         star->drawPolygon(points, 10, Color4F(0.3f, 0.3f, 0.3f, 1.0f), 1, Color4F(0.5f, 0.5f, 0.5f, 1.0f));
-        star->setPosition(Vec2(130 + i * 30, 30));
+        star->setPosition(Vec2(starStartX + i * starSpacing, starY));
         star->setName("star" + std::to_string(i));
         _battleInfoPanel->addChild(star);
     }
     
-    // 掠夺资源显示
+    // 掠夺资源显示 - 右侧
+    const float lootStartX = 220;
+    const float iconSize = 10;
+    const float lootLabelOffsetX = 18;
+    
+    // 金币
     auto goldIcon = DrawNode::create();
-    goldIcon->drawSolidCircle(Vec2(0, 0), 8, 0, 10, Color4F(1.0f, 0.84f, 0.0f, 1.0f));
-    goldIcon->setPosition(Vec2(220, 40));
+    goldIcon->drawSolidCircle(Vec2(0, 0), iconSize, 0, 12, Color4F(1.0f, 0.84f, 0.0f, 1.0f));
+    goldIcon->setPosition(Vec2(lootStartX, panelHeight / 2 + 12));
     _battleInfoPanel->addChild(goldIcon);
     
     _goldLootLabel = Label::createWithSystemFont("0", "Arial", 14);
-    _goldLootLabel->setPosition(Vec2(260, 40));
+    _goldLootLabel->setPosition(Vec2(lootStartX + lootLabelOffsetX, panelHeight / 2 + 12));
     _goldLootLabel->setAnchorPoint(Vec2(0, 0.5f));
     _goldLootLabel->setColor(Color3B(255, 215, 0));
     _battleInfoPanel->addChild(_goldLootLabel);
     
+    // 圣水
     auto elixirIcon = DrawNode::create();
-    elixirIcon->drawSolidCircle(Vec2(0, 0), 8, 0, 10, Color4F(0.6f, 0.2f, 0.8f, 1.0f));
-    elixirIcon->setPosition(Vec2(220, 20));
+    elixirIcon->drawSolidCircle(Vec2(0, 0), iconSize, 0, 12, Color4F(0.6f, 0.2f, 0.8f, 1.0f));
+    elixirIcon->setPosition(Vec2(lootStartX, panelHeight / 2 - 12));
     _battleInfoPanel->addChild(elixirIcon);
     
     _elixirLootLabel = Label::createWithSystemFont("0", "Arial", 14);
-    _elixirLootLabel->setPosition(Vec2(260, 20));
+    _elixirLootLabel->setPosition(Vec2(lootStartX + lootLabelOffsetX, panelHeight / 2 - 12));
     _elixirLootLabel->setAnchorPoint(Vec2(0, 0.5f));
     _elixirLootLabel->setColor(Color3B(180, 80, 220));
     _battleInfoPanel->addChild(_elixirLootLabel);
     
-    _battleInfoPanel->setPosition(Vec2(origin.x + 10, origin.y + visibleSize.height - 70));
+    // 设置面板位置 - 左上角
+    _battleInfoPanel->setPosition(Vec2(origin.x + margin, origin.y + visibleSize.height - panelHeight - margin));
     _uiLayer->addChild(_battleInfoPanel);
     
-    // 时间显示
-    _timeLabel = Label::createWithSystemFont("3:00", "Arial", 24);
-    _timeLabel->setPosition(Vec2(origin.x + visibleSize.width - 60, origin.y + visibleSize.height - 40));
+    // 时间显示 - 右上角，带背景
+    auto timePanel = Node::create();
+    auto timeBg = DrawNode::create();
+    timeBg->drawSolidRect(Vec2(0, 0), Vec2(80, 35), Color4F(0.08f, 0.08f, 0.12f, 0.9f));
+    timeBg->drawRect(Vec2(0, 0), Vec2(80, 35), Color4F(0.4f, 0.4f, 0.5f, 1.0f));
+    timePanel->addChild(timeBg);
+    
+    _timeLabel = Label::createWithSystemFont("3:00", "Arial", 22);
+    _timeLabel->setPosition(Vec2(40, 17.5f));
     _timeLabel->setColor(Color3B::WHITE);
-    _uiLayer->addChild(_timeLabel);
+    timePanel->addChild(_timeLabel);
+    
+    timePanel->setPosition(Vec2(origin.x + visibleSize.width - 80 - margin, 
+                                origin.y + visibleSize.height - 35 - margin));
+    _uiLayer->addChild(timePanel);
 }
 
 // ==================== 战斗操作 ====================
@@ -480,13 +535,17 @@ void BattleScene::updateBattle(float dt) {
         return;
     }
     
-    // 移除死亡的单位
-    auto it = _playerUnits.begin();
-    while (it != _playerUnits.end()) {
-        if (*it && (*it)->isDead()) {
-            it = _playerUnits.erase(it);
-        } else {
-            ++it;
+    // 移除死亡或无效的单位
+    _playerUnits.erase(
+        std::remove_if(_playerUnits.begin(), _playerUnits.end(),
+            [](Unit* u) { return u == nullptr || u->isDead() || u->getParent() == nullptr; }),
+        _playerUnits.end()
+    );
+    
+    // 更新防御建筑的敌人列表（确保有效性）
+    for (auto defense : _defenseBuildings) {
+        if (defense && !defense->isDestroyed()) {
+            defense->setEnemyList(_playerUnits);
         }
     }
     

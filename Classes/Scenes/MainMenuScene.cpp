@@ -172,74 +172,87 @@ void MainMenuScene::createMenuButtons() {
     
     Vector<MenuItem*> menuItems;
     
-    // 按钮样式设置
-    float buttonWidth = 200;
-    float buttonHeight = 50;
-    float buttonSpacing = 70;
-    float startY = visibleSize.height * 0.4f;
+    // 按钮样式设置 - 统一尺寸确保对齐
+    const float buttonWidth = 220;
+    const float buttonHeight = 55;
+    const float buttonSpacing = 75;
+    const float buttonCenterX = origin.x + visibleSize.width / 2;
+    const float startY = origin.y + visibleSize.height * 0.42f;
+    const float borderWidth = 3.0f;
+    
+    // 辅助函数：创建带背景的按钮
+    auto createButton = [=](const std::string& text, const Color4F& bgColor, 
+                           const Color4F& borderColor, const ccMenuCallback& callback) -> MenuItem* {
+        auto label = Label::createWithSystemFont(text, "Arial", 26);
+        label->setColor(Color3B::WHITE);
+        auto button = MenuItemLabel::create(label, callback);
+        
+        auto bg = DrawNode::create();
+        // 绘制背景矩形
+        bg->drawSolidRect(Vec2(-buttonWidth/2, -buttonHeight/2), 
+                          Vec2(buttonWidth/2, buttonHeight/2), bgColor);
+        // 绘制边框 - 使用更粗的线条
+        bg->drawRect(Vec2(-buttonWidth/2, -buttonHeight/2), 
+                     Vec2(buttonWidth/2, buttonHeight/2), borderColor);
+        // 添加内部高亮线
+        bg->drawLine(Vec2(-buttonWidth/2 + 2, buttonHeight/2 - 2),
+                     Vec2(buttonWidth/2 - 2, buttonHeight/2 - 2),
+                     Color4F(1.0f, 1.0f, 1.0f, 0.3f));
+        button->addChild(bg, -1);
+        
+        return button;
+    };
     
     // 开始游戏按钮
-    auto startLabel = Label::createWithSystemFont("Start Game", "Arial", 28);
-    startLabel->setColor(Color3B::WHITE);
-    auto startButton = MenuItemLabel::create(startLabel, CC_CALLBACK_1(MainMenuScene::onStartGame, this));
-    
-    // 创建按钮背景
-    auto startBg = DrawNode::create();
-    startBg->drawSolidRect(Vec2(-buttonWidth/2, -buttonHeight/2), 
-                           Vec2(buttonWidth/2, buttonHeight/2),
-                           Color4F(0.2f, 0.6f, 0.3f, 0.9f));
-    startBg->drawRect(Vec2(-buttonWidth/2, -buttonHeight/2), 
-                      Vec2(buttonWidth/2, buttonHeight/2),
-                      Color4F(1.0f, 0.84f, 0.0f, 1.0f));
-    startButton->addChild(startBg, -1);
-    
-    startButton->setPosition(Vec2(visibleSize.width / 2, startY));
+    auto startButton = createButton("Start Game", 
+                                    Color4F(0.2f, 0.6f, 0.3f, 0.95f),
+                                    Color4F(0.3f, 0.8f, 0.4f, 1.0f),
+                                    CC_CALLBACK_1(MainMenuScene::onStartGame, this));
+    startButton->setPosition(Vec2(buttonCenterX, startY));
     menuItems.pushBack(startButton);
     
+    // 帮助按钮（新增：游戏规则说明）
+    auto helpButton = createButton("Help / Rules",
+                                   Color4F(0.3f, 0.5f, 0.6f, 0.95f),
+                                   Color4F(0.4f, 0.7f, 0.8f, 1.0f),
+                                   CC_CALLBACK_1(MainMenuScene::onHelp, this));
+    helpButton->setPosition(Vec2(buttonCenterX, startY - buttonSpacing));
+    menuItems.pushBack(helpButton);
+    
     // 设置按钮
-    auto settingsLabel = Label::createWithSystemFont("Settings", "Arial", 28);
-    settingsLabel->setColor(Color3B::WHITE);
-    auto settingsButton = MenuItemLabel::create(settingsLabel, CC_CALLBACK_1(MainMenuScene::onSettings, this));
-    
-    auto settingsBg = DrawNode::create();
-    settingsBg->drawSolidRect(Vec2(-buttonWidth/2, -buttonHeight/2), 
-                              Vec2(buttonWidth/2, buttonHeight/2),
-                              Color4F(0.3f, 0.3f, 0.5f, 0.9f));
-    settingsBg->drawRect(Vec2(-buttonWidth/2, -buttonHeight/2), 
-                         Vec2(buttonWidth/2, buttonHeight/2),
-                         Color4F(0.6f, 0.6f, 0.8f, 1.0f));
-    settingsButton->addChild(settingsBg, -1);
-    
-    settingsButton->setPosition(Vec2(visibleSize.width / 2, startY - buttonSpacing));
+    auto settingsButton = createButton("Settings",
+                                       Color4F(0.3f, 0.3f, 0.5f, 0.95f),
+                                       Color4F(0.5f, 0.5f, 0.7f, 1.0f),
+                                       CC_CALLBACK_1(MainMenuScene::onSettings, this));
+    settingsButton->setPosition(Vec2(buttonCenterX, startY - buttonSpacing * 2));
     menuItems.pushBack(settingsButton);
     
     // 退出按钮
-    auto exitLabel = Label::createWithSystemFont("Exit", "Arial", 28);
-    exitLabel->setColor(Color3B::WHITE);
-    auto exitButton = MenuItemLabel::create(exitLabel, CC_CALLBACK_1(MainMenuScene::onExit, this));
-    
-    auto exitBg = DrawNode::create();
-    exitBg->drawSolidRect(Vec2(-buttonWidth/2, -buttonHeight/2), 
-                          Vec2(buttonWidth/2, buttonHeight/2),
-                          Color4F(0.6f, 0.2f, 0.2f, 0.9f));
-    exitBg->drawRect(Vec2(-buttonWidth/2, -buttonHeight/2), 
-                     Vec2(buttonWidth/2, buttonHeight/2),
-                     Color4F(0.8f, 0.4f, 0.4f, 1.0f));
-    exitButton->addChild(exitBg, -1);
-    
-    exitButton->setPosition(Vec2(visibleSize.width / 2, startY - buttonSpacing * 2));
+    auto exitButton = createButton("Exit",
+                                   Color4F(0.6f, 0.2f, 0.2f, 0.95f),
+                                   Color4F(0.8f, 0.3f, 0.3f, 1.0f),
+                                   CC_CALLBACK_1(MainMenuScene::onExit, this));
+    exitButton->setPosition(Vec2(buttonCenterX, startY - buttonSpacing * 3));
     menuItems.pushBack(exitButton);
     
     // 创建菜单
     _menu = Menu::createWithArray(menuItems);
-    _menu->setPosition(origin);
+    _menu->setPosition(Vec2::ZERO);
     this->addChild(_menu, Z_UI);
     
-    // 版本信息
-    auto versionLabel = Label::createWithSystemFont("Version 1.0.0", "Arial", 16);
-    versionLabel->setPosition(Vec2(origin.x + visibleSize.width - 80, origin.y + 20));
+    // 版本信息 - 右下角对齐
+    auto versionLabel = Label::createWithSystemFont("Version 1.0.0", "Arial", 14);
+    versionLabel->setAnchorPoint(Vec2(1.0f, 0.0f));  // 右下角锚点
+    versionLabel->setPosition(Vec2(origin.x + visibleSize.width - 15, origin.y + 15));
     versionLabel->setColor(Color3B(150, 150, 150));
     this->addChild(versionLabel, Z_UI);
+    
+    // 版权信息 - 左下角对齐
+    auto copyrightLabel = Label::createWithSystemFont("© 2025 Tongji University - Software Engineering", "Arial", 12);
+    copyrightLabel->setAnchorPoint(Vec2(0.0f, 0.0f));  // 左下角锚点
+    copyrightLabel->setPosition(Vec2(origin.x + 15, origin.y + 15));
+    copyrightLabel->setColor(Color3B(120, 120, 120));
+    this->addChild(copyrightLabel, Z_UI);
 }
 
 void MainMenuScene::playBackgroundAnimation() {
@@ -256,12 +269,97 @@ void MainMenuScene::onStartGame(Ref* sender) {
     Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene, Color3B::BLACK));
 }
 
-void MainMenuScene::onSettings(Ref* sender) {
-    // TODO: 打开设置界面
-    // 暂时显示一个提示
+void MainMenuScene::onHelp(Ref* sender) {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
     
+    // 创建帮助/规则弹窗
+    auto helpPanel = Node::create();
+    helpPanel->setName("helpPanel");
+    
+    // 背景遮罩
+    auto mask = DrawNode::create();
+    mask->drawSolidRect(Vec2(0, 0), Vec2(visibleSize.width, visibleSize.height),
+                        Color4F(0, 0, 0, 0.7f));
+    helpPanel->addChild(mask);
+    
+    // 面板尺寸
+    const float panelWidth = 700;
+    const float panelHeight = 500;
+    const float panelX = (visibleSize.width - panelWidth) / 2;
+    const float panelY = (visibleSize.height - panelHeight) / 2;
+    
+    // 面板背景
+    auto panel = DrawNode::create();
+    panel->drawSolidRect(Vec2(panelX, panelY), Vec2(panelX + panelWidth, panelY + panelHeight),
+                         Color4F(0.12f, 0.12f, 0.18f, 0.98f));
+    panel->drawRect(Vec2(panelX, panelY), Vec2(panelX + panelWidth, panelY + panelHeight),
+                    Color4F(0.4f, 0.6f, 0.8f, 1.0f));
+    helpPanel->addChild(panel);
+    
+    // 标题
+    auto titleLabel = Label::createWithSystemFont("Game Rules / Help", "Arial", 32);
+    titleLabel->setPosition(Vec2(visibleSize.width / 2, panelY + panelHeight - 40));
+    titleLabel->setColor(Color3B(255, 215, 0));
+    helpPanel->addChild(titleLabel);
+    
+    // 规则内容
+    std::string rulesText = 
+        "=== Game Objectives ===\n"
+        "Build your base, train troops, and attack enemy bases to earn resources!\n\n"
+        
+        "=== Building Types ===\n"
+        "- Town Hall: Core building, protects your base\n"
+        "- Cannon/Archer Tower: Defense buildings, attack enemies\n"
+        "- Gold Mine/Elixir Collector: Produce resources over time\n"
+        "- Gold/Elixir Storage: Store your resources\n"
+        "- Barracks: Train troops for battle\n"
+        "- Wall: Block enemy troops\n\n"
+        
+        "=== Battle System ===\n"
+        "- Deploy troops at the edge of enemy base\n"
+        "- Destroy 50% for 1 star, Town Hall for 2 stars, 100% for 3 stars\n"
+        "- Earn Gold and Elixir by destroying enemy buildings\n"
+        "- Battle time limit: 3 minutes\n\n"
+        
+        "=== Controls ===\n"
+        "- Drag to move the camera\n"
+        "- Scroll to zoom in/out\n"
+        "- Click buildings to select and see info\n"
+        "- Click troop icon then click to deploy";
+    
+    auto rulesLabel = Label::createWithSystemFont(rulesText, "Arial", 16);
+    rulesLabel->setPosition(Vec2(visibleSize.width / 2, panelY + panelHeight / 2 - 20));
+    rulesLabel->setColor(Color3B(220, 220, 220));
+    rulesLabel->setAlignment(TextHAlignment::LEFT, TextVAlignment::TOP);
+    rulesLabel->setMaxLineWidth(panelWidth - 60);
+    helpPanel->addChild(rulesLabel);
+    
+    // 关闭按钮
+    auto closeLabel = Label::createWithSystemFont("Close", "Arial", 22);
+    closeLabel->setColor(Color3B::WHITE);
+    auto closeButton = MenuItemLabel::create(closeLabel, [helpPanel](Ref* sender) {
+        helpPanel->removeFromParent();
+    });
+    auto closeBg = DrawNode::create();
+    closeBg->drawSolidRect(Vec2(-60, -20), Vec2(60, 20), Color4F(0.5f, 0.3f, 0.3f, 1.0f));
+    closeBg->drawRect(Vec2(-60, -20), Vec2(60, 20), Color4F(0.7f, 0.4f, 0.4f, 1.0f));
+    closeButton->addChild(closeBg, -1);
+    closeButton->setPosition(Vec2(visibleSize.width / 2, panelY + 45));
+    
+    auto menu = Menu::create(closeButton, nullptr);
+    menu->setPosition(Vec2::ZERO);
+    helpPanel->addChild(menu);
+    
+    helpPanel->setPosition(origin);
+    this->addChild(helpPanel, Z_POPUP);
+}
+
+void MainMenuScene::onSettings(Ref* sender) {
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+    
+    // 显示设置提示(未实现)
     auto label = Label::createWithSystemFont("Settings coming soon!", "Arial", 24);
     label->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height * 0.2f));
     label->setColor(Color3B::YELLOW);
