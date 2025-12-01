@@ -17,6 +17,7 @@ USING_NS_CC;
  * 主界面功能:
  * - 游戏标题显示
  * - 开始游戏按钮
+ * - 帮助/规则按钮
  * - 设置按钮
  * - 退出按钮
  */
@@ -28,6 +29,9 @@ public:
     
     // 开始游戏
     void onStartGame(Ref* sender);
+    
+    // 显示帮助/游戏规则
+    void onHelp(Ref* sender);
     
     // 打开设置
     void onSettings(Ref* sender);

@@ -215,7 +215,7 @@ void MainMenuScene::createMenuButtons() {
     auto helpButton = createButton("Help / Rules",
                                    Color4F(0.3f, 0.5f, 0.6f, 0.95f),
                                    Color4F(0.4f, 0.7f, 0.8f, 1.0f),
-                                   CC_CALLBACK_1(MainMenuScene::onSettings, this));  // 暂时复用settings
+                                   CC_CALLBACK_1(MainMenuScene::onHelp, this));
     helpButton->setPosition(Vec2(buttonCenterX, startY - buttonSpacing));
     menuItems.pushBack(helpButton);
     
@@ -269,7 +269,7 @@ void MainMenuScene::onStartGame(Ref* sender) {
     Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene, Color3B::BLACK));
 }
 
-void MainMenuScene::onSettings(Ref* sender) {
+void MainMenuScene::onHelp(Ref* sender) {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
     
@@ -353,6 +353,23 @@ void MainMenuScene::onSettings(Ref* sender) {
     
     helpPanel->setPosition(origin);
     this->addChild(helpPanel, Z_POPUP);
+}
+
+void MainMenuScene::onSettings(Ref* sender) {
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+    
+    // 显示设置提示(未实现)
+    auto label = Label::createWithSystemFont("Settings coming soon!", "Arial", 24);
+    label->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height * 0.2f));
+    label->setColor(Color3B::YELLOW);
+    this->addChild(label, Z_POPUP);
+    
+    // 2秒后消失
+    auto delay = DelayTime::create(2.0f);
+    auto fade = FadeOut::create(0.5f);
+    auto remove = RemoveSelf::create();
+    label->runAction(Sequence::create(delay, fade, remove, nullptr));
 }
 
 void MainMenuScene::onExit(Ref* sender) {

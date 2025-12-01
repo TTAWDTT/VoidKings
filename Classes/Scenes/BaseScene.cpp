@@ -318,11 +318,11 @@ void BaseScene::createToolbar() {
     collectButton->setPosition(Vec2(startX + buttonSpacing * 2, buttonCenterY));
     menuItems.pushBack(collectButton);
     
-    // 帮助按钮（新增）
+    // 帮助按钮
     auto helpButton = createToolButton("Help",
                                        Color4F(0.3f, 0.4f, 0.5f, 1.0f),
                                        Color4F(0.4f, 0.6f, 0.7f, 1.0f),
-                                       CC_CALLBACK_1(BaseScene::onBackToMenu, this));  // 暂时返回菜单查看帮助
+                                       CC_CALLBACK_1(BaseScene::onHelp, this));
     helpButton->setPosition(Vec2(startX + buttonSpacing * 3, buttonCenterY));
     menuItems.pushBack(helpButton);
     
@@ -851,6 +851,86 @@ void BaseScene::onAttack(Ref* sender) {
     // 切换到战斗场景
     auto scene = BattleScene::createScene();
     Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene, Color3B::BLACK));
+}
+
+void BaseScene::onHelp(Ref* sender) {
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+    
+    // 创建帮助弹窗
+    auto helpPanel = Node::create();
+    helpPanel->setName("helpPanel");
+    
+    // 背景遮罩
+    auto mask = DrawNode::create();
+    mask->drawSolidRect(Vec2(0, 0), Vec2(visibleSize.width, visibleSize.height),
+                        Color4F(0, 0, 0, 0.7f));
+    helpPanel->addChild(mask);
+    
+    // 面板尺寸
+    const float panelWidth = 650;
+    const float panelHeight = 450;
+    const float panelX = (visibleSize.width - panelWidth) / 2;
+    const float panelY = (visibleSize.height - panelHeight) / 2;
+    
+    // 面板背景
+    auto panel = DrawNode::create();
+    panel->drawSolidRect(Vec2(panelX, panelY), Vec2(panelX + panelWidth, panelY + panelHeight),
+                         Color4F(0.12f, 0.12f, 0.18f, 0.98f));
+    panel->drawRect(Vec2(panelX, panelY), Vec2(panelX + panelWidth, panelY + panelHeight),
+                    Color4F(0.4f, 0.6f, 0.8f, 1.0f));
+    helpPanel->addChild(panel);
+    
+    // 标题
+    auto titleLabel = Label::createWithSystemFont("Base Building Help", "Arial", 28);
+    titleLabel->setPosition(Vec2(visibleSize.width / 2, panelY + panelHeight - 35));
+    titleLabel->setColor(Color3B(255, 215, 0));
+    helpPanel->addChild(titleLabel);
+    
+    // 帮助内容
+    std::string helpText = 
+        "=== Building Your Base ===\n"
+        "- Click [Build] to open the building menu\n"
+        "- Select a building type and place it on the map\n"
+        "- Drag to move the camera around your base\n"
+        "- Scroll wheel to zoom in/out\n\n"
+        
+        "=== Building Management ===\n"
+        "- Click on a building to select it\n"
+        "- Upgrade buildings to increase their stats\n"
+        "- Gold Mine/Elixir Collector produce resources over time\n"
+        "- Click [Collect] to gather all produced resources\n\n"
+        
+        "=== Starting Battle ===\n"
+        "- Click [Attack] to enter battle mode\n"
+        "- You will attack an enemy base to earn resources\n"
+        "- Train troops in Barracks before attacking";
+    
+    auto helpLabel = Label::createWithSystemFont(helpText, "Arial", 15);
+    helpLabel->setPosition(Vec2(visibleSize.width / 2, panelY + panelHeight / 2 - 10));
+    helpLabel->setColor(Color3B(220, 220, 220));
+    helpLabel->setAlignment(TextHAlignment::LEFT, TextVAlignment::TOP);
+    helpLabel->setMaxLineWidth(panelWidth - 50);
+    helpPanel->addChild(helpLabel);
+    
+    // 关闭按钮
+    auto closeLabel = Label::createWithSystemFont("Close", "Arial", 20);
+    closeLabel->setColor(Color3B::WHITE);
+    auto closeButton = MenuItemLabel::create(closeLabel, [helpPanel](Ref* sender) {
+        helpPanel->removeFromParent();
+    });
+    auto closeBg = DrawNode::create();
+    closeBg->drawSolidRect(Vec2(-55, -18), Vec2(55, 18), Color4F(0.5f, 0.3f, 0.3f, 1.0f));
+    closeBg->drawRect(Vec2(-55, -18), Vec2(55, 18), Color4F(0.7f, 0.4f, 0.4f, 1.0f));
+    closeButton->addChild(closeBg, -1);
+    closeButton->setPosition(Vec2(visibleSize.width / 2, panelY + 40));
+    
+    auto menu = Menu::create(closeButton, nullptr);
+    menu->setPosition(Vec2::ZERO);
+    helpPanel->addChild(menu);
+    
+    helpPanel->setPosition(origin);
+    this->addChild(helpPanel, Z_POPUP);
 }
 
 void BaseScene::onBackToMenu(Ref* sender) {

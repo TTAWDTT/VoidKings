@@ -23,8 +23,11 @@ Resources/
 │   └── settings.json       # 游戏设置
 ├── fonts/                  # 字体文件
 │   └── Marker Felt.ttf
-├── res/                    # 新增资源存放目录
-│   └── .gitkeep
+├── textures/               # 纹理资源目录（建议新建）
+│   ├── buildings/          # 建筑纹理
+│   ├── units/              # 单位纹理
+│   ├── ui/                 # UI纹理
+│   └── effects/            # 特效纹理
 ├── CloseNormal.png         # 默认关闭按钮
 ├── CloseSelected.png       # 选中状态关闭按钮
 └── HelloWorld.png          # 示例图片
@@ -34,11 +37,11 @@ Resources/
 
 #### 步骤1：准备资源文件
 
-将图片资源放入对应目录：
-- 建筑纹理：`Resources/res/buildings/`
-- 单位纹理：`Resources/res/units/`
-- UI纹理：`Resources/res/ui/`
-- 特效纹理：`Resources/res/effects/`
+将图片资源放入对应目录（如目录不存在，请先创建）：
+- 建筑纹理：`Resources/textures/buildings/`
+- 单位纹理：`Resources/textures/units/`
+- UI纹理：`Resources/textures/ui/`
+- 特效纹理：`Resources/textures/effects/`
 
 **推荐格式**：PNG（支持透明度）
 **推荐尺寸**：2的幂次方（如64x64, 128x128）以获得最佳性能
@@ -48,7 +51,7 @@ Resources/
 **加载精灵示例**：
 ```cpp
 // 方式1：直接创建精灵
-auto sprite = Sprite::create("res/buildings/cannon.png");
+auto sprite = Sprite::create("textures/buildings/cannon.png");
 if (sprite) {
     this->addChild(sprite);
 }

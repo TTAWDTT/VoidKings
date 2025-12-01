@@ -186,6 +186,9 @@ protected:
     // 沿路径移动
     virtual void moveAlongPath(float dt);
     
+    // 检查目标是否有效
+    bool isTargetValid(Node* target) const;
+    
     // ==================== 成员变量 ====================
     
     // 基础属性

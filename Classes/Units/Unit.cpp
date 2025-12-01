@@ -505,6 +505,21 @@ std::vector<Vec2> Unit::findPath(const Vec2& target) {
     return path;
 }
 
+// 检查目标是否有效（未被销毁且仍在场景中）
+bool Unit::isTargetValid(Node* target) const {
+    if (!target || target->getParent() == nullptr) {
+        return false;
+    }
+    
+    if (auto building = dynamic_cast<Building*>(target)) {
+        return !building->isDestroyed();
+    } else if (auto unit = dynamic_cast<Unit*>(target)) {
+        return !unit->isDead();
+    }
+    
+    return false;
+}
+
 void Unit::moveAlongPath(float dt) {
     if (_path.empty() || _pathIndex >= (int)_path.size()) {
         stopMoving();
@@ -608,15 +623,7 @@ void Unit::updateStateMachine(float dt) {
             
             // 检查目标是否仍有效
             if (_currentTarget) {
-                // 先验证目标是否被释放
-                bool targetValid = false;
-                if (auto building = dynamic_cast<Building*>(_currentTarget)) {
-                    targetValid = !building->isDestroyed() && building->getParent() != nullptr;
-                } else if (auto unit = dynamic_cast<Unit*>(_currentTarget)) {
-                    targetValid = !unit->isDead() && unit->getParent() != nullptr;
-                }
-                
-                if (!targetValid) {
+                if (!isTargetValid(_currentTarget)) {
                     _currentTarget = nullptr;
                     _state = UnitState::IDLE;
                     break;
@@ -634,30 +641,11 @@ void Unit::updateStateMachine(float dt) {
             
         case UnitState::ATTACKING:
             // 攻击状态
-            if (!_currentTarget) {
-                // 目标丢失，回到待机
+            if (!_currentTarget || !isTargetValid(_currentTarget)) {
+                // 目标丢失或无效，回到待机
+                _currentTarget = nullptr;
                 _state = UnitState::IDLE;
                 break;
-            }
-            
-            // 检查目标是否已死亡或被移除
-            {
-                bool targetValid = false;
-                if (auto building = dynamic_cast<Building*>(_currentTarget)) {
-                    targetValid = !building->isDestroyed() && building->getParent() != nullptr;
-                    if (!targetValid) {
-                        _currentTarget = nullptr;
-                        _state = UnitState::IDLE;
-                        break;
-                    }
-                } else if (auto unit = dynamic_cast<Unit*>(_currentTarget)) {
-                    targetValid = !unit->isDead() && unit->getParent() != nullptr;
-                    if (!targetValid) {
-                        _currentTarget = nullptr;
-                        _state = UnitState::IDLE;
-                        break;
-                    }
-                }
             }
             
             // 更新攻击冷却
@@ -665,7 +653,7 @@ void Unit::updateStateMachine(float dt) {
                 _attackCooldown -= dt;
             } else {
                 // 可以攻击
-                if (_currentTarget) {
+                if (_currentTarget && isTargetValid(_currentTarget)) {
                     attack(_currentTarget);
                     _attackCooldown = 1.0f / _attackSpeed;
                 }
@@ -681,10 +669,8 @@ void Unit::updateStateMachine(float dt) {
 // ==================== 帧更新 ====================
 
 void Unit::update(float dt) {
-    if (_state == UnitState::DEAD) return;
-    
-    // 验证自身状态
-    if (!this->getParent()) return;
+    // 验证自身状态 - 优先检查以避免无效处理
+    if (_state == UnitState::DEAD || !this->getParent()) return;
     
     updateStateMachine(dt);
 }
