@@ -5,6 +5,7 @@
 #include "DefenseBuilding.h"
 #include "../Units/Unit.h"
 #include "../Projectiles/Projectile.h"
+#include <algorithm>
 
 // ==================== 创建和初始化 ====================
 
@@ -139,8 +140,15 @@ Unit* DefenseBuilding::findTarget() {
     
     Vec2 myPos = this->getPosition();
     
+    // 清理无效的敌人引用
+    _enemies.erase(
+        std::remove_if(_enemies.begin(), _enemies.end(), 
+            [](Unit* u) { return u == nullptr || u->isDead() || u->getParent() == nullptr; }),
+        _enemies.end()
+    );
+    
     for (auto unit : _enemies) {
-        if (!unit || unit->isDead()) continue;
+        if (!unit || unit->isDead() || unit->getParent() == nullptr) continue;
         
         // 检查是否可以攻击该单位
         if (unit->isAirUnit() && !_canAttackAir) continue;
@@ -267,6 +275,9 @@ void DefenseBuilding::update(float dt) {
     // 如果建筑不在正常状态，不进行战斗
     if (_state != BuildingState::NORMAL) return;
     
+    // 验证自身状态
+    if (!this->getParent()) return;
+    
     // 更新攻击冷却
     if (_attackCooldown > 0) {
         _attackCooldown -= dt;
@@ -274,9 +285,16 @@ void DefenseBuilding::update(float dt) {
     }
     
     // 检查当前目标是否有效
-    if (_currentTarget && (_currentTarget->isDead() || 
-        this->getPosition().distance(_currentTarget->getPosition()) > _attackRange)) {
-        _currentTarget = nullptr;
+    if (_currentTarget) {
+        bool targetValid = !_currentTarget->isDead() && _currentTarget->getParent() != nullptr;
+        if (!targetValid) {
+            _currentTarget = nullptr;
+        } else {
+            float distance = this->getPosition().distance(_currentTarget->getPosition());
+            if (distance > _attackRange) {
+                _currentTarget = nullptr;
+            }
+        }
     }
     
     // 如果没有目标，尝试索敌

@@ -162,62 +162,85 @@ void BaseScene::createResourceDisplay() {
     
     _resourcePanel = Node::create();
     
-    // 背景
+    // 统一的布局常量
+    const float panelWidth = 480;
+    const float panelHeight = 55;
+    const float iconSize = 12;
+    const float iconSpacing = 115;  // 每个资源项的间距
+    const float startX = 25;
+    const float centerY = panelHeight / 2;
+    const float labelOffsetX = 25;  // 标签相对图标的偏移
+    
+    // 背景 - 圆角矩形效果
     auto bgDraw = DrawNode::create();
-    bgDraw->drawSolidRect(Vec2(0, 0), Vec2(400, 50), Color4F(0, 0, 0, 0.7f));
-    bgDraw->drawRect(Vec2(0, 0), Vec2(400, 50), Color4F(0.5f, 0.5f, 0.5f, 1.0f));
+    bgDraw->drawSolidRect(Vec2(0, 0), Vec2(panelWidth, panelHeight), Color4F(0.08f, 0.08f, 0.12f, 0.85f));
+    bgDraw->drawRect(Vec2(0, 0), Vec2(panelWidth, panelHeight), Color4F(0.4f, 0.4f, 0.5f, 1.0f));
+    // 添加顶部高亮线
+    bgDraw->drawLine(Vec2(2, panelHeight - 1), Vec2(panelWidth - 2, panelHeight - 1), 
+                     Color4F(0.5f, 0.5f, 0.6f, 0.5f));
     _resourcePanel->addChild(bgDraw);
     
-    // 金币图标和数量
+    // 金币图标和数量 - 位置1
     auto goldIcon = DrawNode::create();
-    goldIcon->drawSolidCircle(Vec2(0, 0), 12, 0, 12, Color4F(1.0f, 0.84f, 0.0f, 1.0f));
-    goldIcon->setPosition(Vec2(30, 25));
+    goldIcon->drawSolidCircle(Vec2(0, 0), iconSize, 0, 16, Color4F(1.0f, 0.84f, 0.0f, 1.0f));
+    goldIcon->drawCircle(Vec2(0, 0), iconSize, 0, 16, false, Color4F(0.8f, 0.6f, 0.0f, 1.0f));
+    goldIcon->setPosition(Vec2(startX, centerY));
     _resourcePanel->addChild(goldIcon);
     
-    _goldLabel = Label::createWithSystemFont("500", "Arial", 18);
-    _goldLabel->setPosition(Vec2(80, 25));
+    _goldLabel = Label::createWithSystemFont("500", "Arial", 16);
+    _goldLabel->setPosition(Vec2(startX + labelOffsetX, centerY));
     _goldLabel->setAnchorPoint(Vec2(0, 0.5f));
     _goldLabel->setColor(Color3B(255, 215, 0));
     _resourcePanel->addChild(_goldLabel);
     
-    // 圣水图标和数量
+    // 圣水图标和数量 - 位置2
+    float pos2X = startX + iconSpacing;
     auto elixirIcon = DrawNode::create();
-    elixirIcon->drawSolidCircle(Vec2(0, 0), 12, 0, 12, Color4F(0.6f, 0.2f, 0.8f, 1.0f));
-    elixirIcon->setPosition(Vec2(150, 25));
+    elixirIcon->drawSolidCircle(Vec2(0, 0), iconSize, 0, 16, Color4F(0.6f, 0.2f, 0.8f, 1.0f));
+    elixirIcon->drawCircle(Vec2(0, 0), iconSize, 0, 16, false, Color4F(0.4f, 0.1f, 0.6f, 1.0f));
+    elixirIcon->setPosition(Vec2(pos2X, centerY));
     _resourcePanel->addChild(elixirIcon);
     
-    _elixirLabel = Label::createWithSystemFont("500", "Arial", 18);
-    _elixirLabel->setPosition(Vec2(200, 25));
+    _elixirLabel = Label::createWithSystemFont("500", "Arial", 16);
+    _elixirLabel->setPosition(Vec2(pos2X + labelOffsetX, centerY));
     _elixirLabel->setAnchorPoint(Vec2(0, 0.5f));
     _elixirLabel->setColor(Color3B(180, 80, 220));
     _resourcePanel->addChild(_elixirLabel);
     
-    // 工人图标和数量
+    // 工人图标和数量 - 位置3
+    float pos3X = startX + iconSpacing * 2;
     auto workerIcon = DrawNode::create();
-    workerIcon->drawSolidRect(Vec2(-8, -10), Vec2(8, 10), Color4F(0.6f, 0.4f, 0.2f, 1.0f));
-    workerIcon->setPosition(Vec2(270, 25));
+    // 绘制工人图标（小人形状）
+    workerIcon->drawSolidCircle(Vec2(0, 4), 6, 0, 12, Color4F(0.7f, 0.5f, 0.3f, 1.0f));  // 头
+    workerIcon->drawSolidRect(Vec2(-5, -10), Vec2(5, 2), Color4F(0.5f, 0.3f, 0.1f, 1.0f));  // 身体
+    workerIcon->setPosition(Vec2(pos3X, centerY));
     _resourcePanel->addChild(workerIcon);
     
-    _workerLabel = Label::createWithSystemFont("2/2", "Arial", 18);
-    _workerLabel->setPosition(Vec2(300, 25));
+    _workerLabel = Label::createWithSystemFont("2/2", "Arial", 16);
+    _workerLabel->setPosition(Vec2(pos3X + labelOffsetX, centerY));
     _workerLabel->setAnchorPoint(Vec2(0, 0.5f));
     _workerLabel->setColor(Color3B(200, 150, 100));
     _resourcePanel->addChild(_workerLabel);
     
-    // 人口图标和数量
+    // 人口图标和数量 - 位置4
+    float pos4X = startX + iconSpacing * 3;
     auto popIcon = DrawNode::create();
-    popIcon->drawSolidCircle(Vec2(0, 0), 10, 0, 12, Color4F(0.4f, 0.6f, 0.8f, 1.0f));
-    popIcon->drawSolidCircle(Vec2(0, -8), 6, 0, 8, Color4F(0.4f, 0.6f, 0.8f, 1.0f));
-    popIcon->setPosition(Vec2(360, 25));
+    // 绘制人口图标（小组人形状）
+    popIcon->drawSolidCircle(Vec2(-4, 2), 5, 0, 10, Color4F(0.4f, 0.6f, 0.8f, 1.0f));
+    popIcon->drawSolidCircle(Vec2(4, 2), 5, 0, 10, Color4F(0.4f, 0.6f, 0.8f, 1.0f));
+    popIcon->drawSolidCircle(Vec2(0, -4), 4, 0, 10, Color4F(0.4f, 0.6f, 0.8f, 1.0f));
+    popIcon->setPosition(Vec2(pos4X, centerY));
     _resourcePanel->addChild(popIcon);
     
-    _populationLabel = Label::createWithSystemFont("0/20", "Arial", 18);
-    _populationLabel->setPosition(Vec2(380, 25));
+    _populationLabel = Label::createWithSystemFont("0/20", "Arial", 16);
+    _populationLabel->setPosition(Vec2(pos4X + labelOffsetX, centerY));
     _populationLabel->setAnchorPoint(Vec2(0, 0.5f));
     _populationLabel->setColor(Color3B(150, 200, 255));
     _resourcePanel->addChild(_populationLabel);
     
-    _resourcePanel->setPosition(Vec2(origin.x + 10, origin.y + visibleSize.height - 60));
+    // 设置面板位置 - 左上角，保持边距一致
+    const float margin = 10;
+    _resourcePanel->setPosition(Vec2(origin.x + margin, origin.y + visibleSize.height - panelHeight - margin));
     _uiLayer->addChild(_resourcePanel);
     
     updateResourceDisplay();
@@ -229,68 +252,86 @@ void BaseScene::createToolbar() {
     
     _toolbar = Node::create();
     
+    // 工具栏常量
+    const float toolbarHeight = 65;
+    const float buttonWidth = 105;
+    const float buttonHeight = 45;
+    const float buttonSpacing = 125;
+    const float startX = 75;
+    const float buttonCenterY = toolbarHeight / 2;
+    
     // 工具栏背景
     auto bgDraw = DrawNode::create();
-    bgDraw->drawSolidRect(Vec2(0, 0), Vec2(visibleSize.width, 60), Color4F(0.1f, 0.1f, 0.1f, 0.9f));
-    bgDraw->drawLine(Vec2(0, 60), Vec2(visibleSize.width, 60), Color4F(0.5f, 0.5f, 0.5f, 1.0f));
+    bgDraw->drawSolidRect(Vec2(0, 0), Vec2(visibleSize.width, toolbarHeight), 
+                          Color4F(0.08f, 0.08f, 0.1f, 0.95f));
+    bgDraw->drawLine(Vec2(0, toolbarHeight), Vec2(visibleSize.width, toolbarHeight), 
+                     Color4F(0.4f, 0.4f, 0.5f, 1.0f));
+    // 添加底部阴影效果
+    bgDraw->drawLine(Vec2(0, toolbarHeight - 1), Vec2(visibleSize.width, toolbarHeight - 1),
+                     Color4F(0.3f, 0.3f, 0.4f, 0.5f));
     _toolbar->addChild(bgDraw);
     
     Vector<MenuItem*> menuItems;
-    float buttonWidth = 100;
-    float buttonHeight = 40;
-    float spacing = 120;
-    float startX = 80;
+    
+    // 辅助函数：创建工具栏按钮
+    auto createToolButton = [=](const std::string& text, const Color4F& bgColor,
+                                const Color4F& borderColor, const ccMenuCallback& callback) -> MenuItem* {
+        auto label = Label::createWithSystemFont(text, "Arial", 18);
+        label->setColor(Color3B::WHITE);
+        auto button = MenuItemLabel::create(label, callback);
+        
+        auto bg = DrawNode::create();
+        bg->drawSolidRect(Vec2(-buttonWidth/2, -buttonHeight/2), 
+                          Vec2(buttonWidth/2, buttonHeight/2), bgColor);
+        bg->drawRect(Vec2(-buttonWidth/2, -buttonHeight/2), 
+                     Vec2(buttonWidth/2, buttonHeight/2), borderColor);
+        // 顶部高亮
+        bg->drawLine(Vec2(-buttonWidth/2 + 2, buttonHeight/2 - 2),
+                     Vec2(buttonWidth/2 - 2, buttonHeight/2 - 2),
+                     Color4F(1.0f, 1.0f, 1.0f, 0.2f));
+        button->addChild(bg, -1);
+        
+        return button;
+    };
     
     // 建造按钮
-    auto buildLabel = Label::createWithSystemFont("Build", "Arial", 20);
-    buildLabel->setColor(Color3B::WHITE);
-    auto buildButton = MenuItemLabel::create(buildLabel, CC_CALLBACK_1(BaseScene::onBuildMenuOpen, this));
-    auto buildBg = DrawNode::create();
-    buildBg->drawSolidRect(Vec2(-buttonWidth/2, -buttonHeight/2), Vec2(buttonWidth/2, buttonHeight/2),
-                           Color4F(0.2f, 0.5f, 0.3f, 1.0f));
-    buildBg->drawRect(Vec2(-buttonWidth/2, -buttonHeight/2), Vec2(buttonWidth/2, buttonHeight/2),
-                      Color4F(0.4f, 0.8f, 0.5f, 1.0f));
-    buildButton->addChild(buildBg, -1);
-    buildButton->setPosition(Vec2(startX, 30));
+    auto buildButton = createToolButton("Build", 
+                                        Color4F(0.2f, 0.5f, 0.3f, 1.0f),
+                                        Color4F(0.3f, 0.7f, 0.4f, 1.0f),
+                                        CC_CALLBACK_1(BaseScene::onBuildMenuOpen, this));
+    buildButton->setPosition(Vec2(startX, buttonCenterY));
     menuItems.pushBack(buildButton);
     
     // 攻击按钮
-    auto attackLabel = Label::createWithSystemFont("Attack", "Arial", 20);
-    attackLabel->setColor(Color3B::WHITE);
-    auto attackButton = MenuItemLabel::create(attackLabel, CC_CALLBACK_1(BaseScene::onAttack, this));
-    auto attackBg = DrawNode::create();
-    attackBg->drawSolidRect(Vec2(-buttonWidth/2, -buttonHeight/2), Vec2(buttonWidth/2, buttonHeight/2),
-                            Color4F(0.6f, 0.2f, 0.2f, 1.0f));
-    attackBg->drawRect(Vec2(-buttonWidth/2, -buttonHeight/2), Vec2(buttonWidth/2, buttonHeight/2),
-                       Color4F(0.8f, 0.4f, 0.4f, 1.0f));
-    attackButton->addChild(attackBg, -1);
-    attackButton->setPosition(Vec2(startX + spacing, 30));
+    auto attackButton = createToolButton("Attack",
+                                         Color4F(0.6f, 0.2f, 0.2f, 1.0f),
+                                         Color4F(0.8f, 0.3f, 0.3f, 1.0f),
+                                         CC_CALLBACK_1(BaseScene::onAttack, this));
+    attackButton->setPosition(Vec2(startX + buttonSpacing, buttonCenterY));
     menuItems.pushBack(attackButton);
     
     // 收集按钮
-    auto collectLabel = Label::createWithSystemFont("Collect", "Arial", 20);
-    collectLabel->setColor(Color3B::WHITE);
-    auto collectButton = MenuItemLabel::create(collectLabel, CC_CALLBACK_1(BaseScene::onCollectAll, this));
-    auto collectBg = DrawNode::create();
-    collectBg->drawSolidRect(Vec2(-buttonWidth/2, -buttonHeight/2), Vec2(buttonWidth/2, buttonHeight/2),
-                             Color4F(0.5f, 0.5f, 0.2f, 1.0f));
-    collectBg->drawRect(Vec2(-buttonWidth/2, -buttonHeight/2), Vec2(buttonWidth/2, buttonHeight/2),
-                        Color4F(0.8f, 0.8f, 0.4f, 1.0f));
-    collectButton->addChild(collectBg, -1);
-    collectButton->setPosition(Vec2(startX + spacing * 2, 30));
+    auto collectButton = createToolButton("Collect",
+                                          Color4F(0.5f, 0.5f, 0.2f, 1.0f),
+                                          Color4F(0.7f, 0.7f, 0.3f, 1.0f),
+                                          CC_CALLBACK_1(BaseScene::onCollectAll, this));
+    collectButton->setPosition(Vec2(startX + buttonSpacing * 2, buttonCenterY));
     menuItems.pushBack(collectButton);
     
-    // 返回按钮
-    auto backLabel = Label::createWithSystemFont("Menu", "Arial", 20);
-    backLabel->setColor(Color3B::WHITE);
-    auto backButton = MenuItemLabel::create(backLabel, CC_CALLBACK_1(BaseScene::onBackToMenu, this));
-    auto backBg = DrawNode::create();
-    backBg->drawSolidRect(Vec2(-buttonWidth/2, -buttonHeight/2), Vec2(buttonWidth/2, buttonHeight/2),
-                          Color4F(0.3f, 0.3f, 0.4f, 1.0f));
-    backBg->drawRect(Vec2(-buttonWidth/2, -buttonHeight/2), Vec2(buttonWidth/2, buttonHeight/2),
-                     Color4F(0.5f, 0.5f, 0.6f, 1.0f));
-    backButton->addChild(backBg, -1);
-    backButton->setPosition(Vec2(visibleSize.width - 80, 30));
+    // 帮助按钮（新增）
+    auto helpButton = createToolButton("Help",
+                                       Color4F(0.3f, 0.4f, 0.5f, 1.0f),
+                                       Color4F(0.4f, 0.6f, 0.7f, 1.0f),
+                                       CC_CALLBACK_1(BaseScene::onBackToMenu, this));  // 暂时返回菜单查看帮助
+    helpButton->setPosition(Vec2(startX + buttonSpacing * 3, buttonCenterY));
+    menuItems.pushBack(helpButton);
+    
+    // 返回菜单按钮 - 右侧对齐
+    auto backButton = createToolButton("Menu",
+                                       Color4F(0.3f, 0.3f, 0.4f, 1.0f),
+                                       Color4F(0.5f, 0.5f, 0.6f, 1.0f),
+                                       CC_CALLBACK_1(BaseScene::onBackToMenu, this));
+    backButton->setPosition(Vec2(visibleSize.width - startX, buttonCenterY));
     menuItems.pushBack(backButton);
     
     auto menu = Menu::createWithArray(menuItems);

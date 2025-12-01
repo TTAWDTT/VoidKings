@@ -606,8 +606,22 @@ void Unit::updateStateMachine(float dt) {
             // 移动状态：沿路径移动
             moveAlongPath(dt);
             
-            // 检查是否有更近的目标
+            // 检查目标是否仍有效
             if (_currentTarget) {
+                // 先验证目标是否被释放
+                bool targetValid = false;
+                if (auto building = dynamic_cast<Building*>(_currentTarget)) {
+                    targetValid = !building->isDestroyed() && building->getParent() != nullptr;
+                } else if (auto unit = dynamic_cast<Unit*>(_currentTarget)) {
+                    targetValid = !unit->isDead() && unit->getParent() != nullptr;
+                }
+                
+                if (!targetValid) {
+                    _currentTarget = nullptr;
+                    _state = UnitState::IDLE;
+                    break;
+                }
+                
                 Vec2 myPos = this->getPosition();
                 float distance = myPos.distance(_currentTarget->getPosition());
                 if (distance <= _attackRange) {
@@ -626,18 +640,23 @@ void Unit::updateStateMachine(float dt) {
                 break;
             }
             
-            // 检查目标是否已死亡
-            if (auto building = dynamic_cast<Building*>(_currentTarget)) {
-                if (building->isDestroyed()) {
-                    _currentTarget = nullptr;
-                    _state = UnitState::IDLE;
-                    break;
-                }
-            } else if (auto unit = dynamic_cast<Unit*>(_currentTarget)) {
-                if (unit->isDead()) {
-                    _currentTarget = nullptr;
-                    _state = UnitState::IDLE;
-                    break;
+            // 检查目标是否已死亡或被移除
+            {
+                bool targetValid = false;
+                if (auto building = dynamic_cast<Building*>(_currentTarget)) {
+                    targetValid = !building->isDestroyed() && building->getParent() != nullptr;
+                    if (!targetValid) {
+                        _currentTarget = nullptr;
+                        _state = UnitState::IDLE;
+                        break;
+                    }
+                } else if (auto unit = dynamic_cast<Unit*>(_currentTarget)) {
+                    targetValid = !unit->isDead() && unit->getParent() != nullptr;
+                    if (!targetValid) {
+                        _currentTarget = nullptr;
+                        _state = UnitState::IDLE;
+                        break;
+                    }
                 }
             }
             
@@ -646,8 +665,10 @@ void Unit::updateStateMachine(float dt) {
                 _attackCooldown -= dt;
             } else {
                 // 可以攻击
-                attack(_currentTarget);
-                _attackCooldown = 1.0f / _attackSpeed;
+                if (_currentTarget) {
+                    attack(_currentTarget);
+                    _attackCooldown = 1.0f / _attackSpeed;
+                }
             }
             break;
             
@@ -661,6 +682,9 @@ void Unit::updateStateMachine(float dt) {
 
 void Unit::update(float dt) {
     if (_state == UnitState::DEAD) return;
+    
+    // 验证自身状态
+    if (!this->getParent()) return;
     
     updateStateMachine(dt);
 }
