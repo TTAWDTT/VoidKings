@@ -46,13 +46,69 @@ if(APPLE OR WINDOWS)
 endif()
 
 # add cross-platforms source files and header files 
+# Core - 核心系统
 list(APPEND GAME_SOURCE
      Classes/AppDelegate.cpp
      Classes/HelloWorldScene.cpp
+     Classes/Core/ResourceManager.cpp
      )
 list(APPEND GAME_HEADER
      Classes/AppDelegate.h
      Classes/HelloWorldScene.h
+     Classes/Core/GameDefines.h
+     Classes/Core/ResourceManager.h
+     )
+
+# Buildings - 建筑系统
+list(APPEND GAME_SOURCE
+     Classes/Buildings/Building.cpp
+     Classes/Buildings/DefenseBuilding.cpp
+     Classes/Buildings/ProductionBuilding.cpp
+     Classes/Buildings/StorageBuilding.cpp
+     Classes/Buildings/Barracks.cpp
+     )
+list(APPEND GAME_HEADER
+     Classes/Buildings/Building.h
+     Classes/Buildings/DefenseBuilding.h
+     Classes/Buildings/ProductionBuilding.h
+     Classes/Buildings/StorageBuilding.h
+     Classes/Buildings/Barracks.h
+     )
+
+# Units - 兵种系统
+list(APPEND GAME_SOURCE
+     Classes/Units/Unit.cpp
+     )
+list(APPEND GAME_HEADER
+     Classes/Units/Unit.h
+     )
+
+# Projectiles - 投射物系统
+list(APPEND GAME_SOURCE
+     Classes/Projectiles/Projectile.cpp
+     )
+list(APPEND GAME_HEADER
+     Classes/Projectiles/Projectile.h
+     )
+
+# Potions - 药水系统
+list(APPEND GAME_SOURCE
+     Classes/Potions/Potion.cpp
+     )
+list(APPEND GAME_HEADER
+     Classes/Potions/Potion.h
+     )
+
+# Scenes - 场景系统
+list(APPEND GAME_SOURCE
+     Classes/Scenes/MainMenuScene.cpp
+     Classes/Scenes/BaseScene.cpp
+     Classes/Scenes/BattleScene.cpp
+     )
+list(APPEND GAME_HEADER
+     Classes/Scenes/MainMenuScene.h
+     Classes/Scenes/BaseScene.h
+     Classes/Scenes/BattleScene.h
      )
 
 if(ANDROID)

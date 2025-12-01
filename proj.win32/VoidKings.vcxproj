@@ -152,11 +152,36 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
   <ItemGroup>
     <ClCompile Include="..\Classes\AppDelegate.cpp" />
     <ClCompile Include="..\Classes\HelloWorldScene.cpp" />
+    <ClCompile Include="..\Classes\Core\ResourceManager.cpp" />
+    <ClCompile Include="..\Classes\Buildings\Building.cpp" />
+    <ClCompile Include="..\Classes\Buildings\DefenseBuilding.cpp" />
+    <ClCompile Include="..\Classes\Buildings\ProductionBuilding.cpp" />
+    <ClCompile Include="..\Classes\Buildings\StorageBuilding.cpp" />
+    <ClCompile Include="..\Classes\Buildings\Barracks.cpp" />
+    <ClCompile Include="..\Classes\Units\Unit.cpp" />
+    <ClCompile Include="..\Classes\Projectiles\Projectile.cpp" />
+    <ClCompile Include="..\Classes\Potions\Potion.cpp" />
+    <ClCompile Include="..\Classes\Scenes\MainMenuScene.cpp" />
+    <ClCompile Include="..\Classes\Scenes\BaseScene.cpp" />
+    <ClCompile Include="..\Classes\Scenes\BattleScene.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Classes\AppDelegate.h" />
     <ClInclude Include="..\Classes\HelloWorldScene.h" />
+    <ClInclude Include="..\Classes\Core\GameDefines.h" />
+    <ClInclude Include="..\Classes\Core\ResourceManager.h" />
+    <ClInclude Include="..\Classes\Buildings\Building.h" />
+    <ClInclude Include="..\Classes\Buildings\DefenseBuilding.h" />
+    <ClInclude Include="..\Classes\Buildings\ProductionBuilding.h" />
+    <ClInclude Include="..\Classes\Buildings\StorageBuilding.h" />
+    <ClInclude Include="..\Classes\Buildings\Barracks.h" />
+    <ClInclude Include="..\Classes\Units\Unit.h" />
+    <ClInclude Include="..\Classes\Projectiles\Projectile.h" />
+    <ClInclude Include="..\Classes\Potions\Potion.h" />
+    <ClInclude Include="..\Classes\Scenes\MainMenuScene.h" />
+    <ClInclude Include="..\Classes\Scenes\BaseScene.h" />
+    <ClInclude Include="..\Classes\Scenes\BattleScene.h" />
     <ClInclude Include="main.h" />
   </ItemGroup>
   <ItemGroup>
