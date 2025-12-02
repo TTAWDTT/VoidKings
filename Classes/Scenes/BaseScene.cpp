@@ -11,6 +11,7 @@
 #include "../Buildings/ProductionBuilding.h"
 #include "../Buildings/StorageBuilding.h"
 #include "../Buildings/Barracks.h"
+#include "../Buildings/BuildingLimits.h"
 
 // ==================== 场景创建 ====================
 
@@ -475,6 +476,17 @@ void BaseScene::initDefaultBuildings() {
 // ==================== 建筑操作 ====================
 
 bool BaseScene::addBuilding(BuildingType type, int gridX, int gridY) {
+    // ——— 建造数量与解锁检查 ———
+    int thLevel = getTownHallLevel();
+    int allowed = BuildingLimits::getMaxCount(type, thLevel);
+    int current = countBuildingsOfType(type);
+    if (current >= allowed) {
+        char buf[128];
+        snprintf(buf, sizeof(buf), "Reached limit: %d/%d (TH %d)", current, allowed, thLevel);
+        showTip(buf);
+        return false;
+    }
+
     // 创建建筑
     Building* building = nullptr;
 
@@ -532,6 +544,31 @@ bool BaseScene::addBuilding(BuildingType type, int gridX, int gridY) {
     }
 
     return true;
+}
+
+// ==================== 数量与提示辅助 ====================
+
+int BaseScene::getTownHallLevel() const {
+    for (auto b : _buildings) {
+        if (b && b->getBuildingType() == BuildingType::TOWN_HALL) {
+            return b->getLevel();
+        }
+    }
+    // 场景初始化时会放置一个大本营，若未找到则默认为1
+    return 1;
+}
+
+int BaseScene::countBuildingsOfType(BuildingType type) const {
+    int c = 0;
+    for (auto b : _buildings) {
+        if (b && b->getBuildingType() == type) c++;
+    }
+    return c;
+}
+
+void BaseScene::showTip(const std::string& text) {
+    // 使用简单的消息框或顶部提示
+    MessageBox(text.c_str(), "Notice");
 }
 
 void BaseScene::removeBuilding(Building* building) {

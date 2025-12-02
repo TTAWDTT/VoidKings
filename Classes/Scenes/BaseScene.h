@@ -156,6 +156,11 @@ protected:
     void onResourceChanged(ResourceType type, int oldValue, int newValue);
     
 private:
+    // === 辅助：建筑数量与大本营等级 ===
+    int getTownHallLevel() const;                     // 获取当前大本营等级（默认1）
+    int countBuildingsOfType(BuildingType type) const; // 统计某类型建筑数量
+    void showTip(const std::string& text);             // 简单提示
+
     // 地图层
     Node* _mapLayer;
     Node* _gridLayer;
