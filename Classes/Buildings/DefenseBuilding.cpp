@@ -7,6 +7,9 @@
 #include "../Projectiles/Projectile.h"
 #include <algorithm>
 
+// 线性增长：伤害默认增长系数（沿用 GameDefines 中 LEVEL_DAMAGE_MULTIPLIER）
+float DefenseBuilding::s_damageGrowthK = LEVEL_DAMAGE_MULTIPLIER;
+
 // ==================== 创建和初始化 ====================
 
 DefenseBuilding* DefenseBuilding::create(BuildingType type, Faction faction) {
@@ -33,6 +36,7 @@ DefenseBuilding::DefenseBuilding()
     , _currentTarget(nullptr)
     , _rangeIndicator(nullptr)
     , _turretSprite(nullptr)
+    , _baseDamage(0)
 {
 }
 
@@ -98,10 +102,28 @@ void DefenseBuilding::initDefenseAttributes() {
             break;
     }
     
-    // 根据等级调整属性
-    float levelMultiplier = 1.0f + (_level - 1) * LEVEL_DAMAGE_MULTIPLIER;
-    _damage = (int)(_damage * levelMultiplier);
+    // 记录基础攻击力并按线性曲线计算攻击力
+    _baseDamage = _damage;
+    _damage = (int)(_baseDamage * (1.0f + s_damageGrowthK * (_level - 1)));
+    // 攻击范围仍按原有规则调整（与需求不冲突）
     _attackRange *= (1.0f + (_level - 1) * LEVEL_RANGE_MULTIPLIER);
+}
+
+void DefenseBuilding::finishUpgrade() {
+    // 先执行基类升级（处理等级、HP等）
+    Building::finishUpgrade();
+    // 按线性曲线刷新伤害
+    _damage = (int)(_baseDamage * (1.0f + s_damageGrowthK * (_level - 1)));
+}
+
+// ==================== 曲线配置接口 ====================
+
+void DefenseBuilding::setDamageGrowthFactor(float k) {
+    s_damageGrowthK = k;
+}
+
+float DefenseBuilding::getDamageGrowthFactor() {
+    return s_damageGrowthK;
 }
 
 // ==================== 攻击范围显示 ====================

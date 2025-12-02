@@ -21,13 +21,15 @@ typedef std::function<void(class Building*)> BuildingCallback;
  * 所有建筑的基础属性:
  * - 血量/耐久
  * - 占地格子数
- * - 建筑类型(己方/敌方)
+ * - 建筑类型（防御/资源/军事等)
  * - UI绑定(信息显示)
  * - 等级系统(升级解锁属性)
  * - 模型/动画/音效绑定
- * - 阵营归属
+ * - 阵营归属（己方/敌方)
  * - 建造/升级耗时
- * - 拆除返还资源比例
+ * - 被攻击方拆除时攻击方获得被攻击方资源比例（float值，0.0-1.0）
+ * - 被攻击方拆除时获胜进度占比（int值，所有建筑总和作为进度条满值）
+ * 
  */
 class Building : public Node {
 public:
@@ -61,6 +63,9 @@ public:
     // 获取最大等级
     int getMaxLevel() const { return _maxLevel; }
     
+    // 获取拆除获胜进度值
+    int getProgressValue() const { return _progressValue; }
+    
     // 获取占地宽度(格子数)
     int getGridWidth() const { return _gridWidth; }
     
@@ -81,6 +86,7 @@ public:
     
     // 是否在升级中
     bool isUpgrading() const { return _state == BuildingState::UPGRADING; }
+
     
     // ==================== 属性设置接口 ====================
     
@@ -99,7 +105,8 @@ public:
      * @return 剩余血量
      */
     virtual int takeDamage(int damage);
-    
+
+    //暂时不考虑修复被攻击的建筑
     /**
      * @brief 修复建筑
      * @param amount 修复量
@@ -182,6 +189,11 @@ public:
     // 显示攻击范围(防御建筑用)
     virtual void showRange(bool show);
 
+    // ==================== 线性增长曲线配置 ====================
+    // HP 线性增长系数（线性：baseHP * (1 + k * (level-1))）
+    static void setHpGrowthFactor(float k);
+    static float getHpGrowthFactor();
+
 protected:
     // 受保护的构造函数
     Building();
@@ -249,6 +261,7 @@ protected:
     int _goldCost;                      // 金币消耗
     int _elixirCost;                    // 圣水消耗
     float _refundRate;                  // 拆除返还比例
+    int _progressValue;                 // 拆除获胜进度值
     
     // UI组件
     Sprite* _sprite;                    // 建筑精灵
@@ -263,6 +276,10 @@ protected:
     // 回调
     BuildingCallback _clickCallback;     // 点击回调
     BuildingCallback _destroyCallback;   // 摧毁回调
+
+    // 线性增长：基础最大血量与增长系数
+    int _baseMaxHP;                      // 基础最大血量（level=1）
+    static float s_hpGrowthK;            // HP 线性增长系数 k
 };
 
 #endif // __BUILDING_H__

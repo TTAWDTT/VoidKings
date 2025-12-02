@@ -33,6 +33,9 @@ public:
     // 初始化
     virtual bool initWithType(BuildingType type, Faction faction) override;
     
+    // 升级完成时刷新攻击力（线性增长）
+    virtual void finishUpgrade() override;
+    
     // ==================== 防御属性获取 ====================
     
     // 获取攻击范围
@@ -122,6 +125,11 @@ public:
     // 帧更新
     virtual void update(float dt) override;
 
+    // ==================== 线性增长曲线配置 ====================
+    // 伤害线性增长系数（baseDamage * (1 + k * (level-1))）
+    static void setDamageGrowthFactor(float k);
+    static float getDamageGrowthFactor();
+
 protected:
     DefenseBuilding();
     virtual ~DefenseBuilding();
@@ -161,6 +169,10 @@ protected:
     // UI组件
     DrawNode* _rangeIndicator;       // 攻击范围指示器
     Sprite* _turretSprite;           // 炮塔精灵(可旋转)
+
+    // 线性增长：基础攻击力与增长系数
+    int _baseDamage;                 // 基础攻击力（level=1）
+    static float s_damageGrowthK;    // 伤害线性增长系数 k
 };
 
 #endif // __DEFENSE_BUILDING_H__

@@ -50,6 +50,11 @@ public:
     // 受到伤害时处理
     virtual int takeDamage(int damage) override;
 
+    // ==================== 线性增长曲线配置 ====================
+    // 容量线性增长系数（baseCapacity * (1 + k * (level-1))）
+    static void setCapacityGrowthFactor(float k);
+    static float getCapacityGrowthFactor();
+
 protected:
     StorageBuilding();
     virtual ~StorageBuilding();
@@ -66,6 +71,10 @@ protected:
     int _capacity;                   // 存储容量
     int _previousCapacity;           // 升级前的容量(用于计算增量)
     float _lossRateOnDeath;          // 死亡时资源损失比例
+
+    // 线性增长：基础容量与增长系数
+    int _baseCapacity;               // 基础容量（level=1）
+    static float s_capacityGrowthK;  // 容量线性增长系数 k
 };
 
 #endif // __STORAGE_BUILDING_H__

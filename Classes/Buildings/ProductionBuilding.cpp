@@ -5,6 +5,9 @@
 #include "ProductionBuilding.h"
 #include "../Core/ResourceManager.h"
 
+// 线性增长：产量默认增长系数（与原逻辑一致为 0.15）
+float ProductionBuilding::s_productionGrowthK = 0.15f;
+
 // ==================== 创建和初始化 ====================
 
 ProductionBuilding* ProductionBuilding::create(BuildingType type, Faction faction) {
@@ -26,6 +29,7 @@ ProductionBuilding::ProductionBuilding()
     , _lossRateOnDeath(0.5f)
     , _resourceIndicator(nullptr)
     , _resourceLabel(nullptr)
+    , _baseProductionRate(0.0f)
 {
 }
 
@@ -52,15 +56,15 @@ void ProductionBuilding::initProductionAttributes() {
     switch (_buildingType) {
         case BuildingType::GOLD_MINE:
             _productionType = ResourceType::GOLD;
-            _productionRate = 0.5f;  // 每秒0.5金币
-            _maxStorage = 500;
+            _productionRate = 0.5f;  // 每秒基础产量
+            _maxStorage = 500;       // 基础存储（不随等级线性增长）
             _lossRateOnDeath = 0.5f;
             break;
             
         case BuildingType::ELIXIR_COLLECTOR:
             _productionType = ResourceType::ELIXIR;
-            _productionRate = 0.5f;  // 每秒0.5圣水
-            _maxStorage = 500;
+            _productionRate = 0.5f;  // 每秒基础产量
+            _maxStorage = 500;       // 基础存储（不随等级线性增长）
             _lossRateOnDeath = 0.5f;
             break;
             
@@ -68,10 +72,9 @@ void ProductionBuilding::initProductionAttributes() {
             break;
     }
     
-    // 根据等级调整产量和存储
-    float levelMultiplier = 1.0f + (_level - 1) * 0.15f;
-    _productionRate *= levelMultiplier;
-    _maxStorage = (int)(_maxStorage * levelMultiplier);
+    // 记录基础产量并按线性曲线计算当前产量
+    _baseProductionRate = _productionRate;
+    _productionRate = _baseProductionRate * (1.0f + s_productionGrowthK * (_level - 1));
 }
 
 // ==================== 资源指示器 ====================
@@ -183,4 +186,21 @@ void ProductionBuilding::update(float dt) {
             updateResourceIndicator();
         }
     }
+}
+
+void ProductionBuilding::finishUpgrade() {
+    // 先执行基类升级（处理等级、HP等）
+    Building::finishUpgrade();
+    // 按线性曲线刷新产量
+    _productionRate = _baseProductionRate * (1.0f + s_productionGrowthK * (_level - 1));
+}
+
+// ==================== 曲线配置接口 ====================
+
+void ProductionBuilding::setProductionGrowthFactor(float k) {
+    s_productionGrowthK = k;
+}
+
+float ProductionBuilding::getProductionGrowthFactor() {
+    return s_productionGrowthK;
 }

@@ -5,6 +5,9 @@
 #include "StorageBuilding.h"
 #include "../Core/ResourceManager.h"
 
+// 线性增长：容量默认增长系数（与原逻辑一致为 0.25）
+float StorageBuilding::s_capacityGrowthK = 0.25f;
+
 // ==================== 创建和初始化 ====================
 
 StorageBuilding* StorageBuilding::create(BuildingType type, Faction faction) {
@@ -22,6 +25,7 @@ StorageBuilding::StorageBuilding()
     , _capacity(1000)
     , _previousCapacity(0)
     , _lossRateOnDeath(0.3f)
+    , _baseCapacity(0)
 {
 }
 
@@ -45,13 +49,13 @@ void StorageBuilding::initStorageAttributes() {
     switch (_buildingType) {
         case BuildingType::GOLD_STORAGE:
             _storageType = ResourceType::GOLD;
-            _capacity = 1500;
+            _capacity = 1500;  // 基础容量
             _lossRateOnDeath = 0.3f;
             break;
             
         case BuildingType::ELIXIR_STORAGE:
             _storageType = ResourceType::ELIXIR;
-            _capacity = 1500;
+            _capacity = 1500;  // 基础容量
             _lossRateOnDeath = 0.3f;
             break;
             
@@ -59,9 +63,9 @@ void StorageBuilding::initStorageAttributes() {
             break;
     }
     
-    // 根据等级调整容量
-    float levelMultiplier = 1.0f + (_level - 1) * 0.25f;
-    _capacity = (int)(_capacity * levelMultiplier);
+    // 记录基础容量并按线性曲线计算当前容量
+    _baseCapacity = _capacity;
+    _capacity = (int)(_baseCapacity * (1.0f + s_capacityGrowthK * (_level - 1)));
     _previousCapacity = _capacity;
 }
 
@@ -81,9 +85,8 @@ void StorageBuilding::finishUpgrade() {
     // 调用父类升级
     Building::finishUpgrade();
     
-    // 重新计算容量
-    float levelMultiplier = 1.0f + (_level - 1) * 0.25f;
-    _capacity = (int)(1500 * levelMultiplier);  // 使用基础值重新计算
+    // 重新按线性曲线计算容量
+    _capacity = (int)(_baseCapacity * (1.0f + s_capacityGrowthK * (_level - 1)));
     
     // 更新全局存储容量
     updateGlobalCapacity();
@@ -118,4 +121,14 @@ int StorageBuilding::takeDamage(int damage) {
     }
     
     return result;
+}
+
+// ==================== 曲线配置接口 ====================
+
+void StorageBuilding::setCapacityGrowthFactor(float k) {
+    s_capacityGrowthK = k;
+}
+
+float StorageBuilding::getCapacityGrowthFactor() {
+    return s_capacityGrowthK;
 }

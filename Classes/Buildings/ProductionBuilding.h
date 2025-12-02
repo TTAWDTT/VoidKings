@@ -15,7 +15,7 @@
  * - 资源加成定时器(生产间隔)
  * - 生产资源类型(金币/圣水)
  * - 生产效率(等级对应产量)
- * - 死亡后资源损失比例
+ * - 死亡后资源损失比例 （float值，0.0-1.0）
  * - 最大存储量(若为资源生产+存储二合一建筑)
  */
 class ProductionBuilding : public Building {
@@ -25,6 +25,9 @@ public:
     
     // 初始化
     virtual bool initWithType(BuildingType type, Faction faction) override;
+    
+    // 升级完成时刷新产量（线性增长）
+    virtual void finishUpgrade() override;
     
     // ==================== 生产属性获取 ====================
     
@@ -62,6 +65,11 @@ public:
     // 受到伤害时处理资源损失
     virtual int takeDamage(int damage) override;
 
+    // ==================== 线性增长曲线配置 ====================
+    // 产量线性增长系数（baseRate * (1 + k * (level-1))）
+    static void setProductionGrowthFactor(float k);
+    static float getProductionGrowthFactor();
+
 protected:
     ProductionBuilding();
     virtual ~ProductionBuilding();
@@ -87,6 +95,10 @@ protected:
     // UI组件
     Node* _resourceIndicator;        // 资源指示器
     Label* _resourceLabel;           // 资源数量标签
+
+    // 线性增长：基础产量与增长系数
+    float _baseProductionRate;       // 基础产量/秒（level=1）
+    static float s_productionGrowthK;// 产量线性增长系数 k
 };
 
 #endif // __PRODUCTION_BUILDING_H__

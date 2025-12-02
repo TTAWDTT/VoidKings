@@ -5,6 +5,9 @@
 #include "Building.h"
 #include "../Core/ResourceManager.h"
 
+// 线性增长：HP 默认增长系数（沿用 GameDefines 中 LEVEL_HP_MULTIPLIER）
+float Building::s_hpGrowthK = LEVEL_HP_MULTIPLIER;
+
 // ==================== 创建和初始化 ====================
 
 Building* Building::create(BuildingType type, Faction faction) {
@@ -42,6 +45,8 @@ Building::Building()
     , _isSelected(false)
     , _clickCallback(nullptr)
     , _destroyCallback(nullptr)
+    , _progressValue(0)
+    , _baseMaxHP(0)
 {
 }
 
@@ -89,6 +94,7 @@ bool Building::initWithType(BuildingType type, Faction faction) {
 void Building::initAttributes() {
     // 根据建筑类型设置属性
     switch (_buildingType) {
+        //市政厅（基地）
         case BuildingType::TOWN_HALL:
             _buildingName = "Town Hall";
             _gridWidth = 4;
@@ -96,39 +102,43 @@ void Building::initAttributes() {
             _maxHP = 1500;
             _goldCost = 0;
             _buildTime = 0;
-            _maxLevel = 10;
+            _maxLevel = 5;
+            _progressValue = 40;
             break;
-            
+        //大炮    
         case BuildingType::CANNON:
             _buildingName = "Cannon";
-            _gridWidth = 3;
-            _gridHeight = 3;
+            _gridWidth = 2;
+            _gridHeight = 2;
             _maxHP = 400;
             _goldCost = 250;
             _buildTime = 60;
-            _maxLevel = 15;
+            _maxLevel = 5;
+            _progressValue = 5;
             break;
-            
+        //弓箭塔    
         case BuildingType::ARCHER_TOWER:
             _buildingName = "Archer Tower";
-            _gridWidth = 3;
-            _gridHeight = 3;
+            _gridWidth = 2;
+            _gridHeight = 2;
             _maxHP = 380;
             _goldCost = 500;
             _buildTime = 120;
-            _maxLevel = 15;
+            _maxLevel = 5;
+            _progressValue = 5;
             break;
-            
+        //迫击炮
         case BuildingType::MORTAR:
             _buildingName = "Mortar";
-            _gridWidth = 3;
-            _gridHeight = 3;
+            _gridWidth = 2;
+            _gridHeight = 2;
             _maxHP = 400;
             _goldCost = 5000;
             _buildTime = 300;
-            _maxLevel = 10;
+            _maxLevel = 5;  
+            _progressValue = 5;
             break;
-            
+        //金矿    
         case BuildingType::GOLD_MINE:
             _buildingName = "Gold Mine";
             _gridWidth = 3;
@@ -136,9 +146,10 @@ void Building::initAttributes() {
             _maxHP = 400;
             _elixirCost = 150;
             _buildTime = 60;
-            _maxLevel = 12;
+            _maxLevel = 5;
+            _progressValue = 10;
             break;
-            
+        //圣水收集器    
         case BuildingType::ELIXIR_COLLECTOR:
             _buildingName = "Elixir Collector";
             _gridWidth = 3;
@@ -146,9 +157,10 @@ void Building::initAttributes() {
             _maxHP = 400;
             _goldCost = 150;
             _buildTime = 60;
-            _maxLevel = 12;
+            _maxLevel = 5;
+            _progressValue = 10;
             break;
-            
+        //金库    
         case BuildingType::GOLD_STORAGE:
             _buildingName = "Gold Storage";
             _gridWidth = 3;
@@ -156,9 +168,10 @@ void Building::initAttributes() {
             _maxHP = 600;
             _elixirCost = 300;
             _buildTime = 120;
-            _maxLevel = 12;
+            _maxLevel = 5;
+            _progressValue = 10;
             break;
-            
+        //圣水库    
         case BuildingType::ELIXIR_STORAGE:
             _buildingName = "Elixir Storage";
             _gridWidth = 3;
@@ -166,9 +179,10 @@ void Building::initAttributes() {
             _maxHP = 600;
             _goldCost = 300;
             _buildTime = 120;
-            _maxLevel = 12;
+            _maxLevel = 5;
+            _progressValue = 10;
             break;
-            
+        //兵营    
         case BuildingType::BARRACKS:
             _buildingName = "Barracks";
             _gridWidth = 3;
@@ -176,9 +190,10 @@ void Building::initAttributes() {
             _maxHP = 500;
             _elixirCost = 200;
             _buildTime = 180;
-            _maxLevel = 10;
+            _maxLevel = 5;
+            _progressValue = 5;
             break;
-            
+        //法术工厂
         case BuildingType::SPELL_FACTORY:
             _buildingName = "Spell Factory";
             _gridWidth = 3;
@@ -187,8 +202,9 @@ void Building::initAttributes() {
             _goldCost = 200;
             _buildTime = 240;
             _maxLevel = 5;
+            _progressValue = 5;
             break;
-            
+        //城墙    
         case BuildingType::WALL:
             _buildingName = "Wall";
             _gridWidth = 1;
@@ -196,13 +212,18 @@ void Building::initAttributes() {
             _maxHP = 300;
             _goldCost = 50;
             _buildTime = 1;
-            _maxLevel = 12;
+            _maxLevel = 5;
+            _progressValue = 0;
             break;
             
         default:
             break;
     }
     
+    // 记录基础最大血量
+    _baseMaxHP = _maxHP;
+    // 应用线性增长：maxHP = base * (1 + k * (level-1))
+    _maxHP = (int)(_baseMaxHP * (1.0f + s_hpGrowthK * (_level - 1)));
     // 设置当前血量为最大血量
     _currentHP = _maxHP;
 }
@@ -553,8 +574,8 @@ void Building::finishUpgrade() {
     _state = BuildingState::NORMAL;
     _buildProgress = 1.0f;
     
-    // 更新属性(根据等级提升)
-    _maxHP = (int)(_maxHP * 1.1f);  // 每级提升10%血量
+    // 按线性曲线更新最大血量
+    _maxHP = (int)(_baseMaxHP * (1.0f + s_hpGrowthK * (_level - 1)));
     _currentHP = _maxHP;
     
     if (_progressBar) {
@@ -564,6 +585,16 @@ void Building::finishUpgrade() {
     
     // 释放工人
     ResourceManager::getInstance()->releaseWorker();
+}
+
+// ==================== 曲线配置接口 ====================
+
+void Building::setHpGrowthFactor(float k) {
+    s_hpGrowthK = k;
+}
+
+float Building::getHpGrowthFactor() {
+    return s_hpGrowthK;
 }
 
 void Building::cancelConstruction() {
