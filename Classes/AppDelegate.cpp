@@ -21,18 +21,9 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  ****************************************************************************/
-// AppDelegate.cpp
-// 应用程序代理类
-// 功能: 管理应用程序生命周期，初始化游戏窗口和场景
-// 修改说明: 
-// - 调整设计分辨率为1280x720以适配游戏界面
-// - 启用窗口大小调整功能
-// - 默认启动主菜单场景
 
 #include "AppDelegate.h"
 #include "HelloWorldScene.h"
-
-// #include "MainMenuScene.h"
 
 // #define USE_AUDIO_ENGINE 1
 // #define USE_SIMPLE_AUDIO_ENGINE 1
@@ -51,14 +42,10 @@ using namespace CocosDenshion;
 
 USING_NS_CC;
 
-// 设计分辨率 - 游戏画面的基准尺寸
-static cocos2d::Size designResolutionSize = cocos2d::Size(1280, 720);
-// 小屏幕分辨率
-static cocos2d::Size smallResolutionSize = cocos2d::Size(960, 540);
-// 中等屏幕分辨率
-static cocos2d::Size mediumResolutionSize = cocos2d::Size(1280, 720);
-// 大屏幕分辨率
-static cocos2d::Size largeResolutionSize = cocos2d::Size(1920, 1080);
+static cocos2d::Size designResolutionSize = cocos2d::Size(480, 320);
+static cocos2d::Size smallResolutionSize = cocos2d::Size(480, 320);
+static cocos2d::Size mediumResolutionSize = cocos2d::Size(1024, 768);
+static cocos2d::Size largeResolutionSize = cocos2d::Size(2048, 1536);
 
 AppDelegate::AppDelegate()
 {
@@ -73,8 +60,8 @@ AppDelegate::~AppDelegate()
 #endif
 }
 
-// 初始化OpenGL上下文属性
-// 设置颜色深度、深度缓冲、模板缓冲等参数
+// if you want a different context, modify the value of glContextAttrs
+// it will affect all platforms
 void AppDelegate::initGLContextAttrs()
 {
     // set OpenGL context attributes: red,green,blue,alpha,depth,stencil,multisamplesCount
@@ -83,62 +70,57 @@ void AppDelegate::initGLContextAttrs()
     GLView::setGLContextAttrs(glContextAttrs);
 }
 
-// 包管理器注册函数
-// 如果需要使用包管理器安装更多包，不要修改或删除此函数
+// if you want to use the package manager to install more packages,  
+// don't modify or remove this function
 static int register_all_packages()
 {
-    return 0; // 包管理器标志
+    return 0; //flag for packages manager
 }
 
 bool AppDelegate::applicationDidFinishLaunching() {
-    // 初始化导演类
+    // initialize director
     auto director = Director::getInstance();
     auto glview = director->getOpenGLView();
-
-    if (!glview) {
+    if(!glview) {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) || (CC_TARGET_PLATFORM == CC_PLATFORM_MAC) || (CC_TARGET_PLATFORM == CC_PLATFORM_LINUX)
-        // Win32/Mac/Linux平台: 创建可调整大小的窗口
-        // 参数: 窗口标题, 窗口矩形区域, 缩放因子, 是否可调整大小
-        glview = GLViewImpl::createWithRect("Void Kings - Clash of Clans Style Game",
-            cocos2d::Rect(0, 0, designResolutionSize.width, designResolutionSize.height),
-            1.0f,
-            true);  // 启用窗口大小调整
+        glview = GLViewImpl::createWithRect("VoidKings", cocos2d::Rect(0, 0, designResolutionSize.width, designResolutionSize.height));
 #else
-        glview = GLViewImpl::create("Void Kings");
+        glview = GLViewImpl::create("VoidKings");
 #endif
         director->setOpenGLView(glview);
     }
 
-    // 设置设计分辨率
-    // 使用SHOW_ALL策略确保所有内容可见，同时保持宽高比
-    glview->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height, ResolutionPolicy::SHOW_ALL);
+    // turn on display FPS
+    director->setDisplayStats(true);
 
+    // set FPS. the default value is 1.0/60 if you don't call this
+    director->setAnimationInterval(1.0f / 60);
+
+    // Set the design resolution
+    glview->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height, ResolutionPolicy::NO_BORDER);
     auto frameSize = glview->getFrameSize();
-
-    // 根据实际窗口大小设置内容缩放因子
+    // if the frame's height is larger than the height of medium size.
     if (frameSize.height > mediumResolutionSize.height)
-    {
-        director->setContentScaleFactor(MIN(largeResolutionSize.height / designResolutionSize.height,
-            largeResolutionSize.width / designResolutionSize.width));
+    {        
+        director->setContentScaleFactor(MIN(largeResolutionSize.height/designResolutionSize.height, largeResolutionSize.width/designResolutionSize.width));
     }
+    // if the frame's height is larger than the height of small size.
     else if (frameSize.height > smallResolutionSize.height)
-    {
-        director->setContentScaleFactor(MIN(mediumResolutionSize.height / designResolutionSize.height,
-            mediumResolutionSize.width / designResolutionSize.width));
+    {        
+        director->setContentScaleFactor(MIN(mediumResolutionSize.height/designResolutionSize.height, mediumResolutionSize.width/designResolutionSize.width));
     }
+    // if the frame's height is smaller than the height of medium size.
     else
-    {
-        director->setContentScaleFactor(MIN(smallResolutionSize.height / designResolutionSize.height,
-            smallResolutionSize.width / designResolutionSize.width));
+    {        
+        director->setContentScaleFactor(MIN(smallResolutionSize.height/designResolutionSize.height, smallResolutionSize.width/designResolutionSize.width));
     }
 
-    // 注册所有包
     register_all_packages();
 
-    // 创建并运行主菜单场景
-    // auto scene = MainMenuScene::createScene();
-    // MainMenuScene not present in this workspace; start with HelloWorld scene
+    // create a scene. it's an autorelease object
     auto scene = HelloWorld::createScene();
+
+    // run
     director->runWithScene(scene);
 
     return true;
