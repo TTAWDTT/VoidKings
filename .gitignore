@@ -111,5 +111,4 @@ proj.win32/Debug.win32/
 proj.win32/Release.win32/
 
 # Cocos2d-x specific
-cocos2d/external/*/prebuilt/
-cocos2d/external/*/build/
+cocos2d/
