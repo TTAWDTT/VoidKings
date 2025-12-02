@@ -110,8 +110,5 @@ proj.ios_mac/build/
 proj.win32/Debug.win32/
 proj.win32/Release.win32/
 
-# Cocos2d-x engine (should be managed separately)
-cocos2d/
-
 # CMake output
 out/
