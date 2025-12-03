@@ -1,0 +1,973 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|Win32">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|Win32">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{E28C41F1-729D-343B-8292-5595AC8E2A8F}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.22621.0</WindowsTargetPlatformVersion>
+    <Platform>Win32</Platform>
+    <ProjectName>VoidKings</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\bin\VoidKings\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">VoidKings.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">VoidKings</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\bin\VoidKings\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">VoidKings.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">VoidKings</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\bin\VoidKings\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">VoidKings.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">VoidKings</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\bin\VoidKings\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">VoidKings.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">VoidKings</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">true</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\audio\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\extensions;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\platform;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\editor-support;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\base;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\platform\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\recast\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\tinyxml2\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\xxhash\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\xxtea\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\clipper\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\edtaa3func\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\ConvertUTF\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\poly2tri\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\md5\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\unzip\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/Box2D/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/chipmunk/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/freetype2/include/win32/freetype2" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/bullet/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/bullet/include/bullet" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/jpeg/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/openssl/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/uv/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/webp/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/websockets/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/curl/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/png/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/gles/include/OGLES" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/icon/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/MP3Decoder/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/OggDecoder/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/OpenalSoft/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/glfw3/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/zlib/../win32-specific/zlib/include"</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <FloatingPointModel></FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <MinimalRebuild></MinimalRebuild>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;COCOS2D_DEBUG=1;_WIN32;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;CC_STATIC;LWS_WITH_LIBUV;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;COCOS2D_DEBUG=1;_WIN32;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;CC_STATIC;LWS_WITH_LIBUV;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\audio\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\extensions;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\platform;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\editor-support;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\base;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\platform\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\recast\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\tinyxml2\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\xxhash\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\xxtea\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\clipper\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\edtaa3func\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\ConvertUTF\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\poly2tri\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\md5\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\unzip\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\Box2D\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\chipmunk\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\freetype2\include\win32\freetype2;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\bullet\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\bullet\include\bullet;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\jpeg\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\openssl\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\uv\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\webp\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\websockets\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\curl\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\png\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\gles\include\OGLES;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\icon\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\MP3Decoder\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OggDecoder\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OpenalSoft\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\glfw3\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\zlib\..\win32-specific\zlib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\audio\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\extensions;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\platform;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\editor-support;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\base;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\platform\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\recast\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\tinyxml2\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\xxhash\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\xxtea\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\clipper\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\edtaa3func\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\ConvertUTF\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\poly2tri\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\md5\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\unzip\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\Box2D\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\chipmunk\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\freetype2\include\win32\freetype2;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\bullet\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\bullet\include\bullet;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\jpeg\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\openssl\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\uv\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\webp\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\websockets\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\curl\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\png\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\gles\include\OGLES;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\icon\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\MP3Decoder\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OggDecoder\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OpenalSoft\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\glfw3\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\zlib\..\win32-specific\zlib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PostBuildEvent>
+      <Message>												</Message>
+      <Command>setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/openssl/prebuilt/win32/libssl-1_1.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Debug/libssl-1_1.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/openssl/prebuilt/win32/libcrypto-1_1.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Debug/libcrypto-1_1.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/uv/prebuilt/win32/uv.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Debug/uv.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/websockets/prebuilt/win32/websockets.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Debug/websockets.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/curl/prebuilt/win32/libcurl.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Debug/libcurl.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/gles/prebuilt/glew32.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Debug/glew32.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/icon/prebuilt/iconv.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Debug/iconv.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/MP3Decoder/prebuilt/libmpg123.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Debug/libmpg123.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/OggDecoder/prebuilt/libogg.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Debug/libogg.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/OggDecoder/prebuilt/libvorbis.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Debug/libvorbis.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/OggDecoder/prebuilt/libvorbisfile.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Debug/libvorbisfile.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/OpenalSoft/prebuilt/OpenAL32.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Debug/OpenAL32.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/zlib/../win32-specific/zlib/prebuilt/zlib1.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Debug/zlib1.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalDependencies>lib\Debug\cocos2d.lib;lib\Debug\external.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\Box2D\prebuilt\win32\debug\libbox2d.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\chipmunk\prebuilt\win32\debug-lib\libchipmunk.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\freetype2\prebuilt\win32\freetype.lib;lib\Debug\ext_recast.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\bullet\prebuilt\win32\debug\libbullet.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\jpeg\prebuilt\win32\libjpeg.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\webp\prebuilt\win32\libwebp.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\websockets\prebuilt\win32\websockets.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\openssl\prebuilt\win32\libssl.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\openssl\prebuilt\win32\libcrypto.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\uv\prebuilt\win32\uv_a.lib;lib\Debug\ext_tinyxml2.lib;lib\Debug\ext_xxhash.lib;lib\Debug\ext_xxtea.lib;lib\Debug\ext_clipper.lib;lib\Debug\ext_edtaa3func.lib;lib\Debug\ext_convertUTF.lib;lib\Debug\ext_poly2tri.lib;lib\Debug\ext_md5.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\curl\prebuilt\win32\libcurl.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\png\prebuilt\win32\libpng.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\gles\prebuilt\glew32.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\icon\prebuilt\libiconv.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\MP3Decoder\prebuilt\libmpg123.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OggDecoder\prebuilt\libogg.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OggDecoder\prebuilt\libvorbis.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OggDecoder\prebuilt\libvorbisfile.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OpenalSoft\prebuilt\OpenAL32.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\glfw3\prebuilt\win32\glfw3.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\zlib\..\win32-specific\zlib\prebuilt\libzlib.lib;lib\Debug\ext_unzip.lib;ws2_32.lib;userenv.lib;psapi.lib;winmm.lib;Version.lib;Iphlpapi.lib;opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <ImportLibrary>D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/Debug/VoidKings.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Debug/VoidKings.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\audio\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\extensions;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\platform;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\editor-support;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\base;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\platform\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\recast\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\tinyxml2\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\xxhash\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\xxtea\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\clipper\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\edtaa3func\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\ConvertUTF\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\poly2tri\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\md5\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\unzip\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/Box2D/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/chipmunk/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/freetype2/include/win32/freetype2" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/bullet/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/bullet/include/bullet" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/jpeg/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/openssl/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/uv/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/webp/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/websockets/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/curl/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/png/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/gles/include/OGLES" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/icon/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/MP3Decoder/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/OggDecoder/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/OpenalSoft/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/glfw3/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/zlib/../win32-specific/zlib/include"</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <FloatingPointModel></FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <MinimalRebuild></MinimalRebuild>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_WIN32;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;CC_STATIC;LWS_WITH_LIBUV;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_WIN32;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;CC_STATIC;LWS_WITH_LIBUV;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\audio\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\extensions;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\platform;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\editor-support;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\base;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\platform\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\recast\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\tinyxml2\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\xxhash\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\xxtea\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\clipper\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\edtaa3func\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\ConvertUTF\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\poly2tri\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\md5\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\unzip\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\Box2D\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\chipmunk\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\freetype2\include\win32\freetype2;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\bullet\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\bullet\include\bullet;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\jpeg\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\openssl\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\uv\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\webp\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\websockets\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\curl\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\png\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\gles\include\OGLES;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\icon\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\MP3Decoder\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OggDecoder\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OpenalSoft\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\glfw3\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\zlib\..\win32-specific\zlib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\audio\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\extensions;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\platform;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\editor-support;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\base;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\platform\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\recast\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\tinyxml2\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\xxhash\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\xxtea\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\clipper\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\edtaa3func\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\ConvertUTF\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\poly2tri\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\md5\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\unzip\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\Box2D\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\chipmunk\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\freetype2\include\win32\freetype2;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\bullet\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\bullet\include\bullet;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\jpeg\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\openssl\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\uv\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\webp\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\websockets\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\curl\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\png\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\gles\include\OGLES;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\icon\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\MP3Decoder\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OggDecoder\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OpenalSoft\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\glfw3\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\zlib\..\win32-specific\zlib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PostBuildEvent>
+      <Message>												</Message>
+      <Command>setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/openssl/prebuilt/win32/libssl-1_1.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Release/libssl-1_1.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/openssl/prebuilt/win32/libcrypto-1_1.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Release/libcrypto-1_1.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/uv/prebuilt/win32/uv.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Release/uv.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/websockets/prebuilt/win32/websockets.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Release/websockets.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/curl/prebuilt/win32/libcurl.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Release/libcurl.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/gles/prebuilt/glew32.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Release/glew32.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/icon/prebuilt/iconv.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Release/iconv.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/MP3Decoder/prebuilt/libmpg123.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Release/libmpg123.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/OggDecoder/prebuilt/libogg.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Release/libogg.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/OggDecoder/prebuilt/libvorbis.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Release/libvorbis.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/OggDecoder/prebuilt/libvorbisfile.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Release/libvorbisfile.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/OpenalSoft/prebuilt/OpenAL32.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Release/OpenAL32.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/zlib/../win32-specific/zlib/prebuilt/zlib1.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Release/zlib1.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalDependencies>lib\Release\cocos2d.lib;lib\Release\external.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\Box2D\prebuilt\win32\release\libbox2d.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\chipmunk\prebuilt\win32\release-lib\libchipmunk.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\freetype2\prebuilt\win32\freetype.lib;lib\Release\ext_recast.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\bullet\prebuilt\win32\release\libbullet.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\jpeg\prebuilt\win32\libjpeg.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\webp\prebuilt\win32\libwebp.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\websockets\prebuilt\win32\websockets.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\openssl\prebuilt\win32\libssl.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\openssl\prebuilt\win32\libcrypto.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\uv\prebuilt\win32\uv_a.lib;lib\Release\ext_tinyxml2.lib;lib\Release\ext_xxhash.lib;lib\Release\ext_xxtea.lib;lib\Release\ext_clipper.lib;lib\Release\ext_edtaa3func.lib;lib\Release\ext_convertUTF.lib;lib\Release\ext_poly2tri.lib;lib\Release\ext_md5.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\curl\prebuilt\win32\libcurl.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\png\prebuilt\win32\libpng.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\gles\prebuilt\glew32.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\icon\prebuilt\libiconv.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\MP3Decoder\prebuilt\libmpg123.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OggDecoder\prebuilt\libogg.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OggDecoder\prebuilt\libvorbis.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OggDecoder\prebuilt\libvorbisfile.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OpenalSoft\prebuilt\OpenAL32.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\glfw3\prebuilt\win32\glfw3.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\zlib\..\win32-specific\zlib\prebuilt\libzlib.lib;lib\Release\ext_unzip.lib;ws2_32.lib;userenv.lib;psapi.lib;winmm.lib;Version.lib;Iphlpapi.lib;opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <ImportLibrary>D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/Release/VoidKings.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/Release/VoidKings.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\audio\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\extensions;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\platform;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\editor-support;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\base;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\platform\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\recast\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\tinyxml2\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\xxhash\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\xxtea\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\clipper\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\edtaa3func\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\ConvertUTF\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\poly2tri\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\md5\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\unzip\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/Box2D/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/chipmunk/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/freetype2/include/win32/freetype2" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/bullet/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/bullet/include/bullet" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/jpeg/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/openssl/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/uv/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/webp/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/websockets/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/curl/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/png/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/gles/include/OGLES" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/icon/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/MP3Decoder/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/OggDecoder/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/OpenalSoft/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/glfw3/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/zlib/../win32-specific/zlib/include"</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <FloatingPointModel></FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <MinimalRebuild></MinimalRebuild>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_WIN32;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;CC_STATIC;LWS_WITH_LIBUV;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_WIN32;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;CC_STATIC;LWS_WITH_LIBUV;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\audio\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\extensions;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\platform;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\editor-support;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\base;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\platform\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\recast\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\tinyxml2\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\xxhash\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\xxtea\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\clipper\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\edtaa3func\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\ConvertUTF\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\poly2tri\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\md5\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\unzip\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\Box2D\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\chipmunk\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\freetype2\include\win32\freetype2;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\bullet\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\bullet\include\bullet;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\jpeg\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\openssl\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\uv\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\webp\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\websockets\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\curl\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\png\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\gles\include\OGLES;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\icon\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\MP3Decoder\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OggDecoder\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OpenalSoft\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\glfw3\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\zlib\..\win32-specific\zlib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\audio\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\extensions;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\platform;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\editor-support;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\base;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\platform\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\recast\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\tinyxml2\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\xxhash\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\xxtea\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\clipper\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\edtaa3func\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\ConvertUTF\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\poly2tri\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\md5\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\unzip\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\Box2D\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\chipmunk\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\freetype2\include\win32\freetype2;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\bullet\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\bullet\include\bullet;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\jpeg\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\openssl\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\uv\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\webp\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\websockets\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\curl\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\png\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\gles\include\OGLES;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\icon\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\MP3Decoder\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OggDecoder\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OpenalSoft\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\glfw3\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\zlib\..\win32-specific\zlib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PostBuildEvent>
+      <Message>												</Message>
+      <Command>setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/openssl/prebuilt/win32/libssl-1_1.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/MinSizeRel/libssl-1_1.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/openssl/prebuilt/win32/libcrypto-1_1.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/MinSizeRel/libcrypto-1_1.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/uv/prebuilt/win32/uv.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/MinSizeRel/uv.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/websockets/prebuilt/win32/websockets.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/MinSizeRel/websockets.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/curl/prebuilt/win32/libcurl.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/MinSizeRel/libcurl.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/gles/prebuilt/glew32.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/MinSizeRel/glew32.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/icon/prebuilt/iconv.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/MinSizeRel/iconv.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/MP3Decoder/prebuilt/libmpg123.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/MinSizeRel/libmpg123.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/OggDecoder/prebuilt/libogg.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/MinSizeRel/libogg.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/OggDecoder/prebuilt/libvorbis.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/MinSizeRel/libvorbis.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/OggDecoder/prebuilt/libvorbisfile.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/MinSizeRel/libvorbisfile.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/OpenalSoft/prebuilt/OpenAL32.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/MinSizeRel/OpenAL32.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/zlib/../win32-specific/zlib/prebuilt/zlib1.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/MinSizeRel/zlib1.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalDependencies>lib\MinSizeRel\cocos2d.lib;lib\MinSizeRel\external.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\Box2D\prebuilt\win32\release\libbox2d.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\chipmunk\prebuilt\win32\release-lib\libchipmunk.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\freetype2\prebuilt\win32\freetype.lib;lib\MinSizeRel\ext_recast.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\bullet\prebuilt\win32\release\libbullet.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\jpeg\prebuilt\win32\libjpeg.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\webp\prebuilt\win32\libwebp.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\websockets\prebuilt\win32\websockets.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\openssl\prebuilt\win32\libssl.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\openssl\prebuilt\win32\libcrypto.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\uv\prebuilt\win32\uv_a.lib;lib\MinSizeRel\ext_tinyxml2.lib;lib\MinSizeRel\ext_xxhash.lib;lib\MinSizeRel\ext_xxtea.lib;lib\MinSizeRel\ext_clipper.lib;lib\MinSizeRel\ext_edtaa3func.lib;lib\MinSizeRel\ext_convertUTF.lib;lib\MinSizeRel\ext_poly2tri.lib;lib\MinSizeRel\ext_md5.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\curl\prebuilt\win32\libcurl.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\png\prebuilt\win32\libpng.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\gles\prebuilt\glew32.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\icon\prebuilt\libiconv.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\MP3Decoder\prebuilt\libmpg123.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OggDecoder\prebuilt\libogg.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OggDecoder\prebuilt\libvorbis.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OggDecoder\prebuilt\libvorbisfile.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OpenalSoft\prebuilt\OpenAL32.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\glfw3\prebuilt\win32\glfw3.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\zlib\..\win32-specific\zlib\prebuilt\libzlib.lib;lib\MinSizeRel\ext_unzip.lib;ws2_32.lib;userenv.lib;psapi.lib;winmm.lib;Version.lib;Iphlpapi.lib;opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <ImportLibrary>D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/MinSizeRel/VoidKings.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/MinSizeRel/VoidKings.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\audio\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\extensions;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\platform;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\editor-support;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\base;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\platform\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\recast\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\tinyxml2\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\xxhash\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\xxtea\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\clipper\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\edtaa3func\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\ConvertUTF\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\poly2tri\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\md5\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\unzip\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/Box2D/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/chipmunk/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/freetype2/include/win32/freetype2" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/bullet/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/bullet/include/bullet" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/jpeg/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/openssl/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/uv/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/webp/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/websockets/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/curl/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/png/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/gles/include/OGLES" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/icon/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/MP3Decoder/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/OggDecoder/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/OpenalSoft/include" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/glfw3/include/win32" /external:I "D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/zlib/../win32-specific/zlib/include"</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <FloatingPointModel></FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <MinimalRebuild></MinimalRebuild>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_WIN32;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;CC_STATIC;LWS_WITH_LIBUV;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_WIN32;UNICODE;_UNICODE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;CC_STATIC;LWS_WITH_LIBUV;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\audio\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\extensions;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\platform;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\editor-support;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\base;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\platform\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\recast\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\tinyxml2\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\xxhash\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\xxtea\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\clipper\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\edtaa3func\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\ConvertUTF\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\poly2tri\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\md5\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\unzip\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\Box2D\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\chipmunk\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\freetype2\include\win32\freetype2;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\bullet\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\bullet\include\bullet;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\jpeg\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\openssl\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\uv\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\webp\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\websockets\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\curl\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\png\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\gles\include\OGLES;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\icon\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\MP3Decoder\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OggDecoder\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OpenalSoft\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\glfw3\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\zlib\..\win32-specific\zlib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\audio\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\extensions;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\platform;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\editor-support;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\base;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cocos\platform\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\recast\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\tinyxml2\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\xxhash\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\xxtea\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\clipper\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\edtaa3func\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\ConvertUTF\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\poly2tri\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\md5\..;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\unzip\.;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\Box2D\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\chipmunk\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\freetype2\include\win32\freetype2;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\bullet\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\bullet\include\bullet;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\jpeg\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\openssl\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\uv\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\webp\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\websockets\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\curl\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\png\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\gles\include\OGLES;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\icon\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\MP3Decoder\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OggDecoder\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OpenalSoft\include;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\glfw3\include\win32;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\zlib\..\win32-specific\zlib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PostBuildEvent>
+      <Message>												</Message>
+      <Command>setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/openssl/prebuilt/win32/libssl-1_1.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/RelWithDebInfo/libssl-1_1.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/openssl/prebuilt/win32/libcrypto-1_1.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/RelWithDebInfo/libcrypto-1_1.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/uv/prebuilt/win32/uv.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/RelWithDebInfo/uv.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/websockets/prebuilt/win32/websockets.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/RelWithDebInfo/websockets.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/curl/prebuilt/win32/libcurl.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/RelWithDebInfo/libcurl.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/gles/prebuilt/glew32.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/RelWithDebInfo/glew32.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/icon/prebuilt/iconv.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/RelWithDebInfo/iconv.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/MP3Decoder/prebuilt/libmpg123.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/RelWithDebInfo/libmpg123.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/OggDecoder/prebuilt/libogg.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/RelWithDebInfo/libogg.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/OggDecoder/prebuilt/libvorbis.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/RelWithDebInfo/libvorbis.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/OggDecoder/prebuilt/libvorbisfile.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/RelWithDebInfo/libvorbisfile.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/win32-specific/OpenalSoft/prebuilt/OpenAL32.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/RelWithDebInfo/OpenAL32.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+E:\CMake\bin\cmake.exe -E copy_if_different D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/cocos2d/external/zlib/../win32-specific/zlib/prebuilt/zlib1.dll D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/RelWithDebInfo/zlib1.dll
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalDependencies>lib\RelWithDebInfo\cocos2d.lib;lib\RelWithDebInfo\external.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\Box2D\prebuilt\win32\release\libbox2d.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\chipmunk\prebuilt\win32\release-lib\libchipmunk.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\freetype2\prebuilt\win32\freetype.lib;lib\RelWithDebInfo\ext_recast.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\bullet\prebuilt\win32\release\libbullet.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\jpeg\prebuilt\win32\libjpeg.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\webp\prebuilt\win32\libwebp.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\websockets\prebuilt\win32\websockets.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\openssl\prebuilt\win32\libssl.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\openssl\prebuilt\win32\libcrypto.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\uv\prebuilt\win32\uv_a.lib;lib\RelWithDebInfo\ext_tinyxml2.lib;lib\RelWithDebInfo\ext_xxhash.lib;lib\RelWithDebInfo\ext_xxtea.lib;lib\RelWithDebInfo\ext_clipper.lib;lib\RelWithDebInfo\ext_edtaa3func.lib;lib\RelWithDebInfo\ext_convertUTF.lib;lib\RelWithDebInfo\ext_poly2tri.lib;lib\RelWithDebInfo\ext_md5.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\curl\prebuilt\win32\libcurl.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\png\prebuilt\win32\libpng.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\gles\prebuilt\glew32.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\icon\prebuilt\libiconv.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\MP3Decoder\prebuilt\libmpg123.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OggDecoder\prebuilt\libogg.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OggDecoder\prebuilt\libvorbis.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OggDecoder\prebuilt\libvorbisfile.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\win32-specific\OpenalSoft\prebuilt\OpenAL32.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\glfw3\prebuilt\win32\glfw3.lib;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\external\zlib\..\win32-specific\zlib\prebuilt\libzlib.lib;lib\RelWithDebInfo\ext_unzip.lib;ws2_32.lib;userenv.lib;psapi.lib;winmm.lib;Version.lib;Iphlpapi.lib;opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <ImportLibrary>D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/RelWithDebInfo/VoidKings.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/bin/VoidKings/RelWithDebInfo/VoidKings.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Building Custom Rule D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">setlocal
+E:\CMake\bin\cmake.exe -SD:/Desktop/程序设计范式/部落冲突/分支/VoidKings -BD:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32 --check-stamp-file D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\CMakeFiles\4.2.0\CMakeCCompiler.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\CMakeFiles\4.2.0\CMakeCXXCompiler.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\CMakeFiles\4.2.0\CMakeRCCompiler.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\CMakeFiles\4.2.0\CMakeSystem.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cmake\Modules\CocosBuildHelpers.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cmake\Modules\CocosBuildSet.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cmake\Modules\CocosConfigDefine.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cmake\Modules\CocosConfigDepend.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeCInformation.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeCXXInformation.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeCommonLanguageInclude.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeGenericSystem.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeInitializeConfigs.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeLanguageInformation.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeParseArguments.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeRCInformation.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeSystemSpecificInformation.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeSystemSpecificInitialize.cmake;E:\CMake\share\cmake-4.2\Modules\Compiler\CMakeCommonCompilerMacros.cmake;E:\CMake\share\cmake-4.2\Modules\Compiler\MSVC-C.cmake;E:\CMake\share\cmake-4.2\Modules\Compiler\MSVC-CXX.cmake;E:\CMake\share\cmake-4.2\Modules\Compiler\MSVC.cmake;E:\CMake\share\cmake-4.2\Modules\Internal\CMakeCLinkerInformation.cmake;E:\CMake\share\cmake-4.2\Modules\Internal\CMakeCXXLinkerInformation.cmake;E:\CMake\share\cmake-4.2\Modules\Internal\CMakeCommonLinkerInformation.cmake;E:\CMake\share\cmake-4.2\Modules\Linker\MSVC-C.cmake;E:\CMake\share\cmake-4.2\Modules\Linker\MSVC-CXX.cmake;E:\CMake\share\cmake-4.2\Modules\Linker\MSVC.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Linker\Windows-MSVC-C.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Linker\Windows-MSVC.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Windows-Initialize.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Windows-MSVC-C.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Windows-MSVC-CXX.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Windows-MSVC.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Windows.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\WindowsPaths.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Building Custom Rule D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
+E:\CMake\bin\cmake.exe -SD:/Desktop/程序设计范式/部落冲突/分支/VoidKings -BD:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32 --check-stamp-file D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\CMakeFiles\4.2.0\CMakeCCompiler.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\CMakeFiles\4.2.0\CMakeCXXCompiler.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\CMakeFiles\4.2.0\CMakeRCCompiler.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\CMakeFiles\4.2.0\CMakeSystem.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cmake\Modules\CocosBuildHelpers.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cmake\Modules\CocosBuildSet.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cmake\Modules\CocosConfigDefine.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cmake\Modules\CocosConfigDepend.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeCInformation.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeCXXInformation.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeCommonLanguageInclude.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeGenericSystem.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeInitializeConfigs.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeLanguageInformation.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeParseArguments.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeRCInformation.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeSystemSpecificInformation.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeSystemSpecificInitialize.cmake;E:\CMake\share\cmake-4.2\Modules\Compiler\CMakeCommonCompilerMacros.cmake;E:\CMake\share\cmake-4.2\Modules\Compiler\MSVC-C.cmake;E:\CMake\share\cmake-4.2\Modules\Compiler\MSVC-CXX.cmake;E:\CMake\share\cmake-4.2\Modules\Compiler\MSVC.cmake;E:\CMake\share\cmake-4.2\Modules\Internal\CMakeCLinkerInformation.cmake;E:\CMake\share\cmake-4.2\Modules\Internal\CMakeCXXLinkerInformation.cmake;E:\CMake\share\cmake-4.2\Modules\Internal\CMakeCommonLinkerInformation.cmake;E:\CMake\share\cmake-4.2\Modules\Linker\MSVC-C.cmake;E:\CMake\share\cmake-4.2\Modules\Linker\MSVC-CXX.cmake;E:\CMake\share\cmake-4.2\Modules\Linker\MSVC.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Linker\Windows-MSVC-C.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Linker\Windows-MSVC.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Windows-Initialize.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Windows-MSVC-C.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Windows-MSVC-CXX.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Windows-MSVC.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Windows.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\WindowsPaths.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">Building Custom Rule D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">setlocal
+E:\CMake\bin\cmake.exe -SD:/Desktop/程序设计范式/部落冲突/分支/VoidKings -BD:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32 --check-stamp-file D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\CMakeFiles\4.2.0\CMakeCCompiler.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\CMakeFiles\4.2.0\CMakeCXXCompiler.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\CMakeFiles\4.2.0\CMakeRCCompiler.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\CMakeFiles\4.2.0\CMakeSystem.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cmake\Modules\CocosBuildHelpers.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cmake\Modules\CocosBuildSet.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cmake\Modules\CocosConfigDefine.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cmake\Modules\CocosConfigDepend.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeCInformation.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeCXXInformation.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeCommonLanguageInclude.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeGenericSystem.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeInitializeConfigs.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeLanguageInformation.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeParseArguments.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeRCInformation.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeSystemSpecificInformation.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeSystemSpecificInitialize.cmake;E:\CMake\share\cmake-4.2\Modules\Compiler\CMakeCommonCompilerMacros.cmake;E:\CMake\share\cmake-4.2\Modules\Compiler\MSVC-C.cmake;E:\CMake\share\cmake-4.2\Modules\Compiler\MSVC-CXX.cmake;E:\CMake\share\cmake-4.2\Modules\Compiler\MSVC.cmake;E:\CMake\share\cmake-4.2\Modules\Internal\CMakeCLinkerInformation.cmake;E:\CMake\share\cmake-4.2\Modules\Internal\CMakeCXXLinkerInformation.cmake;E:\CMake\share\cmake-4.2\Modules\Internal\CMakeCommonLinkerInformation.cmake;E:\CMake\share\cmake-4.2\Modules\Linker\MSVC-C.cmake;E:\CMake\share\cmake-4.2\Modules\Linker\MSVC-CXX.cmake;E:\CMake\share\cmake-4.2\Modules\Linker\MSVC.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Linker\Windows-MSVC-C.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Linker\Windows-MSVC.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Windows-Initialize.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Windows-MSVC-C.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Windows-MSVC-CXX.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Windows-MSVC.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Windows.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\WindowsPaths.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">Building Custom Rule D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">setlocal
+E:\CMake\bin\cmake.exe -SD:/Desktop/程序设计范式/部落冲突/分支/VoidKings -BD:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32 --check-stamp-file D:/Desktop/程序设计范式/部落冲突/分支/VoidKings/build-win32/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\CMakeFiles\4.2.0\CMakeCCompiler.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\CMakeFiles\4.2.0\CMakeCXXCompiler.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\CMakeFiles\4.2.0\CMakeRCCompiler.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\CMakeFiles\4.2.0\CMakeSystem.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cmake\Modules\CocosBuildHelpers.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cmake\Modules\CocosBuildSet.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cmake\Modules\CocosConfigDefine.cmake;D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\cocos2d\cmake\Modules\CocosConfigDepend.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeCInformation.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeCXXInformation.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeCommonLanguageInclude.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeGenericSystem.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeInitializeConfigs.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeLanguageInformation.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeParseArguments.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeRCInformation.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeSystemSpecificInformation.cmake;E:\CMake\share\cmake-4.2\Modules\CMakeSystemSpecificInitialize.cmake;E:\CMake\share\cmake-4.2\Modules\Compiler\CMakeCommonCompilerMacros.cmake;E:\CMake\share\cmake-4.2\Modules\Compiler\MSVC-C.cmake;E:\CMake\share\cmake-4.2\Modules\Compiler\MSVC-CXX.cmake;E:\CMake\share\cmake-4.2\Modules\Compiler\MSVC.cmake;E:\CMake\share\cmake-4.2\Modules\Internal\CMakeCLinkerInformation.cmake;E:\CMake\share\cmake-4.2\Modules\Internal\CMakeCXXLinkerInformation.cmake;E:\CMake\share\cmake-4.2\Modules\Internal\CMakeCommonLinkerInformation.cmake;E:\CMake\share\cmake-4.2\Modules\Linker\MSVC-C.cmake;E:\CMake\share\cmake-4.2\Modules\Linker\MSVC-CXX.cmake;E:\CMake\share\cmake-4.2\Modules\Linker\MSVC.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Linker\Windows-MSVC-C.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Linker\Windows-MSVC.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Windows-Initialize.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Windows-MSVC-C.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Windows-MSVC-CXX.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Windows-MSVC.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\Windows.cmake;E:\CMake\share\cmake-4.2\Modules\Platform\WindowsPaths.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\AppDelegate.h" />
+    <ClInclude Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\HelloWorldScene.h" />
+    <ClInclude Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\Core\GameDefines.h" />
+    <ClInclude Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\Core\ResourceManager.h" />
+    <ClInclude Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\Buildings\Building.h" />
+    <ClInclude Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\Buildings\DefenseBuilding.h" />
+    <ClInclude Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\Buildings\ProductionBuilding.h" />
+    <ClInclude Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\Buildings\StorageBuilding.h" />
+    <ClInclude Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\Buildings\Barracks.h" />
+    <ClInclude Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\Units\Unit.h" />
+    <ClInclude Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\Projectiles\Projectile.h" />
+    <ClInclude Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\Potions\Potion.h" />
+    <ClInclude Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\Scenes\MainMenuScene.h" />
+    <ClInclude Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\Scenes\BaseScene.h" />
+    <ClInclude Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\Scenes\BattleScene.h" />
+    <ClInclude Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\proj.win32\main.h" />
+    <ClInclude Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\proj.win32\resource.h" />
+    <ClCompile Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\AppDelegate.cpp" />
+    <ClCompile Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\HelloWorldScene.cpp" />
+    <ClCompile Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\Core\ResourceManager.cpp" />
+    <ClCompile Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\Buildings\Building.cpp" />
+    <ClCompile Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\Buildings\DefenseBuilding.cpp" />
+    <ClCompile Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\Buildings\ProductionBuilding.cpp" />
+    <ClCompile Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\Buildings\StorageBuilding.cpp" />
+    <ClCompile Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\Buildings\Barracks.cpp" />
+    <ClCompile Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\Units\Unit.cpp" />
+    <ClCompile Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\Projectiles\Projectile.cpp" />
+    <ClCompile Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\Potions\Potion.cpp" />
+    <ClCompile Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\Scenes\MainMenuScene.cpp" />
+    <ClCompile Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\Scenes\BaseScene.cpp" />
+    <ClCompile Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Classes\Scenes\BattleScene.cpp" />
+    <ClCompile Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\proj.win32\main.cpp" />
+    <ResourceCompile Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\proj.win32\game.rc" />
+    <ClInclude Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Resources\CloseNormal.png" />
+    <ClInclude Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Resources\CloseSelected.png" />
+    <ClInclude Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Resources\HelloWorld.png" />
+    <ClInclude Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Resources\config\buildings.json" />
+    <ClInclude Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Resources\config\potions.json" />
+    <ClInclude Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Resources\config\settings.json" />
+    <ClInclude Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Resources\config\units.json" />
+    <ClInclude Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Resources\fonts\Marker Felt.ttf" />
+    <ClInclude Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Resources\fonts\arial.ttf" />
+    <ClInclude Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\Resources\res\.gitkeep" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\ZERO_CHECK.vcxproj">
+      <Project>{03EB000D-0F81-33A1-86A5-C8FA88CE6AB6}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\SYNC_RESOURCE-VoidKings.vcxproj">
+      <Project>{28BEFF29-E3A0-3598-AB75-F8B3813AD869}</Project>
+      <Name>SYNC_RESOURCE-VoidKings</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\engine\cocos\core\cocos2d.vcxproj">
+      <Project>{1B59356E-8E21-329C-AC54-8D5273638645}</Project>
+      <Name>cocos2d</Name>
+    </ProjectReference>
+    <ProjectReference Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\engine\external\clipper\ext_clipper.vcxproj">
+      <Project>{EE224D6B-6F52-3E90-9452-C730187F6820}</Project>
+      <Name>ext_clipper</Name>
+    </ProjectReference>
+    <ProjectReference Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\engine\external\ConvertUTF\ext_convertUTF.vcxproj">
+      <Project>{EEE0BBBC-E238-3765-B475-59A1ECA50D2D}</Project>
+      <Name>ext_convertUTF</Name>
+    </ProjectReference>
+    <ProjectReference Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\engine\external\edtaa3func\ext_edtaa3func.vcxproj">
+      <Project>{AAA5940D-C35F-3AE6-8E9E-C9CEAEE17521}</Project>
+      <Name>ext_edtaa3func</Name>
+    </ProjectReference>
+    <ProjectReference Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\engine\external\md5\ext_md5.vcxproj">
+      <Project>{1A31568A-0071-3841-95DB-347C772278E4}</Project>
+      <Name>ext_md5</Name>
+    </ProjectReference>
+    <ProjectReference Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\engine\external\poly2tri\ext_poly2tri.vcxproj">
+      <Project>{D17DDE43-5C75-3B66-8F69-5810C3055761}</Project>
+      <Name>ext_poly2tri</Name>
+    </ProjectReference>
+    <ProjectReference Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\engine\external\recast\ext_recast.vcxproj">
+      <Project>{53D69F1E-B6C7-37A4-929E-13828F3AE7B6}</Project>
+      <Name>ext_recast</Name>
+    </ProjectReference>
+    <ProjectReference Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\engine\external\tinyxml2\ext_tinyxml2.vcxproj">
+      <Project>{A461FDF6-56ED-3BF9-AEDB-E2822AEBD1F6}</Project>
+      <Name>ext_tinyxml2</Name>
+    </ProjectReference>
+    <ProjectReference Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\engine\external\unzip\ext_unzip.vcxproj">
+      <Project>{E12837B2-EF55-3407-8AED-CD41787984D6}</Project>
+      <Name>ext_unzip</Name>
+    </ProjectReference>
+    <ProjectReference Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\engine\external\xxhash\ext_xxhash.vcxproj">
+      <Project>{CD61F737-AB5C-3FC9-941F-96DA2FC58251}</Project>
+      <Name>ext_xxhash</Name>
+    </ProjectReference>
+    <ProjectReference Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\engine\external\xxtea\ext_xxtea.vcxproj">
+      <Project>{AB31500B-56C9-3155-9E0E-31B473757CE6}</Project>
+      <Name>ext_xxtea</Name>
+    </ProjectReference>
+    <ProjectReference Include="D:\Desktop\程序设计范式\部落冲突\分支\VoidKings\build-win32\engine\external\external.vcxproj">
+      <Project>{7C21A67B-0529-3A76-9D09-BA92A53790EF}</Project>
+      <Name>external</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

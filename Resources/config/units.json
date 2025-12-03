@@ -1,0 +1,104 @@
+{
+    "units": [
+        {
+            "type": "BARBARIAN",
+            "name": "Barbarian",
+            "name_cn": "野蛮人",
+            "description": "The Barbarian is the first troop you unlock. A fierce warrior with a giant sword.",
+            "description_cn": "野蛮人是你解锁的第一个兵种，是一名手持巨剑的猛烈战士。",
+            "texturePath": "textures/units/barbarian.png",
+            "isAirUnit": false,
+            "targetPriority": "NEAREST",
+            "levels": [
+                {"level": 1, "hp": 100, "damage": 20, "attackRange": 30, "attackSpeed": 1.0, "moveSpeed": 100, "goldCost": 25, "elixirCost": 0, "population": 1, "trainTime": 20},
+                {"level": 2, "hp": 110, "damage": 24, "attackRange": 30, "attackSpeed": 1.0, "moveSpeed": 100, "goldCost": 40, "elixirCost": 0, "population": 1, "trainTime": 20},
+                {"level": 3, "hp": 120, "damage": 28, "attackRange": 30, "attackSpeed": 1.0, "moveSpeed": 100, "goldCost": 60, "elixirCost": 0, "population": 1, "trainTime": 20},
+                {"level": 4, "hp": 135, "damage": 32, "attackRange": 30, "attackSpeed": 1.0, "moveSpeed": 100, "goldCost": 80, "elixirCost": 0, "population": 1, "trainTime": 20},
+                {"level": 5, "hp": 150, "damage": 40, "attackRange": 30, "attackSpeed": 1.0, "moveSpeed": 100, "goldCost": 100, "elixirCost": 0, "population": 1, "trainTime": 20}
+            ]
+        },
+        {
+            "type": "ARCHER",
+            "name": "Archer",
+            "name_cn": "弓箭手",
+            "description": "A ranged unit that can attack from a distance. Weak but fast and cheap.",
+            "description_cn": "可从远处发动攻击的远程单位。虽然较弱但速度快且成本低。",
+            "texturePath": "textures/units/archer.png",
+            "isAirUnit": false,
+            "targetPriority": "NEAREST",
+            "levels": [
+                {"level": 1, "hp": 80, "damage": 15, "attackRange": 200, "attackSpeed": 1.2, "moveSpeed": 120, "goldCost": 50, "elixirCost": 0, "population": 1, "trainTime": 25},
+                {"level": 2, "hp": 88, "damage": 18, "attackRange": 200, "attackSpeed": 1.2, "moveSpeed": 120, "goldCost": 80, "elixirCost": 0, "population": 1, "trainTime": 25},
+                {"level": 3, "hp": 96, "damage": 22, "attackRange": 200, "attackSpeed": 1.2, "moveSpeed": 120, "goldCost": 120, "elixirCost": 0, "population": 1, "trainTime": 25},
+                {"level": 4, "hp": 106, "damage": 26, "attackRange": 200, "attackSpeed": 1.2, "moveSpeed": 120, "goldCost": 160, "elixirCost": 0, "population": 1, "trainTime": 25},
+                {"level": 5, "hp": 117, "damage": 30, "attackRange": 200, "attackSpeed": 1.2, "moveSpeed": 120, "goldCost": 200, "elixirCost": 0, "population": 1, "trainTime": 25}
+            ]
+        },
+        {
+            "type": "GIANT",
+            "name": "Giant",
+            "name_cn": "巨人",
+            "description": "A huge warrior that prioritizes defensive buildings. High HP but slow.",
+            "description_cn": "优先攻击防御建筑的巨大战士。血量高但移动较慢。",
+            "texturePath": "textures/units/giant.png",
+            "isAirUnit": false,
+            "targetPriority": "DEFENSE_FIRST",
+            "levels": [
+                {"level": 1, "hp": 400, "damage": 40, "attackRange": 40, "attackSpeed": 0.5, "moveSpeed": 60, "goldCost": 250, "elixirCost": 0, "population": 5, "trainTime": 120},
+                {"level": 2, "hp": 450, "damage": 48, "attackRange": 40, "attackSpeed": 0.5, "moveSpeed": 60, "goldCost": 400, "elixirCost": 0, "population": 5, "trainTime": 120},
+                {"level": 3, "hp": 500, "damage": 58, "attackRange": 40, "attackSpeed": 0.5, "moveSpeed": 60, "goldCost": 600, "elixirCost": 0, "population": 5, "trainTime": 120},
+                {"level": 4, "hp": 560, "damage": 70, "attackRange": 40, "attackSpeed": 0.5, "moveSpeed": 60, "goldCost": 800, "elixirCost": 0, "population": 5, "trainTime": 120},
+                {"level": 5, "hp": 620, "damage": 85, "attackRange": 40, "attackSpeed": 0.5, "moveSpeed": 60, "goldCost": 1000, "elixirCost": 0, "population": 5, "trainTime": 120}
+            ]
+        },
+        {
+            "type": "GOBLIN",
+            "name": "Goblin",
+            "name_cn": "哥布林",
+            "description": "A sneaky little creature that targets resource buildings. Very fast.",
+            "description_cn": "专门针对资源建筑的狡猾小生物。移动速度非常快。",
+            "texturePath": "textures/units/goblin.png",
+            "isAirUnit": false,
+            "targetPriority": "RESOURCE_FIRST",
+            "levels": [
+                {"level": 1, "hp": 60, "damage": 12, "attackRange": 30, "attackSpeed": 1.5, "moveSpeed": 150, "goldCost": 25, "elixirCost": 0, "population": 1, "trainTime": 30},
+                {"level": 2, "hp": 68, "damage": 15, "attackRange": 30, "attackSpeed": 1.5, "moveSpeed": 150, "goldCost": 40, "elixirCost": 0, "population": 1, "trainTime": 30},
+                {"level": 3, "hp": 76, "damage": 19, "attackRange": 30, "attackSpeed": 1.5, "moveSpeed": 150, "goldCost": 60, "elixirCost": 0, "population": 1, "trainTime": 30},
+                {"level": 4, "hp": 85, "damage": 24, "attackRange": 30, "attackSpeed": 1.5, "moveSpeed": 150, "goldCost": 80, "elixirCost": 0, "population": 1, "trainTime": 30},
+                {"level": 5, "hp": 95, "damage": 30, "attackRange": 30, "attackSpeed": 1.5, "moveSpeed": 150, "goldCost": 100, "elixirCost": 0, "population": 1, "trainTime": 30}
+            ]
+        },
+        {
+            "type": "WIZARD",
+            "name": "Wizard",
+            "name_cn": "法师",
+            "description": "A powerful spellcaster that deals splash damage. Expensive but effective.",
+            "description_cn": "造成范围伤害的强大施法者。成本较高但非常有效。",
+            "texturePath": "textures/units/wizard.png",
+            "isAirUnit": false,
+            "targetPriority": "NEAREST",
+            "levels": [
+                {"level": 1, "hp": 75, "damage": 50, "attackRange": 180, "attackSpeed": 0.8, "moveSpeed": 80, "goldCost": 0, "elixirCost": 1500, "population": 4, "trainTime": 180},
+                {"level": 2, "hp": 82, "damage": 60, "attackRange": 180, "attackSpeed": 0.8, "moveSpeed": 80, "goldCost": 0, "elixirCost": 2000, "population": 4, "trainTime": 180},
+                {"level": 3, "hp": 90, "damage": 72, "attackRange": 180, "attackSpeed": 0.8, "moveSpeed": 80, "goldCost": 0, "elixirCost": 2500, "population": 4, "trainTime": 180},
+                {"level": 4, "hp": 99, "damage": 85, "attackRange": 180, "attackSpeed": 0.8, "moveSpeed": 80, "goldCost": 0, "elixirCost": 3000, "population": 4, "trainTime": 180},
+                {"level": 5, "hp": 109, "damage": 100, "attackRange": 180, "attackSpeed": 0.8, "moveSpeed": 80, "goldCost": 0, "elixirCost": 3500, "population": 4, "trainTime": 180}
+            ]
+        },
+        {
+            "type": "HEALER",
+            "name": "Healer",
+            "name_cn": "治疗者",
+            "description": "An angelic flying unit that heals friendly troops. Does not attack enemies.",
+            "description_cn": "一个能治疗友军的飞行单位。不会攻击敌人。",
+            "texturePath": "textures/units/healer.png",
+            "isAirUnit": true,
+            "targetPriority": "LOWEST_HP",
+            "levels": [
+                {"level": 1, "hp": 100, "damage": 0, "healPerSecond": 30, "attackRange": 300, "attackSpeed": 0.7, "moveSpeed": 80, "goldCost": 0, "elixirCost": 2500, "population": 14, "trainTime": 300},
+                {"level": 2, "hp": 120, "damage": 0, "healPerSecond": 40, "attackRange": 300, "attackSpeed": 0.7, "moveSpeed": 80, "goldCost": 0, "elixirCost": 3500, "population": 14, "trainTime": 300},
+                {"level": 3, "hp": 140, "damage": 0, "healPerSecond": 50, "attackRange": 300, "attackSpeed": 0.7, "moveSpeed": 80, "goldCost": 0, "elixirCost": 4500, "population": 14, "trainTime": 300}
+            ]
+        }
+    ]
+}

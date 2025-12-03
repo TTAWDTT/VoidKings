@@ -110,6 +110,9 @@ proj.ios_mac/build/
 proj.win32/Debug.win32/
 proj.win32/Release.win32/
 
+# CMake output
+out/
+
 # Cocos2d-x specific
 cocos2d/external/*/prebuilt/
 cocos2d/external/*/build/
