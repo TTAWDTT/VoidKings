@@ -110,6 +110,38 @@ proj.ios_mac/build/
 proj.win32/Debug.win32/
 proj.win32/Release.win32/
 
-# Cocos2d-x specific
-cocos2d/external/*/prebuilt/
-cocos2d/external/*/build/
+# Cocos2d-x Engine (整个引擎目录)
+/cocos2d/
+
+# 如果需要保留 cocos2d，但排除构建产物和预编译库，则使用下面的规则替代上面的
+# cocos2d/build/
+# cocos2d/external/*/prebuilt/
+# cocos2d/external/*/build/
+# cocos2d/**/Debug.win32/
+# cocos2d/**/Release.win32/
+# cocos2d/**/*.obj
+# cocos2d/**/*.lib
+# cocos2d/**/*.dll
+# cocos2d/**/*.pdb
+
+# 项目构建产物目录（更彻底）
+**/ipch/
+**/x64/
+**/x86/
+**/ARM/
+**/ARM64/
+**/.vs/
+**/__pycache__/
+*.pyc
+
+# 资源编译产物
+*.res
+
+# 其他临时文件
+*.VC.db
+*.VC.opendb
+*.VC.VC.opendb
+*.sdf
+*.opensdf
+*.db
+*.opendb
