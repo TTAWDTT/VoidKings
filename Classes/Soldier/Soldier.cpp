@@ -22,7 +22,7 @@ bool Soldier::init(const UnitConfig* config, int level) {
     // 2. 设置等级并验证
     _level = level;
     if (_level < 0) _level = 0;
-    if (_level >= _config->MAXLEVEL) _level = _config->MAXLEVEL - 1;
+    if (_level > _config->MAXLEVEL) _level = _config->MAXLEVEL;
     
     // 3. 初始化运行时状态 - 使用level索引访问属性
     _currentHP = getCurrentMaxHP();
@@ -40,46 +40,46 @@ bool Soldier::init(const UnitConfig* config, int level) {
 
 void Soldier::setLevel(int level) {
     if (level < 0) level = 0;
-    if (level >= _config->MAXLEVEL) level = _config->MAXLEVEL - 1;
+    if (level > _config->MAXLEVEL) level = _config->MAXLEVEL;
     
-    // 保存血量百分比
-    float hpPercent = _currentHP / getCurrentMaxHP();
-    
+    //// 保存血量百分比
+    //float hpPercent = _currentHP / getCurrentMaxHP();
+    //
     _level = level;
-    
-    // 按新等级的最大血量恢复相同百分比的血量
-    _currentHP = getCurrentMaxHP() * hpPercent;
+    //
+    //// 按新等级的最大血量恢复相同百分比的血量
+    //_currentHP = getCurrentMaxHP() * hpPercent;
 }
 
-float Soldier::getCurrentMaxHP() const {
+float Soldier::getHP() const {
     if (_level >= 0 && _level < _config->HP.size()) {
         return _config->HP[_level];
     }
     return _config->HP.empty() ? 0.0f : _config->HP[0];
 }
 
-float Soldier::getCurrentSpeed() const {
+float Soldier::getSpeed() const {
     if (_level >= 0 && _level < _config->SPEED.size()) {
         return _config->SPEED[_level];
     }
     return _config->SPEED.empty() ? 0.0f : _config->SPEED[0];
 }
 
-float Soldier::getCurrentATK() const {
+float Soldier::getATK() const {
     if (_level >= 0 && _level < _config->ATK.size()) {
         return _config->ATK[_level];
     }
     return _config->ATK.empty() ? 0.0f : _config->ATK[0];
 }
 
-float Soldier::getCurrentRange() const {
+float Soldier::getRange() const {
     if (_level >= 0 && _level < _config->RANGE.size()) {
         return _config->RANGE[_level];
     }
     return _config->RANGE.empty() ? 0.0f : _config->RANGE[0];
 }
 
-float Soldier::getCurrentHP() const {
+float Soldier::getHP() const {
     return _currentHP;
 }
 
