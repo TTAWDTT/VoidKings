@@ -26,5 +26,8 @@
         "editorMultiCursor.secondary.foreground": "#94E2D5",
         "editorSuggestWidget.border": "#94E2D5",
         "editorLineNumber.activeForeground": "#94E2D5"
-    }
+    },
+    "conventionalCommits.scopes": [
+        "建筑"
+    ]
 }

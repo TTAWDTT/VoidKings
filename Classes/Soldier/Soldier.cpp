@@ -51,7 +51,7 @@ void Soldier::setLevel(int level) {
     //_currentHP = getCurrentMaxHP() * hpPercent;
 }
 
-float Soldier::getHP() const {
+float Soldier::getCurrentMaxHP() const {
     if (_level >= 0 && _level < _config->HP.size()) {
         return _config->HP[_level];
     }

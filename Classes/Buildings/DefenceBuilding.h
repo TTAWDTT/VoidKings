@@ -15,9 +15,9 @@ public:
     // 等级相关方法
     int getLevel() const { return _level; }
     void setLevel(int level);
-    
-    // 获取当前等级的属性
+    // 获取当前血量
     float getCurrentHP() const;
+    // 获取当前等级的属性
     float getCurrentMaxHP() const;
     float getCurrentDP() const;
     float getCurrentATK_SPEED() const;
