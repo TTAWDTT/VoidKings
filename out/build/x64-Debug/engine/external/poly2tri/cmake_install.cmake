@@ -1,8 +1,8 @@
-# Install script for directory: D:/Github/VoidKings/cocos2d/external/poly2tri
+# Install script for directory: D:/VoidKings12.5/VoidKing-Fake/cocos2d/external/poly2tri
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "D:/Github/VoidKings/out/install/x64-Debug")
+  set(CMAKE_INSTALL_PREFIX "D:/VoidKings12.5/VoidKing-Fake/out/install/x64-Debug")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -35,6 +35,6 @@ endif()
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
 if(CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "D:/Github/VoidKings/out/build/x64-Debug/engine/external/poly2tri/install_local_manifest.txt"
+  file(WRITE "D:/VoidKings12.5/VoidKing-Fake/out/build/x64-Debug/engine/external/poly2tri/install_local_manifest.txt"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()
