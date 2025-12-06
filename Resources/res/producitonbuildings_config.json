@@ -1,0 +1,38 @@
+{
+    "productionbuildings": [
+        {
+            "id": 211,
+            "name": "Gold_Mine",
+            "spriteFrameName": "gold_mine.png",
+            "HP": [75, 90, 105, 120, 135, 150],
+            "DP": [0, 0, 0, 0, 0, 0],
+            "length": 2,
+            "width": 2,
+            "BUILD_TIME": [10, 60, 120, 600, 1200, 3600],
+            "COST_GOLD": [0, 10, 20, 30, 40, 50],
+            "COST_ELIXIR": [25, 75, 100, 125, 150, 175],
+            "PRODUCE_ELIXIR": [0, 0, 0, 0, 0, 0],
+            "STORAGE_ELIXIR_CAPACITY": [0, 0, 0, 0, 0, 0],
+            "PRODUCE_GOLD": [60, 120, 180, 240, 300, 360],
+            "STORAGE_GOLD_CAPACITY": [120, 240, 360, 480, 600, 720],
+            "MAX_LEVEL": 5
+        },
+        {
+            "id": 212,
+            "name": "Elixir_Collector",
+            "spriteFrameName": "elixir_collector.png",
+            "HP": [75, 90, 105, 120, 135, 150],
+            "DP": [0, 0, 0, 0, 0, 0],
+            "length": 2,
+            "width": 2,
+            "BUILD_TIME": [10, 60, 120, 600, 1200, 3600],
+            "COST_ELIXIR": [0, 10, 20, 30, 40, 50],
+            "COST_GOLD": [50, 75, 100, 125, 150, 175],
+            "PRODUCE_ELIXIR": [60, 120, 180, 240, 300, 360],
+            "STORAGE_ELIXIR_CAPACITY": [120, 240, 360, 480, 600, 720],
+            "PRODUCE_GOLD": [0, 0, 0, 0, 0, 0],
+            "STORAGE_GOLD_CAPACITY": [0, 0, 0, 0, 0, 0],
+            "MAX_LEVEL": 5
+        }
+    ]
+}

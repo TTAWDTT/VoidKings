@@ -10,10 +10,14 @@ struct DefenseBuildingConfig {
     // 战斗属性
     std::vector<float> HP;                   // 每个等级的生命值  
     std::vector<float> DP;                   // 每个等级的抗性（0~1）
+    // 战斗属性
+    std::vector<float> HP;                   // 每个等级的生命值  
+    std::vector<float> DP;                   // 每个等级的抗性（0~1）
     std::vector<float> ATK;                  // 每个等级的攻击力（每次伤害）（0表示不攻击）
     std::vector<float> ATK_RANGE;            // 每个等级的攻击范围（0表示不攻击）
-    std::vector<float> ATK_SPEED;            // 每个等级的攻击速度（每秒攻击次数）（0表示不攻击）
-    bool SKY_ABLE;              // 是否能攻击空中单位
+    std::vector<float> ATK_SPEED;            // 每个等级的攻击间隔（秒）
+    bool SKY_ABLE;                           // 是否能攻击空中单位
+    bool GROUND_ABLE;                         // 是否能攻击地面单位
     // 基地属性
     int length;                             // 建筑占地长度（格子数）
     int width;                              // 建筑占地宽度（格子数）

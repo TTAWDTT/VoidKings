@@ -1,0 +1,34 @@
+{
+    "storagebuildings": [
+        {
+            "id": 201,
+            "name": "Treasury",
+            "spriteFrameName": "treasury.png",
+            "HP": [75, 90, 105, 120, 135, 150],
+            "DP": [0.05, 0.05, 0.1, 0.1, 0.15, 0.2],
+            "length": 2,
+            "width": 2,
+            "BUILD_TIME": [10, 60, 120, 600, 1200, 3600],
+            "COST_GOLD": [0, 0, 0, 0, 0, 0],
+            "COST_ELIXIR": [75, 150, 350, 750, 1200, 1600],
+            "ADD_STORAGE_ELIXIR_CAPACITY": [0, 0, 0, 0, 0, 0],
+            "ADD_STORAGE_GOLD_CAPACITY": [100, 300, 500, 700, 900, 1100],
+            "MAX_LEVEL": 5
+        },
+        {
+            "id": 202,
+            "name": "Bottle",
+            "spriteFrameName": "bottle.png",
+            "HP": [75, 90, 105, 120, 135, 150],
+            "DP": [0.05, 0.05, 0.1, 0.1, 0.15, 0.2],
+            "length": 2,
+            "width": 2,
+            "BUILD_TIME": [10, 60, 120, 600, 1200, 3600],
+            "COST_ELIXIR": [0, 0, 0, 0, 0, 0],
+            "COST_GOLD": [75, 150, 350, 750, 1200, 1600],
+            "ADD_STORAGE_ELIXIR_CAPACITY": [100, 300, 500, 700, 900, 1100],
+            "ADD_STORAGE_GOLD_CAPACITY": [0, 0, 0, 0, 0, 0],
+            "MAX_LEVEL": 5
+        }
+    ]
+}

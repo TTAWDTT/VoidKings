@@ -1,0 +1,43 @@
+{
+    "otherbuildings": [
+        {
+            "id": 221,
+            "name": "Base",
+            "spriteFrameName": "base.png",
+            "HP": [200, 250, 300, 350, 400, 450],
+            "DP": [0.1, 0.15, 0.2, 0.25, 0.3, 0.3],
+            "length": 3,
+            "width": 3,
+            "BUILD_TIME": [5, 120, 240, 1200, 2400, 7200],
+            "COST_GOLD": [0, 75, 375, 1000, 1400, 1800],
+            "COST_ELIXIR": [0, 75, 375, 1000, 1400, 1800],
+            "MAX_LEVEL": 5
+        },
+        {
+            "id": 222,
+            "name": "Barracks",
+            "spriteFrameName": "barracks.png",
+            "HP": [100, 110, 120, 130, 140, 150],
+            "DP": [0, 0, 0, 0, 0, 0],
+            "length": 2,
+            "width": 2,
+            "BUILD_TIME": [10, 90, 150, 900, 1800, 4800],
+            "COST_ELIXIR": [25, 50, 250, 400, 600, 700],
+            "COST_GOLD": [75, 250, 750, 800, 1200, 1400],
+            "MAX_LEVEL": 5
+        },
+        {
+            "id": 223,
+            "name": "Potion_Factory",
+            "spriteFrameName": "potion_factory.png",
+            "HP": [130, 140, 150],
+            "DP": [0, 0, 0],
+            "length": 2,
+            "width": 2,
+            "BUILD_TIME": [10, 900, 4800],
+            "COST_ELIXIR": [400, 600, 700],
+            "COST_GOLD": [800, 1200, 1400],
+            "MAX_LEVEL": 3
+        }
+    ]
+}

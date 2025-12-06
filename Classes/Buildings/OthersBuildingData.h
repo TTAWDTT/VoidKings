@@ -7,6 +7,9 @@ struct OtherBuildingConfig {
     std::string name;                        // 如"ARCHER_TOWER"
     std::string spriteFrameName;             // 如"archer_tower.png" 
     TargetPriority aiType;                   // 如：弓箭塔 - 这个字段决定了它是弓箭塔
+    // 战斗属性
+    std::vector<float> HP;                   // 每个等级的生命值  
+    std::vector<float> DP;                   // 每个等级的抗性（0~1）
     // 基地属性
     int length;                             // 建筑占地长度（格子数）
     int width;                              // 建筑占地宽度（格子数）

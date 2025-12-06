@@ -1,0 +1,58 @@
+{
+    "defencebuildings": [
+        {
+            "id": 231,
+            "name": "Archer_Tower",
+            "spriteFrameName": "archer_tower.png",
+            "HP": [100, 125, 150, 175, 200, 225],
+            "DP": [0, 0.05, 0.05, 0.1, 0.1, 0.15],
+            "ATK": [15, 20, 25, 30, 35, 40],
+            "ATK_RANGE": [60, 60, 60, 60, 60, 60],
+            "ATK_SPEED": [1.5, 1.5, 1.5, 1.5, 1.5, 1.5],
+            "SKY_ABLE": true,
+            "GROUND_ABLE": true,
+            "length": 2,
+            "width": 2,
+            "BUILD_TIME": [10, 30, 120, 240, 360, 600],
+            "COST_GOLD": [50, 150, 250, 450, 650, 900],
+            "COST_ELIXIR": [10, 20, 30, 40, 50, 60],
+            "MAX_LEVEL": 5
+        },
+        {
+            "id": 232,
+            "name": "Cannon",
+            "spriteFrameName": "cannon.png",
+            "HP": [120, 145, 170, 195, 220, 245],
+            "DP": [0.05, 0.05, 0.1, 0.1, 0.15, 0.2],
+            "ATK": [25, 35, 45, 55, 65, 75],
+            "ATK_RANGE": [35, 35, 35, 35, 35, 35],
+            "ATK_SPEED": [2.5, 2.5, 2.5, 2.5, 2.5, 2.5],
+            "SKY_ABLE": false,
+            "GROUND_ABLE": true,
+            "length": 2,
+            "width": 2,
+            "BUILD_TIME": [10, 30, 120, 240, 360, 600],
+            "COST_GOLD": [50, 150, 250, 450, 650, 900],
+            "COST_ELIXIR": [10, 20, 30, 40, 50, 60],
+            "MAX_LEVEL": 5
+        },
+        {
+            "id": 233,
+            "name": "Fireworks_Tower",
+            "spriteFrameName": "fireworks_tower.png",
+            "HP": [200, 300, 300],
+            "DP": [0, 0, 0],
+            "length": 2,
+            "width": 2,
+            "ATK": [50, 60, 70],
+            "ATK_RANGE": [60, 60, 60],
+            "ATK_SPEED": [2, 2, 2],
+            "SKY_ABLE": true,
+            "GROUND_ABLE": false,
+            "BUILD_TIME": [20, 600, 2400],
+            "COST_ELIXIR": [700, 900, 1200],
+            "COST_GOLD": [700, 900, 1200],
+            "MAX_LEVEL": 3
+        }
+    ]
+}
