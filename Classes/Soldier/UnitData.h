@@ -39,13 +39,13 @@ struct UnitConfig {
     bool ISFLY;
 
     // 最大等级
-int MAXLEVEL;
+    int MAXLEVEL;
 
     // 资源消耗
-int COST_COIN;
-int COST_ELIXIR;
+    int COST_COIN;
+    int COST_ELIXIR;
     int COST_POPULATION;
-int TRAIN_TIME; // 训练时间,单位秒
+    int TRAIN_TIME; // 训练时间,单位秒
     // 动画配置：从精灵图集中读取帧序
     // 帧命名规范：{spriteFrameName}_{anim_key}_{frame_number}.png
     // 例如：goblin_walk_1.png, goblin_walk_2.png, ...

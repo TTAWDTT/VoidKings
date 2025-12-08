@@ -10,7 +10,7 @@
 class Soldier : public cocos2d::Node {
 public:
     // 标准 Cocos create 方法
-static Soldier* create(const UnitConfig* config, int level = 0); // 创建士兵实例,默认等级为0
+    static Soldier* create(const UnitConfig* config, int level = 0); // 创建士兵实例,默认等级为0
 
     virtual bool init(const UnitConfig* config, int level = 0); // 初始化并添加子节点
     virtual void update(float dt) override;
@@ -40,7 +40,7 @@ private:
     int _level;                   // 当前等级
     float _currentHP;
     cocos2d::Sprite* _bodySprite; // 以后会定义这个为动画,暂时应该渲染成图片
-cocos2d::Sprite* _healthBar;  // 血条精灵
+    cocos2d::Sprite* _healthBar;  // 血条精灵
     cocos2d::Node* _target;       // 当前锁定的攻击目标（也是一个Node）
     // 动画支持
     std::string _currentActionKey;     // 当前动画的键
