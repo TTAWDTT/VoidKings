@@ -59,30 +59,75 @@ void MainMenuScene::createBackground()
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
-    background = Sprite::create("background.png");
-    if (!background) return;
+    // 背景图列表
+    std::vector<std::string> bgList = {
+        "background1.png",
+        "background2.png",
+        "background3.png",
+		"background4.png"
+    };
 
-    background->setPosition(Vec2(origin.x + visibleSize.width / 2,
-        origin.y + visibleSize.height / 2));
+    int bgCount = bgList.size();
+    if (bgCount == 0) return;
 
-    Size bgSize = background->getContentSize();
+    for (int i = 0; i < bgCount; i++)
+    {
+        auto bg = Sprite::create(bgList[i]);
+        if (!bg) continue;
 
-    float scaleX = visibleSize.width / bgSize.width;
-    float scaleY = visibleSize.height / bgSize.height;
- 
-    float finalScale = std::max(scaleX, scaleY);
+        bg->setPosition(Vec2(origin.x + visibleSize.width / 2,
+            origin.y + visibleSize.height / 2));
 
-    background->setScale(finalScale);
+        // 缩放适配窗口
+        Size bgSize = bg->getContentSize();
+        float scaleX = visibleSize.width / bgSize.width;
+        float scaleY = visibleSize.height / bgSize.height;
+        float finalScale = std::max(scaleX, scaleY);
+        bg->setScale(finalScale);
 
-    this->addChild(background);   
+        // 所有背景先透明
+        bg->setOpacity(0);
+
+        this->addChild(bg, -10); // 放在最底层
+
+        backgroundList.pushBack(bg);  // 存入成员变量
+    }
+
+    // 第一张淡入
+    if (!backgroundList.empty())
+    {
+        backgroundList.at(0)->runAction(FadeTo::create(1.2f, 255));
+        currentBgIndex = 0;
+    }
+
+    // 每 6 秒切一次图
+    this->schedule(CC_SCHEDULE_SELECTOR(MainMenuScene::switchBackground), 6.0f);
 }
 
+void MainMenuScene::switchBackground(float dt)
+{
+    if (backgroundList.empty()) return;
+
+    int nextIndex = (currentBgIndex + 1) % backgroundList.size();
+
+    auto currentBg = backgroundList.at(currentBgIndex);
+    auto nextBg = backgroundList.at(nextIndex);
+
+    // 当前淡出
+    currentBg->runAction(FadeTo::create(1.5f, 0));
+
+    // 下一个淡入
+    nextBg->runAction(FadeTo::create(1.5f, 255));
+
+    currentBgIndex = nextIndex;
+}
 
 void MainMenuScene::createHeadLogo()
 {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
     headLogo = Label::createWithTTF("Void Kings", "fonts/Marker Felt.ttf", 48);
+    headLogo->setTextColor(Color4B(255, 200, 50, 255));
     headLogo->setPosition(Vec2(origin.x + visibleSize.width / 2,
         origin.y + visibleSize.height - headLogo->getContentSize().height));
     this->addChild(headLogo, 1);
@@ -90,111 +135,138 @@ void MainMenuScene::createHeadLogo()
 
 void MainMenuScene::createOtherThings()
 {
-	// 预留扩展
+    auto dinosaur = Sprite::create("dinosaur.png");
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+
+    if (!dinosaur) return;
+    dinosaur->setScale(5.0f); 
+    dinosaur->setPosition(Vec2(
+        origin.x + visibleSize.width - dinosaur->getContentSize().width * dinosaur->getScale() / 2 - 20,
+        origin.y + dinosaur->getContentSize().height * dinosaur->getScale() / 2 + 20
+    ));
+
+    this->addChild(dinosaur, 5);
+}
+
+Button* MainMenuScene::createIconButton(
+    const std::string& title,
+    const std::string& iconPath,
+    const Widget::ccWidgetTouchCallback& callback)
+{
+    float padding = 10;
+    float leftPadding = 5;
+    float spacing = 5;
+
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+
+    // 按钮背景
+    auto button = Button::create("btn_normal.png", "btn_pressed.png");
+    button->setScale9Enabled(true);
+
+    // 文字
+    button->setTitleFontName("fonts/ScienceGothic.ttf");
+    button->setTitleFontSize(22);
+    button->setTitleText(title);
+ 
+    auto titleRenderer = button->getTitleRenderer();
+    auto titleSize = titleRenderer->getContentSize();
+
+    // 图标
+    auto icon = Sprite::create(iconPath);
+
+    // 先用文字高度估一个按钮高度
+    float tmpHeight = std::max(icon->getContentSize().height, titleSize.height) + padding;
+
+    // 图标自动缩放
+    float targetHeight = tmpHeight * 0.75f;
+    float scale = targetHeight / icon->getContentSize().height;
+    icon->setScale(scale);
+
+    float iconWidth = icon->getContentSize().width * scale;
+    float iconHeight = icon->getContentSize().height * scale;
+
+    // 计算按钮最终大小
+    float buttonWidth = 160;
+
+    float buttonHeight =
+        std::max(iconHeight, titleSize.height) + padding;
+
+    button->setContentSize(Size(buttonWidth, buttonHeight));
+
+    auto innerBg = DrawNode::create();
+
+    float margin = 4.0f;     // 与外层按钮的边距
+    Color4F boxColor = Color4F(0.2f, 0.4f, 0.9f, 0.5f); // 半透明蓝色
+
+    innerBg->drawSolidRect(
+        Vec2(margin, margin),
+        Vec2(buttonWidth - margin, buttonHeight - margin),
+        boxColor);
+    button->addChild(innerBg, -5);
+
+    // 图标位置
+    icon->setAnchorPoint(Vec2(0, 0.5));
+    icon->setPosition(Vec2(leftPadding, buttonHeight / 2));
+    button->addChild(icon,1);
+
+    // 文字位置
+    titleRenderer->setAnchorPoint(Vec2(0, 0.5));
+    titleRenderer->setPosition(Vec2(
+        leftPadding + iconWidth + spacing,
+        buttonHeight / 2));
+
+    // 点击事件
+    button->addTouchEventListener(callback);
+
+    return button;
 }
 
 void MainMenuScene::createMainMenuLayer() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
-    auto origin = Director::getInstance()->getVisibleOrigin();
 
     mainMenuLayer = Node::create();
     this->addChild(mainMenuLayer, 10);
 
     float startY = visibleSize.height * 0.6f;
+    float spacingY = 50;
+	float spacingX = 10;
 
-    Vector<MenuItem*> menuItems;
+    // Start
+    auto startBtn = createIconButton(
+        "Start",
+        "start.png",
+        CC_CALLBACK_2(MainMenuScene::onStartTouch, this)
+    );
+    startBtn->setPosition(Vec2(visibleSize.width / 2+ spacingX, startY));
+    mainMenuLayer->addChild(startBtn);
 
-    // 开始游戏按钮
-    auto startLabel = Label::createWithSystemFont("Start Game", "Arial", 25);
-    startLabel->setColor(Color3B::WHITE);
-    startLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
+    // Settings
+    auto settingsBtn = createIconButton(
+        "Settings",
+        "settings.png",
+        CC_CALLBACK_2(MainMenuScene::onSettingsTouch, this)
+    );
+    settingsBtn->setPosition(Vec2(visibleSize.width / 2 + spacingX, startY - spacingY));
+    mainMenuLayer->addChild(settingsBtn);
 
-    auto startButton = MenuItemLabel::create(startLabel, CC_CALLBACK_1(MainMenuScene::onStart, this));
+    // Rules
+    auto rulesBtn = createIconButton(
+        "Rules",
+        "rules.png",
+        CC_CALLBACK_2(MainMenuScene::onRuleTouch, this)
+    );
+    rulesBtn->setPosition(Vec2(visibleSize.width / 2 + spacingX, startY - spacingY * 2));
+    mainMenuLayer->addChild(rulesBtn);
 
-    // 创建按钮背景
-    auto startBg = DrawNode::create();
-    startBg->drawSolidRect(Vec2(-buttonWidth / 2, -buttonHeight / 2),
-        Vec2(buttonWidth / 2, buttonHeight / 2),
-        Color4F(0.3f, 0.3f, 0.5f, 0.9f));
-    startBg->drawRect(Vec2(-buttonWidth / 2, -buttonHeight / 2),
-        Vec2(buttonWidth / 2, buttonHeight / 2),
-        Color4F(1.0f, 0.84f, 0.0f, 1.0f));
-
-    startBg->setPosition(startButton->getContentSize().width / 2,
-        startButton->getContentSize().height / 2 );
-    
-    startButton->addChild(startBg, -1);
-    startButton->setPosition(Vec2(visibleSize.width / 2, startY));
-    menuItems.pushBack(startButton);
-
-    // 设置按钮
-    auto settingsLabel = Label::createWithSystemFont("Settings", "Arial", 25);
-    settingsLabel->setColor(Color3B::WHITE);
-    settingsLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
-    auto settingsButton = MenuItemLabel::create(settingsLabel, CC_CALLBACK_1(MainMenuScene::onSettings, this));
-
-    auto settingsBg = DrawNode::create();
-    settingsBg->drawSolidRect(Vec2(-buttonWidth / 2, -buttonHeight / 2),
-        Vec2(buttonWidth / 2, buttonHeight / 2),
-        Color4F(0.3f, 0.3f, 0.5f, 0.9f));
-    settingsBg->drawRect(Vec2(-buttonWidth / 2, -buttonHeight / 2),
-        Vec2(buttonWidth / 2, buttonHeight / 2),
-        Color4F(0.6f, 0.6f, 0.8f, 1.0f));
-    settingsBg->setPosition(settingsButton->getContentSize().width / 2,
-        settingsButton->getContentSize().height / 2);
-    
-    settingsButton->addChild(settingsBg, -1);
-    settingsButton->setPosition(Vec2(visibleSize.width / 2, startY - buttonSpacing));
-    menuItems.pushBack(settingsButton);
-	
-    // 规则按钮
-	auto ruleLabel = Label::createWithSystemFont("Rule", "Arial", 25);
-	ruleLabel->setColor(Color3B::WHITE);
-	ruleLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
-	auto ruleButton = MenuItemLabel::create(ruleLabel, CC_CALLBACK_1(MainMenuScene::onRule, this));
-
-	auto ruleBg = DrawNode::create();
-	ruleBg->drawSolidRect(Vec2(-buttonWidth / 2, -buttonHeight / 2),
-		Vec2(buttonWidth / 2, buttonHeight / 2),
-		Color4F(0.3f, 0.5f, 0.3f, 0.9f));
-	ruleBg->drawRect(Vec2(-buttonWidth / 2, -buttonHeight / 2),
-		Vec2(buttonWidth / 2, buttonHeight / 2),
-		Color4F(0.6f, 0.8f, 0.6f, 1.0f));
-	ruleBg->setPosition(ruleButton->getContentSize().width / 2,
-		ruleButton->getContentSize().height / 2);
-
-	ruleButton->addChild(ruleBg, -1);
-	ruleButton->setPosition(Vec2(visibleSize.width / 2, startY - buttonSpacing * 2));
-	menuItems.pushBack(ruleButton);
-
-    // 退出按钮
-    auto exitLabel = Label::createWithSystemFont("Exit", "Arial", 25);
-    exitLabel->setColor(Color3B::WHITE);
-    exitLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
-    auto exitButton = MenuItemLabel::create(exitLabel, CC_CALLBACK_1(MainMenuScene::onExit, this));
-
-    auto exitBg = DrawNode::create();
-    exitBg->drawSolidRect(Vec2(-buttonWidth / 2, -buttonHeight / 2),
-        Vec2(buttonWidth / 2, buttonHeight / 2),
-        Color4F(0.6f, 0.2f, 0.2f, 0.9f));
-    exitBg->drawRect(Vec2(-buttonWidth / 2, -buttonHeight / 2),
-        Vec2(buttonWidth / 2, buttonHeight / 2),
-        Color4F(0.8f, 0.4f, 0.4f, 1.0f));
-    exitBg->setPosition(exitButton->getContentSize().width / 2,
-        exitButton->getContentSize().height / 2);
-
-    exitButton->addChild(exitBg, -1);
-    exitButton->setPosition(Vec2(visibleSize.width / 2, startY - buttonSpacing * 3));
-    menuItems.pushBack(exitButton);
-
-    auto menu = Menu::createWithArray(menuItems);
-    menu->setPosition(Vec2::ZERO);
-    mainMenuLayer->addChild(menu);
-
-    auto versionLabel = Label::createWithSystemFont("Version 1.0.0", "Arial", 16);
-    versionLabel->setPosition(Vec2(visibleSize.width - 80, 20));
-    versionLabel->setColor(Color3B(150, 150, 150));
-    mainMenuLayer->addChild(versionLabel);
+    // Exit
+    auto exitBtn = createIconButton(
+        "Exit",
+        "exit.png",
+        CC_CALLBACK_2(MainMenuScene::onExitTouch, this)
+    );
+    exitBtn->setPosition(Vec2(visibleSize.width / 2 + spacingX, startY - spacingY * 3));
+    mainMenuLayer->addChild(exitBtn);
 }
 
 void MainMenuScene::onStart(Ref* sender) {
@@ -220,38 +292,38 @@ void MainMenuScene::createSettingsLayer()
     settingsLayer = Node::create();
     this->addChild(settingsLayer, 20);
 
-    auto label = Label::createWithSystemFont("Settings Page", "Arial", 25);
-    label->setPosition(Vec2(visibleSize.width / 2, visibleSize.height * 0.7f));
-    settingsLayer->addChild(label);
+	// 面板背景
+    float panelWidth = visibleSize.width * 0.6f;   // 面板宽度
+    float panelHeight = visibleSize.height * 0.7f; // 面板高度
 
-    auto returnLabel = Label::createWithSystemFont("Return", "Arial", 25);
-    returnLabel->setColor(Color3B::WHITE);
-    returnLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
+    auto panel = DrawNode::create();
+    Color4F panelColor(0.0f, 0.0f, 0.0f, 0.45f);  // 半透明黑
+    float radius = 20.0f; // 圆角
 
-    auto returnButton = MenuItemLabel::create(returnLabel, CC_CALLBACK_1(MainMenuScene::onReturn, this));
+    panel->drawSolidRect(Vec2(-panelWidth / 2, -panelHeight / 2),
+        Vec2(panelWidth / 2, panelHeight / 2),
+        panelColor);
 
-    auto returnBg = DrawNode::create();
-    returnBg->drawSolidRect(Vec2(-buttonWidth / 2, -buttonHeight / 2),
-        Vec2(buttonWidth / 2, buttonHeight / 2),
-        Color4F(0.6f, 0.2f, 0.2f, 0.9f));
-    returnBg->drawRect(Vec2(-buttonWidth / 2, -buttonHeight / 2),
-        Vec2(buttonWidth / 2, buttonHeight / 2),
-        Color4F(0.8f, 0.4f, 0.4f, 1.0f));
-    returnBg->setPosition(returnButton->getContentSize().width / 2,
-        returnButton->getContentSize().height / 2);
+    panel->setPosition(Vec2(visibleSize.width / 2,
+        visibleSize.height / 2-20));
+    settingsLayer->addChild(panel, 1);
 
-    returnButton->addChild(returnBg, -1);
-    returnButton->setPosition(Vec2(visibleSize.width / 2, visibleSize.height * 0.2f));
+    //标题
+    auto label = Label::createWithTTF("Settings", "fonts/ScienceGothic.ttf", 32);
+    label->setPosition(Vec2(0, panelHeight / 2 - 20));  // 相对 panel 的位置
+    panel->addChild(label, 2);
 
-    auto menu = Menu::create(returnButton, nullptr);
-    menu->setPosition(Vec2::ZERO);
-    settingsLayer->addChild(menu);
+    //Return 按钮
+    auto returnBtn = createIconButton(
+        "Return",
+        "exit.png",   // 图标
+        CC_CALLBACK_2(MainMenuScene::onReturnTouch, this)
+    );
+
+    returnBtn->setPosition(Vec2(0, -panelHeight / 2 + 60)); // 放在底部区域
+    panel->addChild(returnBtn, 2);
 }
 
-void MainMenuScene::onSettings(Ref* sender)
-{
-    switchToLayer(settingsLayer);
-}
 
 void MainMenuScene::createRuleLayer()
 {
@@ -260,33 +332,81 @@ void MainMenuScene::createRuleLayer()
     ruleLayer = Node::create();
     this->addChild(ruleLayer, 20);
 
-    auto label = Label::createWithSystemFont("Rules", "Arial", 25);
+    // 面板背景
+    float panelWidth = visibleSize.width * 0.6f;   // 面板宽度
+    float panelHeight = visibleSize.height * 0.7f; // 面板高度
 
-    label->setPosition(Vec2(visibleSize.width / 2, visibleSize.height * 0.7f));
-    ruleLayer->addChild(label);
+    auto panel = DrawNode::create();
+    Color4F panelColor(0.0f, 0.0f, 0.0f, 0.45f);  // 半透明黑
+    float radius = 20.0f; // 圆角
 
-    auto returnLabel = Label::createWithSystemFont("Return", "Arial", 25);
-    returnLabel->setColor(Color3B::WHITE);
-    returnLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
+    panel->drawSolidRect(Vec2(-panelWidth / 2, -panelHeight / 2),
+        Vec2(panelWidth / 2, panelHeight / 2),
+        panelColor);
 
-    auto returnButton = MenuItemLabel::create(returnLabel, CC_CALLBACK_1(MainMenuScene::onReturn, this));
+    panel->setPosition(Vec2(visibleSize.width / 2,
+        visibleSize.height / 2 - 20));
+    ruleLayer->addChild(panel, 1);
 
-    auto returnBg = DrawNode::create();
-    returnBg->drawSolidRect(Vec2(-buttonWidth / 2, -buttonHeight / 2),
-        Vec2(buttonWidth / 2, buttonHeight / 2),
-        Color4F(0.6f, 0.2f, 0.2f, 0.9f));
-    returnBg->drawRect(Vec2(-buttonWidth / 2, -buttonHeight / 2),
-        Vec2(buttonWidth / 2, buttonHeight / 2),
-        Color4F(0.8f, 0.4f, 0.4f, 1.0f));
-    returnBg->setPosition(returnButton->getContentSize().width / 2,
-        returnButton->getContentSize().height / 2);
+    //标题
+    auto label = Label::createWithTTF("Rule", "fonts/ScienceGothic.ttf", 32);
+    label->setPosition(Vec2(0, panelHeight / 2 - 20));  // 相对 panel 的位置
+    panel->addChild(label, 2);
 
-    returnButton->addChild(returnBg, -1);
-    returnButton->setPosition(Vec2(visibleSize.width / 2, visibleSize.height * 0.2f));
+    //Return 按钮
+    auto returnBtn = createIconButton(
+        "Return",
+        "exit.png",   // 图标
+        CC_CALLBACK_2(MainMenuScene::onReturnTouch, this)
+    );
 
-    auto menu = Menu::create(returnButton, nullptr);
-    menu->setPosition(Vec2::ZERO);
-    ruleLayer->addChild(menu);
+    returnBtn->setPosition(Vec2(0, -panelHeight / 2 + 60)); // 放在底部区域
+    panel->addChild(returnBtn, 2);
+}
+
+void MainMenuScene::onReturnTouch(Ref* sender, ui::Widget::TouchEventType type)
+{
+    if (type == Widget::TouchEventType::ENDED)
+    {
+        onReturn(sender);
+    }
+}
+
+void MainMenuScene::onStartTouch(Ref* sender, ui::Widget::TouchEventType type)
+{
+    if (type == Widget::TouchEventType::ENDED)
+    {
+        onStart(sender);
+    }
+}
+
+void MainMenuScene::onSettingsTouch(Ref* sender, ui::Widget::TouchEventType type)
+{
+    if (type == Widget::TouchEventType::ENDED)
+    {
+        onSettings(sender);
+    }
+}
+
+void MainMenuScene::onRuleTouch(Ref* sender, ui::Widget::TouchEventType type)
+{
+    if (type == Widget::TouchEventType::ENDED)
+    {
+        onRule(sender);
+    }
+}
+
+void MainMenuScene::onExitTouch(Ref* sender, ui::Widget::TouchEventType type)
+{
+    if (type == Widget::TouchEventType::ENDED)
+    {
+        onExit(sender);
+    }
+}
+
+void MainMenuScene::onSettings(Ref* sender)
+{
+    switchToLayer(settingsLayer);
 }
 
 void MainMenuScene::onRule(Ref* sender)
