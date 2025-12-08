@@ -39,6 +39,16 @@ private:
     cocos2d::Sprite* _bodySprite; // 这个会定义它作为精灵,当时应渲染的图片
 	cocos2d::Sprite* _healthBar;  // 血条精灵
     cocos2d::Node* _target;       // 当前锁定的攻击目标（也是一个Node）
+    // 动画支持
+    cocos2d::Animate* _currentAnimate; // 当前运行的动画(持有指针仅为引用Action，不负责释放)
+    std::string _currentActionKey;     // 当前动作的键
+
+    // 动画控制接口
+    void playMoveAnimation();
+    void playAttackAnimation();
+    void playDeadAnimation();
+    void playIdleAnimation();
+    void stopCurrentAnimation();
 
     // 内部行为逻辑
     void findTarget();            // 索敌逻辑

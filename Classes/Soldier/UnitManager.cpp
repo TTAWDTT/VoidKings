@@ -107,6 +107,22 @@ bool UnitManager::parseUnitConfig(const rapidjson::Value& unitJson, UnitConfig& 
     config.COST_POPULATION = unitJson.HasMember("COST_POPULATION") ? unitJson["COST_POPULATION"].GetInt() : 1;
     config.TRAIN_TIME = unitJson.HasMember("TRAIN_TIME") ? unitJson["TRAIN_TIME"].GetInt() : 30;
 
+    // 动画配置（可选，使用默认值）
+    config.anim_walk = unitJson.HasMember("anim_walk") ? unitJson["anim_walk"].GetString() : "walk";
+    config.anim_walk_frames = unitJson.HasMember("anim_walk_frames") ? unitJson["anim_walk_frames"].GetInt() : 6;
+    config.anim_walk_delay = unitJson.HasMember("anim_walk_delay") ? static_cast<float>(unitJson["anim_walk_delay"].GetDouble()) : 0.08f;
+    
+    config.anim_attack = unitJson.HasMember("anim_attack") ? unitJson["anim_attack"].GetString() : "attack";
+    config.anim_attack_frames = unitJson.HasMember("anim_attack_frames") ? unitJson["anim_attack_frames"].GetInt() : 8;
+    config.anim_attack_delay = unitJson.HasMember("anim_attack_delay") ? static_cast<float>(unitJson["anim_attack_delay"].GetDouble()) : 0.06f;
+    
+    config.anim_idle = unitJson.HasMember("anim_idle") ? unitJson["anim_idle"].GetString() : "idle";
+    config.anim_idle_frames = unitJson.HasMember("anim_idle_frames") ? unitJson["anim_idle_frames"].GetInt() : 4;
+    config.anim_idle_delay = unitJson.HasMember("anim_idle_delay") ? static_cast<float>(unitJson["anim_idle_delay"].GetDouble()) : 0.15f;
+
+    config.anim_dead = unitJson.HasMember("anim_dead") ? unitJson["anim_dead"].GetString() : "dead";
+    config.anim_dead_frames = unitJson.HasMember("anim_dead_frames") ? unitJson["anim_dead_frames"].GetInt() : 4;
+    config.anim_dead_delay = unitJson.HasMember("anim_dead_delay") ? static_cast<float>(unitJson["anim_dead_delay"].GetDouble()) : 0.15f;
     return true;
 }
 
