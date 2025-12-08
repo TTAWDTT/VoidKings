@@ -61,10 +61,10 @@ void MainMenuScene::createBackground()
 
     // 背景图列表
     std::vector<std::string> bgList = {
-        "background1.png",
-        "background2.png",
-        "background3.png",
-		"background4.png"
+        "background/background1.png",
+        "background/background2.png",
+        "background/background3.png",
+		"background/background4.png"
     };
 
     int bgCount = bgList.size();
