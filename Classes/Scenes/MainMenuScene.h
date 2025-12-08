@@ -47,6 +47,9 @@ private:
 	Sprite* otherThings = nullptr;
 	Label* headLogo = nullptr;
 	Menu* _menu = nullptr;
+	const float buttonWidth = 150;
+	const float buttonHeight = 30;
+	const float buttonSpacing = 50;
 };
 
 #endif // __MAIN_MENU_SCENE_H__

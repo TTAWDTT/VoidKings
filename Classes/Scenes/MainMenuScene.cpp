@@ -56,16 +56,27 @@ bool MainMenuScene::init()
 
 void MainMenuScene::createBackground()
 {
-	auto visibleSize = Director::getInstance()->getVisibleSize();
-	auto origin = Director::getInstance()->getVisibleOrigin();
-	background = Sprite::create("background.png");
-	if (background)
-	{
-		background->setPosition(Vec2(origin.x + visibleSize.width / 2,
-			origin.y + visibleSize.height / 2));
-		this->addChild(background);
-	}
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+
+    background = Sprite::create("background.png");
+    if (!background) return;
+
+    background->setPosition(Vec2(origin.x + visibleSize.width / 2,
+        origin.y + visibleSize.height / 2));
+
+    Size bgSize = background->getContentSize();
+
+    float scaleX = visibleSize.width / bgSize.width;
+    float scaleY = visibleSize.height / bgSize.height;
+ 
+    float finalScale = std::max(scaleX, scaleY);
+
+    background->setScale(finalScale);
+
+    this->addChild(background);   
 }
+
 
 void MainMenuScene::createHeadLogo()
 {
@@ -89,16 +100,12 @@ void MainMenuScene::createMainMenuLayer() {
     mainMenuLayer = Node::create();
     this->addChild(mainMenuLayer, 10);
 
-    // 按钮样式设置
-    float buttonWidth = 200;
-    float buttonHeight = 50;
-    float buttonSpacing = 70;
-    float startY = visibleSize.height * 0.4f;
+    float startY = visibleSize.height * 0.6f;
 
     Vector<MenuItem*> menuItems;
 
     // 开始游戏按钮
-    auto startLabel = Label::createWithSystemFont("Start Game", "Arial", 28);
+    auto startLabel = Label::createWithSystemFont("Start Game", "Arial", 25);
     startLabel->setColor(Color3B::WHITE);
     startLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
 
@@ -121,7 +128,7 @@ void MainMenuScene::createMainMenuLayer() {
     menuItems.pushBack(startButton);
 
     // 设置按钮
-    auto settingsLabel = Label::createWithSystemFont("Settings", "Arial", 28);
+    auto settingsLabel = Label::createWithSystemFont("Settings", "Arial", 25);
     settingsLabel->setColor(Color3B::WHITE);
     settingsLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
     auto settingsButton = MenuItemLabel::create(settingsLabel, CC_CALLBACK_1(MainMenuScene::onSettings, this));
@@ -141,7 +148,7 @@ void MainMenuScene::createMainMenuLayer() {
     menuItems.pushBack(settingsButton);
 	
     // 规则按钮
-	auto ruleLabel = Label::createWithSystemFont("Rule", "Arial", 28);
+	auto ruleLabel = Label::createWithSystemFont("Rule", "Arial", 25);
 	ruleLabel->setColor(Color3B::WHITE);
 	ruleLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
 	auto ruleButton = MenuItemLabel::create(ruleLabel, CC_CALLBACK_1(MainMenuScene::onRule, this));
@@ -161,7 +168,7 @@ void MainMenuScene::createMainMenuLayer() {
 	menuItems.pushBack(ruleButton);
 
     // 退出按钮
-    auto exitLabel = Label::createWithSystemFont("Exit", "Arial", 28);
+    auto exitLabel = Label::createWithSystemFont("Exit", "Arial", 25);
     exitLabel->setColor(Color3B::WHITE);
     exitLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
     auto exitButton = MenuItemLabel::create(exitLabel, CC_CALLBACK_1(MainMenuScene::onExit, this));
@@ -213,13 +220,28 @@ void MainMenuScene::createSettingsLayer()
     settingsLayer = Node::create();
     this->addChild(settingsLayer, 20);
 
-    auto label = Label::createWithSystemFont("Settings Page", "Arial", 32);
+    auto label = Label::createWithSystemFont("Settings Page", "Arial", 25);
     label->setPosition(Vec2(visibleSize.width / 2, visibleSize.height * 0.7f));
     settingsLayer->addChild(label);
 
-    auto returnLabel = Label::createWithSystemFont("Return", "Arial", 28);
+    auto returnLabel = Label::createWithSystemFont("Return", "Arial", 25);
+    returnLabel->setColor(Color3B::WHITE);
+    returnLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
+
     auto returnButton = MenuItemLabel::create(returnLabel, CC_CALLBACK_1(MainMenuScene::onReturn, this));
-    returnButton->setPosition(Vec2(visibleSize.width / 2, visibleSize.height * 0.4f));
+
+    auto returnBg = DrawNode::create();
+    returnBg->drawSolidRect(Vec2(-buttonWidth / 2, -buttonHeight / 2),
+        Vec2(buttonWidth / 2, buttonHeight / 2),
+        Color4F(0.6f, 0.2f, 0.2f, 0.9f));
+    returnBg->drawRect(Vec2(-buttonWidth / 2, -buttonHeight / 2),
+        Vec2(buttonWidth / 2, buttonHeight / 2),
+        Color4F(0.8f, 0.4f, 0.4f, 1.0f));
+    returnBg->setPosition(returnButton->getContentSize().width / 2,
+        returnButton->getContentSize().height / 2);
+
+    returnButton->addChild(returnBg, -1);
+    returnButton->setPosition(Vec2(visibleSize.width / 2, visibleSize.height * 0.2f));
 
     auto menu = Menu::create(returnButton, nullptr);
     menu->setPosition(Vec2::ZERO);
@@ -238,13 +260,29 @@ void MainMenuScene::createRuleLayer()
     ruleLayer = Node::create();
     this->addChild(ruleLayer, 20);
 
-    auto label = Label::createWithSystemFont("Rules", "Arial", 32);
+    auto label = Label::createWithSystemFont("Rules", "Arial", 25);
+
     label->setPosition(Vec2(visibleSize.width / 2, visibleSize.height * 0.7f));
     ruleLayer->addChild(label);
 
-    auto returnLabel = Label::createWithSystemFont("Return", "Arial", 28);
+    auto returnLabel = Label::createWithSystemFont("Return", "Arial", 25);
+    returnLabel->setColor(Color3B::WHITE);
+    returnLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
+
     auto returnButton = MenuItemLabel::create(returnLabel, CC_CALLBACK_1(MainMenuScene::onReturn, this));
-    returnButton->setPosition(Vec2(visibleSize.width / 2, visibleSize.height * 0.4f));
+
+    auto returnBg = DrawNode::create();
+    returnBg->drawSolidRect(Vec2(-buttonWidth / 2, -buttonHeight / 2),
+        Vec2(buttonWidth / 2, buttonHeight / 2),
+        Color4F(0.6f, 0.2f, 0.2f, 0.9f));
+    returnBg->drawRect(Vec2(-buttonWidth / 2, -buttonHeight / 2),
+        Vec2(buttonWidth / 2, buttonHeight / 2),
+        Color4F(0.8f, 0.4f, 0.4f, 1.0f));
+    returnBg->setPosition(returnButton->getContentSize().width / 2,
+        returnButton->getContentSize().height / 2);
+
+    returnButton->addChild(returnBg, -1);
+    returnButton->setPosition(Vec2(visibleSize.width / 2, visibleSize.height * 0.2f));
 
     auto menu = Menu::create(returnButton, nullptr);
     menu->setPosition(Vec2::ZERO);
