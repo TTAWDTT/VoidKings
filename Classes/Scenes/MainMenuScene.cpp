@@ -135,18 +135,48 @@ void MainMenuScene::createHeadLogo()
 
 void MainMenuScene::createOtherThings()
 {
-    auto dinosaur = Sprite::create("dinosaur.png");
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
-    if (!dinosaur) return;
-    dinosaur->setScale(5.0f); 
-    dinosaur->setPosition(Vec2(
-        origin.x + visibleSize.width - dinosaur->getContentSize().width * dinosaur->getScale() / 2 - 20,
-        origin.y + dinosaur->getContentSize().height * dinosaur->getScale() / 2 + 20
-    ));
+    // 创建初始精灵（从第0帧开始）
+    auto dinosaur = Sprite::create("dinosaur/sprite_0000.png");
+    if (!dinosaur) {
+        CCLOG("Failed to load dinosaur sprite");
+        return;
+    }
 
+    // 创建动画
+    Animation* anim = Animation::create();
+    for (int j = 0; j < 4; j++) {
+        for (int k = 0; k < 6; k++) {
+            for (int i = 2; i <= 11; ++i) {
+                std::string framePath = StringUtils::format("dinosaur/sprite_%04d.png", 10 * j + i);
+                auto frame = SpriteFrame::create(framePath, Rect(0, 0, 64, 64));
+                if (frame) {
+                    anim->addSpriteFrame(frame);
+                }
+            }
+        }
+    }
+    anim->setDelayPerUnit(0.1f);
+
+    // 配置精灵并播放动画
+    dinosaur->setScale(5.0f);
+    dinosaur->setAnchorPoint(Vec2(1.0f, 0.0f)); // 右下角锚点
+    
+    // 位置：右下角，留20px边距
+    float margin = 20.0f;
+    dinosaur->setPosition(Vec2(origin.x + visibleSize.width + 12 * margin,
+                               origin.y - 12 * margin));
+
+    // 添加到场景（不是mainMenuLayer，而是直接添加到Scene）
     this->addChild(dinosaur, 5);
+
+    // 播放循环动画
+    dinosaur->runAction(RepeatForever::create(Animate::create(anim)));
+
+    // 存储精灵指针便于后续控制（如需要）
+    otherThings = dinosaur;
 }
 
 Button* MainMenuScene::createIconButton(
