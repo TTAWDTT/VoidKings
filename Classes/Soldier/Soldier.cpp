@@ -210,19 +210,8 @@ void Soldier::stopCurrentAnimation() {
     _currentActionKey.clear();
 }
 
-// 从精灵帧缓存构建动画
-// 帧命名规范:{baseName}_{animKey}_{frameNumber}.png
-// 例如:goblin_walk_1.png, goblin_walk_2.png
-static cocos2d::Animation* buildAnimationFromFrames(const std::string& baseName, const std::string& animKey, int frameCount, float delay) {
-    cocos2d::Vector<cocos2d::SpriteFrame*> frames;
-    for (int i = 1; i <= frameCount; ++i) {
-        std::string frameName = baseName + "_" + animKey + "_" + std::to_string(i) + ".png";
-        auto frame = cocos2d::SpriteFrameCache::getInstance()->getSpriteFrameByName(frameName);
-        if (frame) frames.pushBack(frame);
-    }
-    if (frames.empty()) return nullptr;
-    return cocos2d::Animation::createWithSpriteFrames(frames, delay);
-}
+// buildAnimationFromFrames 已迁移到公共工具
+#include "Utils/AnimationUtils.h"
 
 // 计算方向: 简化为左右两个方向
 // 向正上/正下时保持当前方向不变
@@ -263,7 +252,7 @@ void Soldier::playAnimation(const std::string& animType, int frameCount, float d
     std::string key = animType;
     if (_currentActionKey == key) return; // 已在播放相同动画
     
-    auto anim = buildAnimationFromFrames(_config->spriteFrameName, animType, frameCount, delay);
+    auto anim = AnimationUtils::buildAnimationFromFrames(_config->spriteFrameName, animType, frameCount, delay);
     if (!anim) return;
     
     _bodySprite->stopAllActions();
