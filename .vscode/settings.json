@@ -28,6 +28,7 @@
         "editorLineNumber.activeForeground": "#94E2D5"
     },
     "conventionalCommits.scopes": [
-        "Soldier"
+        "Soldier",
+        "building"
     ]
 }

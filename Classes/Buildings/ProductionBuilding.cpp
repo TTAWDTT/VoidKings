@@ -118,3 +118,48 @@ void ProductionBuilding::takeDamage(float damage) {
         // ´¦ÀíËÀÍöÂß¼­
     }
 }
+void ProductionBuilding::updateHealthBar(bool animate) {
+    if (!_healthBar || !_config) return;
+
+    float maxHP = getCurrentMaxHP();
+    float pct = 0.0f;
+    if (maxHP > 0.00001f) {
+        pct = _currentHP / maxHP;
+    }
+    if (pct < 0.0f) pct = 0.0f;
+    if (pct > 1.0f) pct = 1.0f;
+
+    float targetScaleX = pct;
+
+    if (animate) {
+        _healthBar->stopAllActions();
+        auto action = cocos2d::ScaleTo::create(0.12f, targetScaleX, 1.0f);
+        _healthBar->runAction(action);
+    }
+    else {
+        _healthBar->setScaleX(targetScaleX);
+    }
+
+    if (pct > 0.5f) {
+        _healthBar->setColor(cocos2d::Color3B::GREEN);
+    }
+    else if (pct > 0.2f) {
+        _healthBar->setColor(cocos2d::Color3B::YELLOW);
+    }
+    else {
+        _healthBar->setColor(cocos2d::Color3B::RED);
+    }
+
+    if (pct <= 0.0f) {
+        _healthBar->setVisible(false);
+    }
+    else {
+        _healthBar->setVisible(true);
+    }
+}
+
+void ProductionBuilding::stopCurrentAnimation() {
+    if (!_bodySprite) return;
+    _bodySprite->stopAllActions();
+    _currentActionKey.clear();
+}

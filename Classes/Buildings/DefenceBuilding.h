@@ -15,8 +15,14 @@ public:
     // 等级相关方法
     int getLevel() const { return _level; }
     void setLevel(int level);
-    // 获取当前血量
-    float getCurrentHP() const;
+    // 运行时数据
+    int _level;                   // 当前等级
+    float _currentHP;
+    cocos2d::Sprite* _bodySprite; // 以后会定义这个为动画,暂时应该渲染成图片
+    cocos2d::Sprite* _healthBar;  // 血条精灵
+    cocos2d::Node* _target;       // 当前锁定的攻击目标（也是一个Node）
+    // 动画支持
+    std::string _currentActionKey;     // 当前动画的键
     // 获取当前等级的属性
     float getCurrentMaxHP() const;
     float getCurrentDP() const;
@@ -43,6 +49,7 @@ private:
     void attackTarget();            // 攻击逻辑
     void getAttacked(float damage); // 受击逻辑
     void die();                     // 死亡逻辑
-    void bar();                     // 显示血条
+    void updateHealthBar(bool animate = true); // 血条更新
     void button();                  // 按钮逻辑
 };
+
