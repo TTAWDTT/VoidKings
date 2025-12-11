@@ -1,0 +1,21 @@
+Missing Resources - Optional Improvements
+==========================================
+
+The following resources are optional but recommended for better visuals:
+
+1. Health Bar Image
+   Path: Resources/res/health_bar.png
+   Specifications:
+   - Dimensions: 50x5 pixels
+   - Color: Solid green (#00FF00)
+   - Format: PNG with transparency
+   - Usage: Displays above buildings to show their health
+   - Current Status: System creates programmatic health bars as fallback
+
+How to create:
+- Use any image editor (Paint, Photoshop, GIMP, etc.)
+- Create a new 50x5 pixel image
+- Fill with green color
+- Save as PNG
+
+All other resources are already present in the repository and working correctly.

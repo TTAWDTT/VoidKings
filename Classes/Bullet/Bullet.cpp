@@ -1,0 +1,69 @@
+// Bullet.cpp
+#include "Bullet.h"
+
+USING_NS_CC;
+
+Bullet* Bullet::create(const std::string& spriteFrame, float damage, float speed) {
+    Bullet* pRet = new(std::nothrow) Bullet();
+    if (pRet && pRet->init(spriteFrame, damage, speed)) {
+        pRet->autorelease();
+        return pRet;
+    }
+    delete pRet;
+    return nullptr;
+}
+
+bool Bullet::init(const std::string& spriteFrame, float damage, float speed) {
+    if (!Node::init()) return false;
+
+    _damage = damage;
+    _speed = speed;
+    _target = nullptr;
+
+    // Create sprite
+    _sprite = Sprite::create(spriteFrame);
+    if (_sprite) {
+        this->addChild(_sprite);
+    }
+
+    this->scheduleUpdate();
+    return true;
+}
+
+void Bullet::setTarget(cocos2d::Node* target) {
+    _target = target;
+}
+
+void Bullet::update(float dt) {
+    if (!_target) {
+        this->removeFromParent();
+        return;
+    }
+
+    Vec2 targetPos = _target->getPosition();
+    Vec2 currentPos = this->getPosition();
+    Vec2 diff = targetPos - currentPos;
+    float distance = diff.length();
+
+    // Check if reached target
+    if (distance < 5.0f) {
+        onReachTarget();
+        this->removeFromParent();
+        return;
+    }
+
+    // Move towards target
+    Vec2 direction = diff.getNormalized();
+    Vec2 newPos = currentPos + direction * _speed * dt;
+    this->setPosition(newPos);
+
+    // Rotate bullet to face target
+    float angle = CC_RADIANS_TO_DEGREES(atan2(diff.y, diff.x));
+    if (_sprite) {
+        _sprite->setRotation(-angle);
+    }
+}
+
+void Bullet::onReachTarget() {
+    // Override in subclasses for specific effects
+}

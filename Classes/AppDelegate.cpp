@@ -23,7 +23,7 @@
  ****************************************************************************/
 
 #include "AppDelegate.h"
-#include "Scenes\MainMenuScene.cpp"
+#include "Scenes/MainMenuScene.h"
 
 // #define USE_AUDIO_ENGINE 1
 // #define USE_SIMPLE_AUDIO_ENGINE 1
@@ -116,6 +116,41 @@ bool AppDelegate::applicationDidFinishLaunching() {
     }
 
     register_all_packages();
+
+    // Load resources
+    auto fileUtils = FileUtils::getInstance();
+    fileUtils->addSearchPath("Resources");
+    fileUtils->addSearchPath("Resources/buildings");
+    fileUtils->addSearchPath("Resources/source");
+    fileUtils->addSearchPath("Resources/bullet");
+    fileUtils->addSearchPath("Resources/grass");
+    
+    // Preload sprite frames for resources
+    auto spriteCache = SpriteFrameCache::getInstance();
+    
+    // Load coin frames
+    for (int i = 1; i <= 5; ++i) {
+        char buffer[64];
+        sprintf(buffer, "source/coin/coin_%04d.png", i);
+        auto texture = Director::getInstance()->getTextureCache()->addImage(buffer);
+        if (texture) {
+            sprintf(buffer, "coin_%04d.png", i);
+            auto frame = SpriteFrame::createWithTexture(texture, Rect(0, 0, texture->getContentSize().width, texture->getContentSize().height));
+            spriteCache->addSpriteFrame(frame, buffer);
+        }
+    }
+    
+    // Load diamond frames
+    for (int i = 0; i <= 3; ++i) {
+        char buffer[64];
+        sprintf(buffer, "source/diamond/sprite_%04d.png", i);
+        auto texture = Director::getInstance()->getTextureCache()->addImage(buffer);
+        if (texture) {
+            sprintf(buffer, "sprite_%04d.png", i);
+            auto frame = SpriteFrame::createWithTexture(texture, Rect(0, 0, texture->getContentSize().width, texture->getContentSize().height));
+            spriteCache->addSpriteFrame(frame, buffer);
+        }
+    }
 
     // create a scene. it's an autorelease object
     auto scene = MainMenuScene::createScene();

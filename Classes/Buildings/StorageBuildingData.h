@@ -1,22 +1,31 @@
+#ifndef __STORAGE_BUILDING_DATA_H__
+#define __STORAGE_BUILDING_DATA_H__
+
 #include "cocos2d.h"
+#include "Soldier/UnitData.h"
 #include <vector>
 
-// 纯数据类，用来存储存储建筑的属性
 struct StorageBuildingConfig {
-    int id;                                  // 方便管理
-    std::string name;                        // 如"ARCHER_TOWER"
-    std::string spriteFrameName;             // 如"archer_tower.png" 
-    TargetPriority aiType;                   // 如：弓箭塔 - 这个字段决定了它是弓箭塔   
-    // 战斗属性
-    std::vector<float> HP;                   // 每个等级的生命值  
-    std::vector<float> DP;                   // 每个等级的抗性（0~1）       
-    // 基地属性
-    int length;                             // 建筑占地长度（格子数）
-    int width;                              // 建筑占地宽度（格子数）
-    std::vector<float> BUILD_TIME;           // 每个等级的建造时间（秒）
-    std::vector<int> COST_GOLD;              // 每个等级的建造花费（金）
-    std::vector<int> COST_ELIXIR;            // 每个等级的建造花费（圣水）
-    std::vector<int> ADD_STORAGE_ELIXIR_CAPACITY;// 每个等级的圣水储存上限增加量（影响source）
-    std::vector<int> ADD_STORAGE_GOLD_CAPACITY;  // 每个等级的金钱储存上限增加量（影响source）
-    int MAX_LEVEL;                           // 最大等级
+    int id;
+    std::string name;
+    std::string spriteFrameName;
+    TargetPriority aiType;
+    
+    std::vector<float> HP;
+    std::vector<float> DP;
+    
+    int length;
+    int width;
+    std::vector<float> BUILD_TIME;
+    std::vector<int> COST_GOLD;
+    std::vector<int> COST_ELIXIR;
+    std::vector<int> ADD_STORAGE_ELIXIR_CAPACITY;
+    std::vector<int> ADD_STORAGE_GOLD_CAPACITY;
+    int MAXLEVEL;
+    
+    std::string anim_idle = "idle";
+    int anim_idle_frames = 1;
+    float anim_idle_delay = 0.1f;
 };
+
+#endif // __STORAGE_BUILDING_DATA_H__

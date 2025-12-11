@@ -1,67 +1,72 @@
 // UnitData.h
+#ifndef __UNIT_DATA_H__
+#define __UNIT_DATA_H__
+
 #include "cocos2d.h"
 #include <vector>
 
-// ¶¨Òå¹¥»÷Æ«ºÃÀàÐÍ
+// ï¿½ï¿½ï¿½å¹¥ï¿½ï¿½Æ«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 enum class TargetPriority {
-    ANY = 0,        // ÈÎÒâ½¨Öþ (Ò°ÂùÈË)
-    RESOURCE = 1,   // ×ÊÔ´ÓÅÏÈ (¸ç²¼ÁÖ)
-    DEFENSE = 2     // ·ÀÓùËþ (ÆøÇò)
+    ANY = 0,        // ï¿½ï¿½ï¿½â½¨ï¿½ï¿½ (Ò°ï¿½ï¿½ï¿½ï¿½)
+    RESOURCE = 1,   // ï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½ (ï¿½ç²¼ï¿½ï¿½)
+    DEFENSE = 2     // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½)
 };
 
-// ·½ÏòÃ¶¾Ù
-// ×¢Òâ£ºÖ»ÐèÒªÏòÓÒ·½Ïò(RIGHT)µÄ¶¯»­×ÊÔ´£¬Ïò×ó·½ÏòÍ¨¹ýÍ¼Æ¬·­×ªÊµÏÖ
-// Ö¡ÃüÃû¹æ·¶£º{spriteFrameName}_{anim_key}_{frame_number}.png
-// ÀýÈç£ºgoblin_walk_1.png, goblin_walk_2.png
+// ï¿½ï¿½ï¿½ï¿½Ã¶ï¿½ï¿½
+// ×¢ï¿½â£ºÖ»ï¿½ï¿½Òªï¿½ï¿½ï¿½Ò·ï¿½ï¿½ï¿½(RIGHT)ï¿½Ä¶ï¿½ï¿½ï¿½ï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½Í¼Æ¬ï¿½ï¿½×ªÊµï¿½ï¿½
+// Ö¡ï¿½ï¿½ï¿½ï¿½ï¿½æ·¶ï¿½ï¿½{spriteFrameName}_{anim_key}_{frame_number}.png
+// ï¿½ï¿½ï¿½ç£ºgoblin_walk_1.png, goblin_walk_2.png
 enum class Direction {
-    LEFT = 0,       // ×ó
-    RIGHT = 1       // ÓÒ
+    LEFT = 0,       // ï¿½ï¿½
+    RIGHT = 1       // ï¿½ï¿½
 };
 
-// ±øÖÖÅäÖÃ,ÓÃÓÚ´æ´¢¸÷ÖÖ±øµÄÊý¾Ý
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½Ú´æ´¢ï¿½ï¿½ï¿½Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 struct UnitConfig {
-// »ù´¡ÐÅÏ¢
-    int id;                     // ±øÖÖ±àºÅÈç1001
-    std::string name;           // Èç"Goblin"
-    std::string spriteFrameName;// Èç"goblin01.png" 
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+    int id;                     // ï¿½ï¿½ï¿½Ö±ï¿½ï¿½ï¿½ï¿½1001
+    std::string name;           // ï¿½ï¿½"Goblin"
+    std::string spriteFrameName;// ï¿½ï¿½"goblin01.png" 
     
-// ÊôÐÔÊý¾Ý - ÐÞ¸ÄÎª°´µÈ¼¶µÄvectorÊý×é
-    std::vector<float> HP;      // Ã¿¸öµÈ¼¶µÄÑªÁ¿
-    std::vector<float> SPEED;   // Ã¿¸öµÈ¼¶µÄÒÆ¶¯ËÙ¶È
-    std::vector<float> DP;      // Ã¿¸öµÈ¼¶µÄ·ÀÓùÁ¦
-    std::vector<float> ATK;     // Ã¿¸öµÈ¼¶µÄ¹¥»÷Á¦
-    std::vector<float> RANGE;   // Ã¿¸öµÈ¼¶µÄ¹¥»÷·¶Î§
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ - ï¿½Þ¸ï¿½Îªï¿½ï¿½ï¿½È¼ï¿½ï¿½ï¿½vectorï¿½ï¿½ï¿½ï¿½
+    std::vector<float> HP;      // Ã¿ï¿½ï¿½ï¿½È¼ï¿½ï¿½ï¿½Ñªï¿½ï¿½
+    std::vector<float> SPEED;   // Ã¿ï¿½ï¿½ï¿½È¼ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½ï¿½Ù¶ï¿½
+    std::vector<float> DP;      // Ã¿ï¿½ï¿½ï¿½È¼ï¿½ï¿½Ä·ï¿½ï¿½ï¿½ï¿½ï¿½
+    std::vector<float> ATK;     // Ã¿ï¿½ï¿½ï¿½È¼ï¿½ï¿½Ä¹ï¿½ï¿½ï¿½ï¿½ï¿½
+    std::vector<float> RANGE;   // Ã¿ï¿½ï¿½ï¿½È¼ï¿½ï¿½Ä¹ï¿½ï¿½ï¿½ï¿½ï¿½Î§
     
-    TargetPriority aiType;      // Èç£º2 - Õâ¸ö×Ö¶Î¾ö¶¨Õâ¸öÊÇ¸ç²¼ÁÖ
+    TargetPriority aiType;      // ï¿½ç£º2 - ï¿½ï¿½ï¿½ï¿½Ö¶Î¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç¸ç²¼ï¿½ï¿½
     
-    // ÆäËûÊôÐÔ
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     bool ISREMOTE;
     bool ISFLY;
 
-    // ×î´óµÈ¼¶
+    // ï¿½ï¿½ï¿½È¼ï¿½
     int MAXLEVEL;
 
-    // ×ÊÔ´ÏûºÄ
+    // ï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½
     int COST_COIN;
     int COST_ELIXIR;
     int COST_POPULATION;
-    int TRAIN_TIME; // ÑµÁ·Ê±¼ä,µ¥Î»Ãë
-    // ¶¯»­ÅäÖÃ£º´Ó¾«ÁéÍ¼¼¯ÖÐ¶ÁÈ¡Ö¡Ðò
-    // Ö¡ÃüÃû¹æ·¶£º{spriteFrameName}_{anim_key}_{frame_number}.png
-    // ÀýÈç£ºgoblin_walk_1.png, goblin_walk_2.png, ...
-    std::string anim_walk = "walk";        // ÒÆ¶¯¶¯»­¹Ø¼ü×Ö
-    int anim_walk_frames = 6;              // ÒÆ¶¯¶¯»­Ö¡Êý
-    float anim_walk_delay = 0.08f;         // Ã¿Ö¡ÑÓ³Ù£¨Ãë£©
+    int TRAIN_TIME; // Ñµï¿½ï¿½Ê±ï¿½ï¿½,ï¿½ï¿½Î»ï¿½ï¿½
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã£ï¿½ï¿½Ó¾ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½Ð¶ï¿½È¡Ö¡ï¿½ï¿½
+    // Ö¡ï¿½ï¿½ï¿½ï¿½ï¿½æ·¶ï¿½ï¿½{spriteFrameName}_{anim_key}_{frame_number}.png
+    // ï¿½ï¿½ï¿½ç£ºgoblin_walk_1.png, goblin_walk_2.png, ...
+    std::string anim_walk = "walk";        // ï¿½Æ¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø¼ï¿½ï¿½ï¿½
+    int anim_walk_frames = 6;              // ï¿½Æ¶ï¿½ï¿½ï¿½ï¿½ï¿½Ö¡ï¿½ï¿½
+    float anim_walk_delay = 0.08f;         // Ã¿Ö¡ï¿½Ó³Ù£ï¿½ï¿½ë£©
     
-    std::string anim_attack = "attack";    // ¹¥»÷¶¯»­¹Ø¼ü×Ö
-    int anim_attack_frames = 8;            // ¹¥»÷¶¯»­Ö¡Êý
-    float anim_attack_delay = 0.06f;       // Ã¿Ö¡ÑÓ³Ù£¨Ãë£©
+    std::string anim_attack = "attack";    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø¼ï¿½ï¿½ï¿½
+    int anim_attack_frames = 8;            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¡ï¿½ï¿½
+    float anim_attack_delay = 0.06f;       // Ã¿Ö¡ï¿½Ó³Ù£ï¿½ï¿½ë£©
     
-    std::string anim_idle = "idle";        // ´ý»ú¶¯»­¹Ø¼ü×Ö£¨¿ÉÑ¡£©
-    int anim_idle_frames = 4;              // ´ý»ú¶¯»­Ö¡Êý
-    float anim_idle_delay = 0.15f;         // Ã¿Ö¡ÑÓ³Ù£¨Ãë£©
+    std::string anim_idle = "idle";        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø¼ï¿½ï¿½Ö£ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½
+    int anim_idle_frames = 4;              // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¡ï¿½ï¿½
+    float anim_idle_delay = 0.15f;         // Ã¿Ö¡ï¿½Ó³Ù£ï¿½ï¿½ë£©
 
     std::string anim_dead = "dead";
-    int anim_dead_frames = 4;              // ËÀÍö¶¯»­Ö¡Êý
-    float anim_dead_delay = 0.06f;         // Ã¿Ö¡ÑÓ³Ù£¨Ãë£©
+    int anim_dead_frames = 4;              // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¡ï¿½ï¿½
+    float anim_dead_delay = 0.06f;         // Ã¿Ö¡ï¿½Ó³Ù£ï¿½ï¿½ë£©
 };
+
+#endif // __UNIT_DATA_H__
