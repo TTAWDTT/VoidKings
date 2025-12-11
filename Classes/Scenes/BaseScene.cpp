@@ -63,7 +63,7 @@ void BaseScene::createGrassBackground() {
         for (int x = 0; x < 40; ++x) {
             // Random grass tile (0-2)
             int grassType = rand() % 3;
-            char buffer[32];
+            char buffer[64];
             sprintf(buffer, "grass/grass_000%d.png", grassType);
             
             auto grassSprite = Sprite::create(buffer);

@@ -29,7 +29,22 @@ bool StorageBuilding::init(const StorageBuildingConfig* config, int level) {
         this->addChild(_bodySprite);
     }
 
+    // Create health bar using DrawNode if image not available
     _healthBar = Sprite::create("res/health_bar.png");
+    if (!_healthBar) {
+        // Create a simple colored sprite as health bar
+        auto healthBarBg = Sprite::create();
+        if (healthBarBg) {
+            // Create a 1x1 white texture and scale it
+            unsigned char data[] = {255, 255, 255, 255};
+            auto texture = new Texture2D();
+            texture->initWithData(data, 1, Image::Format::RGBA8888, 1, 1, Size(1, 1));
+            healthBarBg->initWithTexture(texture);
+            healthBarBg->setTextureRect(Rect(0, 0, 50, 5));
+            texture->release();
+            _healthBar = healthBarBg;
+        }
+    }
     if (_healthBar) {
         _healthBar->setAnchorPoint(Vec2(0.0f, 0.5f));
         float offsetY = 30.0f;
