@@ -1,0 +1,24 @@
+{
+    "sources": [
+        {
+            "id": 1,
+            "type": "coin",
+            "name": "Gold Coin",
+            "spritePath": "source/coin/coin_0001.png",
+            "animFrames": 5,
+            "animDelay": 0.15,
+            "framePattern": "source/coin/coin_%04d.png",
+            "frameStart": 1
+        },
+        {
+            "id": 2,
+            "type": "diamond",
+            "name": "Diamond",
+            "spritePath": "source/diamond/sprite_0000.png",
+            "animFrames": 4,
+            "animDelay": 0.15,
+            "framePattern": "source/diamond/sprite_%04d.png",
+            "frameStart": 0
+        }
+    ]
+}
