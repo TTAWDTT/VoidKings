@@ -24,6 +24,7 @@
  ****************************************************************************/
 
 #include "MainMenuScene.h"
+#include "BaseScene.h"
 
 Scene* MainMenuScene::createScene()
 {
@@ -300,12 +301,8 @@ void MainMenuScene::createMainMenuLayer() {
 }
 
 void MainMenuScene::onStart(Ref* sender) {
-    // TODO: 待实现 BaseScene 后取消注释
-    // auto scene = BaseScene::createScene();
-    // Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene, Color3B::BLACK));
-    
-    // 临时提示
-    CCLOG("Start Game clicked - BaseScene not yet implemented");
+    auto scene = BaseScene::createScene();
+    Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene, Color3B::BLACK));
 }
 
 void MainMenuScene::switchToLayer(Node* targetLayer)

@@ -1,0 +1,25 @@
+// Bullet.h
+#ifndef __BULLET_H__
+#define __BULLET_H__
+
+#include "cocos2d.h"
+
+class Bullet : public cocos2d::Node {
+public:
+    static Bullet* create(const std::string& spriteFrame, float damage, float speed);
+    virtual bool init(const std::string& spriteFrame, float damage, float speed);
+    virtual void update(float dt) override;
+
+    void setTarget(cocos2d::Node* target);
+    float getDamage() const { return _damage; }
+    
+protected:
+    cocos2d::Sprite* _sprite;
+    cocos2d::Node* _target;
+    float _damage;
+    float _speed;
+    
+    virtual void onReachTarget();
+};
+
+#endif // __BULLET_H__

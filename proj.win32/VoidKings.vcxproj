@@ -153,11 +153,39 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
   <ItemGroup>
     <ClCompile Include="..\Classes\AppDelegate.cpp" />
     <ClCompile Include="..\Classes\HelloWorldScene.cpp" />
+    <ClCompile Include="..\Classes\Scenes\MainMenuScene.cpp" />
+    <ClCompile Include="..\Classes\Scenes\BaseScene.cpp" />
+    <ClCompile Include="..\Classes\Soldier\Soldier.cpp" />
+    <ClCompile Include="..\Classes\Soldier\UnitManager.cpp" />
+    <ClCompile Include="..\Classes\Buildings\DefenceBuilding.cpp" />
+    <ClCompile Include="..\Classes\Buildings\ProductionBuilding.cpp" />
+    <ClCompile Include="..\Classes\Buildings\StorageBuilding.cpp" />
+    <ClCompile Include="..\Classes\Buildings\BuildingManager.cpp" />
+    <ClCompile Include="..\Classes\Bullet\Bullet.cpp" />
+    <ClCompile Include="..\Classes\Resource\Resource.cpp" />
+    <ClCompile Include="..\Classes\Map\GridMap.cpp" />
+    <ClCompile Include="..\Classes\Utils\AnimationUtils.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Classes\AppDelegate.h" />
     <ClInclude Include="..\Classes\HelloWorldScene.h" />
+    <ClInclude Include="..\Classes\Scenes\MainMenuScene.h" />
+    <ClInclude Include="..\Classes\Scenes\BaseScene.h" />
+    <ClInclude Include="..\Classes\Soldier\Soldier.h" />
+    <ClInclude Include="..\Classes\Soldier\UnitData.h" />
+    <ClInclude Include="..\Classes\Soldier\UnitManager.h" />
+    <ClInclude Include="..\Classes\Buildings\DefenceBuilding.h" />
+    <ClInclude Include="..\Classes\Buildings\DefenseBuildingData.h" />
+    <ClInclude Include="..\Classes\Buildings\ProductionBuilding.h" />
+    <ClInclude Include="..\Classes\Buildings\ProductionBuildingData.h" />
+    <ClInclude Include="..\Classes\Buildings\StorageBuilding.h" />
+    <ClInclude Include="..\Classes\Buildings\StorageBuildingData.h" />
+    <ClInclude Include="..\Classes\Buildings\BuildingManager.h" />
+    <ClInclude Include="..\Classes\Bullet\Bullet.h" />
+    <ClInclude Include="..\Classes\Resource\Resource.h" />
+    <ClInclude Include="..\Classes\Map\GridMap.h" />
+    <ClInclude Include="..\Classes\Utils\AnimationUtils.h" />
     <ClInclude Include="main.h" />
   </ItemGroup>
   <ItemGroup>

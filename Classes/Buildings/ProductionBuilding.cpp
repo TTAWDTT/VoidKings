@@ -1,44 +1,65 @@
-// ProductionBuilding.cpp
 #include "ProductionBuilding.h"
+#include "Utils/AnimationUtils.h"
 
-// 从config中创建
+USING_NS_CC;
+
 ProductionBuilding* ProductionBuilding::create(const ProductionBuildingConfig* config, int level) {
-    ProductionBuilding* pRet = new(std::nothrow) ProductionBuilding(); // 在堆内存（Heap）中申请一块内存来存放 ProductionBuilding 对象 - nothrow会安全一点,内存不够时返回nullptr,而不是直接崩溃
-    if (pRet && pRet->init(config, level)) { // 调用init进行初始化
-        pRet->autorelease(); // 意思为：这一帧结束时,如果没有被addChild,就自动滚
+    ProductionBuilding* pRet = new(std::nothrow) ProductionBuilding();
+    if (pRet && pRet->init(config, level)) {
+        pRet->autorelease();
         return pRet;
     }
     delete pRet;
-    return nullptr; // 没内存就滚
+    return nullptr;
 }
 
 bool ProductionBuilding::init(const ProductionBuildingConfig* config, int level) {
-    // 底层数据初始化
     if (!Node::init()) return false;
 
-    // 1. 绑定配置
-    _config = config; // 这个写指针绑定,而不是拷贝,节约内存
-
-    // 2. 设置等级并验证
+    _config = config;
     _level = level;
     if (_level < 0) _level = 0;
     if (_level > _config->MAXLEVEL) _level = _config->MAXLEVEL;
     
-    // 3. 初始化运行时状态 - 使用level索引访问属性
     _currentHP = getCurrentMaxHP();
-    _currentDP = getCurrentDP();
-    _currentPRODUCE_ELIXIR = getCurrentPRODUCE_ELIXIR();
-    _currentPRODUCE_GOLD = getCurrentPRODUCE_GOLD();
-    _currentSTORAGE_ELIXIR_CAPACITY = getCurrentSTORAGE_ELIXIR_CAPACITY();
-    _currentSTORAGE_GOLD_CAPACITY = getCurrentSTORAGE_GOLD_CAPACITY();
+    _lastProduceTime = 0.0f;
+    _currentActionKey.clear();
 
-    // 4. 获得占地尺寸
-    _length = getLength();
-    _width = getWidth();
-    // 5. 创建外观 (根据配置里的图片路径)
-    _bodySprite = cocos2d::Sprite::createWithSpriteFrameName(_config->spriteFrameName);
-    this->addChild(_bodySprite); // 这个大概就体现了逻辑实体和显示实体的组合
-    // 6. 开启 Update 循环
+    _bodySprite = Sprite::create(_config->spriteFrameName);
+    if (_bodySprite) {
+        this->addChild(_bodySprite);
+    }
+
+    // Create health bar using DrawNode if image not available
+    _healthBar = Sprite::create("res/health_bar.png");
+    if (!_healthBar) {
+        // Create a simple colored sprite as health bar
+        auto healthBarBg = Sprite::create();
+        if (healthBarBg) {
+            // Create a 1x1 white texture and scale it
+            unsigned char data[] = {255, 255, 255, 255};
+            auto texture = new Texture2D();
+            texture->initWithData(data, 1, Texture2D::PixelFormat::RGBA8888, 1, 1, Size(1, 1));
+            healthBarBg->initWithTexture(texture);
+            healthBarBg->setTextureRect(Rect(0, 0, 50, 5));
+            texture->release();
+            _healthBar = healthBarBg;
+        }
+    }
+    if (_healthBar) {
+        _healthBar->setAnchorPoint(Vec2(0.0f, 0.5f));
+        float offsetY = 30.0f;
+        if (_bodySprite) {
+            float y = _bodySprite->getContentSize().height * 0.5f + offsetY;
+            float x = -_healthBar->getContentSize().width * 0.5f;
+            _healthBar->setPosition(Vec2(x, y));
+        }
+        this->addChild(_healthBar);
+        _healthBar->setScaleX(1.0f);
+        _healthBar->setColor(Color3B::GREEN);
+    }
+
+    updateHealthBar(false);
     this->scheduleUpdate();
 
     return true;
@@ -47,10 +68,7 @@ bool ProductionBuilding::init(const ProductionBuildingConfig* config, int level)
 void ProductionBuilding::setLevel(int level) {
     if (level < 0) level = 0;
     if (level > _config->MAXLEVEL) level = _config->MAXLEVEL;
-    // 保存血量百分比
-    float hpPercent = _currentHP / getCurrentMaxHP();
     _level = level;
-
 }
 
 float ProductionBuilding::getCurrentMaxHP() const {
@@ -59,7 +77,6 @@ float ProductionBuilding::getCurrentMaxHP() const {
     }
     return _config->HP.empty() ? 0.0f : _config->HP[0];
 }
-    
 
 float ProductionBuilding::getCurrentDP() const {
     if (_level >= 0 && _level < _config->DP.size()) {
@@ -75,49 +92,54 @@ float ProductionBuilding::getCurrentPRODUCE_ELIXIR() const {
     return _config->PRODUCE_ELIXIR.empty() ? 0.0f : _config->PRODUCE_ELIXIR[0];
 }
 
-float ProductionBuilding::getCurrentPRODUCE_GOLD() const {
-    if (_level >= 0 && _level < _config->PRODUCE_GOLD.size()) {
-        return _config->PRODUCE_GOLD[_level];
-    }
-    return _config->PRODUCE_GOLD.empty() ? 0.0f : _config->PRODUCE_GOLD[0];
-}
 float ProductionBuilding::getCurrentSTORAGE_ELIXIR_CAPACITY() const {
     if (_level >= 0 && _level < _config->STORAGE_ELIXIR_CAPACITY.size()) {
         return _config->STORAGE_ELIXIR_CAPACITY[_level];
     }
     return _config->STORAGE_ELIXIR_CAPACITY.empty() ? 0.0f : _config->STORAGE_ELIXIR_CAPACITY[0];
 }
+
+float ProductionBuilding::getCurrentPRODUCE_GOLD() const {
+    if (_level >= 0 && _level < _config->PRODUCE_GOLD.size()) {
+        return _config->PRODUCE_GOLD[_level];
+    }
+    return _config->PRODUCE_GOLD.empty() ? 0.0f : _config->PRODUCE_GOLD[0];
+}
+
 float ProductionBuilding::getCurrentSTORAGE_GOLD_CAPACITY() const {
     if (_level >= 0 && _level < _config->STORAGE_GOLD_CAPACITY.size()) {
         return _config->STORAGE_GOLD_CAPACITY[_level];
     }
     return _config->STORAGE_GOLD_CAPACITY.empty() ? 0.0f : _config->STORAGE_GOLD_CAPACITY[0];
 }
-float ProductionBuilding::getCurrentHP() const {
-    return _currentHP;
-}
+
 int ProductionBuilding::getLength() const {
     return _config->length;
 }
+
 int ProductionBuilding::getWidth() const {
     return _config->width;
 }
 
 void ProductionBuilding::update(float dt) {
-    levelup();//升级,未实现
-    produce(dt);//生产与暂存逻辑,未实现
+    produce(dt);
 }
 
+void ProductionBuilding::produce(float dt) {
+    // TODO: Implement resource production
+}
 
 void ProductionBuilding::takeDamage(float damage) {
     _currentHP -= damage;
     if (_currentHP < 0) _currentHP = 0;
     
-    // 死亡处理
+    updateHealthBar(true);
+    
     if (_currentHP <= 0) {
-        // 处理死亡逻辑
+        this->removeFromParent();
     }
 }
+
 void ProductionBuilding::updateHealthBar(bool animate) {
     if (!_healthBar || !_config) return;
 
@@ -133,29 +155,53 @@ void ProductionBuilding::updateHealthBar(bool animate) {
 
     if (animate) {
         _healthBar->stopAllActions();
-        auto action = cocos2d::ScaleTo::create(0.12f, targetScaleX, 1.0f);
+        auto action = ScaleTo::create(0.12f, targetScaleX, 1.0f);
         _healthBar->runAction(action);
-    }
-    else {
+    } else {
         _healthBar->setScaleX(targetScaleX);
     }
 
     if (pct > 0.5f) {
-        _healthBar->setColor(cocos2d::Color3B::GREEN);
-    }
-    else if (pct > 0.2f) {
-        _healthBar->setColor(cocos2d::Color3B::YELLOW);
-    }
-    else {
-        _healthBar->setColor(cocos2d::Color3B::RED);
+        _healthBar->setColor(Color3B::GREEN);
+    } else if (pct > 0.2f) {
+        _healthBar->setColor(Color3B::YELLOW);
+    } else {
+        _healthBar->setColor(Color3B::RED);
     }
 
     if (pct <= 0.0f) {
         _healthBar->setVisible(false);
-    }
-    else {
+    } else {
         _healthBar->setVisible(true);
     }
+}
+
+void ProductionBuilding::playAnimation(const std::string& animType, int frameCount, float delay, bool loop) {
+    if (!_bodySprite || !_config) return;
+    
+    std::string key = animType;
+    if (_currentActionKey == key) return;
+    
+    auto anim = AnimationUtils::buildAnimationFromFrames(_config->spriteFrameName, animType, frameCount, delay);
+    if (!anim) return;
+    
+    _bodySprite->stopAllActions();
+    
+    if (loop) {
+        auto act = RepeatForever::create(Animate::create(anim));
+        _bodySprite->runAction(act);
+    } else {
+        auto sequence = Sequence::create(
+            Animate::create(anim),
+            CallFunc::create([this]() {
+                _currentActionKey.clear();
+            }),
+            nullptr
+        );
+        _bodySprite->runAction(sequence);
+    }
+    
+    _currentActionKey = key;
 }
 
 void ProductionBuilding::stopCurrentAnimation() {
