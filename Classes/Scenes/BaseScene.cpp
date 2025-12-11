@@ -64,12 +64,13 @@ void BaseScene::createGrassBackground() {
             // Random grass tile (0-2)
             int grassType = rand() % 3;
             char buffer[64];
-            sprintf(buffer, "grass/grass_000%d.png", grassType);
+            sprintf(buffer, "grass_000%d.png", grassType);
             
             auto grassSprite = Sprite::create(buffer);
             if (grassSprite) {
                 Vec2 pos = _gridMap->gridToWorld(x, y);
                 grassSprite->setPosition(pos);
+                // Scale grass to fit cell size
                 grassSprite->setScale(32.0f / grassSprite->getContentSize().width);
                 _gridMap->addChild(grassSprite, 0);
             }
@@ -190,26 +191,26 @@ void BaseScene::createBuildShop() {
 }
 
 void BaseScene::initBaseBuilding() {
-    // Create base building in center (grid position 19, 19 - 2x2 size)
-    ProductionBuildingConfig baseConfig;
-    baseConfig.id = 100;
-    baseConfig.name = "Base";
-    baseConfig.spriteFrameName = "buildings/base.png";
-    baseConfig.HP = {1000, 1500, 2000};
-    baseConfig.DP = {0.5f, 0.6f, 0.7f};
-    baseConfig.length = 2;
-    baseConfig.width = 2;
-    baseConfig.MAXLEVEL = 2;
-    baseConfig.PRODUCE_GOLD = {10, 15, 20};
-    baseConfig.PRODUCE_ELIXIR = {5, 8, 10};
-    baseConfig.STORAGE_GOLD_CAPACITY = {1000, 2000, 3000};
-    baseConfig.STORAGE_ELIXIR_CAPACITY = {500, 1000, 1500};
+    // Initialize base building config as member variable
+    _baseConfig.id = 3001;
+    _baseConfig.name = "Base";
+    _baseConfig.spriteFrameName = "buildings/base.png";
+    _baseConfig.HP = {2000, 2500, 3000};
+    _baseConfig.DP = {0, 0.05f, 0.1f};
+    _baseConfig.length = 4;
+    _baseConfig.width = 4;
+    _baseConfig.MAXLEVEL = 2;
+    _baseConfig.PRODUCE_GOLD = {0, 0, 0};
+    _baseConfig.PRODUCE_ELIXIR = {0, 0, 0};
+    _baseConfig.STORAGE_GOLD_CAPACITY = {1000, 2000, 4000};
+    _baseConfig.STORAGE_ELIXIR_CAPACITY = {500, 1000, 2000};
 
-    auto base = ProductionBuilding::create(&baseConfig, 0);
+    auto base = ProductionBuilding::create(&_baseConfig, 0);
     if (base) {
         _buildingLayer->addChild(base);
         BuildingManager::getInstance()->setGridMap(_gridMap);
-        BuildingManager::getInstance()->placeBuilding(base, 19, 19, 2, 2);
+        // Place base at center: grid 18,18 for a 4x4 building (so it centers around 20,20)
+        BuildingManager::getInstance()->placeBuilding(base, 18, 18, 4, 4);
     }
 }
 
@@ -244,28 +245,28 @@ void BaseScene::onBuildingSelected(int buildingType) {
     switch (buildingType) {
         case 1: // Arrow Tower
             spritePath = "buildings/ArrowTower.png";
-            _previewWidth = 1;
-            _previewHeight = 1;
+            _previewWidth = 2;
+            _previewHeight = 2;
             break;
         case 2: // Boom Tower
             spritePath = "buildings/BoomTower.png";
-            _previewWidth = 1;
-            _previewHeight = 1;
+            _previewWidth = 2;
+            _previewHeight = 2;
             break;
         case 3: // Tree
             spritePath = "buildings/Tree/sprite_0000.png";
-            _previewWidth = 1;
-            _previewHeight = 1;
+            _previewWidth = 2;
+            _previewHeight = 2;
             break;
         case 4: // Snowman
             spritePath = "buildings/snowman.png";
-            _previewWidth = 1;
-            _previewHeight = 1;
+            _previewWidth = 2;
+            _previewHeight = 2;
             break;
         case 5: // Soldier Builder
             spritePath = "buildings/soldierbuilder.png";
-            _previewWidth = 2;
-            _previewHeight = 2;
+            _previewWidth = 3;
+            _previewHeight = 3;
             break;
     }
 
@@ -274,6 +275,9 @@ void BaseScene::onBuildingSelected(int buildingType) {
         _placementPreview->setOpacity(180);
         _gridMap->addChild(_placementPreview, 50);
     }
+    
+    // Show grid lines for easier placement
+    _gridMap->showGrid(true);
 }
 
 void BaseScene::updatePlacementPreview() {
@@ -287,6 +291,8 @@ void BaseScene::confirmPlacement() {
         _placementPreview->removeFromParent();
         _placementPreview = nullptr;
     }
+    // Hide grid lines
+    _gridMap->showGrid(false);
 }
 
 void BaseScene::cancelPlacement() {
@@ -295,6 +301,8 @@ void BaseScene::cancelPlacement() {
         _placementPreview->removeFromParent();
         _placementPreview = nullptr;
     }
+    // Hide grid lines
+    _gridMap->showGrid(false);
 }
 
 bool BaseScene::onTouchBegan(Touch* touch, Event* event) {
@@ -328,10 +336,129 @@ void BaseScene::onTouchEnded(Touch* touch, Event* event) {
         Vec2 touchPos = touch->getLocation();
         Vec2 localPos = _gridMap->convertToNodeSpace(touchPos);
         Vec2 gridPos = _gridMap->worldToGrid(localPos);
+        
+        int gridX = (int)gridPos.x;
+        int gridY = (int)gridPos.y;
 
-        if (_gridMap->canPlaceBuilding((int)gridPos.x, (int)gridPos.y, _previewWidth, _previewHeight)) {
-            // TODO: Create actual building and place it
-            // For now, just end placement mode
+        if (_gridMap->canPlaceBuilding(gridX, gridY, _previewWidth, _previewHeight)) {
+            // Create the actual building based on type
+            Node* newBuilding = nullptr;
+            
+            switch (_selectedBuildingType) {
+                case 1: { // Arrow Tower
+                    DefenceBuildingConfig config;
+                    config.id = 2001;
+                    config.name = "ArrowTower";
+                    config.spriteFrameName = "buildings/ArrowTower.png";
+                    config.HP = {500, 750, 1000};
+                    config.DP = {0, 0.05f, 0.1f};
+                    config.ATK = {30, 45, 60};
+                    config.ATK_RANGE = {200, 250, 300};
+                    config.ATK_SPEED = {1.0f, 0.9f, 0.8f};
+                    config.SKY_ABLE = true;
+                    config.GROUND_ABLE = true;
+                    config.length = 2;
+                    config.width = 2;
+                    config.MAXLEVEL = 2;
+                    auto building = DefenceBuilding::create(&config, 0);
+                    newBuilding = building;
+                    break;
+                }
+                case 2: { // Boom Tower
+                    DefenceBuildingConfig config;
+                    config.id = 2002;
+                    config.name = "BoomTower";
+                    config.spriteFrameName = "buildings/BoomTower.png";
+                    config.HP = {600, 900, 1200};
+                    config.DP = {0.05f, 0.1f, 0.15f};
+                    config.ATK = {50, 75, 100};
+                    config.ATK_RANGE = {180, 220, 260};
+                    config.ATK_SPEED = {1.5f, 1.4f, 1.3f};
+                    config.SKY_ABLE = false;
+                    config.GROUND_ABLE = true;
+                    config.length = 2;
+                    config.width = 2;
+                    config.MAXLEVEL = 2;
+                    auto building = DefenceBuilding::create(&config, 0);
+                    newBuilding = building;
+                    break;
+                }
+                case 3: { // Tree
+                    DefenceBuildingConfig config;
+                    config.id = 2003;
+                    config.name = "Tree";
+                    config.spriteFrameName = "buildings/Tree/sprite_0000.png";
+                    config.HP = {450, 650, 850};
+                    config.DP = {0, 0.05f, 0.1f};
+                    config.ATK = {25, 40, 55};
+                    config.ATK_RANGE = {220, 270, 320};
+                    config.ATK_SPEED = {0.8f, 0.7f, 0.6f};
+                    config.SKY_ABLE = false;
+                    config.GROUND_ABLE = true;
+                    config.length = 2;
+                    config.width = 2;
+                    config.MAXLEVEL = 2;
+                    auto building = DefenceBuilding::create(&config, 0);
+                    newBuilding = building;
+                    break;
+                }
+                case 4: { // Snowman
+                    StorageBuildingConfig config;
+                    config.id = 4001;
+                    config.name = "Snowman";
+                    config.spriteFrameName = "buildings/snowman.png";
+                    config.HP = {800, 1000, 1200};
+                    config.DP = {0.1f, 0.15f, 0.2f};
+                    config.length = 2;
+                    config.width = 2;
+                    config.MAXLEVEL = 2;
+                    config.ADD_STORAGE_ELIXIR_CAPACITY = {1000, 2000, 4000};
+                    config.ADD_STORAGE_GOLD_CAPACITY = {1000, 2000, 4000};
+                    auto building = StorageBuilding::create(&config, 0);
+                    newBuilding = building;
+                    break;
+                }
+                case 5: { // Soldier Builder
+                    ProductionBuildingConfig config;
+                    config.id = 3002;
+                    config.name = "SoldierBuilder";
+                    config.spriteFrameName = "buildings/soldierbuilder.png";
+                    config.HP = {600, 750, 900};
+                    config.DP = {0, 0, 0};
+                    config.length = 3;
+                    config.width = 3;
+                    config.MAXLEVEL = 2;
+                    config.PRODUCE_ELIXIR = {0, 0, 0};
+                    config.STORAGE_ELIXIR_CAPACITY = {0, 0, 0};
+                    config.PRODUCE_GOLD = {0, 0, 0};
+                    config.STORAGE_GOLD_CAPACITY = {0, 0, 0};
+                    auto building = ProductionBuilding::create(&config, 0);
+                    newBuilding = building;
+                    break;
+                }
+            }
+            
+            if (newBuilding) {
+                _buildingLayer->addChild(newBuilding);
+                BuildingManager::getInstance()->placeBuilding(newBuilding, gridX, gridY, _previewWidth, _previewHeight);
+                
+                // Deduct cost
+                int cost = 0;
+                switch (_selectedBuildingType) {
+                    case 1: cost = 100; break;
+                    case 2: cost = 150; break;
+                    case 3: cost = 80; break;
+                    case 4: cost = 200; break;
+                    case 5: cost = 300; break;
+                }
+                _currentGold -= cost;
+                
+                // Update UI
+                char buffer[64];
+                sprintf(buffer, "Gold: %d", _currentGold);
+                _goldLabel->setString(buffer);
+            }
+            
             confirmPlacement();
         } else {
             cancelPlacement();

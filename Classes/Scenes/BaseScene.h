@@ -37,6 +37,9 @@ private:
     Label* _goldLabel;
     Label* _diamondLabel;
     
+    // Store building configs as member variables
+    ProductionBuildingConfig _baseConfig;
+    
     void createGrassBackground();
     void createUI();
     void createBuildShop();
