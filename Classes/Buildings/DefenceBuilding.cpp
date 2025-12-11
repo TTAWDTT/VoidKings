@@ -1,45 +1,51 @@
-// Defence.cpp
 #include "DefenceBuilding.h"
+#include "Utils/AnimationUtils.h"
 
-// 从config中创建
+USING_NS_CC;
+
 DefenceBuilding* DefenceBuilding::create(const DefenceBuildingConfig* config, int level) {
-    DefenceBuilding* pRet = new(std::nothrow) DefenceBuilding(); // 在堆内存（Heap）中申请一块内存来存放 DefenceBuilding 对象 - nothrow会安全一点,内存不够时返回nullptr,而不是直接崩溃
-    if (pRet && pRet->init(config, level)) { // 调用init进行初始化
-        pRet->autorelease(); // 意思为：这一帧结束时,如果没有被addChild,就自动滚
+    DefenceBuilding* pRet = new(std::nothrow) DefenceBuilding();
+    if (pRet && pRet->init(config, level)) {
+        pRet->autorelease();
         return pRet;
     }
     delete pRet;
-    return nullptr; // 没内存就滚
+    return nullptr;
 }
 
 bool DefenceBuilding::init(const DefenceBuildingConfig* config, int level) {
-    // 底层数据初始化
     if (!Node::init()) return false;
 
-    // 1. 绑定配置
-    _config = config; // 这个写指针绑定,而不是拷贝,节约内存
-
-    // 2. 设置等级并验证
+    _config = config;
     _level = level;
     if (_level < 0) _level = 0;
     if (_level > _config->MAXLEVEL) _level = _config->MAXLEVEL;
     
-    // 3. 初始化运行时状态 - 使用level索引访问属性
     _currentHP = getCurrentMaxHP();
-    _currentDP = getCurrentDP();
-    _currentATK_SPEED = getCurrentATK_SPEED();
-    _currentATK = getCurrentATK();
-    _currentATK_RANGE = getCurrentATK_RANGE();
+    _target = nullptr;
+    _lastAttackTime = 0.0f;
+    _currentActionKey.clear();
 
-    // 4. 获得占地尺寸
-    _length = getLength();
-    _width = getWidth();
+    _bodySprite = Sprite::create(_config->spriteFrameName);
+    if (_bodySprite) {
+        this->addChild(_bodySprite);
+    }
 
-    // 5. 创建外观 (根据配置里的图片路径)
-    _bodySprite = cocos2d::Sprite::createWithSpriteFrameName(_config->spriteFrameName);
-    this->addChild(_bodySprite); // 这个大概就体现了逻辑实体和显示实体的组合
+    _healthBar = Sprite::create("res/health_bar.png");
+    if (_healthBar) {
+        _healthBar->setAnchorPoint(Vec2(0.0f, 0.5f));
+        float offsetY = 30.0f;
+        if (_bodySprite) {
+            float y = _bodySprite->getContentSize().height * 0.5f + offsetY;
+            float x = -_healthBar->getContentSize().width * 0.5f;
+            _healthBar->setPosition(Vec2(x, y));
+        }
+        this->addChild(_healthBar);
+        _healthBar->setScaleX(1.0f);
+        _healthBar->setColor(Color3B::GREEN);
+    }
 
-    // 6. 开启 Update 循环
+    updateHealthBar(false);
     this->scheduleUpdate();
 
     return true;
@@ -48,10 +54,6 @@ bool DefenceBuilding::init(const DefenceBuildingConfig* config, int level) {
 void DefenceBuilding::setLevel(int level) {
     if (level < 0) level = 0;
     if (level > _config->MAXLEVEL) level = _config->MAXLEVEL;
-    
-    // 保存血量百分比
-    float hpPercent = _currentHP / getCurrentMaxHP();
-    
     _level = level;
 }
 
@@ -61,91 +63,83 @@ float DefenceBuilding::getCurrentMaxHP() const {
     }
     return _config->HP.empty() ? 0.0f : _config->HP[0];
 }
+
 float DefenceBuilding::getCurrentDP() const {
     if (_level >= 0 && _level < _config->DP.size()) {
         return _config->DP[_level];
     }
     return _config->DP.empty() ? 0.0f : _config->DP[0];
 }
+
 float DefenceBuilding::getCurrentATK_SPEED() const {
     if (_level >= 0 && _level < _config->ATK_SPEED.size()) {
         return _config->ATK_SPEED[_level];
     }
     return _config->ATK_SPEED.empty() ? 0.0f : _config->ATK_SPEED[0];
 }
+
 float DefenceBuilding::getCurrentATK() const {
     if (_level >= 0 && _level < _config->ATK.size()) {
         return _config->ATK[_level];
     }
     return _config->ATK.empty() ? 0.0f : _config->ATK[0];
 }
+
 float DefenceBuilding::getCurrentATK_RANGE() const {
     if (_level >= 0 && _level < _config->ATK_RANGE.size()) {
         return _config->ATK_RANGE[_level];
     }
     return _config->ATK_RANGE.empty() ? 0.0f : _config->ATK_RANGE[0];
 }
-float DefenceBuilding::getCurrentHP() const {
-    return _currentHP;
-}
+
 int DefenceBuilding::getLength() const {
     return _config->length;
 }
+
 int DefenceBuilding::getWidth() const {
     return _config->width;
 }
 
 void DefenceBuilding::update(float dt) {
-    // 简单的状态机逻辑
     if (!_target) {
-        findTarget(); // 如果没有目标,去寻找目标
-    }
-    else {
-        // 计算距离
+        findTarget();
+    } else {
         float dist = this->getPosition().distance(_target->getPosition());
-        // 读配置里的射程 - 使用当前等级的属性
         if (dist <= getCurrentATK_RANGE()) {
-            attackTarget(); // 攻击
+            attackTarget();
+        } else {
+            _target = nullptr;
         }
-
     }
 }
 
-// 索敌）
 void DefenceBuilding::findTarget() {
-    // 获取场景里所有的Soldier (伪代码,假设有个 GameScene 单例管理士兵)
-    auto soldiers = GameWorld::getInstance()->getAllSoldiers();
-
-    // 根据配置里的 SKY_ABLE 进行筛选
-    if (_config->SKY_ABLE) {
-        // 可以攻击空中单位，直接选择最近的士兵
-        _target = findNearestSoldier(soldiers, true);
-        return;
-    }
-    // 不能攻击空中单位，优先选择地面单位
-    else {
-        _target = findNearestSoldier(soldiers, false);
-        if (_target) return; // 找到地面单位就返回
-    }
+    // TODO: Implement with GameWorld
 }
-
 
 void DefenceBuilding::takeDamage(float damage) {
     _currentHP -= damage;
     if (_currentHP < 0) _currentHP = 0;
     
-    // 死亡处理
+    updateHealthBar(true);
+    
     if (_currentHP <= 0) {
-        // 处理死亡逻辑
+        this->removeFromParent();
     }
 }
 
 void DefenceBuilding::attackTarget() {
     if (!_target) return;
     
-    // 使用当前等级的攻击力
-    float attackPower = getCurrentATK();
-    // 攻击逻辑...
+    float currentTime = Director::getInstance()->getTotalFrames() / 60.0f;
+    float attackSpeed = getCurrentATK_SPEED();
+    
+    if (currentTime - _lastAttackTime >= attackSpeed) {
+        playAnimation(_config->anim_attack, _config->anim_attack_frames, _config->anim_attack_delay, false);
+        _lastAttackTime = currentTime;
+        
+        // TODO: Create and fire bullet
+    }
 }
 
 void DefenceBuilding::updateHealthBar(bool animate) {
@@ -163,29 +157,53 @@ void DefenceBuilding::updateHealthBar(bool animate) {
 
     if (animate) {
         _healthBar->stopAllActions();
-        auto action = cocos2d::ScaleTo::create(0.12f, targetScaleX, 1.0f);
+        auto action = ScaleTo::create(0.12f, targetScaleX, 1.0f);
         _healthBar->runAction(action);
-    }
-    else {
+    } else {
         _healthBar->setScaleX(targetScaleX);
     }
 
     if (pct > 0.5f) {
-        _healthBar->setColor(cocos2d::Color3B::GREEN);
-    }
-    else if (pct > 0.2f) {
-        _healthBar->setColor(cocos2d::Color3B::YELLOW);
-    }
-    else {
-        _healthBar->setColor(cocos2d::Color3B::RED);
+        _healthBar->setColor(Color3B::GREEN);
+    } else if (pct > 0.2f) {
+        _healthBar->setColor(Color3B::YELLOW);
+    } else {
+        _healthBar->setColor(Color3B::RED);
     }
 
     if (pct <= 0.0f) {
         _healthBar->setVisible(false);
-    }
-    else {
+    } else {
         _healthBar->setVisible(true);
     }
+}
+
+void DefenceBuilding::playAnimation(const std::string& animType, int frameCount, float delay, bool loop) {
+    if (!_bodySprite || !_config) return;
+    
+    std::string key = animType;
+    if (_currentActionKey == key) return;
+    
+    auto anim = AnimationUtils::buildAnimationFromFrames(_config->spriteFrameName, animType, frameCount, delay);
+    if (!anim) return;
+    
+    _bodySprite->stopAllActions();
+    
+    if (loop) {
+        auto act = RepeatForever::create(Animate::create(anim));
+        _bodySprite->runAction(act);
+    } else {
+        auto sequence = Sequence::create(
+            Animate::create(anim),
+            CallFunc::create([this]() {
+                _currentActionKey.clear();
+            }),
+            nullptr
+        );
+        _bodySprite->runAction(sequence);
+    }
+    
+    _currentActionKey = key;
 }
 
 void DefenceBuilding::stopCurrentAnimation() {
