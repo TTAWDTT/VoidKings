@@ -121,7 +121,7 @@ void BaseScene::createUI() {
 
     _diamondLabel = Label::createWithSystemFont("Diamond: 100", "Arial", 20);
     _diamondLabel->setPosition(Vec2(panelX, visibleSize.height - 60));
-    _diamondLabel->setColor(Color3B::CYAN);
+    _diamondLabel->setColor(Color3B(0, 255, 255)); // Cyan color
     _uiLayer->addChild(_diamondLabel);
 }
 
