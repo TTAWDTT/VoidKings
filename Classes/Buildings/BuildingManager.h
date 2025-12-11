@@ -6,7 +6,6 @@
 #include "Buildings/DefenceBuilding.h"
 #include "Buildings/ProductionBuilding.h"
 #include "Buildings/StorageBuilding.h"
-#include "Buildings/OtherBuilding.h"
 #include "Map/GridMap.h"
 #include <map>
 

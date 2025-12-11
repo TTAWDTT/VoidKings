@@ -39,7 +39,7 @@ bool ProductionBuilding::init(const ProductionBuildingConfig* config, int level)
             // Create a 1x1 white texture and scale it
             unsigned char data[] = {255, 255, 255, 255};
             auto texture = new Texture2D();
-            texture->initWithData(data, 1, Image::Format::RGBA8888, 1, 1, Size(1, 1));
+            texture->initWithData(data, 1, Texture2D::PixelFormat::RGBA8888, 1, 1, Size(1, 1));
             healthBarBg->initWithTexture(texture);
             healthBarBg->setTextureRect(Rect(0, 0, 50, 5));
             texture->release();
