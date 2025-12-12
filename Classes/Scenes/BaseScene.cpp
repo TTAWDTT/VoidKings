@@ -59,12 +59,12 @@ bool BaseScene::init() {
 
 void BaseScene::createGrassBackground() {
     // Create grass tile background
-    for (int y = 0; y < 40; ++y) {
-        for (int x = 0; x < 40; ++x) {
+    for (int y = 0; y < 160; ++y) {
+        for (int x = 0; x < 160; ++x) {
             // Random grass tile (0-2)
-            int grassType = rand() % 3;
+            int grassType = rand() % 6;
             char buffer[64];
-            sprintf(buffer, "grass_000%d.png", grassType);
+            sprintf(buffer, "Grass/grass_000%d.png", grassType);
             
             auto grassSprite = Sprite::create(buffer);
             if (grassSprite) {
@@ -87,42 +87,45 @@ void BaseScene::createUI() {
 
     // Create UI panel on the left side
     float panelX = origin.x + 80;
-    float buttonSpacing = 80;
+    float buttonSpacing = 30;
     float startY = visibleSize.height / 2 + 100;
 
     // Attack button
-    auto attackBtn = Button::create("btn_normal.png", "btn_pressed.png.png");
-    attackBtn->setTitleText("Attack");
-    attackBtn->setTitleFontSize(24);
+    auto attackBtn = Button::create("UI/attack.png");
+    // attackBtn->setTitleText("Attack");
+    // attackBtn->setTitleFontSize(24);
+	attackBtn->setScale(4.0f);
     attackBtn->setPosition(Vec2(panelX, startY));
     attackBtn->addClickEventListener([this](Ref* sender) { this->onAttackButton(sender); });
     _uiLayer->addChild(attackBtn);
 
     // Build button
-    auto buildBtn = Button::create("btn_normal.png", "btn_pressed.png.png");
-    buildBtn->setTitleText("Build");
-    buildBtn->setTitleFontSize(24);
+    auto buildBtn = Button::create("UI/build.png");
+    // buildBtn->setTitleText("Build");
+    // buildBtn->setTitleFontSize(24);
+	buildBtn->setScale(4.0f);
     buildBtn->setPosition(Vec2(panelX, startY - buttonSpacing));
     buildBtn->addClickEventListener([this](Ref* sender) { this->onBuildButton(sender); });
     _uiLayer->addChild(buildBtn);
 
     // Exit button
-    auto exitBtn = Button::create("btn_normal.png", "btn_pressed.png.png");
-    exitBtn->setTitleText("Exit");
-    exitBtn->setTitleFontSize(24);
+    auto exitBtn = Button::create("UI/exit.png");
+    // exitBtn->setTitleText("Exit");
+    // exitBtn->setTitleFontSize(24);
+	exitBtn->setScale(4.0f);
     exitBtn->setPosition(Vec2(panelX, startY - buttonSpacing * 2));
     exitBtn->addClickEventListener([this](Ref* sender) { this->onExitButton(sender); });
     _uiLayer->addChild(exitBtn);
 
     // Resource display
-    _goldLabel = Label::createWithSystemFont("Gold: 1000", "Arial", 20);
+    _goldLabel = Label::createWithSystemFont("Gold: 1000", "ScienceGothic", 10);
     _goldLabel->setPosition(Vec2(panelX, visibleSize.height - 30));
     _goldLabel->setColor(Color3B::YELLOW);
     _uiLayer->addChild(_goldLabel);
 
-    _diamondLabel = Label::createWithSystemFont("Diamond: 100", "Arial", 20);
-    _diamondLabel->setPosition(Vec2(panelX, visibleSize.height - 60));
-    _diamondLabel->setColor(Color3B(0, 255, 255)); // Cyan color
+    _diamondLabel = Label::createWithSystemFont("Diamond: 100", "ScienceGothic", 10);
+    _diamondLabel->setPosition(Vec2(panelX + 60, visibleSize.height - 30));
+    _diamondLabel->setColor(Color3B(0, 255, 255)); // Cyan color 傻逼cocos2d没有这个颜色，只能手打
     _uiLayer->addChild(_diamondLabel);
 }
 
@@ -465,3 +468,4 @@ void BaseScene::onTouchEnded(Touch* touch, Event* event) {
         }
     }
 }
+////

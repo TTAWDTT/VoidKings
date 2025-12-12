@@ -56,7 +56,7 @@ bool GridMap::canPlaceBuilding(int x, int y, int width, int height) {
     // Check all cells
     for (int j = y; j < y + height; ++j) {
         for (int i = x; i < x + width; ++i) {
-            if (_cells[j][i] != CellType::EMPTY) {
+            if (_cells[i][j] != CellType::EMPTY) {
                 return false;
             }
         }
@@ -68,8 +68,8 @@ void GridMap::occupyCell(int x, int y, int width, int height, Node* building) {
     for (int j = y; j < y + height; ++j) {
         for (int i = x; i < x + width; ++i) {
             if (i >= 0 && i < _gridWidth && j >= 0 && j < _gridHeight) {
-                _cells[j][i] = CellType::OCCUPIED;
-                _buildings[j][i] = building;
+                _cells[i][j] = CellType::OCCUPIED;
+                _buildings[i][j] = building;
             }
         }
     }
@@ -79,8 +79,8 @@ void GridMap::freeCell(int x, int y, int width, int height) {
     for (int j = y; j < y + height; ++j) {
         for (int i = x; i < x + width; ++i) {
             if (i >= 0 && i < _gridWidth && j >= 0 && j < _gridHeight) {
-                _cells[j][i] = CellType::EMPTY;
-                _buildings[j][i] = nullptr;
+                _cells[i][j] = CellType::EMPTY;
+                _buildings[i][j] = nullptr;
             }
         }
     }
