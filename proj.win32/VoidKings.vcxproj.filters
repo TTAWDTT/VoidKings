@@ -22,9 +22,6 @@
     <Filter Include="src\Bullet">
       <UniqueIdentifier>{44444444-4444-4444-4444-444444444444}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\Resource">
-      <UniqueIdentifier>{55555555-5555-5555-5555-555555555555}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\Map">
       <UniqueIdentifier>{66666666-6666-6666-6666-666666666666}</UniqueIdentifier>
     </Filter>
@@ -69,14 +66,14 @@
     <ClCompile Include="..\Classes\Bullet\Bullet.cpp">
       <Filter>src\Bullet</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Resource\Resource.cpp">
-      <Filter>src\Resource</Filter>
-    </ClCompile>
     <ClCompile Include="..\Classes\Map\GridMap.cpp">
       <Filter>src\Map</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Utils\AnimationUtils.cpp">
       <Filter>src\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Core\Core.cpp">
+      <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -128,14 +125,14 @@
     <ClInclude Include="..\Classes\Bullet\Bullet.h">
       <Filter>src\Bullet</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Resource\Resource.h">
-      <Filter>src\Resource</Filter>
-    </ClInclude>
     <ClInclude Include="..\Classes\Map\GridMap.h">
       <Filter>src\Map</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Utils\AnimationUtils.h">
       <Filter>src\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Core\Core.h">
+      <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
