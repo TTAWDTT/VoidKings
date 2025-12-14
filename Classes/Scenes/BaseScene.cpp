@@ -25,31 +25,34 @@ bool BaseScene::init() {
     _currentDiamond = 100;
     _selectedBuildingType = 0;
 
-    // Create grid map (40x40 grid, 32 pixels per cell)
+	// 创建网格地图
+    // 这个改一下，改多一点比较好
+    // 注意参考比例
     _gridMap = GridMap::create(40, 40, 32.0f);
     _gridMap->setPosition(origin);
     this->addChild(_gridMap, 0);
 
-    // Create building layer
+    // 建筑层
     _buildingLayer = Node::create();
     _gridMap->addChild(_buildingLayer, 10);
 
-    // Create grass background
+    // 草地背景
     createGrassBackground();
 
-    // Initialize base building in center
+	// 初始化建立基地建筑
     initBaseBuilding();
 
-    // Create UI
+    // 建立UI
     createUI();
 
-    // Create build shop (hidden initially)
+    // 建筑商店
     createBuildShop();
     _buildShopLayer->setVisible(false);
 
-    // Setup touch listener
-    auto listener = EventListenerTouchOneByOne::create();
-    listener->onTouchBegan = CC_CALLBACK_2(BaseScene::onTouchBegan, this);
+    // 触摸监听器
+	// 这部分是跟触摸相关的代码，商店拖拽放建筑啥的都需要用到，我来写就好，有点不好解释
+    auto listener = EventListenerTouchOneByOne::create(); // 逐点触摸监听器->一次处理一个触摸点
+    listener->onTouchBegan = CC_CALLBACK_2(BaseScene::onTouchBegan, this); 
     listener->onTouchMoved = CC_CALLBACK_2(BaseScene::onTouchMoved, this);
     listener->onTouchEnded = CC_CALLBACK_2(BaseScene::onTouchEnded, this);
     _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
@@ -61,16 +64,17 @@ void BaseScene::createGrassBackground() {
     // Create grass tile background
     for (int y = 0; y < 160; ++y) {
         for (int x = 0; x < 160; ++x) {
-            // Random grass tile (0-2)
+            // 随机的草地种类->这部分可以进行算法优化，产生更加自然、复杂的草地分布
             int grassType = rand() % 6;
             char buffer[64];
-            sprintf(buffer, "Grass/grass_000%d.png", grassType);
+            sprintf(buffer, "Grass/grass_000%d.png", grassType); // 记住这个表达形式
             
             auto grassSprite = Sprite::create(buffer);
             if (grassSprite) {
                 Vec2 pos = _gridMap->gridToWorld(x, y);
                 grassSprite->setPosition(pos);
-                // Scale grass to fit cell size
+				// 缩放草地贴图以适应网格大小
+                // 之后的缩放采用这种形式比较方便
                 grassSprite->setScale(32.0f / grassSprite->getContentSize().width);
                 _gridMap->addChild(grassSprite, 0);
             }
@@ -78,22 +82,26 @@ void BaseScene::createGrassBackground() {
     }
 }
 
+// UI层
+// 尹佳玮负责修改
 void BaseScene::createUI() {
+    // origin是指“可见区域”在左下角的全局坐标系中间的位置(0, 0)
+	// visibleSize是指“可见区域”的宽高
+    // 采用这种方式调控具体坐标
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
     _uiLayer = Node::create();
     this->addChild(_uiLayer, 100);
 
-    // Create UI panel on the left side
-    float panelX = origin.x + 80;
-    float buttonSpacing = 30;
+	// 这里是关于UI按钮“位置”的定义，之后会大量用到相对于这几个变量的位置
+    // 注意：尽量多采用相对位置，这样方便维护
+	float panelX = origin.x + 20; // 面板X位置
+    float buttonSpacing = 30; // 按扭间的间隙
     float startY = visibleSize.height / 2 + 100;
 
     // Attack button
     auto attackBtn = Button::create("UI/attack.png");
-    // attackBtn->setTitleText("Attack");
-    // attackBtn->setTitleFontSize(24);
 	attackBtn->setScale(4.0f);
     attackBtn->setPosition(Vec2(panelX, startY));
     attackBtn->addClickEventListener([this](Ref* sender) { this->onAttackButton(sender); });
@@ -101,8 +109,6 @@ void BaseScene::createUI() {
 
     // Build button
     auto buildBtn = Button::create("UI/build.png");
-    // buildBtn->setTitleText("Build");
-    // buildBtn->setTitleFontSize(24);
 	buildBtn->setScale(4.0f);
     buildBtn->setPosition(Vec2(panelX, startY - buttonSpacing));
     buildBtn->addClickEventListener([this](Ref* sender) { this->onBuildButton(sender); });
@@ -110,14 +116,13 @@ void BaseScene::createUI() {
 
     // Exit button
     auto exitBtn = Button::create("UI/exit.png");
-    // exitBtn->setTitleText("Exit");
-    // exitBtn->setTitleFontSize(24);
 	exitBtn->setScale(4.0f);
     exitBtn->setPosition(Vec2(panelX, startY - buttonSpacing * 2));
     exitBtn->addClickEventListener([this](Ref* sender) { this->onExitButton(sender); });
     _uiLayer->addChild(exitBtn);
 
     // Resource display
+    // 这部分会大改为统一的ID_card的子节点
     _goldLabel = Label::createWithSystemFont("Gold: 1000", "ScienceGothic", 10);
     _goldLabel->setPosition(Vec2(panelX, visibleSize.height - 30));
     _goldLabel->setColor(Color3B::YELLOW);
@@ -136,17 +141,20 @@ void BaseScene::createBuildShop() {
     _buildShopLayer = Node::create();
     this->addChild(_buildShopLayer, 101);
 
-    // Create semi-transparent background
+    // 建筑商店
+    // 这个也得改
     auto bg = LayerColor::create(Color4B(0, 0, 0, 180), visibleSize.width, visibleSize.height);
     _buildShopLayer->addChild(bg);
 
-    // Create shop panel
+	// 商店面板->用来承载按钮和标题等控件
+    // 注意，我们必须采用这种设计思路，实现模块化
+    // 必须要加个背景
     auto shopPanel = LayerColor::create(Color4B(50, 50, 50, 255), 400, 500);
     shopPanel->setPosition(Vec2(visibleSize.width / 2 - 200, visibleSize.height / 2 - 250));
     _buildShopLayer->addChild(shopPanel);
 
     // Title
-    auto titleLabel = Label::createWithSystemFont("Building Shop", "Arial", 28);
+    auto titleLabel = Label::createWithSystemFont("Building Shop", "ScienceGothic", 28);
     titleLabel->setPosition(Vec2(200, 460));
     shopPanel->addChild(titleLabel);
 
@@ -168,6 +176,8 @@ void BaseScene::createBuildShop() {
         {"Soldier Builder (300G)", 5, 300}
     };
 
+	// 这部分处理了建筑选项的按钮创建和点击事件绑定
+    // 这个排版改美观点就OK
     for (int i = 0; i < 5; ++i) {
         auto btn = Button::create("btn_normal.png", "btn_pressed.png.png");
         btn->setTitleText(buildings[i].name);
@@ -193,6 +203,8 @@ void BaseScene::createBuildShop() {
     shopPanel->addChild(closeBtn);
 }
 
+// 初始化建筑->基地和一个兵营
+// 这个不知道为啥，没排上用场，需要debug
 void BaseScene::initBaseBuilding() {
     // Initialize base building config as member variable
     _baseConfig.id = 3001;
@@ -212,7 +224,7 @@ void BaseScene::initBaseBuilding() {
     if (base) {
         _buildingLayer->addChild(base);
         BuildingManager::getInstance()->setGridMap(_gridMap);
-        // Place base at center: grid 18,18 for a 4x4 building (so it centers around 20,20)
+        // 把基地放在中心
         BuildingManager::getInstance()->placeBuilding(base, 18, 18, 4, 4);
     }
 }
@@ -230,6 +242,7 @@ void BaseScene::onExitButton(Ref* sender) {
     Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
 }
 
+// 这个要展示建筑信息预览
 void BaseScene::onBuildingSelected(int buildingType) {
     _selectedBuildingType = buildingType;
     _buildShopLayer->setVisible(false);
