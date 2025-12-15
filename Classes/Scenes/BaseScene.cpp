@@ -24,6 +24,7 @@ bool BaseScene::init() {
     _currentGold = 1000;
     _currentDiamond = 100;
     _selectedBuildingType = 0;
+    _selectedLevel = 0; 
 
 	// 创建网格地图
     // 这个改一下，改多一点比较好
@@ -48,6 +49,9 @@ bool BaseScene::init() {
     // 建筑商店
     createBuildShop();
     _buildShopLayer->setVisible(false);
+    // 关卡选择
+    createSelection();
+    _selectionLayer->setVisible(false);
 
     // 触摸监听器
 	// 这部分是跟触摸相关的代码，商店拖拽放建筑啥的都需要用到，我来写就好，有点不好解释
@@ -133,7 +137,7 @@ void BaseScene::createUI() {
     _diamondLabel->setColor(Color3B(0, 255, 255)); // Cyan color 傻逼cocos2d没有这个颜色，只能手打
     _uiLayer->addChild(_diamondLabel);
 }
-
+// 建筑商店界面
 void BaseScene::createBuildShop() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
@@ -202,6 +206,76 @@ void BaseScene::createBuildShop() {
     });
     shopPanel->addChild(closeBtn);
 }
+
+// 关卡选择界面
+void BaseScene::createSelection() {
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+    _selectionLayer = Node::create();
+    this->addChild(_selectionLayer, 102);
+
+    // 选关界面
+    // 这个也得改
+    auto bg = LayerColor::create(Color4B(0, 0, 0, 180), visibleSize.width, visibleSize.height);
+    _selectionLayer->addChild(bg);
+
+	// 选关面板->用来承载按钮和标题等控件
+    // 注意，我们必须采用这种设计思路，实现模块化
+    // 必须要加个背景
+    auto selectionPanel = LayerColor::create(Color4B(50, 50, 50, 255), 400, 500);
+    selectionPanel->setPosition(Vec2(visibleSize.width / 2 - 200, visibleSize.height / 2 - 250));
+    _selectionLayer->addChild(selectionPanel);
+
+    // Title
+    auto titleLabel = Label::createWithSystemFont("Level Selection", "ScienceGothic", 28);
+    titleLabel->setPosition(Vec2(200, 460));
+    selectionPanel->addChild(titleLabel);
+
+    float xPos = 200;
+    float spacing = 60;
+
+    // Level options
+    struct LevelOption {
+        const char* name;
+        int level;
+    };
+
+    LevelOption levels[] = {
+        {"Level 1", 1},
+        {"Level 2", 2},
+        {"Level 3", 3},
+        {"Level 4", 4},
+        {"Level 5", 5}
+    };
+
+	// 这部分处理了关卡选项的按钮创建和点击事件绑定
+    // 这个排版改美观点就OK
+    for (int i = 0; i < 5; ++i) {
+        auto btn = Button::create("btn_normal.png", "btn_pressed.png.png");
+        btn->setTitleText(levels[i].name);
+        btn->setTitleFontSize(18);
+        btn->setScale(1.5f);
+        btn->setPosition(Vec2(xPos, 400));
+        int level = levels[i].level;
+        btn->addClickEventListener([this, level](Ref* sender) {
+            this->onLevelSelected(level);
+        });
+        selectionPanel->addChild(btn);
+        xPos += spacing;
+    }
+
+    // Close button
+    auto closeBtn = Button::create("btn_normal.png", "btn_pressed.png.png");
+    closeBtn->setTitleText("Close");
+    closeBtn->setTitleFontSize(24);
+    closeBtn->setPosition(Vec2(200, 50));
+    closeBtn->addClickEventListener([this](Ref* sender) {
+        _selectionLayer->setVisible(false);
+    });
+    selectionPanel->addChild(closeBtn);
+}
+
 
 // 初始化建筑->基地和一个兵营
 // 这个不知道为啥，没排上用场，需要debug

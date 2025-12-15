@@ -29,6 +29,7 @@
     },
     "conventionalCommits.scopes": [
         "Soldier",
-        "building"
+        "building",
+        "BaseScene"
     ]
 }

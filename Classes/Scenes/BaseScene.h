@@ -24,6 +24,7 @@ private:
     Node* _buildingLayer;
     Node* _uiLayer;
     Node* _buildShopLayer;
+    Node* _selectionLayer;
     
     bool _isPlacingMode;
     Node* _draggingBuilding;
@@ -31,6 +32,7 @@ private:
     int _previewWidth;
     int _previewHeight;
     int _selectedBuildingType;
+    int _selectedLevel;
     
     int _currentGold;
     int _currentDiamond;
@@ -44,7 +46,9 @@ private:
     void createUI();
     void createBuildShop();
     void initBaseBuilding();
-    
+    void createSelection();
+
+    void onLevelSelected(int level);
     void onBuildingSelected(int buildingType);
     void updatePlacementPreview();
     void confirmPlacement();
