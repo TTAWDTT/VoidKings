@@ -24,6 +24,13 @@ public:
     
     int getLength() const;
     int getWidth() const;
+    
+    // 获取建筑ID和名称
+    int getId() const { return _config ? _config->id : 0; }
+    const std::string& getName() const { 
+        static std::string empty = "";
+        return _config ? _config->name : empty; 
+    }
 
 private:
     const ProductionBuildingConfig* _config;

@@ -75,6 +75,12 @@
     <ClCompile Include="..\Classes\Core\Core.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\UI\TrainPanel.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Scenes\LevelSelectScene.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -134,10 +140,21 @@
     <ClInclude Include="..\Classes\Core\Core.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="..\Classes\UI\TrainPanel.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Scenes\LevelSelectScene.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="game.rc">
       <Filter>resource</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Classes\Scenes\SceneWorkSummary.md">
+      <Filter>src</Filter>
+    </None>
   </ItemGroup>
 </Project>

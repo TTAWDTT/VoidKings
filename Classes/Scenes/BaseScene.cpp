@@ -1,8 +1,11 @@
 #include "BaseScene.h"
 #include "MainMenuScene.h"
+#include "LevelSelectScene.h"
 #include "Buildings/DefenceBuilding.h"
 #include "Buildings/ProductionBuilding.h"
 #include "Buildings/StorageBuilding.h"
+#include "UI/TrainPanel.h"
+#include "Soldier/UnitManager.h"
 
 USING_NS_CC;
 
@@ -49,12 +52,15 @@ bool BaseScene::init() {
     // 建筑商店
     createBuildShop();
     _buildShopLayer->setVisible(false);
-    // 关卡选择
-    createSelection();
-    _selectionLayer->setVisible(false);
+    
+    // 兵种训练面板
+    createTrainPanel();
+
+    // 加载兵种配置（确保UnitManager已初始化）
+    UnitManager::getInstance()->loadConfig("res/units_config.json");
 
     // 触摸监听器
-	// 这部分是跟触摸相关的代码，商店拖拽放建筑啥的都需要用到，我来写就好，有点不好解释
+	// 这部分是跟触摸相关的代码，商店拖拽放建筑啥的都需要用到
     auto listener = EventListenerTouchOneByOne::create(); // 逐点触摸监听器->一次处理一个触摸点
     listener->onTouchBegan = CC_CALLBACK_2(BaseScene::onTouchBegan, this); 
     listener->onTouchMoved = CC_CALLBACK_2(BaseScene::onTouchMoved, this);
@@ -207,75 +213,46 @@ void BaseScene::createBuildShop() {
     shopPanel->addChild(closeBtn);
 }
 
-// 关卡选择界面
-void BaseScene::createSelection() {
-    auto visibleSize = Director::getInstance()->getVisibleSize();
-    Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
-    _selectionLayer = Node::create();
-    this->addChild(_selectionLayer, 102);
-
-    // 选关界面
-    // 这个也得改
-    auto bg = LayerColor::create(Color4B(0, 0, 0, 180), visibleSize.width, visibleSize.height);
-    _selectionLayer->addChild(bg);
-
-	// 选关面板->用来承载按钮和标题等控件
-    // 注意，我们必须采用这种设计思路，实现模块化
-    // 必须要加个背景
-    auto selectionPanel = LayerColor::create(Color4B(50, 50, 50, 255), 400, 500);
-    selectionPanel->setPosition(Vec2(visibleSize.width / 2 - 200, visibleSize.height / 2 - 250));
-    _selectionLayer->addChild(selectionPanel);
-
-    // Title
-    auto titleLabel = Label::createWithSystemFont("Level Selection", "ScienceGothic", 28);
-    titleLabel->setPosition(Vec2(200, 460));
-    selectionPanel->addChild(titleLabel);
-
-    float xPos = 200;
-    float spacing = 60;
-
-    // Level options
-    struct LevelOption {
-        const char* name;
-        int level;
-    };
-
-    LevelOption levels[] = {
-        {"Level 1", 1},
-        {"Level 2", 2},
-        {"Level 3", 3},
-        {"Level 4", 4},
-        {"Level 5", 5}
-    };
-
-	// 这部分处理了关卡选项的按钮创建和点击事件绑定
-    // 这个排版改美观点就OK
-    for (int i = 0; i < 5; ++i) {
-        auto btn = Button::create("btn_normal.png", "btn_pressed.png.png");
-        btn->setTitleText(levels[i].name);
-        btn->setTitleFontSize(18);
-        btn->setScale(1.5f);
-        btn->setPosition(Vec2(xPos, 400));
-        int level = levels[i].level;
-        btn->addClickEventListener([this, level](Ref* sender) {
-            this->onLevelSelected(level);
-        });
-        selectionPanel->addChild(btn);
-        xPos += spacing;
+// ===================================================
+// 兵种训练面板创建
+// ===================================================
+void BaseScene::createTrainPanel() {
+    // 创建训练面板，传入回调函数
+    _trainPanel = TrainPanel::create(
+        // 训练完成回调
+        [this](int unitId) {
+            this->onUnitTrainComplete(unitId);
+        },
+        // 关闭回调
+        [this]() {
+            CCLOG("[基地场景] 训练面板关闭");
+        }
+    );
+    
+    if (_trainPanel) {
+        this->addChild(_trainPanel, 102);
+        CCLOG("[基地场景] 训练面板创建成功");
     }
-
-    // Close button
-    auto closeBtn = Button::create("btn_normal.png", "btn_pressed.png.png");
-    closeBtn->setTitleText("Close");
-    closeBtn->setTitleFontSize(24);
-    closeBtn->setPosition(Vec2(200, 50));
-    closeBtn->addClickEventListener([this](Ref* sender) {
-        _selectionLayer->setVisible(false);
-    });
-    selectionPanel->addChild(closeBtn);
 }
 
+// ===================================================
+// 显示训练面板
+// ===================================================
+void BaseScene::showTrainPanel() {
+    if (_trainPanel) {
+        _trainPanel->show();
+        CCLOG("[基地场景] 打开训练面板");
+    }
+}
+
+// ===================================================
+// 兵种训练完成回调
+// ===================================================
+void BaseScene::onUnitTrainComplete(int unitId) {
+    CCLOG("[基地场景] 兵种训练完成: ID=%d", unitId);
+    // 这里可以添加训练完成后的逻辑
+    // 例如：更新UI、播放音效等
+}
 
 // 初始化建筑->基地和一个兵营
 // 这个不知道为啥，没排上用场，需要debug
@@ -303,8 +280,21 @@ void BaseScene::initBaseBuilding() {
     }
 }
 
+// ===================================================
+// 攻击按钮回调 - 跳转到关卡选择场景
+// ===================================================
 void BaseScene::onAttackButton(Ref* sender) {
-    CCLOG("Attack button clicked - Not implemented yet");
+    CCLOG("[基地场景] 点击攻击按钮，跳转到关卡选择");
+    
+    // 获取已训练的兵种
+    std::map<int, int> trainedUnits;
+    if (_trainPanel) {
+        trainedUnits = _trainPanel->getTrainedUnits();
+    }
+    
+    // 跳转到关卡选择场景
+    auto scene = LevelSelectScene::createScene(trainedUnits);
+    Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
 }
 
 void BaseScene::onBuildButton(Ref* sender) {
@@ -395,10 +385,50 @@ void BaseScene::cancelPlacement() {
     _gridMap->showGrid(false);
 }
 
+// ===================================================
+// 触摸开始回调
+// ===================================================
 bool BaseScene::onTouchBegan(Touch* touch, Event* event) {
+    // 如果训练面板正在显示，不处理其他触摸
+    if (_trainPanel && _trainPanel->isShowing()) {
+        return false;
+    }
+    
+    // 如果建筑商店正在显示，不处理其他触摸
+    if (_buildShopLayer && _buildShopLayer->isVisible()) {
+        return false;
+    }
+    
     if (_isPlacingMode) {
         return true;
     }
+    
+    // 检查是否点击了兵营建筑（Soldier Builder）
+    Vec2 touchPos = touch->getLocation();
+    Vec2 localPos = _gridMap->convertToNodeSpace(touchPos);
+    
+    // 遍历建筑层的所有子节点，检查是否点击了兵营
+    auto& buildings = _buildingLayer->getChildren();
+    for (auto& child : buildings) {
+        // 检查是否是ProductionBuilding类型
+        auto building = dynamic_cast<ProductionBuilding*>(child);
+        if (building) {
+            // 获取建筑的边界框
+            auto boundingBox = building->getBoundingBox();
+            if (boundingBox.containsPoint(localPos)) {
+                // 只有兵营（SoldierBuilder, ID=3002）才打开训练面板
+                if (building->getId() == 3002 || building->getName() == "SoldierBuilder") {
+                    CCLOG("[BaseScene] Clicked barracks, opening training panel");
+                    showTrainPanel();
+                    return true;
+                } else {
+                    CCLOG("[BaseScene] Clicked building: %s (ID: %d)", 
+                          building->getName().c_str(), building->getId());
+                }
+            }
+        }
+    }
+    
     return false;
 }
 
@@ -555,4 +585,3 @@ void BaseScene::onTouchEnded(Touch* touch, Event* event) {
         }
     }
 }
-////
