@@ -29,39 +29,39 @@ bool BaseScene::init() {
     _selectedBuildingType = 0;
     _selectedLevel = 0; 
 
-	// ´´½¨Íø¸ñµØÍ¼
-    // Õâ¸ö¸ÄÒ»ÏÂ£¬¸Ä¶àÒ»µã±È½ÏºÃ
-    // ×¢Òâ²Î¿¼±ÈÀý
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼
+    // ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½Â£ï¿½ï¿½Ä¶ï¿½Ò»ï¿½ï¿½È½Ïºï¿½
+    // ×¢ï¿½ï¿½Î¿ï¿½ï¿½ï¿½ï¿½ï¿½
     _gridMap = GridMap::create(40, 40, 32.0f);
     _gridMap->setPosition(origin);
     this->addChild(_gridMap, 0);
 
-    // ½¨Öþ²ã
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     _buildingLayer = Node::create();
     _gridMap->addChild(_buildingLayer, 10);
 
-    // ²ÝµØ±³¾°
+    // ï¿½ÝµØ±ï¿½ï¿½ï¿½
     createGrassBackground();
 
-	// ³õÊ¼»¯½¨Á¢»ùµØ½¨Öþ
+	// ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø½ï¿½ï¿½ï¿½
     initBaseBuilding();
 
-    // ½¨Á¢UI
+    // ï¿½ï¿½ï¿½ï¿½UI
     createUI();
 
-    // ½¨ÖþÉÌµê
+    // ï¿½ï¿½ï¿½ï¿½ï¿½Ìµï¿½
     createBuildShop();
     _buildShopLayer->setVisible(false);
     
-    // ±øÖÖÑµÁ·Ãæ°å
+    // ï¿½ï¿½ï¿½ï¿½Ñµï¿½ï¿½ï¿½ï¿½ï¿½
     createTrainPanel();
 
-    // ¼ÓÔØ±øÖÖÅäÖÃ£¨È·±£UnitManagerÒÑ³õÊ¼»¯£©
+    // ï¿½ï¿½ï¿½Ø±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã£ï¿½È·ï¿½ï¿½UnitManagerï¿½Ñ³ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½
     UnitManager::getInstance()->loadConfig("res/units_config.json");
 
-    // ´¥Ãþ¼àÌýÆ÷
-	// Õâ²¿·ÖÊÇ¸ú´¥ÃþÏà¹ØµÄ´úÂë£¬ÉÌµêÍÏ×§·Å½¨ÖþÉ¶µÄ¶¼ÐèÒªÓÃµ½
-    auto listener = EventListenerTouchOneByOne::create(); // Öðµã´¥Ãþ¼àÌýÆ÷->Ò»´Î´¦ÀíÒ»¸ö´¥Ãþµã
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	// ï¿½â²¿ï¿½ï¿½ï¿½Ç¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ØµÄ´ï¿½ï¿½ë£¬ï¿½Ìµï¿½ï¿½ï¿½×§ï¿½Å½ï¿½ï¿½ï¿½É¶ï¿½Ä¶ï¿½ï¿½ï¿½Òªï¿½Ãµï¿½
+    auto listener = EventListenerTouchOneByOne::create(); // ï¿½ï¿½ã´¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½->Ò»ï¿½Î´ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     listener->onTouchBegan = CC_CALLBACK_2(BaseScene::onTouchBegan, this); 
     listener->onTouchMoved = CC_CALLBACK_2(BaseScene::onTouchMoved, this);
     listener->onTouchEnded = CC_CALLBACK_2(BaseScene::onTouchEnded, this);
@@ -74,17 +74,17 @@ void BaseScene::createGrassBackground() {
     // Create grass tile background
     for (int y = 0; y < 160; ++y) {
         for (int x = 0; x < 160; ++x) {
-            // Ëæ»úµÄ²ÝµØÖÖÀà->Õâ²¿·Ö¿ÉÒÔ½øÐÐËã·¨ÓÅ»¯£¬²úÉú¸ü¼Ó×ÔÈ»¡¢¸´ÔÓµÄ²ÝµØ·Ö²¼
+            // ï¿½ï¿½ï¿½ï¿½Ä²Ýµï¿½ï¿½ï¿½ï¿½ï¿½->ï¿½â²¿ï¿½Ö¿ï¿½ï¿½Ô½ï¿½ï¿½ï¿½ï¿½ã·¨ï¿½Å»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È»ï¿½ï¿½ï¿½ï¿½ï¿½ÓµÄ²ÝµØ·Ö²ï¿½
             int grassType = rand() % 6;
             char buffer[64];
-            sprintf(buffer, "Grass/grass_000%d.png", grassType); // ¼Ç×¡Õâ¸ö±í´ïÐÎÊ½
+            sprintf(buffer, "Grass/grass_000%d.png", grassType); // ï¿½ï¿½×¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê½
             
             auto grassSprite = Sprite::create(buffer);
             if (grassSprite) {
                 Vec2 pos = _gridMap->gridToWorld(x, y);
                 grassSprite->setPosition(pos);
-				// Ëõ·Å²ÝµØÌùÍ¼ÒÔÊÊÓ¦Íø¸ñ´óÐ¡
-                // Ö®ºóµÄËõ·Å²ÉÓÃÕâÖÖÐÎÊ½±È½Ï·½±ã
+				// ï¿½ï¿½ï¿½Å²Ýµï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡
+                // Ö®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê½ï¿½È½Ï·ï¿½ï¿½ï¿½
                 grassSprite->setScale(32.0f / grassSprite->getContentSize().width);
                 _gridMap->addChild(grassSprite, 0);
             }
@@ -92,22 +92,81 @@ void BaseScene::createGrassBackground() {
     }
 }
 
-// UI²ã
-// Òü¼Ñçâ¸ºÔðÐÞ¸Ä
+// UIï¿½ï¿½
+// ï¿½ï¿½ï¿½ï¿½ï¿½â¸ºï¿½ï¿½ï¿½Þ¸ï¿½
+Node* BaseScene::createTooltip(const std::string& text,const Size& size) 
+{ 
+    auto panel = Node::create(); 
+    panel->setContentSize(size); 
+    panel->setAnchorPoint(Vec2(0, 0.5f)); 
+    auto bg = LayerColor::create( Color4B(0, 0, 0, 180), size.width, size.height ); bg->setPosition(Vec2::ZERO); 
+    panel->addChild(bg); 
+    auto label = Label::createWithTTF( text, "fonts/ScienceGothic.ttf", 18 ); 
+    label->setWidth(size.width - 10); 
+    label->setAlignment(TextHAlignment::LEFT); 
+    label->setPosition(Vec2(size.width / 2, size.height / 2)); 
+    panel->addChild(label);
+    return panel; 
+}
+void BaseScene::bindTooltip(
+    Node* owner,
+    Node* targetBtn,
+    Node* tooltip,
+    float offsetX
+)
+{
+    tooltip->setVisible(false);
+    owner->addChild(tooltip, 999);
+
+    auto mouseListener = EventListenerMouse::create();
+
+    mouseListener->onMouseMove = [=](EventMouse* event)
+    {
+        Vec2 mouseWorldPos(
+            event->getCursorX(),
+            event->getCursorY()
+        );
+
+        if (targetBtn->getBoundingBox().containsPoint(mouseWorldPos))
+        {
+            float btnRight =
+                targetBtn->getPositionX() +
+                targetBtn->getContentSize().width *
+                targetBtn->getScale() / 2;
+
+            tooltip->setPosition(Vec2(
+                btnRight + offsetX,
+                targetBtn->getPositionY()
+            ));
+
+            tooltip->setVisible(true);
+        }
+        else
+        {
+            tooltip->setVisible(false);
+        }
+    };
+
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(
+        mouseListener,
+        owner
+    );
+}
+
 void BaseScene::createUI() {
-    // originÊÇÖ¸¡°¿É¼ûÇøÓò¡±ÔÚ×óÏÂ½ÇµÄÈ«¾Ö×ø±êÏµÖÐ¼äµÄÎ»ÖÃ(0, 0)
-	// visibleSizeÊÇÖ¸¡°¿É¼ûÇøÓò¡±µÄ¿í¸ß
-    // ²ÉÓÃÕâÖÖ·½Ê½µ÷¿Ø¾ßÌå×ø±ê
+    // originï¿½ï¿½Ö¸ï¿½ï¿½ï¿½É¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â½Çµï¿½È«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½Ð¼ï¿½ï¿½Î»ï¿½ï¿½(0, 0)
+	// visibleSizeï¿½ï¿½Ö¸ï¿½ï¿½ï¿½É¼ï¿½ï¿½ï¿½ï¿½ò¡±µÄ¿ï¿½ï¿½ï¿½
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½Ê½ï¿½ï¿½ï¿½Ø¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
     _uiLayer = Node::create();
     this->addChild(_uiLayer, 100);
 
-	// ÕâÀïÊÇ¹ØÓÚUI°´Å¥¡°Î»ÖÃ¡±µÄ¶¨Òå£¬Ö®ºó»á´óÁ¿ÓÃµ½Ïà¶ÔÓÚÕâ¼¸¸ö±äÁ¿µÄÎ»ÖÃ
-    // ×¢Òâ£º¾¡Á¿¶à²ÉÓÃÏà¶ÔÎ»ÖÃ£¬ÕâÑù·½±ãÎ¬»¤
-	float panelX = origin.x + 20; // Ãæ°åXÎ»ÖÃ
-    float buttonSpacing = 30; // °´Å¤¼äµÄ¼äÏ¶
+	// ï¿½ï¿½ï¿½ï¿½ï¿½Ç¹ï¿½ï¿½ï¿½UIï¿½ï¿½Å¥ï¿½ï¿½Î»ï¿½Ã¡ï¿½ï¿½Ä¶ï¿½ï¿½å£¬Ö®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½â¼¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
+    // ×¢ï¿½â£ºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½Ã£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î¬ï¿½ï¿½
+	float panelX = origin.x + 20; // ï¿½ï¿½ï¿½XÎ»ï¿½ï¿½
+    float buttonSpacing = 30; // ï¿½ï¿½Å¤ï¿½ï¿½Ä¼ï¿½Ï¶
     float startY = visibleSize.height / 2 + 100;
 
     // Attack button
@@ -116,6 +175,8 @@ void BaseScene::createUI() {
     attackBtn->setPosition(Vec2(panelX, startY));
     attackBtn->addClickEventListener([this](Ref* sender) { this->onAttackButton(sender); });
     _uiLayer->addChild(attackBtn);
+    auto attackTip = createTooltip("Attack", Size(80, 30));
+    bindTooltip(this, attackBtn, attackTip);
 
     // Build button
     auto buildBtn = Button::create("UI/build.png");
@@ -123,6 +184,8 @@ void BaseScene::createUI() {
     buildBtn->setPosition(Vec2(panelX, startY - buttonSpacing));
     buildBtn->addClickEventListener([this](Ref* sender) { this->onBuildButton(sender); });
     _uiLayer->addChild(buildBtn);
+    auto buildTip = createTooltip("Build", Size(60, 30));
+    bindTooltip(this, buildBtn, buildTip);
 
     // Exit button
     auto exitBtn = Button::create("UI/exit.png");
@@ -130,9 +193,11 @@ void BaseScene::createUI() {
     exitBtn->setPosition(Vec2(panelX, startY - buttonSpacing * 2));
     exitBtn->addClickEventListener([this](Ref* sender) { this->onExitButton(sender); });
     _uiLayer->addChild(exitBtn);
-
+    auto exitTip = createTooltip("Exit", Size(60, 30));
+    bindTooltip(this, exitBtn, exitTip);
+    
     // Resource display
-    // Õâ²¿·Ö»á´ó¸ÄÎªÍ³Ò»µÄID_cardµÄ×Ó½Úµã
+    // ï¿½â²¿ï¿½Ö»ï¿½ï¿½ï¿½ÎªÍ³Ò»ï¿½ï¿½ID_cardï¿½ï¿½ï¿½Ó½Úµï¿½
     _goldLabel = Label::createWithSystemFont("Gold: 1000", "ScienceGothic", 10);
     _goldLabel->setPosition(Vec2(panelX, visibleSize.height - 30));
     _goldLabel->setColor(Color3B::YELLOW);
@@ -140,10 +205,10 @@ void BaseScene::createUI() {
 
     _diamondLabel = Label::createWithSystemFont("Diamond: 100", "ScienceGothic", 10);
     _diamondLabel->setPosition(Vec2(panelX + 60, visibleSize.height - 30));
-    _diamondLabel->setColor(Color3B(0, 255, 255)); // Cyan color Éµ±Æcocos2dÃ»ÓÐÕâ¸öÑÕÉ«£¬Ö»ÄÜÊÖ´ò
+    _diamondLabel->setColor(Color3B(0, 255, 255)); // Cyan color Éµï¿½ï¿½cocos2dÃ»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É«ï¿½ï¿½Ö»ï¿½ï¿½ï¿½Ö´ï¿½
     _uiLayer->addChild(_diamondLabel);
 }
-// ½¨ÖþÉÌµê½çÃæ
+// ï¿½ï¿½ï¿½ï¿½ï¿½Ìµï¿½ï¿½ï¿½ï¿½
 void BaseScene::createBuildShop() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
@@ -151,14 +216,14 @@ void BaseScene::createBuildShop() {
     _buildShopLayer = Node::create();
     this->addChild(_buildShopLayer, 101);
 
-    // ½¨ÖþÉÌµê
-    // Õâ¸öÒ²µÃ¸Ä
+    // ï¿½ï¿½ï¿½ï¿½ï¿½Ìµï¿½
+    // ï¿½ï¿½ï¿½Ò²ï¿½Ã¸ï¿½
     auto bg = LayerColor::create(Color4B(0, 0, 0, 180), visibleSize.width, visibleSize.height);
     _buildShopLayer->addChild(bg);
 
-	// ÉÌµêÃæ°å->ÓÃÀ´³ÐÔØ°´Å¥ºÍ±êÌâµÈ¿Ø¼þ
-    // ×¢Òâ£¬ÎÒÃÇ±ØÐë²ÉÓÃÕâÖÖÉè¼ÆË¼Â·£¬ÊµÏÖÄ£¿é»¯
-    // ±ØÐëÒª¼Ó¸ö±³¾°
+	// ï¿½Ìµï¿½ï¿½ï¿½ï¿½->ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø°ï¿½Å¥ï¿½Í±ï¿½ï¿½ï¿½È¿Ø¼ï¿½
+    // ×¢ï¿½â£¬ï¿½ï¿½ï¿½Ç±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë¼Â·ï¿½ï¿½Êµï¿½ï¿½Ä£ï¿½é»¯
+    // ï¿½ï¿½ï¿½ï¿½Òªï¿½Ó¸ï¿½ï¿½ï¿½ï¿½ï¿½
     auto shopPanel = LayerColor::create(Color4B(50, 50, 50, 255), 400, 500);
     shopPanel->setPosition(Vec2(visibleSize.width / 2 - 200, visibleSize.height / 2 - 250));
     _buildShopLayer->addChild(shopPanel);
@@ -186,8 +251,8 @@ void BaseScene::createBuildShop() {
         {"Soldier Builder (300G)", 5, 300}
     };
 
-	// Õâ²¿·Ö´¦ÀíÁË½¨ÖþÑ¡ÏîµÄ°´Å¥´´½¨ºÍµã»÷ÊÂ¼þ°ó¶¨
-    // Õâ¸öÅÅ°æ¸ÄÃÀ¹Ûµã¾ÍOK
+	// ï¿½â²¿ï¿½Ö´ï¿½ï¿½ï¿½ï¿½Ë½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½Ä°ï¿½Å¥ï¿½ï¿½ï¿½ï¿½ï¿½Íµï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½
+    // ï¿½ï¿½ï¿½ï¿½Å°ï¿½ï¿½ï¿½ï¿½ï¿½Ûµï¿½ï¿½OK
     for (int i = 0; i < 5; ++i) {
         auto btn = Button::create("btn_normal.png", "btn_pressed.png.png");
         btn->setTitleText(buildings[i].name);
@@ -214,48 +279,48 @@ void BaseScene::createBuildShop() {
 }
 
 // ===================================================
-// ±øÖÖÑµÁ·Ãæ°å´´½¨
+// ï¿½ï¿½ï¿½ï¿½Ñµï¿½ï¿½ï¿½ï¿½å´´ï¿½ï¿½
 // ===================================================
 void BaseScene::createTrainPanel() {
-    // ´´½¨ÑµÁ·Ãæ°å£¬´«Èë»Øµ÷º¯Êý
+    // ï¿½ï¿½ï¿½ï¿½Ñµï¿½ï¿½ï¿½ï¿½å£¬ï¿½ï¿½ï¿½ï¿½Øµï¿½ï¿½ï¿½ï¿½ï¿½
     _trainPanel = TrainPanel::create(
-        // ÑµÁ·Íê³É»Øµ÷
+        // Ñµï¿½ï¿½ï¿½ï¿½É»Øµï¿½
         [this](int unitId) {
             this->onUnitTrainComplete(unitId);
         },
-        // ¹Ø±Õ»Øµ÷
+        // ï¿½Ø±Õ»Øµï¿½
         [this]() {
-            CCLOG("[»ùµØ³¡¾°] ÑµÁ·Ãæ°å¹Ø±Õ");
+            CCLOG("[ï¿½ï¿½ï¿½Ø³ï¿½ï¿½ï¿½] Ñµï¿½ï¿½ï¿½ï¿½ï¿½Ø±ï¿½");
         }
     );
     
     if (_trainPanel) {
         this->addChild(_trainPanel, 102);
-        CCLOG("[»ùµØ³¡¾°] ÑµÁ·Ãæ°å´´½¨³É¹¦");
+        CCLOG("[ï¿½ï¿½ï¿½Ø³ï¿½ï¿½ï¿½] Ñµï¿½ï¿½ï¿½ï¿½å´´ï¿½ï¿½ï¿½É¹ï¿½");
     }
 }
 
 // ===================================================
-// ÏÔÊ¾ÑµÁ·Ãæ°å
+// ï¿½ï¿½Ê¾Ñµï¿½ï¿½ï¿½ï¿½ï¿½
 // ===================================================
 void BaseScene::showTrainPanel() {
     if (_trainPanel) {
         _trainPanel->show();
-        CCLOG("[»ùµØ³¡¾°] ´ò¿ªÑµÁ·Ãæ°å");
+        CCLOG("[ï¿½ï¿½ï¿½Ø³ï¿½ï¿½ï¿½] ï¿½ï¿½Ñµï¿½ï¿½ï¿½ï¿½ï¿½");
     }
 }
 
 // ===================================================
-// ±øÖÖÑµÁ·Íê³É»Øµ÷
+// ï¿½ï¿½ï¿½ï¿½Ñµï¿½ï¿½ï¿½ï¿½É»Øµï¿½
 // ===================================================
 void BaseScene::onUnitTrainComplete(int unitId) {
-    CCLOG("[»ùµØ³¡¾°] ±øÖÖÑµÁ·Íê³É: ID=%d", unitId);
-    // ÕâÀï¿ÉÒÔÌí¼ÓÑµÁ·Íê³ÉºóµÄÂß¼­
-    // ÀýÈç£º¸üÐÂUI¡¢²¥·ÅÒôÐ§µÈ
+    CCLOG("[ï¿½ï¿½ï¿½Ø³ï¿½ï¿½ï¿½] ï¿½ï¿½ï¿½ï¿½Ñµï¿½ï¿½ï¿½ï¿½ï¿½: ID=%d", unitId);
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñµï¿½ï¿½ï¿½ï¿½Éºï¿½ï¿½ï¿½ß¼ï¿½
+    // ï¿½ï¿½ï¿½ç£ºï¿½ï¿½ï¿½ï¿½UIï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½
 }
 
-// ³õÊ¼»¯½¨Öþ->»ùµØºÍÒ»¸ö±øÓª
-// Õâ¸ö²»ÖªµÀÎªÉ¶£¬Ã»ÅÅÉÏÓÃ³¡£¬ÐèÒªdebug
+// ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½->ï¿½ï¿½ï¿½Øºï¿½Ò»ï¿½ï¿½ï¿½ï¿½Óª
+// ï¿½ï¿½ï¿½ï¿½ï¿½Öªï¿½ï¿½ÎªÉ¶ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½Ã³ï¿½ï¿½ï¿½ï¿½ï¿½Òªdebug
 void BaseScene::initBaseBuilding() {
     // Initialize base building config as member variable
     _baseConfig.id = 3001;
@@ -275,24 +340,24 @@ void BaseScene::initBaseBuilding() {
     if (base) {
         _buildingLayer->addChild(base);
         BuildingManager::getInstance()->setGridMap(_gridMap);
-        // °Ñ»ùµØ·ÅÔÚÖÐÐÄ
+        // ï¿½Ñ»ï¿½ï¿½Ø·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         BuildingManager::getInstance()->placeBuilding(base, 18, 18, 4, 4);
     }
 }
 
 // ===================================================
-// ¹¥»÷°´Å¥»Øµ÷ - Ìø×ªµ½¹Ø¿¨Ñ¡Ôñ³¡¾°
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¥ï¿½Øµï¿½ - ï¿½ï¿½×ªï¿½ï¿½ï¿½Ø¿ï¿½Ñ¡ï¿½ñ³¡¾ï¿½
 // ===================================================
 void BaseScene::onAttackButton(Ref* sender) {
-    CCLOG("[»ùµØ³¡¾°] µã»÷¹¥»÷°´Å¥£¬Ìø×ªµ½¹Ø¿¨Ñ¡Ôñ");
+    CCLOG("[ï¿½ï¿½ï¿½Ø³ï¿½ï¿½ï¿½] ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¥ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½Ø¿ï¿½Ñ¡ï¿½ï¿½");
     
-    // »ñÈ¡ÒÑÑµÁ·µÄ±øÖÖ
+    // ï¿½ï¿½È¡ï¿½ï¿½Ñµï¿½ï¿½ï¿½Ä±ï¿½ï¿½ï¿½
     std::map<int, int> trainedUnits;
     if (_trainPanel) {
         trainedUnits = _trainPanel->getTrainedUnits();
     }
     
-    // Ìø×ªµ½¹Ø¿¨Ñ¡Ôñ³¡¾°
+    // ï¿½ï¿½×ªï¿½ï¿½ï¿½Ø¿ï¿½Ñ¡ï¿½ñ³¡¾ï¿½
     auto scene = LevelSelectScene::createScene(trainedUnits);
     Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
 }
@@ -306,7 +371,7 @@ void BaseScene::onExitButton(Ref* sender) {
     Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
 }
 
-// Õâ¸öÒªÕ¹Ê¾½¨ÖþÐÅÏ¢Ô¤ÀÀ
+// ï¿½ï¿½ï¿½ÒªÕ¹Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢Ô¤ï¿½ï¿½
 void BaseScene::onBuildingSelected(int buildingType) {
     _selectedBuildingType = buildingType;
     _buildShopLayer->setVisible(false);
@@ -386,15 +451,15 @@ void BaseScene::cancelPlacement() {
 }
 
 // ===================================================
-// ´¥Ãþ¿ªÊ¼»Øµ÷
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½Øµï¿½
 // ===================================================
 bool BaseScene::onTouchBegan(Touch* touch, Event* event) {
-    // Èç¹ûÑµÁ·Ãæ°åÕýÔÚÏÔÊ¾£¬²»´¦ÀíÆäËû´¥Ãþ
+    // ï¿½ï¿½ï¿½Ñµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     if (_trainPanel && _trainPanel->isShowing()) {
         return false;
     }
     
-    // Èç¹û½¨ÖþÉÌµêÕýÔÚÏÔÊ¾£¬²»´¦ÀíÆäËû´¥Ãþ
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ìµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     if (_buildShopLayer && _buildShopLayer->isVisible()) {
         return false;
     }
@@ -403,20 +468,20 @@ bool BaseScene::onTouchBegan(Touch* touch, Event* event) {
         return true;
     }
     
-    // ¼ì²éÊÇ·ñµã»÷ÁË±øÓª½¨Öþ£¨Soldier Builder£©
+    // ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½Ë±ï¿½Óªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Soldier Builderï¿½ï¿½
     Vec2 touchPos = touch->getLocation();
     Vec2 localPos = _gridMap->convertToNodeSpace(touchPos);
     
-    // ±éÀú½¨Öþ²ãµÄËùÓÐ×Ó½Úµã£¬¼ì²éÊÇ·ñµã»÷ÁË±øÓª
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó½Úµã£¬ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½Ë±ï¿½Óª
     auto& buildings = _buildingLayer->getChildren();
     for (auto& child : buildings) {
-        // ¼ì²éÊÇ·ñÊÇProductionBuildingÀàÐÍ
+        // ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ProductionBuildingï¿½ï¿½ï¿½ï¿½
         auto building = dynamic_cast<ProductionBuilding*>(child);
         if (building) {
-            // »ñÈ¡½¨ÖþµÄ±ß½ç¿ò
+            // ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½Ä±ß½ï¿½ï¿½
             auto boundingBox = building->getBoundingBox();
             if (boundingBox.containsPoint(localPos)) {
-                // Ö»ÓÐ±øÓª£¨SoldierBuilder, ID=3002£©²Å´ò¿ªÑµÁ·Ãæ°å
+                // Ö»ï¿½Ð±ï¿½Óªï¿½ï¿½SoldierBuilder, ID=3002ï¿½ï¿½ï¿½Å´ï¿½Ñµï¿½ï¿½ï¿½ï¿½ï¿½
                 if (building->getId() == 3002 || building->getName() == "SoldierBuilder") {
                     CCLOG("[BaseScene] Clicked barracks, opening training panel");
                     showTrainPanel();

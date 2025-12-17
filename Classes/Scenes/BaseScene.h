@@ -10,23 +10,23 @@
 USING_NS_CC;
 using namespace cocos2d::ui;
 
-// Ç°ÏòÉùÃ÷
+// Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 class TrainPanel;
 
 class BaseScene : public Scene {
 public:
     static Scene* createScene();
-    // ´´½¨²¢·µ»ØÒ»¸öÐÂµÄ³¡¾°ÊµÀý¡£Í¨³£×÷Îª³¡¾°ÇÐ»»Ê±µÄÈë¿Úº¯ÊýÊ¹ÓÃ¡£
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ÂµÄ³ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½Ð»ï¿½Ê±ï¿½ï¿½ï¿½ï¿½Úºï¿½ï¿½ï¿½Ê¹ï¿½Ã¡ï¿½
     virtual bool init() override;
-    // ³õÊ¼»¯³¡¾°£¬´´½¨µØÍ¼¡¢UI¡¢½¨ÖþµÈ×Ó½Úµã²¢ÉèÖÃÊÂ¼þ¼àÌý¡£·µ»ØÊÇ·ñ³õÊ¼»¯³É¹¦¡£
+    // ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½UIï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó½Úµã²¢ï¿½ï¿½ï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½É¹ï¿½ï¿½ï¿½
     CREATE_FUNC(BaseScene);
 
     void onAttackButton(Ref* sender);
-    // ¹¥»÷°´Å¥»Øµ÷£ºÏìÓ¦µã»÷¹¥»÷°´Å¥£¬ÊÕ¼¯ÒÑÑµÁ·²¿¶Ó²¢ÇÐ»»µ½¹Ø¿¨Ñ¡Ôñ³¡¾°¡£
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¥ï¿½Øµï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¥ï¿½ï¿½ï¿½Õ¼ï¿½ï¿½ï¿½Ñµï¿½ï¿½ï¿½ï¿½ï¿½Ó²ï¿½ï¿½Ð»ï¿½ï¿½ï¿½ï¿½Ø¿ï¿½Ñ¡ï¿½ñ³¡¾ï¿½ï¿½ï¿½
     void onBuildButton(Ref* sender);
-    // ½¨Ôì°´Å¥»Øµ÷£ºÏÔÊ¾½¨ÖþÉÌµê½çÃæÒÔ¹©Íæ¼ÒÑ¡Ôñ½¨ÔìµÄ½¨Öþ¡£
+    // ï¿½ï¿½ï¿½ì°´Å¥ï¿½Øµï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½Ìµï¿½ï¿½ï¿½ï¿½ï¿½Ô¹ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½Ä½ï¿½ï¿½ï¿½ï¿½ï¿½
     void onExitButton(Ref* sender);
-    // ÍË³ö°´Å¥»Øµ÷£º·µ»ØÖ÷²Ëµ¥»òÍË³öµ±Ç°³¡¾°¡£
+    // ï¿½Ë³ï¿½ï¿½ï¿½Å¥ï¿½Øµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ëµï¿½ï¿½ï¿½ï¿½Ë³ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 private:
     GridMap* _gridMap = nullptr;
@@ -34,7 +34,7 @@ private:
     Node* _uiLayer = nullptr;
     Node* _buildShopLayer = nullptr;
     
-    // ÑµÁ·Ãæ°å£¨µã»÷±øÓª½¨ÖþÊ±ÏÔÊ¾£©
+    // Ñµï¿½ï¿½ï¿½ï¿½å£¨ï¿½ï¿½ï¿½ï¿½ï¿½Óªï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½Ê¾ï¿½ï¿½
     TrainPanel* _trainPanel = nullptr;
     
     bool _isPlacingMode = false;
@@ -54,39 +54,46 @@ private:
     ProductionBuildingConfig _baseConfig;
     
     void createGrassBackground();
-    // ´´½¨²ÝµØ±³¾°ÌùÍ¼£¬Ìî³äÕû¸öµØÍ¼ÇøÓòÒÔ×÷ÎªµØÃæÍ¼²ã¡£
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ÝµØ±ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½Í¼ï¿½ã¡£
     void createUI();
-    // ´´½¨²¢²¼¾ÖÓÎÏ·Ö÷UI£¨°´Å¥¡¢×ÊÔ´ÏÔÊ¾µÈ£©£¬½«UI½ÚµãÌí¼Óµ½³¡¾°ÖÐ¡£
+    Node* createTooltip(const std::string& text,const Size& size) ;
+    void bindTooltip(
+        Node* owner,
+        Node* targetBtn,
+        Node* tooltip,
+        float offsetX = 10.0f
+    );
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï·ï¿½ï¿½UIï¿½ï¿½ï¿½ï¿½Å¥ï¿½ï¿½ï¿½ï¿½Ô´ï¿½ï¿½Ê¾ï¿½È£ï¿½ï¿½ï¿½ï¿½ï¿½UIï¿½Úµï¿½ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡ï¿½
     void createBuildShop();
-    // ´´½¨½¨ÖþÉÌµê½çÃæ²¢³õÊ¼»¯½¨ÖþÑ¡Ïî¼°Æä»Øµ÷£¬µ«Ä¬ÈÏ²»ÏÔÊ¾¡£
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ìµï¿½ï¿½ï¿½æ²¢ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½î¼°ï¿½ï¿½Øµï¿½ï¿½ï¿½ï¿½ï¿½Ä¬ï¿½Ï²ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½
     void createTrainPanel();
-    // ´´½¨±øÖÖÑµÁ·Ãæ°å²¢´«ÈëÑµÁ·Íê³ÉºÍ¹Ø±ÕµÄ»Øµ÷º¯Êý£¬½«Ãæ°å×÷Îª×Ó½ÚµãÌí¼Óµ½³¡¾°¡£
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñµï¿½ï¿½ï¿½ï¿½å²¢ï¿½ï¿½ï¿½ï¿½Ñµï¿½ï¿½ï¿½ï¿½ÉºÍ¹Ø±ÕµÄ»Øµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½Ó½Úµï¿½ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     void initBaseBuilding();
-    // ³õÊ¼»¯»ùµØÄ¬ÈÏ½¨Öþ£¨ÀýÈç»ùµØºÍ³õÊ¼±øÓª£©£¬²¢½«Æä·ÅÖÃÔÚµØÍ¼Ö¸¶¨Î»ÖÃ¡£
+    // ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¬ï¿½Ï½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ØºÍ³ï¿½Ê¼ï¿½ï¿½Óªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Úµï¿½Í¼Ö¸ï¿½ï¿½Î»ï¿½Ã¡ï¿½
 
     void onBuildingSelected(int buildingType);
-    // µ±Íæ¼ÒÔÚÉÌµêÖÐÑ¡ÔñÄ³ÖÖ½¨ÖþÊ±µ÷ÓÃ£¬½øÈë·ÅÖÃÄ£Ê½²¢´´½¨·ÅÖÃÔ¤ÀÀ¾«Áé¡£
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ìµï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½Ä³ï¿½Ö½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Ã£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½é¡£
     void updatePlacementPreview();
-    // ¸üÐÂ·ÅÖÃÔ¤ÀÀÎ»ÖÃºÍÑÕÉ«£¬»ùÓÚµ±Ç°Î»ÖÃÊÇ·ñ¿É·ÅÖÃÀ´¸Ä±äÊÓ¾õ·´À¡¡£
+    // ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½Ô¤ï¿½ï¿½Î»ï¿½Ãºï¿½ï¿½ï¿½É«ï¿½ï¿½ï¿½ï¿½ï¿½Úµï¿½Ç°Î»ï¿½ï¿½ï¿½Ç·ï¿½É·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä±ï¿½ï¿½Ó¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     void confirmPlacement();
-    // È·ÈÏ·ÅÖÃ½¨Öþ£º´ÓÔ¤ÀÀÇÐ»»ÎªÊµ¼Ê½¨Öþ¡¢¿Û³ý×ÊÔ´²¢Òþ²ØÍø¸ñÓëÔ¤ÀÀ¡£
+    // È·ï¿½Ï·ï¿½ï¿½Ã½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¤ï¿½ï¿½ï¿½Ð»ï¿½ÎªÊµï¿½Ê½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Û³ï¿½ï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¤ï¿½ï¿½ï¿½ï¿½
     void cancelPlacement();
-    // È¡Ïû·ÅÖÃÄ£Ê½£ºÒÆ³ýÔ¤ÀÀ²¢»Ö¸´Õý³£½»»¥£¬Òþ²ØÍø¸ñÏß¡£
+    // È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½Æ³ï¿½Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¡ï¿½
     
-    // ´ò¿ªÑµÁ·Ãæ°å£¨µã»÷±øÓªÊ±µ÷ÓÃ£©
+    // ï¿½ï¿½Ñµï¿½ï¿½ï¿½ï¿½å£¨ï¿½ï¿½ï¿½ï¿½ï¿½ÓªÊ±ï¿½ï¿½ï¿½Ã£ï¿½
     void showTrainPanel();
-    // ´ò¿ª/ÏÔÊ¾ÑµÁ·Ãæ°å£¨µ±µã»÷±øÓª½¨ÖþÊ±µ÷ÓÃ£©¡£
+    // ï¿½ï¿½/ï¿½ï¿½Ê¾Ñµï¿½ï¿½ï¿½ï¿½å£¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Óªï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Ã£ï¿½ï¿½ï¿½
     
-    // ÑµÁ·Íê³É»Øµ÷
+    // Ñµï¿½ï¿½ï¿½ï¿½É»Øµï¿½
     void onUnitTrainComplete(int unitId);
-    // ´¦Àí±øÖÖÑµÁ·Íê³ÉÊÂ¼þ£¨unitId ±íÊ¾ÑµÁ·Íê³ÉµÄ±øÖÖID£©£¬¿ÉÓÃÓÚ¸üÐÂUI»ò¶ÓÁÐ¡£
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½unitId ï¿½ï¿½Ê¾Ñµï¿½ï¿½ï¿½ï¿½ÉµÄ±ï¿½ï¿½ï¿½IDï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú¸ï¿½ï¿½ï¿½UIï¿½ï¿½ï¿½ï¿½Ð¡ï¿½
     
     bool onTouchBegan(Touch* touch, Event* event);
-    // ´¥Ãþ¿ªÊ¼ÊÂ¼þ´¦Àí£º´¦Àíµã»÷½¨Öþ¡¢´ò¿ªÑµÁ·Ãæ°å»ò½øÈë·ÅÖÃÄ£Ê½µÈ½»»¥Âß¼­¡£
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½È½ï¿½ï¿½ï¿½ï¿½ß¼ï¿½ï¿½ï¿½
     void onTouchMoved(Touch* touch, Event* event);
-    // ´¥ÃþÒÆ¶¯ÊÂ¼þ´¦Àí£ºÔÚ·ÅÖÃÄ£Ê½ÏÂÒÆ¶¯Ô¤ÀÀ²¢ÊµÊ±¼ì²âÊÇ·ñ¿É·ÅÖÃ¡£
+    // ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú·ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½Æ¶ï¿½Ô¤ï¿½ï¿½ï¿½ï¿½ÊµÊ±ï¿½ï¿½ï¿½ï¿½Ç·ï¿½É·ï¿½ï¿½Ã¡ï¿½
     void onTouchEnded(Touch* touch, Event* event);
-    // ´¥Ãþ½áÊøÊÂ¼þ´¦Àí£ºÔÚ·ÅÖÃÄ£Ê½ÏÂ½øÐÐ×îÖÕÎ»ÖÃ¼ì²â²¢È·ÈÏ»òÈ¡Ïû·ÅÖÃ¡£
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú·ï¿½ï¿½ï¿½Ä£Ê½ï¿½Â½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½Ã¼ï¿½â²¢È·ï¿½Ï»ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½Ã¡ï¿½
 };
 
 #endif // __BASE_SCENE_H__
