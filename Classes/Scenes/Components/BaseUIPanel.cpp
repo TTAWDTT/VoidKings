@@ -168,12 +168,12 @@ void BaseUIPanel::updateResourceDisplay(int gold, int diamond) {
     // 如果需要更新，可以在这里添加逻辑
     if (_goldLabel) {
         char buffer[64];
-        sprintf(buffer, "Gold: %d", gold);
+        snprintf(buffer, sizeof(buffer), "Gold: %d", gold);
         _goldLabel->setString(buffer);
     }
     if (_diamondLabel) {
         char buffer[64];
-        sprintf(buffer, "Diamond: %d", diamond);
+        snprintf(buffer, sizeof(buffer), "Diamond: %d", diamond);
         _diamondLabel->setString(buffer);
     }
 }

@@ -154,8 +154,9 @@ Button* BuildShopPanel::createBuildingButton(const BuildingOption& option, float
     }
     
     // 设置按钮文字（显示建筑名称和尺寸信息）
+    // 使用snprintf避免缓冲区溢出
     char buttonText[128];
-    sprintf(buttonText, "%s (%dx%d)", option.name.c_str(), option.gridWidth, option.gridHeight);
+    snprintf(buttonText, sizeof(buttonText), "%s (%dx%d)", option.name.c_str(), option.gridWidth, option.gridHeight);
     btn->setTitleText(buttonText);
     btn->setTitleFontSize(BuildShopConfig::BUTTON_FONT_SIZE);
     btn->setScale(1.5f);
