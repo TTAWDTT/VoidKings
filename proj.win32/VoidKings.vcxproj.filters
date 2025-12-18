@@ -81,6 +81,8 @@
     <ClCompile Include="..\Classes\Scenes\LevelSelectScene.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\UI\IDCardPanel.cpp" />
+    <ClCompile Include="Classes\Scenes\BaseScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">

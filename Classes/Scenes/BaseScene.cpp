@@ -6,6 +6,7 @@
 #include "Buildings/StorageBuilding.h"
 #include "UI/TrainPanel.h"
 #include "Soldier/UnitManager.h"
+#include "UI/IDCardPanel.h"
 
 USING_NS_CC;
 
@@ -172,7 +173,7 @@ void BaseScene::createUI() {
     // Attack button
     auto attackBtn = Button::create("UI/attack.png");
 	attackBtn->setScale(4.0f);
-    attackBtn->setPosition(Vec2(panelX, startY));
+    attackBtn->setPosition(Vec2(panelX, startY - buttonSpacing));
     attackBtn->addClickEventListener([this](Ref* sender) { this->onAttackButton(sender); });
     _uiLayer->addChild(attackBtn);
     auto attackTip = createTooltip("Attack", Size(80, 30));
@@ -181,7 +182,7 @@ void BaseScene::createUI() {
     // Build button
     auto buildBtn = Button::create("UI/build.png");
 	buildBtn->setScale(4.0f);
-    buildBtn->setPosition(Vec2(panelX, startY - buttonSpacing));
+    buildBtn->setPosition(Vec2(panelX, startY - buttonSpacing*2));
     buildBtn->addClickEventListener([this](Ref* sender) { this->onBuildButton(sender); });
     _uiLayer->addChild(buildBtn);
     auto buildTip = createTooltip("Build", Size(60, 30));
@@ -190,23 +191,18 @@ void BaseScene::createUI() {
     // Exit button
     auto exitBtn = Button::create("UI/exit.png");
 	exitBtn->setScale(4.0f);
-    exitBtn->setPosition(Vec2(panelX, startY - buttonSpacing * 2));
+    exitBtn->setPosition(Vec2(panelX, startY - buttonSpacing * 3));
     exitBtn->addClickEventListener([this](Ref* sender) { this->onExitButton(sender); });
     _uiLayer->addChild(exitBtn);
     auto exitTip = createTooltip("Exit", Size(60, 30));
     bindTooltip(this, exitBtn, exitTip);
     
     // Resource display
-    // �ⲿ�ֻ���Ϊͳһ��ID_card���ӽڵ�
-    _goldLabel = Label::createWithSystemFont("Gold: 1000", "ScienceGothic", 10);
-    _goldLabel->setPosition(Vec2(panelX, visibleSize.height - 30));
-    _goldLabel->setColor(Color3B::YELLOW);
-    _uiLayer->addChild(_goldLabel);
-
-    _diamondLabel = Label::createWithSystemFont("Diamond: 100", "ScienceGothic", 10);
-    _diamondLabel->setPosition(Vec2(panelX + 60, visibleSize.height - 30));
-    _diamondLabel->setColor(Color3B(0, 255, 255)); // Cyan color ɵ��cocos2dû�������ɫ��ֻ���ִ�
-    _uiLayer->addChild(_diamondLabel);
+    auto idCard = IDCardPanel::createPanel(_uiLayer);
+    idCard->setPosition(Vec2(
+        panelX+50,
+        startY+20
+    ));
 }
 // �����̵����
 void BaseScene::createBuildShop() {
