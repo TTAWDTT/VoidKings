@@ -1,4 +1,4 @@
-// UnitManager.h
+ï»¿// UnitManager.h
 #ifndef __UNIT_MANAGER_H__
 #define __UNIT_MANAGER_H__
 
@@ -14,35 +14,35 @@ class UnitManager {
 public:
     static UnitManager* getInstance();
 
-    // ¼ÓÔØÅäÖÃ (±ÈÈçÔÚÓÎÏ·Æô¶¯Ê±µ÷ÓÃ)
+    // åŠ è½½é…ç½® (æ¯”å¦‚åœ¨æ¸¸æˆå¯åŠ¨æ—¶è°ƒç”¨)
     bool loadConfig(const std::string& jsonFile);
 
-    // Ôì±ø¹¤³§·½·¨
+    // é€ å…µå·¥å‚æ–¹æ³•
     Soldier* spawnSoldier(int unitId, cocos2d::Vec2 position, int level = 0);
 
-    // »ñÈ¡ÅäÖÃ
+    // è·å–é…ç½®
     const UnitConfig* getConfig(int unitId) const;
 
-    // ¼ì²éÅäÖÃÊÇ·ñ´æÔÚ
+    // æ£€æŸ¥é…ç½®æ˜¯å¦å­˜åœ¨
     bool hasConfig(int unitId) const;
 
 private:
     UnitManager() = default;
     ~UnitManager() = default;
 
-    // ½âÎöµ¥¸öµ¥Î»ÅäÖÃ
+    // è§£æå•ä¸ªå•ä½é…ç½®
     bool parseUnitConfig(const rapidjson::Value& unitJson, UnitConfig& config);
 
-    // ½âÎö¸¡µãÊıÊı×é
+    // è§£ææµ®ç‚¹æ•°æ•°ç»„
     std::vector<float> parseFloatArray(const rapidjson::Value& arr);
 
-    // ½âÎöAIÀàĞÍ
+    // è§£æAIç±»å‹
     TargetPriority parseAIType(int aiType);
 
-    // ID -> Config µÄÓ³Éä±í
+    // ID -> Config çš„æ˜ å°„è¡¨
     std::map<int, UnitConfig> _configCache;
 
-    // µ¥ÀıÊµÀı
+    // å•ä¾‹å®ä¾‹
     static UnitManager* _instance;
 };
 

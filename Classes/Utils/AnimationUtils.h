@@ -1,4 +1,4 @@
-// AnimationUtils.h
+ï»¿// AnimationUtils.h
 #pragma once
 
 #include "cocos2d.h"
@@ -6,9 +6,9 @@
 
 namespace AnimationUtils {
 
-// ´Ó SpriteFrameCache ¹¹½¨ Animation
-// Ö¡ÃüÃû¹æ·¶: {baseName}_{animKey}_{frameNumber}.png (´Ó1¿ªÊ¼)
-// ·µ»ØÖµ: autorelease µÄ cocos2d::Animation*, µ÷ÓÃ·½¿ÉÖ±½ÓÊ¹ÓÃ»ò¼ÓÈë AnimationCache
+// ä» SpriteFrameCache æ„å»º Animation
+// å¸§å‘½åè§„èŒƒ: {baseName}_{animKey}_{frameNumber}.png (ä»1å¼€å§‹)
+// è¿”å›å€¼: autorelease çš„ cocos2d::Animation*, è°ƒç”¨æ–¹å¯ç›´æ¥ä½¿ç”¨æˆ–åŠ å…¥ AnimationCache
 cocos2d::Animation* buildAnimationFromFrames(const std::string& baseName,
                                              const std::string& animKey,
                                              int frameCount,

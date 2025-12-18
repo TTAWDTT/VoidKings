@@ -1,4 +1,4 @@
-#ifndef __PRODUCTION_BUILDING_H__
+ï»¿#ifndef __PRODUCTION_BUILDING_H__
 #define __PRODUCTION_BUILDING_H__
 
 #include "cocos2d.h"
@@ -25,7 +25,7 @@ public:
     int getLength() const;
     int getWidth() const;
     
-    // »ñÈ¡½¨ÖþIDºÍÃû³Æ
+    // èŽ·å–å»ºç­‘IDå’Œåç§°
     int getId() const { return _config ? _config->id : 0; }
     const std::string& getName() const { 
         static std::string empty = "";

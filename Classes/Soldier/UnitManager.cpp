@@ -1,7 +1,7 @@
-// UnitManager.cpp
+ï»¿// UnitManager.cpp
 #include "UnitManager.h"
 
-// µ¥ÀıÊµÀı
+// å•ä¾‹å®ä¾‹
 UnitManager* UnitManager::_instance = nullptr;
 
 UnitManager* UnitManager::getInstance() {
@@ -13,15 +13,15 @@ UnitManager* UnitManager::getInstance() {
 
 
 /*
-×¢Òâ£º
-1.´æÈë»º´æºó£¬ºóĞø´´½¨SoldierÊ±Ö±½Ó´Ó_configCacheÖĞ¶ÁÈ¡£¬¶ÁÈ¡Ê±ĞèÒªÊ¹ÓÃID
-2.ÏàËÆÊµÏÖ½øĞĞµÄÊ±ºò¿ÉÒÔ³­£¬µ«ÊÇÒª×¢Òâ±äÁ¿ÃûºÍ½á¹¹Ìå×Ö¶ÎÃûµÄ¶ÔÓ¦¹ØÏµ
-3.¸Ã²¿·Ö£¬°üÀ¨¼ÓÔØÅäÖÃºÍ½âÎöÅäÖÃ£¬¾ùĞèÒªÊ¹ÓÃrapidjson¿â£¬×¢ÒâÔÚÍ·ÎÄ¼şÖĞinclude£¬¹ØÓÚ¸Ã¿âµÄÏ¸½ÚÎÒ£¨@TTAWDTT£©»áÔÚwikiÖĞËµÃ÷
+æ³¨æ„ï¼š
+1.å­˜å…¥ç¼“å­˜åï¼Œåç»­åˆ›å»ºSoldieræ—¶ç›´æ¥ä»_configCacheä¸­è¯»å–ï¼Œè¯»å–æ—¶éœ€è¦ä½¿ç”¨ID
+2.ç›¸ä¼¼å®ç°è¿›è¡Œçš„æ—¶å€™å¯ä»¥æŠ„ï¼Œä½†æ˜¯è¦æ³¨æ„å˜é‡åå’Œç»“æ„ä½“å­—æ®µåçš„å¯¹åº”å…³ç³»
+3.è¯¥éƒ¨åˆ†ï¼ŒåŒ…æ‹¬åŠ è½½é…ç½®å’Œè§£æé…ç½®ï¼Œå‡éœ€è¦ä½¿ç”¨rapidjsonåº“ï¼Œæ³¨æ„åœ¨å¤´æ–‡ä»¶ä¸­includeï¼Œå…³äºè¯¥åº“çš„ç»†èŠ‚æˆ‘ï¼ˆ@TTAWDTTï¼‰ä¼šåœ¨wikiä¸­è¯´æ˜
 */
 
-// ´ÓjsonÎÄ¼şÖĞ¼ÓÔØÅäÖÃ£¬ÊäÈëÎªÎÄ¼şÂ·¾¶£¬·µ»ØÊÇ·ñ³É¹¦
+// ä»jsonæ–‡ä»¶ä¸­åŠ è½½é…ç½®ï¼Œè¾“å…¥ä¸ºæ–‡ä»¶è·¯å¾„ï¼Œè¿”å›æ˜¯å¦æˆåŠŸ
 bool UnitManager::loadConfig(const std::string& jsonFile) {
-    // 1. ¶ÁÈ¡JSONÎÄ¼ş
+    // 1. è¯»å–JSONæ–‡ä»¶
     std::string fullPath = cocos2d::FileUtils::getInstance()->fullPathForFilename(jsonFile);
     std::string jsonData = cocos2d::FileUtils::getInstance()->getStringFromFile(fullPath);
     
@@ -30,7 +30,7 @@ bool UnitManager::loadConfig(const std::string& jsonFile) {
         return false;
     }
 
-    // 2. ½âÎöJSON -> Ê÷½á¹¹
+    // 2. è§£æJSON -> æ ‘ç»“æ„
     rapidjson::Document doc;
     doc.Parse(jsonData.c_str());
     
@@ -39,18 +39,18 @@ bool UnitManager::loadConfig(const std::string& jsonFile) {
         return false;
     }
 
-    // 3. ¼ì²éÊÇ·ñÓĞunitsÊı×é -> ½âÎöºóµÄ¶¥²ã±ØĞëÊÇunitsÊı×é
+    // 3. æ£€æŸ¥æ˜¯å¦æœ‰unitsæ•°ç»„ -> è§£æåçš„é¡¶å±‚å¿…é¡»æ˜¯unitsæ•°ç»„
     if (!doc.HasMember("units") || !doc["units"].IsArray()) {
         cocos2d::log("UnitManager: Missing 'units' array in config");
         return false;
     }
 
-    // 4. ±éÀú½âÎöÃ¿¸öµ¥Î»ÅäÖÃ
-    const rapidjson::Value& units = doc["units"]; // È¡³ö¶¥²ãunitÊı×é±ãÓÚ±ãÀû
+    // 4. éå†è§£ææ¯ä¸ªå•ä½é…ç½®
+    const rapidjson::Value& units = doc["units"]; // å–å‡ºé¡¶å±‚unitæ•°ç»„ä¾¿äºä¾¿åˆ©
     for (rapidjson::SizeType i = 0; i < units.Size(); i++) {
         UnitConfig config;
-		if (parseUnitConfig(units[i], config)) { // ½«units[i]µÄÊı¾İ½âÎöµ½config½á¹¹ÌåÖĞ
-            _configCache[config.id] = config; // ½âÎöºó´æÈë»º´æ£¬·½±ã´´½¨Ê±µ÷ÓÃ
+		if (parseUnitConfig(units[i], config)) { // å°†units[i]çš„æ•°æ®è§£æåˆ°configç»“æ„ä½“ä¸­
+            _configCache[config.id] = config; // è§£æåå­˜å…¥ç¼“å­˜ï¼Œæ–¹ä¾¿åˆ›å»ºæ—¶è°ƒç”¨
             cocos2d::log("UnitManager: Loaded unit [%d] %s", config.id, config.name.c_str());
         }
     }
@@ -59,21 +59,21 @@ bool UnitManager::loadConfig(const std::string& jsonFile) {
     return true;
 }
 
-// ½«units[i]µÄÊı¾İ½âÎöµ½config½á¹¹ÌåÖĞ£¨´øÄ¬ÈÏÖµ£¬ÃÏ¸çÉè¼ÆµÄÊ±ºò¿ÉÒÔĞŞ¸ÄÒ»ÏÂÊıÖµ£©
-// ºóĞø¸ù¾İÄ¬ÈÏÖµÀ´Éè¼ÆconfigÖĞ¸÷¸öÖÖÀàµÄÊı¾İ²îÒì
+// å°†units[i]çš„æ•°æ®è§£æåˆ°configç»“æ„ä½“ä¸­ï¼ˆå¸¦é»˜è®¤å€¼ï¼Œå­Ÿå“¥è®¾è®¡çš„æ—¶å€™å¯ä»¥ä¿®æ”¹ä¸€ä¸‹æ•°å€¼ï¼‰
+// åç»­æ ¹æ®é»˜è®¤å€¼æ¥è®¾è®¡configä¸­å„ä¸ªç§ç±»çš„æ•°æ®å·®å¼‚
 bool UnitManager::parseUnitConfig(const rapidjson::Value& unitJson, UnitConfig& config) {
-    // ±ØĞè×Ö¶Î¼ì²é
+    // å¿…éœ€å­—æ®µæ£€æŸ¥
     if (!unitJson.HasMember("id") || !unitJson["id"].IsInt()) {
         cocos2d::log("UnitManager: Unit missing 'id' field");
         return false;
     }
 
-    // »ù´¡ĞÅÏ¢
+    // åŸºç¡€ä¿¡æ¯
     config.id = unitJson["id"].GetInt();
     config.name = unitJson.HasMember("name") ? unitJson["name"].GetString() : "Unknown";
     config.spriteFrameName = unitJson.HasMember("spriteFrameName") ? unitJson["spriteFrameName"].GetString() : "";
 
-    // µÈ¼¶Ïà¹ØÊı¾İ - Êı×éĞÎÊ½
+    // ç­‰çº§ç›¸å…³æ•°æ® - æ•°ç»„å½¢å¼
     if (unitJson.HasMember("HP") && unitJson["HP"].IsArray()) {
         config.HP = parseFloatArray(unitJson["HP"]);
     }
@@ -90,24 +90,24 @@ bool UnitManager::parseUnitConfig(const rapidjson::Value& unitJson, UnitConfig& 
         config.RANGE = parseFloatArray(unitJson["RANGE"]);
     }
 
-    // AIÀàĞÍ
+    // AIç±»å‹
     int aiTypeValue = unitJson.HasMember("aiType") ? unitJson["aiType"].GetInt() : 0;
     config.aiType = parseAIType(aiTypeValue);
 
-    // ²¼¶ûÊôĞÔ
+    // å¸ƒå°”å±æ€§
     config.ISREMOTE = unitJson.HasMember("ISREMOTE") ? unitJson["ISREMOTE"].GetBool() : false;
     config.ISFLY = unitJson.HasMember("ISFLY") ? unitJson["ISFLY"].GetBool() : false;
 
-    // µÈ¼¶ÉÏÏŞ
+    // ç­‰çº§ä¸Šé™
     config.MAXLEVEL = unitJson.HasMember("MAXLEVEL") ? unitJson["MAXLEVEL"].GetInt() : 1;
 
-    // ×ÊÔ´ÏûºÄ
+    // èµ„æºæ¶ˆè€—
     config.COST_COIN = unitJson.HasMember("COST_COIN") ? unitJson["COST_COIN"].GetInt() : 0;
     config.COST_ELIXIR = unitJson.HasMember("COST_ELIXIR") ? unitJson["COST_ELIXIR"].GetInt() : 0;
     config.COST_POPULATION = unitJson.HasMember("COST_POPULATION") ? unitJson["COST_POPULATION"].GetInt() : 1;
     config.TRAIN_TIME = unitJson.HasMember("TRAIN_TIME") ? unitJson["TRAIN_TIME"].GetInt() : 30;
 
-    // ¶¯»­ÅäÖÃ£¨¿ÉÑ¡£¬Ê¹ÓÃÄ¬ÈÏÖµ£©
+    // åŠ¨ç”»é…ç½®ï¼ˆå¯é€‰ï¼Œä½¿ç”¨é»˜è®¤å€¼ï¼‰
     config.anim_walk = unitJson.HasMember("anim_walk") ? unitJson["anim_walk"].GetString() : "walk";
     config.anim_walk_frames = unitJson.HasMember("anim_walk_frames") ? unitJson["anim_walk_frames"].GetInt() : 6;
     config.anim_walk_delay = unitJson.HasMember("anim_walk_delay") ? static_cast<float>(unitJson["anim_walk_delay"].GetDouble()) : 0.08f;
@@ -157,14 +157,14 @@ bool UnitManager::hasConfig(int unitId) const {
 }
 
 Soldier* UnitManager::spawnSoldier(int unitId, cocos2d::Vec2 position, int level) {
-    // 1. ²éÕÒÅäÖÃ
+    // 1. æŸ¥æ‰¾é…ç½®
     const UnitConfig* cfg = getConfig(unitId);
     if (!cfg) {
         cocos2d::log("UnitManager: Unit config not found for id: %d", unitId);
         return nullptr;
     }
 
-    // 2. Ê¹ÓÃÍ¨ÓÃÀà + ÌØ¶¨ÅäÖÃ´´½¨Ê¿±ø
+    // 2. ä½¿ç”¨é€šç”¨ç±» + ç‰¹å®šé…ç½®åˆ›å»ºå£«å…µ
     auto soldier = Soldier::create(cfg, level);
     if (soldier) {
         soldier->setPosition(position);
