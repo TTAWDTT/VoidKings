@@ -1,4 +1,9 @@
-﻿#include "BaseScene.h"
+﻿/**
+ * @file BaseScene.cpp
+ * @brief 基地场景实现文件
+ */
+
+#include "BaseScene.h"
 #include "MainMenuScene.h"
 #include "LevelSelectScene.h"
 #include "Buildings/DefenceBuilding.h"
@@ -9,6 +14,8 @@
 #include "UI/IDCardPanel.h"
 
 USING_NS_CC;
+
+// ==================== 场景创建与初始化 ====================
 
 Scene* BaseScene::createScene() {
     return BaseScene::create();
@@ -22,6 +29,7 @@ bool BaseScene::init() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
+    // 初始化状态变量
     _isPlacingMode = false;
     _draggingBuilding = nullptr;
     _placementPreview = nullptr;
@@ -30,39 +38,36 @@ bool BaseScene::init() {
     _selectedBuildingType = 0;
     _selectedLevel = 0; 
 
-	// ���������ͼ
-    // �����һ�£��Ķ�һ��ȽϺ�
-    // ע��ο�����
+    // 创建网格地图（40x40格子，每格32像素）
     _gridMap = GridMap::create(40, 40, 32.0f);
     _gridMap->setPosition(origin);
     this->addChild(_gridMap, 0);
 
-    // ������
+    // 创建建筑层（作为GridMap的子节点）
     _buildingLayer = Node::create();
     _gridMap->addChild(_buildingLayer, 10);
 
-    // �ݵر���
-    createGrassBackground();
+    // 创建网格背景（黑白虚线风格）
+    createGridBackground();
 
-	// ��ʼ���������ؽ���
+    // 初始化基地核心建筑
     initBaseBuilding();
 
-    // ����UI
+    // 创建UI界面
     createUI();
 
-    // �����̵�
+    // 创建建筑商店（初始隐藏）
     createBuildShop();
     _buildShopLayer->setVisible(false);
     
-    // ����ѵ�����
+    // 创建训练面板
     createTrainPanel();
 
-    // ���ر������ã�ȷ��UnitManager�ѳ�ʼ����
+    // 加载兵种配置
     UnitManager::getInstance()->loadConfig("res/units_config.json");
 
-    // ����������
-	// �ⲿ���Ǹ�������صĴ��룬�̵���ק�Ž���ɶ�Ķ���Ҫ�õ�
-    auto listener = EventListenerTouchOneByOne::create(); // ��㴥��������->һ�δ���һ��������
+    // 注册触摸事件监听器
+    auto listener = EventListenerTouchOneByOne::create();
     listener->onTouchBegan = CC_CALLBACK_2(BaseScene::onTouchBegan, this); 
     listener->onTouchMoved = CC_CALLBACK_2(BaseScene::onTouchMoved, this);
     listener->onTouchEnded = CC_CALLBACK_2(BaseScene::onTouchEnded, this);
@@ -71,140 +76,150 @@ bool BaseScene::init() {
     return true;
 }
 
-void BaseScene::createGrassBackground() {
-    // Create grass tile background
-    for (int y = 0; y < 160; ++y) {
-        for (int x = 0; x < 160; ++x) {
-            // ����Ĳݵ�����->�ⲿ�ֿ��Խ����㷨�Ż�������������Ȼ�����ӵĲݵطֲ�
-            int grassType = rand() % 6;
-            char buffer[64];
-            sprintf(buffer, "Grass/grass_000%d.png", grassType); // ��ס���������ʽ
-            
-            auto grassSprite = Sprite::create(buffer);
-            if (grassSprite) {
-                Vec2 pos = _gridMap->gridToWorld(x, y);
-                grassSprite->setPosition(pos);
-				// ���Ųݵ���ͼ����Ӧ�����С
-                // ֮������Ų���������ʽ�ȽϷ���
-                grassSprite->setScale(32.0f / grassSprite->getContentSize().width);
-                _gridMap->addChild(grassSprite, 0);
-            }
+// ==================== 网格背景创建 ====================
+
+void BaseScene::createGridBackground() {
+    // 创建黑色底色背景
+    auto bgColor = LayerColor::create(Color4B(30, 30, 30, 255));
+    _gridMap->addChild(bgColor, -2);
+    
+    // 创建网格线绘制节点
+    _gridBackgroundNode = DrawNode::create();
+    _gridMap->addChild(_gridBackgroundNode, -1);
+    
+    float cellSize = _gridMap->getCellSize();
+    int gridWidth = _gridMap->getGridWidth();
+    int gridHeight = _gridMap->getGridHeight();
+    
+    // 绘制虚线网格
+    // 虚线参数：线段长度和间隔
+    float dashLength = 4.0f;
+    float gapLength = 4.0f;
+    Color4F lineColor(0.5f, 0.5f, 0.5f, 0.6f);  // 灰白色
+    
+    // 绘制垂直虚线
+    for (int x = 0; x <= gridWidth; ++x) {
+        float xPos = x * cellSize;
+        float y = 0;
+        while (y < gridHeight * cellSize) {
+            float endY = std::min(y + dashLength, gridHeight * cellSize);
+            _gridBackgroundNode->drawLine(
+                Vec2(xPos, y), 
+                Vec2(xPos, endY), 
+                lineColor
+            );
+            y += dashLength + gapLength;
         }
     }
+    
+    // 绘制水平虚线
+    for (int y = 0; y <= gridHeight; ++y) {
+        float yPos = y * cellSize;
+        float x = 0;
+        while (x < gridWidth * cellSize) {
+            float endX = std::min(x + dashLength, gridWidth * cellSize);
+            _gridBackgroundNode->drawLine(
+                Vec2(x, yPos), 
+                Vec2(endX, yPos), 
+                lineColor
+            );
+            x += dashLength + gapLength;
+        }
+    }
+    
+    // 创建放置状态网格显示节点（初始隐藏）
+    _placementGridNode = DrawNode::create();
+    _gridMap->addChild(_placementGridNode, 5);
+    _placementGridNode->setVisible(false);
 }
 
-// UI��
-// �����⸺���޸�
-Node* BaseScene::createTooltip(const std::string& text,const Size& size) 
-{ 
+// ==================== UI创建 ====================
+
+Node* BaseScene::createTooltip(const std::string& text, const Size& size) { 
     auto panel = Node::create(); 
     panel->setContentSize(size); 
     panel->setAnchorPoint(Vec2(0, 0.5f)); 
-    auto bg = LayerColor::create( Color4B(0, 0, 0, 180), size.width, size.height ); bg->setPosition(Vec2::ZERO); 
+    
+    auto bg = LayerColor::create(Color4B(0, 0, 0, 180), size.width, size.height); 
+    bg->setPosition(Vec2::ZERO); 
     panel->addChild(bg); 
-    auto label = Label::createWithTTF( text, "fonts/ScienceGothic.ttf", 18 ); 
+    
+    auto label = Label::createWithTTF(text, "fonts/ScienceGothic.ttf", 18); 
     label->setWidth(size.width - 10); 
     label->setAlignment(TextHAlignment::LEFT); 
     label->setPosition(Vec2(size.width / 2, size.height / 2)); 
     panel->addChild(label);
+    
     return panel; 
 }
-void BaseScene::bindTooltip(
-    Node* owner,
-    Node* targetBtn,
-    Node* tooltip,
-    float offsetX
-)
-{
+
+void BaseScene::bindTooltip(Node* owner, Node* targetBtn, Node* tooltip, float offsetX) {
     tooltip->setVisible(false);
     owner->addChild(tooltip, 999);
 
     auto mouseListener = EventListenerMouse::create();
+    mouseListener->onMouseMove = [=](EventMouse* event) {
+        Vec2 mouseWorldPos(event->getCursorX(), event->getCursorY());
 
-    mouseListener->onMouseMove = [=](EventMouse* event)
-    {
-        Vec2 mouseWorldPos(
-            event->getCursorX(),
-            event->getCursorY()
-        );
-
-        if (targetBtn->getBoundingBox().containsPoint(mouseWorldPos))
-        {
-            float btnRight =
-                targetBtn->getPositionX() +
-                targetBtn->getContentSize().width *
-                targetBtn->getScale() / 2;
-
-            tooltip->setPosition(Vec2(
-                btnRight + offsetX,
-                targetBtn->getPositionY()
-            ));
-
+        if (targetBtn->getBoundingBox().containsPoint(mouseWorldPos)) {
+            float btnRight = targetBtn->getPositionX() +
+                targetBtn->getContentSize().width * targetBtn->getScale() / 2;
+            tooltip->setPosition(Vec2(btnRight + offsetX, targetBtn->getPositionY()));
             tooltip->setVisible(true);
-        }
-        else
-        {
+        } else {
             tooltip->setVisible(false);
         }
     };
 
-    _eventDispatcher->addEventListenerWithSceneGraphPriority(
-        mouseListener,
-        owner
-    );
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, owner);
 }
 
 void BaseScene::createUI() {
-    // origin��ָ���ɼ����������½ǵ�ȫ������ϵ�м��λ��(0, 0)
-	// visibleSize��ָ���ɼ����򡱵Ŀ���
-    // �������ַ�ʽ���ؾ�������
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
     _uiLayer = Node::create();
     this->addChild(_uiLayer, 100);
 
-	// �����ǹ���UI��ť��λ�á��Ķ��壬֮�������õ�������⼸��������λ��
-    // ע�⣺������������λ�ã���������ά��
-	float panelX = origin.x + 20; // ���Xλ��
-    float buttonSpacing = 30; // ��Ť��ļ�϶
+    // UI按钮布局参数
+    float panelX = origin.x + 20;
+    float buttonSpacing = 30;
     float startY = visibleSize.height / 2 + 100;
 
-    // Attack button
+    // 进攻按钮
     auto attackBtn = Button::create("UI/attack.png");
-	attackBtn->setScale(4.0f);
+    attackBtn->setScale(4.0f);
     attackBtn->setPosition(Vec2(panelX, startY - buttonSpacing));
     attackBtn->addClickEventListener([this](Ref* sender) { this->onAttackButton(sender); });
     _uiLayer->addChild(attackBtn);
     auto attackTip = createTooltip("Attack", Size(80, 30));
     bindTooltip(this, attackBtn, attackTip);
 
-    // Build button
+    // 建造按钮
     auto buildBtn = Button::create("UI/build.png");
-	buildBtn->setScale(4.0f);
-    buildBtn->setPosition(Vec2(panelX, startY - buttonSpacing*2));
+    buildBtn->setScale(4.0f);
+    buildBtn->setPosition(Vec2(panelX, startY - buttonSpacing * 2));
     buildBtn->addClickEventListener([this](Ref* sender) { this->onBuildButton(sender); });
     _uiLayer->addChild(buildBtn);
     auto buildTip = createTooltip("Build", Size(60, 30));
     bindTooltip(this, buildBtn, buildTip);
 
-    // Exit button
+    // 退出按钮
     auto exitBtn = Button::create("UI/exit.png");
-	exitBtn->setScale(4.0f);
+    exitBtn->setScale(4.0f);
     exitBtn->setPosition(Vec2(panelX, startY - buttonSpacing * 3));
     exitBtn->addClickEventListener([this](Ref* sender) { this->onExitButton(sender); });
     _uiLayer->addChild(exitBtn);
     auto exitTip = createTooltip("Exit", Size(60, 30));
     bindTooltip(this, exitBtn, exitTip);
     
-    // Resource display
+    // 资源显示面板
     auto idCard = IDCardPanel::createPanel(_uiLayer);
-    idCard->setPosition(Vec2(
-        panelX+50,
-        startY+20
-    ));
+    idCard->setPosition(Vec2(panelX + 50, startY + 20));
 }
-// �����̵����
+
+// ==================== 建筑商店创建 ====================
+
 void BaseScene::createBuildShop() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
@@ -212,19 +227,16 @@ void BaseScene::createBuildShop() {
     _buildShopLayer = Node::create();
     this->addChild(_buildShopLayer, 101);
 
-    // �����̵�
-    // ���Ҳ�ø�
+    // 半透明黑色背景遮罩
     auto bg = LayerColor::create(Color4B(0, 0, 0, 180), visibleSize.width, visibleSize.height);
     _buildShopLayer->addChild(bg);
 
-	// �̵����->�������ذ�ť�ͱ���ȿؼ�
-    // ע�⣬���Ǳ�������������˼·��ʵ��ģ�黯
-    // ����Ҫ�Ӹ�����
+    // 商店面板
     auto shopPanel = LayerColor::create(Color4B(50, 50, 50, 255), 400, 500);
     shopPanel->setPosition(Vec2(visibleSize.width / 2 - 200, visibleSize.height / 2 - 250));
     _buildShopLayer->addChild(shopPanel);
 
-    // Title
+    // 标题
     auto titleLabel = Label::createWithSystemFont("Building Shop", "ScienceGothic", 28);
     titleLabel->setPosition(Vec2(200, 460));
     shopPanel->addChild(titleLabel);
@@ -232,7 +244,7 @@ void BaseScene::createBuildShop() {
     float yPos = 400;
     float spacing = 60;
 
-    // Building options
+    // 建筑选项配置
     struct BuildingOption {
         const char* name;
         int type;
@@ -247,10 +259,9 @@ void BaseScene::createBuildShop() {
         {"Soldier Builder (300G)", 5, 300}
     };
 
-	// �ⲿ�ִ����˽���ѡ��İ�ť�����͵���¼���
-    // ����Ű�����۵��OK
+    // 创建建筑选择按钮
     for (int i = 0; i < 5; ++i) {
-        auto btn = Button::create("btn_normal.png", "btn_pressed.png.png");
+        auto btn = Button::create("btn_normal.png", "btn_pressed.png");
         btn->setTitleText(buildings[i].name);
         btn->setTitleFontSize(18);
         btn->setScale(1.5f);
@@ -263,8 +274,8 @@ void BaseScene::createBuildShop() {
         yPos -= spacing;
     }
 
-    // Close button
-    auto closeBtn = Button::create("btn_normal.png", "btn_pressed.png.png");
+    // 关闭按钮
+    auto closeBtn = Button::create("btn_normal.png", "btn_pressed.png");
     closeBtn->setTitleText("Close");
     closeBtn->setTitleFontSize(24);
     closeBtn->setPosition(Vec2(200, 50));
@@ -274,51 +285,41 @@ void BaseScene::createBuildShop() {
     shopPanel->addChild(closeBtn);
 }
 
-// ===================================================
-// ����ѵ����崴��
-// ===================================================
+// ==================== 训练面板创建 ====================
+
 void BaseScene::createTrainPanel() {
-    // ����ѵ����壬����ص�����
     _trainPanel = TrainPanel::create(
-        // ѵ����ɻص�
+        // 训练完成回调
         [this](int unitId) {
             this->onUnitTrainComplete(unitId);
         },
-        // �رջص�
+        // 关闭回调
         [this]() {
-            CCLOG("[���س���] ѵ�����ر�");
+            CCLOG("[基地场景] 训练面板关闭");
         }
     );
     
     if (_trainPanel) {
         this->addChild(_trainPanel, 102);
-        CCLOG("[���س���] ѵ����崴���ɹ�");
+        CCLOG("[基地场景] 训练面板创建成功");
     }
 }
 
-// ===================================================
-// ��ʾѵ�����
-// ===================================================
 void BaseScene::showTrainPanel() {
     if (_trainPanel) {
         _trainPanel->show();
-        CCLOG("[���س���] ��ѵ�����");
+        CCLOG("[基地场景] 打开训练面板");
     }
 }
 
-// ===================================================
-// ����ѵ����ɻص�
-// ===================================================
 void BaseScene::onUnitTrainComplete(int unitId) {
-    CCLOG("[���س���] ����ѵ�����: ID=%d", unitId);
-    // �����������ѵ����ɺ���߼�
-    // ���磺����UI��������Ч��
+    CCLOG("[基地场景] 兵种训练完成: ID=%d", unitId);
 }
 
-// ��ʼ������->���غ�һ����Ӫ
-// �����֪��Ϊɶ��û�����ó�����Ҫdebug
+// ==================== 基地建筑初始化 ====================
+
 void BaseScene::initBaseBuilding() {
-    // Initialize base building config as member variable
+    // 初始化基地建筑配置
     _baseConfig.id = 3001;
     _baseConfig.name = "Base";
     _baseConfig.spriteFrameName = "buildings/base.png";
@@ -336,24 +337,23 @@ void BaseScene::initBaseBuilding() {
     if (base) {
         _buildingLayer->addChild(base);
         BuildingManager::getInstance()->setGridMap(_gridMap);
-        // �ѻ��ط�������
+        // 将基地放置在地图中心位置
         BuildingManager::getInstance()->placeBuilding(base, 18, 18, 4, 4);
     }
 }
 
-// ===================================================
-// ������ť�ص� - ��ת���ؿ�ѡ�񳡾�
-// ===================================================
+// ==================== 按钮回调 ====================
+
 void BaseScene::onAttackButton(Ref* sender) {
-    CCLOG("[���س���] ���������ť����ת���ؿ�ѡ��");
+    CCLOG("[基地场景] 点击进攻按钮，跳转到关卡选择");
     
-    // ��ȡ��ѵ���ı���
+    // 获取已训练的兵种
     std::map<int, int> trainedUnits;
     if (_trainPanel) {
         trainedUnits = _trainPanel->getTrainedUnits();
     }
     
-    // ��ת���ؿ�ѡ�񳡾�
+    // 跳转到关卡选择场景
     auto scene = LevelSelectScene::createScene(trainedUnits);
     Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
 }
@@ -367,13 +367,63 @@ void BaseScene::onExitButton(Ref* sender) {
     Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
 }
 
-// ���Ҫչʾ������ϢԤ��
+// ==================== 建筑放置相关 ====================
+
+Vec2 BaseScene::calculateBuildingPosition(int gridX, int gridY, int width, int height) {
+    // 计算建筑中心位置：左下角格子位置 + 建筑尺寸的一半
+    float cellSize = _gridMap->getCellSize();
+    float centerX = (gridX + width * 0.5f) * cellSize;
+    float centerY = (gridY + height * 0.5f) * cellSize;
+    return Vec2(centerX, centerY);
+}
+
+void BaseScene::updatePlacementGrid(int gridX, int gridY, bool canPlace) {
+    if (!_placementGridNode) return;
+    
+    _placementGridNode->clear();
+    _placementGridNode->setVisible(true);
+    
+    float cellSize = _gridMap->getCellSize();
+    
+    // 根据可放置状态选择颜色
+    Color4F fillColor = canPlace ? 
+        Color4F(0.0f, 0.8f, 0.0f, 0.4f) :   // 绿色（可放置）
+        Color4F(0.8f, 0.0f, 0.0f, 0.4f);    // 红色（不可放置）
+    
+    Color4F borderColor = canPlace ?
+        Color4F(0.0f, 1.0f, 0.0f, 0.8f) :
+        Color4F(1.0f, 0.0f, 0.0f, 0.8f);
+    
+    // 绘制建筑占用的每个格子
+    for (int dy = 0; dy < _previewHeight; ++dy) {
+        for (int dx = 0; dx < _previewWidth; ++dx) {
+            int cellX = gridX + dx;
+            int cellY = gridY + dy;
+            
+            Vec2 bottomLeft(cellX * cellSize, cellY * cellSize);
+            Vec2 topRight((cellX + 1) * cellSize, (cellY + 1) * cellSize);
+            
+            // 绘制填充矩形
+            _placementGridNode->drawSolidRect(bottomLeft, topRight, fillColor);
+            
+            // 绘制边框
+            Vec2 vertices[] = {
+                bottomLeft,
+                Vec2(topRight.x, bottomLeft.y),
+                topRight,
+                Vec2(bottomLeft.x, topRight.y)
+            };
+            _placementGridNode->drawPolygon(vertices, 4, Color4F(0, 0, 0, 0), 1.0f, borderColor);
+        }
+    }
+}
+
 void BaseScene::onBuildingSelected(int buildingType) {
     _selectedBuildingType = buildingType;
     _buildShopLayer->setVisible(false);
     _isPlacingMode = true;
 
-    // Create preview sprite
+    // 移除旧的预览
     if (_placementPreview) {
         _placementPreview->removeFromParent();
         _placementPreview = nullptr;
@@ -383,28 +433,29 @@ void BaseScene::onBuildingSelected(int buildingType) {
     _previewWidth = 1;
     _previewHeight = 1;
 
+    // 根据建筑类型设置预览图和尺寸
     switch (buildingType) {
-        case 1: // Arrow Tower
+        case 1: // 箭塔
             spritePath = "buildings/ArrowTower.png";
             _previewWidth = 2;
             _previewHeight = 2;
             break;
-        case 2: // Boom Tower
+        case 2: // 炮塔
             spritePath = "buildings/BoomTower.png";
             _previewWidth = 2;
             _previewHeight = 2;
             break;
-        case 3: // Tree
+        case 3: // 树
             spritePath = "buildings/Tree/sprite_0000.png";
             _previewWidth = 2;
             _previewHeight = 2;
             break;
-        case 4: // Snowman
+        case 4: // 雪人仓库
             spritePath = "buildings/snowman.png";
             _previewWidth = 2;
             _previewHeight = 2;
             break;
-        case 5: // Soldier Builder
+        case 5: // 兵营
             spritePath = "buildings/soldierbuilder.png";
             _previewWidth = 3;
             _previewHeight = 3;
@@ -417,23 +468,25 @@ void BaseScene::onBuildingSelected(int buildingType) {
         _gridMap->addChild(_placementPreview, 50);
     }
     
-    // Show grid lines for easier placement
+    // 显示网格辅助线
     _gridMap->showGrid(true);
 }
 
 void BaseScene::updatePlacementPreview() {
-    // Update preview position and color based on validity
+    // 预览更新在onTouchMoved中处理
 }
 
 void BaseScene::confirmPlacement() {
-    // Place the building
     _isPlacingMode = false;
     if (_placementPreview) {
         _placementPreview->removeFromParent();
         _placementPreview = nullptr;
     }
-    // Hide grid lines
+    // 隐藏网格辅助线和放置网格
     _gridMap->showGrid(false);
+    if (_placementGridNode) {
+        _placementGridNode->setVisible(false);
+    }
 }
 
 void BaseScene::cancelPlacement() {
@@ -442,20 +495,22 @@ void BaseScene::cancelPlacement() {
         _placementPreview->removeFromParent();
         _placementPreview = nullptr;
     }
-    // Hide grid lines
+    // 隐藏网格辅助线和放置网格
     _gridMap->showGrid(false);
+    if (_placementGridNode) {
+        _placementGridNode->setVisible(false);
+    }
 }
 
-// ===================================================
-// ������ʼ�ص�
-// ===================================================
+// ==================== 触摸事件处理 ====================
+
 bool BaseScene::onTouchBegan(Touch* touch, Event* event) {
-    // ���ѵ�����������ʾ����������������
+    // 如果训练面板正在显示，不处理触摸
     if (_trainPanel && _trainPanel->isShowing()) {
         return false;
     }
     
-    // ��������̵�������ʾ����������������
+    // 如果建筑商店正在显示，不处理触摸
     if (_buildShopLayer && _buildShopLayer->isVisible()) {
         return false;
     }
@@ -464,26 +519,23 @@ bool BaseScene::onTouchBegan(Touch* touch, Event* event) {
         return true;
     }
     
-    // ����Ƿ����˱�Ӫ������Soldier Builder��
+    // 检查是否点击了兵营建筑
     Vec2 touchPos = touch->getLocation();
     Vec2 localPos = _gridMap->convertToNodeSpace(touchPos);
     
-    // ����������������ӽڵ㣬����Ƿ����˱�Ӫ
     auto& buildings = _buildingLayer->getChildren();
     for (auto& child : buildings) {
-        // ����Ƿ���ProductionBuilding����
         auto building = dynamic_cast<ProductionBuilding*>(child);
         if (building) {
-            // ��ȡ�����ı߽��
             auto boundingBox = building->getBoundingBox();
             if (boundingBox.containsPoint(localPos)) {
-                // ֻ�б�Ӫ��SoldierBuilder, ID=3002���Ŵ�ѵ�����
+                // 只有兵营（SoldierBuilder, ID=3002）才打开训练面板
                 if (building->getId() == 3002 || building->getName() == "SoldierBuilder") {
-                    CCLOG("[BaseScene] Clicked barracks, opening training panel");
+                    CCLOG("[基地场景] 点击兵营，打开训练面板");
                     showTrainPanel();
                     return true;
                 } else {
-                    CCLOG("[BaseScene] Clicked building: %s (ID: %d)", 
+                    CCLOG("[基地场景] 点击建筑: %s (ID: %d)", 
                           building->getName().c_str(), building->getId());
                 }
             }
@@ -499,15 +551,22 @@ void BaseScene::onTouchMoved(Touch* touch, Event* event) {
         Vec2 localPos = _gridMap->convertToNodeSpace(touchPos);
         Vec2 gridPos = _gridMap->worldToGrid(localPos);
         
-        // Snap to grid
-        Vec2 worldPos = _gridMap->gridToWorld((int)gridPos.x, (int)gridPos.y);
+        int gridX = (int)gridPos.x;
+        int gridY = (int)gridPos.y;
+        
+        // 计算建筑中心位置（修复偏移问题）
+        Vec2 worldPos = calculateBuildingPosition(gridX, gridY, _previewWidth, _previewHeight);
         _placementPreview->setPosition(worldPos);
 
-        // Check if can place
-        if (_gridMap->canPlaceBuilding((int)gridPos.x, (int)gridPos.y, _previewWidth, _previewHeight)) {
-            _placementPreview->setColor(Color3B::GREEN);
+        // 检查是否可以放置并更新网格颜色
+        bool canPlace = _gridMap->canPlaceBuilding(gridX, gridY, _previewWidth, _previewHeight);
+        updatePlacementGrid(gridX, gridY, canPlace);
+        
+        // 更新预览颜色
+        if (canPlace) {
+            _placementPreview->setColor(Color3B::WHITE);
         } else {
-            _placementPreview->setColor(Color3B::RED);
+            _placementPreview->setColor(Color3B::GRAY);
         }
     }
 }
@@ -522,11 +581,11 @@ void BaseScene::onTouchEnded(Touch* touch, Event* event) {
         int gridY = (int)gridPos.y;
 
         if (_gridMap->canPlaceBuilding(gridX, gridY, _previewWidth, _previewHeight)) {
-            // Create the actual building based on type
+            // 创建实际建筑
             Node* newBuilding = nullptr;
             
             switch (_selectedBuildingType) {
-                case 1: { // Arrow Tower
+                case 1: { // 箭塔
                     DefenceBuildingConfig config;
                     config.id = 2001;
                     config.name = "ArrowTower";
@@ -541,11 +600,10 @@ void BaseScene::onTouchEnded(Touch* touch, Event* event) {
                     config.length = 2;
                     config.width = 2;
                     config.MAXLEVEL = 2;
-                    auto building = DefenceBuilding::create(&config, 0);
-                    newBuilding = building;
+                    newBuilding = DefenceBuilding::create(&config, 0);
                     break;
                 }
-                case 2: { // Boom Tower
+                case 2: { // 炮塔
                     DefenceBuildingConfig config;
                     config.id = 2002;
                     config.name = "BoomTower";
@@ -560,11 +618,10 @@ void BaseScene::onTouchEnded(Touch* touch, Event* event) {
                     config.length = 2;
                     config.width = 2;
                     config.MAXLEVEL = 2;
-                    auto building = DefenceBuilding::create(&config, 0);
-                    newBuilding = building;
+                    newBuilding = DefenceBuilding::create(&config, 0);
                     break;
                 }
-                case 3: { // Tree
+                case 3: { // 树
                     DefenceBuildingConfig config;
                     config.id = 2003;
                     config.name = "Tree";
@@ -579,11 +636,10 @@ void BaseScene::onTouchEnded(Touch* touch, Event* event) {
                     config.length = 2;
                     config.width = 2;
                     config.MAXLEVEL = 2;
-                    auto building = DefenceBuilding::create(&config, 0);
-                    newBuilding = building;
+                    newBuilding = DefenceBuilding::create(&config, 0);
                     break;
                 }
-                case 4: { // Snowman
+                case 4: { // 雪人仓库
                     StorageBuildingConfig config;
                     config.id = 4001;
                     config.name = "Snowman";
@@ -595,11 +651,10 @@ void BaseScene::onTouchEnded(Touch* touch, Event* event) {
                     config.MAXLEVEL = 2;
                     config.ADD_STORAGE_ELIXIR_CAPACITY = {1000, 2000, 4000};
                     config.ADD_STORAGE_GOLD_CAPACITY = {1000, 2000, 4000};
-                    auto building = StorageBuilding::create(&config, 0);
-                    newBuilding = building;
+                    newBuilding = StorageBuilding::create(&config, 0);
                     break;
                 }
-                case 5: { // Soldier Builder
+                case 5: { // 兵营
                     ProductionBuildingConfig config;
                     config.id = 3002;
                     config.name = "SoldierBuilder";
@@ -613,17 +668,22 @@ void BaseScene::onTouchEnded(Touch* touch, Event* event) {
                     config.STORAGE_ELIXIR_CAPACITY = {0, 0, 0};
                     config.PRODUCE_GOLD = {0, 0, 0};
                     config.STORAGE_GOLD_CAPACITY = {0, 0, 0};
-                    auto building = ProductionBuilding::create(&config, 0);
-                    newBuilding = building;
+                    newBuilding = ProductionBuilding::create(&config, 0);
                     break;
                 }
             }
             
             if (newBuilding) {
                 _buildingLayer->addChild(newBuilding);
-                BuildingManager::getInstance()->placeBuilding(newBuilding, gridX, gridY, _previewWidth, _previewHeight);
                 
-                // Deduct cost
+                // 使用统一的位置计算方法放置建筑
+                Vec2 buildingPos = calculateBuildingPosition(gridX, gridY, _previewWidth, _previewHeight);
+                newBuilding->setPosition(buildingPos);
+                
+                // 标记网格为已占用
+                _gridMap->occupyCell(gridX, gridY, _previewWidth, _previewHeight, newBuilding);
+                
+                // 扣除费用
                 int cost = 0;
                 switch (_selectedBuildingType) {
                     case 1: cost = 100; break;
@@ -633,11 +693,6 @@ void BaseScene::onTouchEnded(Touch* touch, Event* event) {
                     case 5: cost = 300; break;
                 }
                 _currentGold -= cost;
-                
-                // Update UI
-                char buffer[64];
-                sprintf(buffer, "Gold: %d", _currentGold);
-                _goldLabel->setString(buffer);
             }
             
             confirmPlacement();

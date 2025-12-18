@@ -52,8 +52,12 @@ bool BuildingManager::placeBuilding(Node* building, int gridX, int gridY, int wi
 
     if (_gridMap->canPlaceBuilding(gridX, gridY, width, height)) {
         _gridMap->occupyCell(gridX, gridY, width, height, building);
-        Vec2 worldPos = _gridMap->gridToWorld(gridX + width / 2, gridY + height / 2);
-        building->setPosition(worldPos);
+        // 计算建筑中心位置：左下角格子位置 + 建筑尺寸的一半
+        // 使用浮点数计算避免整数除法导致的偏移
+        float cellSize = _gridMap->getCellSize();
+        float centerX = (gridX + width * 0.5f) * cellSize;
+        float centerY = (gridY + height * 0.5f) * cellSize;
+        building->setPosition(Vec2(centerX, centerY));
         return true;
     }
     return false;
