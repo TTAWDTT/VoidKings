@@ -148,7 +148,7 @@ void BuildShopPanel::setupBuildingButtons() {
 // 创建单个建筑按钮
 // ===================================================
 Button* BuildShopPanel::createBuildingButton(const BuildingOption& option, float yPos) {
-    auto btn = Button::create("btn_normal.png", "btn_pressed.png.png");
+    auto btn = Button::create("btn_normal.png", "btn_pressed.png");
     if (!btn) {
         btn = Button::create();
     }
@@ -180,7 +180,7 @@ Button* BuildShopPanel::createBuildingButton(const BuildingOption& option, float
 // 关闭按钮设置
 // ===================================================
 void BuildShopPanel::setupCloseButton() {
-    auto closeBtn = Button::create("btn_normal.png", "btn_pressed.png.png");
+    auto closeBtn = Button::create("btn_normal.png", "btn_pressed.png");
     if (!closeBtn) {
         closeBtn = Button::create();
     }
