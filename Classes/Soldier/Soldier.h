@@ -1,62 +1,62 @@
-// Soldier.h
+ï»¿// Soldier.h
 #include "cocos2d.h"
 #include "UnitData.h"
 
-// ´Ë´¦¿ªÊ¼Ğ´Ê¿±øÀà
-// ËµÃ÷ - ÕâÀïÎªÊ²Ã´¼Ì³ĞNode¶ø²»ÊÇSprite£¿
-// Soldier´Ó»­Í¼µÄ½Ç¶ÈÀ´Ëµ£¬²»Ö»ÓĞSoldier±¾ÉíĞèÒª»æÖÆ£¬»¹ÓĞÑªÌõ£¬¿ÉÄÜ»¹ÓĞÒõÓ°
-// µ±Ê¿±øËõ·Å¡¢Ğı×ªÊ±£¬ÑªÌõ¶¼Ó¦¸Ã½øĞĞ±ä»»
-// ËùÒÔ´´½¨Ò»¸öNode£¬Sprite×÷ÎªÆä×Ó½Úµã£¬¼ÓÈëäÖÈ¾Âß¼­£¬¾ÍÄÜ¹»äÖÈ¾¶¯»­
+// æ­¤å¤„å¼€å§‹å†™å£«å…µç±»
+// è¯´æ˜ - è¿™é‡Œä¸ºä»€ä¹ˆç»§æ‰¿Nodeè€Œä¸æ˜¯Spriteï¼Ÿ
+// Soldierä»ç”»å›¾çš„è§’åº¦æ¥è¯´ï¼Œä¸åªæœ‰Soldieræœ¬èº«éœ€è¦ç»˜åˆ¶ï¼Œè¿˜æœ‰è¡€æ¡ï¼Œå¯èƒ½è¿˜æœ‰é˜´å½±
+// å½“å£«å…µç¼©æ”¾ã€æ—‹è½¬æ—¶ï¼Œè¡€æ¡éƒ½åº”è¯¥è¿›è¡Œå˜æ¢
+// æ‰€ä»¥åˆ›å»ºä¸€ä¸ªNodeï¼ŒSpriteä½œä¸ºå…¶å­èŠ‚ç‚¹ï¼ŒåŠ å…¥æ¸²æŸ“é€»è¾‘ï¼Œå°±èƒ½å¤Ÿæ¸²æŸ“åŠ¨ç”»
 class Soldier : public cocos2d::Node {
 public:
-    // ±ê×¼ Cocos create ·½·¨
-    static Soldier* create(const UnitConfig* config, int level = 0); // ´´½¨Ê¿±øÊµÀı,Ä¬ÈÏµÈ¼¶Îª0
+    // æ ‡å‡† Cocos create æ–¹æ³•
+    static Soldier* create(const UnitConfig* config, int level = 0); // åˆ›å»ºå£«å…µå®ä¾‹,é»˜è®¤ç­‰çº§ä¸º0
 
-    virtual bool init(const UnitConfig* config, int level = 0); // ³õÊ¼»¯²¢Ìí¼Ó×Ó½Úµã
+    virtual bool init(const UnitConfig* config, int level = 0); // åˆå§‹åŒ–å¹¶æ·»åŠ å­èŠ‚ç‚¹
     virtual void update(float dt) override;
 
-    // ×´Ì¬²Ù×÷
+    // çŠ¶æ€æ“ä½œ
     void takeDamage(float damage);
     
-    // µÈ¼¶Ïà¹Ø·½·¨
+    // ç­‰çº§ç›¸å…³æ–¹æ³•
     int getLevel() const { return _level; }
     void setLevel(int level);
     
-    // »ñÈ¡µ±Ç°µÈ¼¶µÄÊôĞÔ
+    // è·å–å½“å‰ç­‰çº§çš„å±æ€§
     float getCurrentHP() const;
     float getCurrentMaxHP() const;
     float getCurrentSpeed() const;
     float getCurrentATK() const;
     float getCurrentRange() const;
 
-    // »ñÈ¡µ±Ç°·½Ïò
+    // è·å–å½“å‰æ–¹å‘
     Direction getDirection() const { return _direction; }
 
 private:
-    // ÅäÖÃÄ£°å¡ª¡ªÒ»¸öÖ¸ÕëÒıÓÃµÄÖ¸Õë (ÏíÔªÄ£Ê½,²»ĞèÒª±£´æÅäÖÃ½á¹¹Ìå)
+    // é…ç½®æ¨¡æ¿â€”â€”ä¸€ä¸ªæŒ‡é’ˆå¼•ç”¨çš„æŒ‡é’ˆ (äº«å…ƒæ¨¡å¼,ä¸éœ€è¦ä¿å­˜é…ç½®ç»“æ„ä½“)
     const UnitConfig* _config;
 
-    // ÔËĞĞÊ±Êı¾İ
-    int _level;                   // µ±Ç°µÈ¼¶
+    // è¿è¡Œæ—¶æ•°æ®
+    int _level;                   // å½“å‰ç­‰çº§
     float _currentHP;
-    cocos2d::Sprite* _bodySprite; // ÒÔºó»á¶¨ÒåÕâ¸öÎª¶¯»­,ÔİÊ±Ó¦¸ÃäÖÈ¾³ÉÍ¼Æ¬
-    cocos2d::Sprite* _healthBar;  // ÑªÌõ¾«Áé
-    cocos2d::Node* _target;       // µ±Ç°Ëø¶¨µÄ¹¥»÷Ä¿±ê£¨Ò²ÊÇÒ»¸öNode£©
-    // ¶¯»­Ö§³Ö
-    std::string _currentActionKey;     // µ±Ç°¶¯»­µÄ¼ü
-    Direction _direction;              // µ±Ç°·½Ïò (LEFT/RIGHT)
+    cocos2d::Sprite* _bodySprite; // ä»¥åä¼šå®šä¹‰è¿™ä¸ªä¸ºåŠ¨ç”»,æš‚æ—¶åº”è¯¥æ¸²æŸ“æˆå›¾ç‰‡
+    cocos2d::Sprite* _healthBar;  // è¡€æ¡ç²¾çµ
+    cocos2d::Node* _target;       // å½“å‰é”å®šçš„æ”»å‡»ç›®æ ‡ï¼ˆä¹Ÿæ˜¯ä¸€ä¸ªNodeï¼‰
+    // åŠ¨ç”»æ”¯æŒ
+    std::string _currentActionKey;     // å½“å‰åŠ¨ç”»çš„é”®
+    Direction _direction;              // å½“å‰æ–¹å‘ (LEFT/RIGHT)
 
-    // ´ø·½Ïò¶¯»­½Ó¿Ú - Ö»ĞèÒªÒ»¸ö·½Ïò(RIGHT),LEFT·½ÏòÍ¨¹ı·­×ªÊµÏÖ
+    // å¸¦æ–¹å‘åŠ¨ç”»æ¥å£ - åªéœ€è¦ä¸€ä¸ªæ–¹å‘(RIGHT),LEFTæ–¹å‘é€šè¿‡ç¿»è½¬å®ç°
     void playAnimation(const std::string& animType, int frameCount, float delay, bool loop);
     void stopCurrentAnimation();
-    void updateSpriteDirection(Direction dir); // ¸üĞÂÍ¼Æ¬·­×ª
+    void updateSpriteDirection(Direction dir); // æ›´æ–°å›¾ç‰‡ç¿»è½¬
     
-    // ·½Ïò×ª»»¸¨Öúº¯Êı
+    // æ–¹å‘è½¬æ¢è¾…åŠ©å‡½æ•°
     Direction calcDirection(const cocos2d::Vec2& from, const cocos2d::Vec2& to);
 
-    // ÄÚ²¿ĞĞÎªÂß¼­
-    void findTarget();            // Ñ°µĞÂß¼­
-    void moveToTarget(float dt);  // ÒÆ¶¯Âß¼­
-    void attackTarget();          // ¹¥»÷Âß¼­
-    void updateHealthBar(bool animate = true); // ÑªÌõ¸üĞÂ
+    // å†…éƒ¨è¡Œä¸ºé€»è¾‘
+    void findTarget();            // å¯»æ•Œé€»è¾‘
+    void moveToTarget(float dt);  // ç§»åŠ¨é€»è¾‘
+    void attackTarget();          // æ”»å‡»é€»è¾‘
+    void updateHealthBar(bool animate = true); // è¡€æ¡æ›´æ–°
 };

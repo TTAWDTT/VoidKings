@@ -1,6 +1,6 @@
-// TrainPanel.h
-// ±øÖÖÑµÁ·Ãæ°å×é¼ş
-// ÓÃÓÚÔÚ±øÓªÖĞÑµÁ·±øÖÖ£¬¹ÜÀíÑµÁ·¶ÓÁĞ
+ï»¿// TrainPanel.h
+// å…µç§è®­ç»ƒé¢æ¿ç»„ä»¶
+// ç”¨äºåœ¨å…µè¥ä¸­è®­ç»ƒå…µç§ï¼Œç®¡ç†è®­ç»ƒé˜Ÿåˆ—
 
 #ifndef __TRAIN_PANEL_H__
 #define __TRAIN_PANEL_H__
@@ -16,48 +16,48 @@ USING_NS_CC;
 using namespace cocos2d::ui;
 
 // ===================================================
-// ÑµÁ·¶ÓÁĞÖĞµÄ±øÖÖĞÅÏ¢
+// è®­ç»ƒé˜Ÿåˆ—ä¸­çš„å…µç§ä¿¡æ¯
 // ===================================================
 struct TrainQueueItem {
-    int unitId;                 // ±øÖÖID
-    std::string unitName;       // ±øÖÖÃû³Æ
-    float remainingTime;        // Ê£ÓàÑµÁ·Ê±¼ä£¨Ãë£©
-    float totalTime;            // ×ÜÑµÁ·Ê±¼ä£¨Ãë£©
+    int unitId;                 // å…µç§ID
+    std::string unitName;       // å…µç§åç§°
+    float remainingTime;        // å‰©ä½™è®­ç»ƒæ—¶é—´ï¼ˆç§’ï¼‰
+    float totalTime;            // æ€»è®­ç»ƒæ—¶é—´ï¼ˆç§’ï¼‰
 };
 
 // ===================================================
-// ÑµÁ·Ãæ°åÅäÖÃ³£Á¿
+// è®­ç»ƒé¢æ¿é…ç½®å¸¸é‡
 // ===================================================
 namespace TrainPanelConfig {
-    // Ãæ°å³ß´ç
+    // é¢æ¿å°ºå¯¸
     const Size PANEL_SIZE = Size(500.0f, 400.0f);
     
-    // ±êÌâÅäÖÃ
+    // æ ‡é¢˜é…ç½®
     constexpr int TITLE_FONT_SIZE = 28;
     constexpr float TITLE_TOP_OFFSET = 30.0f;
     
-    // ±øÖÖ°´Å¥ÅäÖÃ
+    // å…µç§æŒ‰é’®é…ç½®
     constexpr float UNIT_BUTTON_SIZE = 80.0f;
     constexpr float UNIT_BUTTON_SPACING = 20.0f;
     constexpr float UNIT_AREA_TOP_OFFSET = 80.0f;
     
-    // ¶ÓÁĞÇøÓòÅäÖÃ
+    // é˜Ÿåˆ—åŒºåŸŸé…ç½®
     constexpr float QUEUE_AREA_HEIGHT = 100.0f;
     constexpr float QUEUE_ITEM_SIZE = 60.0f;
     constexpr float QUEUE_ITEM_SPACING = 10.0f;
     
-    // ¹Ø±Õ°´Å¥ÅäÖÃ
+    // å…³é—­æŒ‰é’®é…ç½®
     constexpr float CLOSE_BUTTON_BOTTOM = 30.0f;
 }
 
 // ===================================================
-// ±øÖÖÑµÁ·Ãæ°åÀà
+// å…µç§è®­ç»ƒé¢æ¿ç±»
 // ===================================================
 class TrainPanel : public Node {
 public:
-    // ´´½¨ÑµÁ·Ãæ°å
-    // onTrainComplete: ÑµÁ·Íê³ÉÊ±µÄ»Øµ÷£¬²ÎÊıÎª±øÖÖID
-    // onClose: ¹Ø±ÕÃæ°åÊ±µÄ»Øµ÷
+    // åˆ›å»ºè®­ç»ƒé¢æ¿
+    // onTrainComplete: è®­ç»ƒå®Œæˆæ—¶çš„å›è°ƒï¼Œå‚æ•°ä¸ºå…µç§ID
+    // onClose: å…³é—­é¢æ¿æ—¶çš„å›è°ƒ
     static TrainPanel* create(
         const std::function<void(int)>& onTrainComplete = nullptr,
         const std::function<void()>& onClose = nullptr
@@ -68,49 +68,49 @@ public:
         const std::function<void()>& onClose
     );
     
-    // ÏÔÊ¾/Òş²ØÃæ°å
+    // æ˜¾ç¤º/éšè—é¢æ¿
     void show();
     void hide();
     bool isShowing() const { return _isShowing; }
     
-    // ¸üĞÂÑµÁ·¶ÓÁĞ£¨Ã¿Ö¡µ÷ÓÃ£©
+    // æ›´æ–°è®­ç»ƒé˜Ÿåˆ—ï¼ˆæ¯å¸§è°ƒç”¨ï¼‰
     void update(float dt) override;
     
-    // »ñÈ¡µ±Ç°ÑµÁ·¶ÓÁĞ
+    // è·å–å½“å‰è®­ç»ƒé˜Ÿåˆ—
     const std::vector<TrainQueueItem>& getTrainQueue() const { return _trainQueue; }
     
-    // »ñÈ¡ÒÑÑµÁ·Íê³ÉµÄ±øÖÖÊıÁ¿
+    // è·å–å·²è®­ç»ƒå®Œæˆçš„å…µç§æ•°é‡
     const std::map<int, int>& getTrainedUnits() const { return _trainedUnits; }
     
-    // Çå¿ÕÒÑÑµÁ·Íê³ÉµÄ±øÖÖ£¨ÅÉ±øºóµ÷ÓÃ£©
+    // æ¸…ç©ºå·²è®­ç»ƒå®Œæˆçš„å…µç§ï¼ˆæ´¾å…µåè°ƒç”¨ï¼‰
     void clearTrainedUnits() { _trainedUnits.clear(); }
     
 private:
-    // UI×é¼ş
-    LayerColor* _background = nullptr;      // °ëÍ¸Ã÷±³¾°
-    LayerColor* _panel = nullptr;           // Ãæ°åÖ÷Ìå
-    Label* _titleLabel = nullptr;           // ±êÌâ
-    Node* _unitButtonArea = nullptr;        // ±øÖÖ°´Å¥ÇøÓò
-    Node* _queueArea = nullptr;             // ÑµÁ·¶ÓÁĞÏÔÊ¾ÇøÓò
-    Label* _resourceLabel = nullptr;        // ×ÊÔ´ÏÔÊ¾
+    // UIç»„ä»¶
+    LayerColor* _background = nullptr;      // åŠé€æ˜èƒŒæ™¯
+    LayerColor* _panel = nullptr;           // é¢æ¿ä¸»ä½“
+    Label* _titleLabel = nullptr;           // æ ‡é¢˜
+    Node* _unitButtonArea = nullptr;        // å…µç§æŒ‰é’®åŒºåŸŸ
+    Node* _queueArea = nullptr;             // è®­ç»ƒé˜Ÿåˆ—æ˜¾ç¤ºåŒºåŸŸ
+    Label* _resourceLabel = nullptr;        // èµ„æºæ˜¾ç¤º
     
-    // ÑµÁ·¶ÓÁĞ
+    // è®­ç»ƒé˜Ÿåˆ—
     std::vector<TrainQueueItem> _trainQueue;
     
-    // ÒÑÑµÁ·Íê³ÉµÄ±øÖÖ <±øÖÖID, ÊıÁ¿>
+    // å·²è®­ç»ƒå®Œæˆçš„å…µç§ <å…µç§ID, æ•°é‡>
     std::map<int, int> _trainedUnits;
     
-    // ¿ÉÑµÁ·µÄ±øÖÖIDÁĞ±í
+    // å¯è®­ç»ƒçš„å…µç§IDåˆ—è¡¨
     std::vector<int> _availableUnits;
     
-    // »Øµ÷º¯Êı
+    // å›è°ƒå‡½æ•°
     std::function<void(int)> _onTrainComplete;
     std::function<void()> _onClose;
     
-    // ×´Ì¬
+    // çŠ¶æ€
     bool _isShowing = false;
     
-    // ³õÊ¼»¯·½·¨
+    // åˆå§‹åŒ–æ–¹æ³•
     void setupBackground();
     void setupPanel();
     void setupTitle();
@@ -119,25 +119,25 @@ private:
     void setupCloseButton();
     void setupResourceDisplay();
     
-    // Ìí¼Ó±øÖÖµ½ÑµÁ·¶ÓÁĞ
+    // æ·»åŠ å…µç§åˆ°è®­ç»ƒé˜Ÿåˆ—
     void addToTrainQueue(int unitId);
     
-    // ´ÓÑµÁ·¶ÓÁĞÒÆ³ı£¨È¡ÏûÑµÁ·£©
+    // ä»è®­ç»ƒé˜Ÿåˆ—ç§»é™¤ï¼ˆå–æ¶ˆè®­ç»ƒï¼‰
     void removeFromTrainQueue(int index);
     
-    // ¸üĞÂ¶ÓÁĞÏÔÊ¾
+    // æ›´æ–°é˜Ÿåˆ—æ˜¾ç¤º
     void updateQueueDisplay();
     
-    // ¸üĞÂ×ÊÔ´ÏÔÊ¾
+    // æ›´æ–°èµ„æºæ˜¾ç¤º
     void updateResourceDisplay();
     
-    // ¼ì²é×ÊÔ´ÊÇ·ñ×ã¹»
+    // æ£€æŸ¥èµ„æºæ˜¯å¦è¶³å¤Ÿ
     bool canAffordUnit(int unitId);
     
-    // ´´½¨±øÖÖ°´Å¥
+    // åˆ›å»ºå…µç§æŒ‰é’®
     Button* createUnitButton(int unitId, const Vec2& position);
     
-    // ´´½¨¶ÓÁĞÏîÏÔÊ¾
+    // åˆ›å»ºé˜Ÿåˆ—é¡¹æ˜¾ç¤º
     Node* createQueueItemNode(const TrainQueueItem& item, int index);
 };
 

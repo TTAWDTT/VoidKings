@@ -1,8 +1,8 @@
-// Soldier.cpp
+ï»¿// Soldier.cpp
 #include "Soldier.h"
 #include <string>
 
-// ´ÓconfigÖĞ´´½¨
+// ä»configä¸­åˆ›å»º
 Soldier* Soldier::create(const UnitConfig* config, int level) {
     Soldier* pRet = new(std::nothrow) Soldier();
     if (pRet && pRet->init(config, level)) {
@@ -16,20 +16,20 @@ Soldier* Soldier::create(const UnitConfig* config, int level) {
 bool Soldier::init(const UnitConfig* config, int level) {
    if (!Node::init()) return false;
 
-   // 1. ±£´æÅäÖÃ
+   // 1. ä¿å­˜é…ç½®
    _config = config;
 
-   // 2. ÉèÖÃµÈ¼¶²¢ÑéÖ¤
+   // 2. è®¾ç½®ç­‰çº§å¹¶éªŒè¯
    _level = level;
    if (_level < 0) _level = 0;
    if (_level > _config->MAXLEVEL) _level = _config->MAXLEVEL;
     
-   // 3. ³õÊ¼»¯ÔËĞĞÊ±×´Ì¬
+   // 3. åˆå§‹åŒ–è¿è¡Œæ—¶çŠ¶æ€
    _currentHP = getCurrentMaxHP();
-   _direction = Direction::RIGHT;  // Ä¬ÈÏ³¯ÓÒ
+   _direction = Direction::RIGHT;  // é»˜è®¤æœå³
    _currentActionKey.clear();
 
-   // 4. ´´½¨¾«Áé
+   // 4. åˆ›å»ºç²¾çµ
    std::string initialFrame = _config->spriteFrameName;
    _bodySprite = cocos2d::Sprite::createWithSpriteFrameName(initialFrame);
     
@@ -37,7 +37,7 @@ bool Soldier::init(const UnitConfig* config, int level) {
     this->addChild(_bodySprite);
     this->addChild(_healthBar);
 
-    // ³õÊ¼»¯ÑªÌõ
+    // åˆå§‹åŒ–è¡€æ¡
     if (_healthBar) {
         _healthBar->setAnchorPoint(cocos2d::Vec2(0.0f, 0.5f));
         float offsetY = 10.0f;
@@ -55,7 +55,7 @@ bool Soldier::init(const UnitConfig* config, int level) {
 
     updateHealthBar(false);
 
-    // 5. Æô¶¯ Update Ñ­»·
+    // 5. å¯åŠ¨ Update å¾ªç¯
     this->scheduleUpdate();
 
     return true;
@@ -115,7 +115,7 @@ void Soldier::update(float dt) {
 }
 
 void Soldier::findTarget() {
-    // Î±´úÂë - ĞèÒªGameWorldÊµÏÖ
+    // ä¼ªä»£ç  - éœ€è¦GameWorldå®ç°
     // auto buildings = GameWorld::getInstance()->getAllBuildings();
     // switch (_config->aiType) { ... }
 }
@@ -125,14 +125,14 @@ void Soldier::moveToTarget(float dt) {
 
     cocos2d::Vec2 diff = _target->getPosition() - this->getPosition();
     
-    // ¼ÆËã·½Ïò(Ö»ÓĞ×óÓÒ)
+    // è®¡ç®—æ–¹å‘(åªæœ‰å·¦å³)
     Direction newDir = calcDirection(this->getPosition(), _target->getPosition());
     
-    // ¸üĞÂ¾«Áé³¯Ïò²¢²¥·ÅÒÆ¶¯¶¯»­
+    // æ›´æ–°ç²¾çµæœå‘å¹¶æ’­æ”¾ç§»åŠ¨åŠ¨ç”»
     updateSpriteDirection(newDir);
     playAnimation(_config->anim_walk, _config->anim_walk_frames, _config->anim_walk_delay, true);
 
-    // Ê¹ÓÃsetPositionÊµÏÖÒÆ¶¯ - Ã¿Ö¡¸üĞÂÎ»ÖÃ,¶¯»­Í¬Ê±²¥·Å
+    // ä½¿ç”¨setPositionå®ç°ç§»åŠ¨ - æ¯å¸§æ›´æ–°ä½ç½®,åŠ¨ç”»åŒæ—¶æ’­æ”¾
     cocos2d::Vec2 direction = diff.getNormalized();
     cocos2d::Vec2 newPos = this->getPosition() + (direction * getCurrentSpeed() * dt);
     this->setPosition(newPos);
@@ -145,7 +145,7 @@ void Soldier::takeDamage(float damage) {
     updateHealthBar(true);
 
     if (_currentHP <= 0) {
-        // ²¥·ÅËÀÍö¶¯»­(Ê¹ÓÃµ±Ç°·½Ïò)
+        // æ’­æ”¾æ­»äº¡åŠ¨ç”»(ä½¿ç”¨å½“å‰æ–¹å‘)
         this->stopAllActions();
         playAnimation(_config->anim_dead, _config->anim_dead_frames, _config->anim_dead_delay, false);
     }
@@ -156,11 +156,11 @@ void Soldier::attackTarget() {
     
     float attackPower = getCurrentATK();
     
-    // ¼ÆËã¹¥»÷·½Ïò
+    // è®¡ç®—æ”»å‡»æ–¹å‘
     Direction attackDir = calcDirection(this->getPosition(), _target->getPosition());
     updateSpriteDirection(attackDir);
     
-    // ²¥·Å¹¥»÷¶¯»­
+    // æ’­æ”¾æ”»å‡»åŠ¨ç”»
     playAnimation(_config->anim_attack, _config->anim_attack_frames, _config->anim_attack_delay, false);
 }
 
@@ -210,32 +210,32 @@ void Soldier::stopCurrentAnimation() {
     _currentActionKey.clear();
 }
 
-// buildAnimationFromFrames ÒÑÇ¨ÒÆµ½¹«¹²¹¤¾ß
+// buildAnimationFromFrames å·²è¿ç§»åˆ°å…¬å…±å·¥å…·
 #include "Utils/AnimationUtils.h"
 
-// ¼ÆËã·½Ïò: ¼ò»¯Îª×óÓÒÁ½¸ö·½Ïò
-// ÏòÕıÉÏ/ÕıÏÂÊ±±£³Öµ±Ç°·½Ïò²»±ä
+// è®¡ç®—æ–¹å‘: ç®€åŒ–ä¸ºå·¦å³ä¸¤ä¸ªæ–¹å‘
+// å‘æ­£ä¸Š/æ­£ä¸‹æ—¶ä¿æŒå½“å‰æ–¹å‘ä¸å˜
 Direction Soldier::calcDirection(const cocos2d::Vec2& from, const cocos2d::Vec2& to) {
     cocos2d::Vec2 diff = to - from;
     
-    // Èç¹ûË®Æ½·ÖÁ¿ºÜĞ¡(½Ó½ü´¹Ö±ÒÆ¶¯),±£³Öµ±Ç°·½Ïò
+    // å¦‚æœæ°´å¹³åˆ†é‡å¾ˆå°(æ¥è¿‘å‚ç›´ç§»åŠ¨),ä¿æŒå½“å‰æ–¹å‘
     if (std::abs(diff.x) < 0.01f) {
         return _direction;
     }
     
-    // ¸ù¾İx·ÖÁ¿ÅĞ¶Ï×óÓÒ
+    // æ ¹æ®xåˆ†é‡åˆ¤æ–­å·¦å³
     return (diff.x >= 0) ? Direction::RIGHT : Direction::LEFT;
 }
 
-// ¸üĞÂ¾«Áé³¯Ïò - Í¨¹ıË®Æ½·­×ªÊµÏÖ×óÏò
+// æ›´æ–°ç²¾çµæœå‘ - é€šè¿‡æ°´å¹³ç¿»è½¬å®ç°å·¦å‘
 void Soldier::updateSpriteDirection(Direction dir) {
     if (!_bodySprite) return;
     
-    if (dir == _direction) return; // ·½ÏòÎ´±ä,ÎŞĞè¸üĞÂ
+    if (dir == _direction) return; // æ–¹å‘æœªå˜,æ— éœ€æ›´æ–°
     
     _direction = dir;
     
-    // ËØ²ÄÄ¬ÈÏ³¯ÓÒ,×óÏòÍ¨¹ıscaleX=-1ÊµÏÖ·­×ª
+    // ç´ æé»˜è®¤æœå³,å·¦å‘é€šè¿‡scaleX=-1å®ç°ç¿»è½¬
     if (dir == Direction::LEFT) {
         _bodySprite->setScaleX(-1.0f);
     }
@@ -244,13 +244,13 @@ void Soldier::updateSpriteDirection(Direction dir) {
     }
 }
 
-// Í³Ò»µÄ¶¯»­²¥·Åº¯Êı
+// ç»Ÿä¸€çš„åŠ¨ç”»æ’­æ”¾å‡½æ•°
 void Soldier::playAnimation(const std::string& animType, int frameCount, float delay, bool loop) {
     if (!_bodySprite || !_config) return;
     
-    // Éú³É¶¯»­keyÓÃÓÚÈ¥ÖØ
+    // ç”ŸæˆåŠ¨ç”»keyç”¨äºå»é‡
     std::string key = animType;
-    if (_currentActionKey == key) return; // ÒÑÔÚ²¥·ÅÏàÍ¬¶¯»­
+    if (_currentActionKey == key) return; // å·²åœ¨æ’­æ”¾ç›¸åŒåŠ¨ç”»
     
     auto anim = AnimationUtils::buildAnimationFromFrames(_config->spriteFrameName, animType, frameCount, delay);
     if (!anim) return;
@@ -258,17 +258,17 @@ void Soldier::playAnimation(const std::string& animType, int frameCount, float d
     _bodySprite->stopAllActions();
     
     if (loop) {
-        // Ñ­»·²¥·Å(ÒÆ¶¯/´ı»ú)
+        // å¾ªç¯æ’­æ”¾(ç§»åŠ¨/å¾…æœº)
         auto act = cocos2d::RepeatForever::create(cocos2d::Animate::create(anim));
         _bodySprite->runAction(act);
     }
     else {
-        // µ¥´Î²¥·Å(¹¥»÷/ËÀÍö)
+        // å•æ¬¡æ’­æ”¾(æ”»å‡»/æ­»äº¡)
         auto sequence = cocos2d::Sequence::create(
             cocos2d::Animate::create(anim),
             cocos2d::CallFunc::create([this]() {
                 _currentActionKey.clear();
-                // ËÀÍö¶¯»­½áÊøºóÒÆ³ı
+                // æ­»äº¡åŠ¨ç”»ç»“æŸåç§»é™¤
                 if (_currentHP <= 0) {
                     this->removeFromParent();
                 }

@@ -1,4 +1,4 @@
-// GridMap.cpp
+ï»¿// GridMap.cpp
 #include "GridMap.h"
 
 USING_NS_CC;
@@ -53,7 +53,7 @@ bool GridMap::canPlaceBuilding(int x, int y, int width, int height) {
         return false;
     }
 
-    // Check all cells - Ê¹ÓÃÕıÈ·µÄĞĞÓÅÏÈË÷Òı [y][x]
+    // Check all cells - ä½¿ç”¨æ­£ç¡®çš„è¡Œä¼˜å…ˆç´¢å¼• [y][x]
     for (int j = y; j < y + height; ++j) {
         for (int i = x; i < x + width; ++i) {
             if (_cells[j][i] != CellType::EMPTY) {

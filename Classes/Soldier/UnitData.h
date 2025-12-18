@@ -1,4 +1,4 @@
-// UnitData.h
+﻿// UnitData.h
 #ifndef __UNIT_DATA_H__
 #define __UNIT_DATA_H__
 

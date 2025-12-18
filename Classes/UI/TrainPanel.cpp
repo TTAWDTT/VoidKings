@@ -1,11 +1,11 @@
-// TrainPanel.cpp
-// ±øÖÖÑµÁ·Ãæ°åÊµÏÖ
+ï»¿// TrainPanel.cpp
+// å…µç§è®­ç»ƒé¢æ¿å®ç°
 
 #include "TrainPanel.h"
 #include "Core/Core.h"
 
 // ===================================================
-// ´´½¨Óë³õÊ¼»¯
+// åˆ›å»ºä¸åˆå§‹åŒ–
 // ===================================================
 
 TrainPanel* TrainPanel::create(
@@ -33,11 +33,11 @@ bool TrainPanel::init(
     _onClose = onClose;
     _isShowing = false;
     
-    // ³õÊ¼»¯¿ÉÑµÁ·±øÖÖÁĞ±í£¨´ÓUnitManager»ñÈ¡£©
-    // ÕâÀïÓ²±àÂëÁËÈıÖÖ±øÖÖID£¬Êµ¼Ê¿ÉÒÔ´ÓÅäÖÃ¶ÁÈ¡
+    // åˆå§‹åŒ–å¯è®­ç»ƒå…µç§åˆ—è¡¨ï¼ˆä»UnitManagerè·å–ï¼‰
+    // è¿™é‡Œç¡¬ç¼–ç äº†ä¸‰ç§å…µç§IDï¼Œå®é™…å¯ä»¥ä»é…ç½®è¯»å–
     _availableUnits = {101, 102, 103};  // Goblin, Barbarian, Archer
     
-    // ³õÊ¼»¯¸÷¸öUI×é¼ş
+    // åˆå§‹åŒ–å„ä¸ªUIç»„ä»¶
     setupBackground();
     setupPanel();
     setupTitle();
@@ -46,17 +46,17 @@ bool TrainPanel::init(
     setupCloseButton();
     setupResourceDisplay();
     
-    // ³õÊ¼Òş²Ø
+    // åˆå§‹éšè—
     this->setVisible(false);
     
-    // ÆôÓÃupdate
+    // å¯ç”¨update
     this->scheduleUpdate();
     
     return true;
 }
 
 // ===================================================
-// ±³¾°ÉèÖÃ - °ëÍ¸Ã÷ÕÚÕÖ¸²¸ÇÈ«ÆÁ
+// èƒŒæ™¯è®¾ç½® - åŠé€æ˜é®ç½©è¦†ç›–å…¨å±
 // ===================================================
 void TrainPanel::setupBackground() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
@@ -72,7 +72,7 @@ void TrainPanel::setupBackground() {
 }
 
 // ===================================================
-// Ãæ°åÖ÷ÌåÉèÖÃ - ¾ÓÖĞÏÔÊ¾µÄÖ÷Ãæ°å
+// é¢æ¿ä¸»ä½“è®¾ç½® - å±…ä¸­æ˜¾ç¤ºçš„ä¸»é¢æ¿
 // ===================================================
 void TrainPanel::setupPanel() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
@@ -84,7 +84,7 @@ void TrainPanel::setupPanel() {
         TrainPanelConfig::PANEL_SIZE.height
     );
     
-    // ¾ÓÖĞ¶¨Î»
+    // å±…ä¸­å®šä½
     float panelX = origin.x + (visibleSize.width - TrainPanelConfig::PANEL_SIZE.width) / 2;
     float panelY = origin.y + (visibleSize.height - TrainPanelConfig::PANEL_SIZE.height) / 2;
     _panel->setPosition(panelX, panelY);
@@ -93,7 +93,7 @@ void TrainPanel::setupPanel() {
 }
 
 // ===================================================
-// ±êÌâÉèÖÃ
+// æ ‡é¢˜è®¾ç½®
 // ===================================================
 void TrainPanel::setupTitle() {
     _titleLabel = Label::createWithSystemFont(
@@ -111,14 +111,14 @@ void TrainPanel::setupTitle() {
 }
 
 // ===================================================
-// ±øÖÖ°´Å¥ÇøÓòÉèÖÃ
+// å…µç§æŒ‰é’®åŒºåŸŸè®¾ç½®
 // ===================================================
 void TrainPanel::setupUnitButtons() {
     _unitButtonArea = Node::create();
     _unitButtonArea->setPosition(Vec2(0, 0));
     _panel->addChild(_unitButtonArea);
     
-    // ¼ÆËãÆğÊ¼Î»ÖÃ£¨Ë®Æ½¾ÓÖĞÅÅÁĞ£©
+    // è®¡ç®—èµ·å§‹ä½ç½®ï¼ˆæ°´å¹³å±…ä¸­æ’åˆ—ï¼‰
     float totalWidth = _availableUnits.size() * TrainPanelConfig::UNIT_BUTTON_SIZE + 
                        (_availableUnits.size() - 1) * TrainPanelConfig::UNIT_BUTTON_SPACING;
     float startX = (TrainPanelConfig::PANEL_SIZE.width - totalWidth) / 2 + 
@@ -138,23 +138,23 @@ void TrainPanel::setupUnitButtons() {
 }
 
 // ===================================================
-// ´´½¨µ¥¸ö±øÖÖ°´Å¥
+// åˆ›å»ºå•ä¸ªå…µç§æŒ‰é’®
 // ===================================================
 Button* TrainPanel::createUnitButton(int unitId, const Vec2& position) {
     const UnitConfig* config = UnitManager::getInstance()->getConfig(unitId);
     if (!config) {
-        CCLOG("[ÑµÁ·Ãæ°å] Î´ÕÒµ½±øÖÖÅäÖÃ: %d", unitId);
+        CCLOG("[è®­ç»ƒé¢æ¿] æœªæ‰¾åˆ°å…µç§é…ç½®: %d", unitId);
         return nullptr;
     }
     
-    // ´´½¨°´Å¥ÈİÆ÷
+    // åˆ›å»ºæŒ‰é’®å®¹å™¨
     auto btnNode = Node::create();
     btnNode->setPosition(position);
     
-    // ´´½¨°´Å¥±³¾°
+    // åˆ›å»ºæŒ‰é’®èƒŒæ™¯
     auto btn = Button::create("btn_normal.png", "btn_pressed.png");
     if (!btn) {
-        // Èç¹û°´Å¥Í¼Æ¬²»´æÔÚ£¬´´½¨Ò»¸ö¼òµ¥µÄÉ«¿é°´Å¥
+        // å¦‚æœæŒ‰é’®å›¾ç‰‡ä¸å­˜åœ¨ï¼Œåˆ›å»ºä¸€ä¸ªç®€å•çš„è‰²å—æŒ‰é’®
         btn = Button::create();
         btn->setScale9Enabled(true);
         btn->setContentSize(Size(TrainPanelConfig::UNIT_BUTTON_SIZE, TrainPanelConfig::UNIT_BUTTON_SIZE));
@@ -162,17 +162,17 @@ Button* TrainPanel::createUnitButton(int unitId, const Vec2& position) {
     btn->setScale(1.0f);
     btn->setPosition(position);
     
-    // ÉèÖÃ°´Å¥ÎÄ×Ö£¨±øÖÖÃû³Æ£©
+    // è®¾ç½®æŒ‰é’®æ–‡å­—ï¼ˆå…µç§åç§°ï¼‰
     btn->setTitleText(config->name);
     btn->setTitleFontSize(12);
     btn->setTitleColor(Color3B::WHITE);
     
-    // °ó¶¨µã»÷ÊÂ¼ş
+    // ç»‘å®šç‚¹å‡»äº‹ä»¶
     btn->addClickEventListener([this, unitId](Ref* sender) {
         this->addToTrainQueue(unitId);
     });
     
-    // Ìí¼Ó·ÑÓÃ±êÇ©
+    // æ·»åŠ è´¹ç”¨æ ‡ç­¾
     auto costLabel = Label::createWithSystemFont(
         std::to_string(config->COST_ELIXIR) + "E",
         "Arial",
@@ -189,18 +189,18 @@ Button* TrainPanel::createUnitButton(int unitId, const Vec2& position) {
 }
 
 // ===================================================
-// ÑµÁ·¶ÓÁĞÇøÓòÉèÖÃ
+// è®­ç»ƒé˜Ÿåˆ—åŒºåŸŸè®¾ç½®
 // ===================================================
 void TrainPanel::setupQueueArea() {
     _queueArea = Node::create();
     
-    // ¶ÓÁĞÇøÓòÎ»ÓÚÃæ°åÖĞÏÂ²¿
+    // é˜Ÿåˆ—åŒºåŸŸä½äºé¢æ¿ä¸­ä¸‹éƒ¨
     float queueY = TrainPanelConfig::QUEUE_AREA_HEIGHT + 50;
     _queueArea->setPosition(Vec2(20, queueY));
     
     _panel->addChild(_queueArea);
     
-    // ¶ÓÁĞ±êÌâ
+    // é˜Ÿåˆ—æ ‡é¢˜
     auto queueTitle = Label::createWithSystemFont(
         "Training Queue:",
         "Arial",
@@ -213,7 +213,7 @@ void TrainPanel::setupQueueArea() {
 }
 
 // ===================================================
-// ¹Ø±Õ°´Å¥ÉèÖÃ
+// å…³é—­æŒ‰é’®è®¾ç½®
 // ===================================================
 void TrainPanel::setupCloseButton() {
     auto closeBtn = Button::create("btn_normal.png", "btn_pressed.png");
@@ -237,7 +237,7 @@ void TrainPanel::setupCloseButton() {
 }
 
 // ===================================================
-// ×ÊÔ´ÏÔÊ¾ÉèÖÃ
+// èµ„æºæ˜¾ç¤ºè®¾ç½®
 // ===================================================
 void TrainPanel::setupResourceDisplay() {
     _resourceLabel = Label::createWithSystemFont(
@@ -257,7 +257,7 @@ void TrainPanel::setupResourceDisplay() {
 }
 
 // ===================================================
-// ÏÔÊ¾Ãæ°å
+// æ˜¾ç¤ºé¢æ¿
 // ===================================================
 void TrainPanel::show() {
     this->setVisible(true);
@@ -267,7 +267,7 @@ void TrainPanel::show() {
 }
 
 // ===================================================
-// Òş²ØÃæ°å
+// éšè—é¢æ¿
 // ===================================================
 void TrainPanel::hide() {
     this->setVisible(false);
@@ -275,45 +275,45 @@ void TrainPanel::hide() {
 }
 
 // ===================================================
-// Ã¿Ö¡¸üĞÂ - ´¦ÀíÑµÁ·¶ÓÁĞ
+// æ¯å¸§æ›´æ–° - å¤„ç†è®­ç»ƒé˜Ÿåˆ—
 // ===================================================
 void TrainPanel::update(float dt) {
     if (!_isShowing || _trainQueue.empty()) {
         return;
     }
     
-    // ¸üĞÂ¶ÓÁĞµÚÒ»¸ö±øÖÖµÄÑµÁ·Ê±¼ä
+    // æ›´æ–°é˜Ÿåˆ—ç¬¬ä¸€ä¸ªå…µç§çš„è®­ç»ƒæ—¶é—´
     TrainQueueItem& currentItem = _trainQueue.front();
     currentItem.remainingTime -= dt;
     
-    // ¼ì²éÊÇ·ñÑµÁ·Íê³É
+    // æ£€æŸ¥æ˜¯å¦è®­ç»ƒå®Œæˆ
     if (currentItem.remainingTime <= 0) {
-        // ÑµÁ·Íê³É£¬Ìí¼Óµ½ÒÑÍê³ÉÁĞ±í
+        // è®­ç»ƒå®Œæˆï¼Œæ·»åŠ åˆ°å·²å®Œæˆåˆ—è¡¨
         _trainedUnits[currentItem.unitId]++;
         
-        CCLOG("[ÑµÁ·Ãæ°å] ±øÖÖÑµÁ·Íê³É: %s (ID: %d)", 
+        CCLOG("[è®­ç»ƒé¢æ¿] å…µç§è®­ç»ƒå®Œæˆ: %s (ID: %d)", 
               currentItem.unitName.c_str(), currentItem.unitId);
         
-        // ´¥·¢»Øµ÷
+        // è§¦å‘å›è°ƒ
         if (_onTrainComplete) {
             _onTrainComplete(currentItem.unitId);
         }
         
-        // ´Ó¶ÓÁĞÒÆ³ı
+        // ä»é˜Ÿåˆ—ç§»é™¤
         _trainQueue.erase(_trainQueue.begin());
         
-        // ¸üĞÂÏÔÊ¾
+        // æ›´æ–°æ˜¾ç¤º
         updateQueueDisplay();
     }
 }
 
 // ===================================================
-// Ìí¼Ó±øÖÖµ½ÑµÁ·¶ÓÁĞ
+// æ·»åŠ å…µç§åˆ°è®­ç»ƒé˜Ÿåˆ—
 // ===================================================
 void TrainPanel::addToTrainQueue(int unitId) {
-    // ¼ì²é×ÊÔ´ÊÇ·ñ×ã¹»
+    // æ£€æŸ¥èµ„æºæ˜¯å¦è¶³å¤Ÿ
     if (!canAffordUnit(unitId)) {
-        CCLOG("[ÑµÁ·Ãæ°å] ×ÊÔ´²»×ã£¬ÎŞ·¨ÑµÁ·±øÖÖ: %d", unitId);
+        CCLOG("[è®­ç»ƒé¢æ¿] èµ„æºä¸è¶³ï¼Œæ— æ³•è®­ç»ƒå…µç§: %d", unitId);
         return;
     }
     
@@ -322,43 +322,43 @@ void TrainPanel::addToTrainQueue(int unitId) {
         return;
     }
     
-    // ¿Û³ı×ÊÔ´
+    // æ‰£é™¤èµ„æº
     Core::getInstance()->consumeResource(ResourceType::DIAMOND, config->COST_ELIXIR);
     
-    // ´´½¨¶ÓÁĞÏî
+    // åˆ›å»ºé˜Ÿåˆ—é¡¹
     TrainQueueItem item;
     item.unitId = unitId;
     item.unitName = config->name;
     item.totalTime = static_cast<float>(config->TRAIN_TIME);
     item.remainingTime = item.totalTime;
     
-    // Ìí¼Óµ½¶ÓÁĞ
+    // æ·»åŠ åˆ°é˜Ÿåˆ—
     _trainQueue.push_back(item);
     
-    CCLOG("[ÑµÁ·Ãæ°å] Ìí¼Ó±øÖÖµ½ÑµÁ·¶ÓÁĞ: %s, ÑµÁ·Ê±¼ä: %.1fÃë", 
+    CCLOG("[è®­ç»ƒé¢æ¿] æ·»åŠ å…µç§åˆ°è®­ç»ƒé˜Ÿåˆ—: %s, è®­ç»ƒæ—¶é—´: %.1fç§’", 
           config->name.c_str(), item.totalTime);
     
-    // ¸üĞÂÏÔÊ¾
+    // æ›´æ–°æ˜¾ç¤º
     updateQueueDisplay();
     updateResourceDisplay();
 }
 
 // ===================================================
-// ´ÓÑµÁ·¶ÓÁĞÒÆ³ı
+// ä»è®­ç»ƒé˜Ÿåˆ—ç§»é™¤
 // ===================================================
 void TrainPanel::removeFromTrainQueue(int index) {
     if (index < 0 || index >= static_cast<int>(_trainQueue.size())) {
         return;
     }
     
-    // ·µ»¹²¿·Ö×ÊÔ´£¨¿ÉÑ¡¹¦ÄÜ£©
+    // è¿”è¿˜éƒ¨åˆ†èµ„æºï¼ˆå¯é€‰åŠŸèƒ½ï¼‰
     const TrainQueueItem& item = _trainQueue[index];
     const UnitConfig* config = UnitManager::getInstance()->getConfig(item.unitId);
     if (config) {
-        // ·µ»¹50%×ÊÔ´
+        // è¿”è¿˜50%èµ„æº
         int refund = config->COST_ELIXIR / 2;
         Core::getInstance()->addResource(ResourceType::DIAMOND, refund);
-        CCLOG("[ÑµÁ·Ãæ°å] È¡ÏûÑµÁ·£¬·µ»¹×ÊÔ´: %d", refund);
+        CCLOG("[è®­ç»ƒé¢æ¿] å–æ¶ˆè®­ç»ƒï¼Œè¿”è¿˜èµ„æº: %d", refund);
     }
     
     _trainQueue.erase(_trainQueue.begin() + index);
@@ -367,13 +367,13 @@ void TrainPanel::removeFromTrainQueue(int index) {
 }
 
 // ===================================================
-// ¸üĞÂ¶ÓÁĞÏÔÊ¾
+// æ›´æ–°é˜Ÿåˆ—æ˜¾ç¤º
 // ===================================================
 void TrainPanel::updateQueueDisplay() {
-    // Çå³ı¾ÉµÄ¶ÓÁĞÏÔÊ¾
+    // æ¸…é™¤æ—§çš„é˜Ÿåˆ—æ˜¾ç¤º
     _queueArea->removeAllChildren();
     
-    // ¶ÓÁĞ±êÌâ
+    // é˜Ÿåˆ—æ ‡é¢˜
     auto queueTitle = Label::createWithSystemFont(
         "Training Queue:",
         "Arial",
@@ -384,7 +384,7 @@ void TrainPanel::updateQueueDisplay() {
     queueTitle->setColor(Color3B::WHITE);
     _queueArea->addChild(queueTitle);
     
-    // ÏÔÊ¾¶ÓÁĞÖĞµÄÃ¿¸ö±øÖÖ
+    // æ˜¾ç¤ºé˜Ÿåˆ—ä¸­çš„æ¯ä¸ªå…µç§
     for (size_t i = 0; i < _trainQueue.size() && i < 8; ++i) {
         auto itemNode = createQueueItemNode(_trainQueue[i], static_cast<int>(i));
         if (itemNode) {
@@ -394,7 +394,7 @@ void TrainPanel::updateQueueDisplay() {
         }
     }
     
-    // ÏÔÊ¾ÒÑÍê³ÉµÄ±øÖÖÊıÁ¿
+    // æ˜¾ç¤ºå·²å®Œæˆçš„å…µç§æ•°é‡
     if (!_trainedUnits.empty()) {
         std::string trainedText = "Trained: ";
         for (const auto& pair : _trainedUnits) {
@@ -412,12 +412,12 @@ void TrainPanel::updateQueueDisplay() {
 }
 
 // ===================================================
-// ´´½¨¶ÓÁĞÏîÏÔÊ¾½Úµã
+// åˆ›å»ºé˜Ÿåˆ—é¡¹æ˜¾ç¤ºèŠ‚ç‚¹
 // ===================================================
 Node* TrainPanel::createQueueItemNode(const TrainQueueItem& item, int index) {
     auto node = Node::create();
     
-    // ±³¾°
+    // èƒŒæ™¯
     auto bg = LayerColor::create(
         Color4B(80, 80, 100, 255),
         TrainPanelConfig::QUEUE_ITEM_SIZE,
@@ -425,9 +425,9 @@ Node* TrainPanel::createQueueItemNode(const TrainQueueItem& item, int index) {
     );
     node->addChild(bg);
     
-    // ±øÖÖÃû³Æ
+    // å…µç§åç§°
     auto nameLabel = Label::createWithSystemFont(
-        item.unitName.substr(0, 3),  // Ö»ÏÔÊ¾Ç°3¸ö×Ö·û
+        item.unitName.substr(0, 3),  // åªæ˜¾ç¤ºå‰3ä¸ªå­—ç¬¦
         "Arial",
         10
     );
@@ -437,7 +437,7 @@ Node* TrainPanel::createQueueItemNode(const TrainQueueItem& item, int index) {
     ));
     node->addChild(nameLabel);
     
-    // Ê£ÓàÊ±¼ä
+    // å‰©ä½™æ—¶é—´
     char timeStr[32];
     sprintf(timeStr, "%.0fs", item.remainingTime);
     auto timeLabel = Label::createWithSystemFont(timeStr, "Arial", 10);
@@ -448,7 +448,7 @@ Node* TrainPanel::createQueueItemNode(const TrainQueueItem& item, int index) {
     timeLabel->setColor(Color3B::YELLOW);
     node->addChild(timeLabel);
     
-    // ½ø¶ÈÌõ±³¾°
+    // è¿›åº¦æ¡èƒŒæ™¯
     auto progressBg = LayerColor::create(
         Color4B(40, 40, 40, 255),
         TrainPanelConfig::QUEUE_ITEM_SIZE - 10,
@@ -457,7 +457,7 @@ Node* TrainPanel::createQueueItemNode(const TrainQueueItem& item, int index) {
     progressBg->setPosition(Vec2(5, 5));
     node->addChild(progressBg);
     
-    // ½ø¶ÈÌõ
+    // è¿›åº¦æ¡
     float progress = 1.0f - (item.remainingTime / item.totalTime);
     float progressWidth = (TrainPanelConfig::QUEUE_ITEM_SIZE - 10) * progress;
     auto progressBar = LayerColor::create(
@@ -472,19 +472,19 @@ Node* TrainPanel::createQueueItemNode(const TrainQueueItem& item, int index) {
 }
 
 // ===================================================
-// ¸üĞÂ×ÊÔ´ÏÔÊ¾
+// æ›´æ–°èµ„æºæ˜¾ç¤º
 // ===================================================
 void TrainPanel::updateResourceDisplay() {
     int coin = Core::getInstance()->getResource(ResourceType::COIN);
     int diamond = Core::getInstance()->getResource(ResourceType::DIAMOND);
     
     char buffer[64];
-    sprintf(buffer, "½ğ±Ò: %d  ×êÊ¯: %d", coin, diamond);
+    sprintf(buffer, "é‡‘å¸: %d  é’»çŸ³: %d", coin, diamond);
     _resourceLabel->setString(buffer);
 }
 
 // ===================================================
-// ¼ì²é×ÊÔ´ÊÇ·ñ×ã¹»
+// æ£€æŸ¥èµ„æºæ˜¯å¦è¶³å¤Ÿ
 // ===================================================
 bool TrainPanel::canAffordUnit(int unitId) {
     const UnitConfig* config = UnitManager::getInstance()->getConfig(unitId);
@@ -492,7 +492,7 @@ bool TrainPanel::canAffordUnit(int unitId) {
         return false;
     }
     
-    // Ê¹ÓÃ×êÊ¯×÷ÎªÑµÁ·×ÊÔ´£¨ÓëCOST_ELIXIR¶ÔÓ¦£©
+    // ä½¿ç”¨é’»çŸ³ä½œä¸ºè®­ç»ƒèµ„æºï¼ˆä¸COST_ELIXIRå¯¹åº”ï¼‰
     int diamond = Core::getInstance()->getResource(ResourceType::DIAMOND);
     return diamond >= config->COST_ELIXIR;
 }

@@ -1,6 +1,6 @@
-// LevelSelectScene.h
-// ¹Ø¿¨Ñ¡Ôñ³¡¾°
-// ¶ÀÁ¢µÄ¹Ø¿¨Ñ¡Ôñ½çÃæ£¬Õ¹Ê¾¹Ø¿¨°´Å¥¡¢±øÖÖÔ¤ÀÀºÍ±³¾°
+ï»¿// LevelSelectScene.h
+// å…³å¡é€‰æ‹©åœºæ™¯
+// ç‹¬ç«‹çš„å…³å¡é€‰æ‹©ç•Œé¢ï¼Œå±•ç¤ºå…³å¡æŒ‰é’®ã€å…µç§é¢„è§ˆå’ŒèƒŒæ™¯
 
 #ifndef __LEVEL_SELECT_SCENE_H__
 #define __LEVEL_SELECT_SCENE_H__
@@ -14,51 +14,51 @@ USING_NS_CC;
 using namespace cocos2d::ui;
 
 // ===================================================
-// ¹Ø¿¨Ñ¡Ôñ³¡¾°ÅäÖÃ
+// å…³å¡é€‰æ‹©åœºæ™¯é…ç½®
 // ===================================================
 namespace LevelSelectConfig {
-    // ¹Ø¿¨°´Å¥ÅäÖÃ
-    constexpr int MAX_LEVELS = 5;                    // ×î´ó¹Ø¿¨Êı
-    constexpr float LEVEL_BUTTON_SIZE = 80.0f;       // ¹Ø¿¨°´Å¥³ß´ç
-    constexpr float LEVEL_BUTTON_SPACING = 30.0f;    // ¹Ø¿¨°´Å¥¼ä¾à
-    constexpr float LEVEL_AREA_Y_RATIO = 0.55f;      // ¹Ø¿¨ÇøÓòYÎ»ÖÃ£¨Ïà¶ÔÆÁÄ»¸ß¶È£©
+    // å…³å¡æŒ‰é’®é…ç½®
+    constexpr int MAX_LEVELS = 5;                    // æœ€å¤§å…³å¡æ•°
+    constexpr float LEVEL_BUTTON_SIZE = 80.0f;       // å…³å¡æŒ‰é’®å°ºå¯¸
+    constexpr float LEVEL_BUTTON_SPACING = 30.0f;    // å…³å¡æŒ‰é’®é—´è·
+    constexpr float LEVEL_AREA_Y_RATIO = 0.55f;      // å…³å¡åŒºåŸŸYä½ç½®ï¼ˆç›¸å¯¹å±å¹•é«˜åº¦ï¼‰
     
-    // ±øÖÖÔ¤ÀÀÇøÓòÅäÖÃ
-    constexpr float UNIT_PREVIEW_HEIGHT = 120.0f;    // ±øÖÖÔ¤ÀÀÇøÓò¸ß¶È
-    constexpr float UNIT_PREVIEW_BOTTOM = 20.0f;     // ¾àÀëµ×²¿¾àÀë
-    constexpr float UNIT_ICON_SIZE = 60.0f;          // ±øÖÖÍ¼±ê³ß´ç
-    constexpr float UNIT_ICON_SPACING = 15.0f;       // ±øÖÖÍ¼±ê¼ä¾à
+    // å…µç§é¢„è§ˆåŒºåŸŸé…ç½®
+    constexpr float UNIT_PREVIEW_HEIGHT = 120.0f;    // å…µç§é¢„è§ˆåŒºåŸŸé«˜åº¦
+    constexpr float UNIT_PREVIEW_BOTTOM = 20.0f;     // è·ç¦»åº•éƒ¨è·ç¦»
+    constexpr float UNIT_ICON_SIZE = 60.0f;          // å…µç§å›¾æ ‡å°ºå¯¸
+    constexpr float UNIT_ICON_SPACING = 15.0f;       // å…µç§å›¾æ ‡é—´è·
     
-    // ±êÌâÅäÖÃ
+    // æ ‡é¢˜é…ç½®
     constexpr int TITLE_FONT_SIZE = 36;
     constexpr float TITLE_TOP_OFFSET = 50.0f;
     
-    // ÍË³ö°´Å¥ÅäÖÃ
+    // é€€å‡ºæŒ‰é’®é…ç½®
     constexpr float EXIT_BUTTON_SIZE = 50.0f;
     constexpr float EXIT_BUTTON_MARGIN = 30.0f;
 }
 
 // ===================================================
-// ¹Ø¿¨ĞÅÏ¢½á¹¹
+// å…³å¡ä¿¡æ¯ç»“æ„
 // ===================================================
 struct LevelInfo {
-    int levelId;                    // ¹Ø¿¨ID
-    std::string name;               // ¹Ø¿¨Ãû³Æ
-    bool isUnlocked;                // ÊÇ·ñ½âËø
-    int starCount;                  // ÒÑ»ñµÃĞÇĞÇÊı£¨0-3£©
-    std::string description;        // ¹Ø¿¨ÃèÊö
+    int levelId;                    // å…³å¡ID
+    std::string name;               // å…³å¡åç§°
+    bool isUnlocked;                // æ˜¯å¦è§£é”
+    int starCount;                  // å·²è·å¾—æ˜Ÿæ˜Ÿæ•°ï¼ˆ0-3ï¼‰
+    std::string description;        // å…³å¡æè¿°
 };
 
 // ===================================================
-// ±øÖÖÔ¤ÀÀÏî
+// å…µç§é¢„è§ˆé¡¹
 // ===================================================
 struct UnitPreviewItem {
-    int unitId;                     // ±øÖÖID
-    int count;                      // ÊıÁ¿
+    int unitId;                     // å…µç§ID
+    int count;                      // æ•°é‡
 };
 
 // ===================================================
-// ¹Ø¿¨Ñ¡Ôñ³¡¾°Àà
+// å…³å¡é€‰æ‹©åœºæ™¯ç±»
 // ===================================================
 class LevelSelectScene : public Scene {
 public:
@@ -68,52 +68,52 @@ public:
     virtual bool init() override;
     CREATE_FUNC(LevelSelectScene);
     
-    // ÉèÖÃÒÑÑ¡ÔñµÄ±øÖÖ£¨´ÓÑµÁ·Ãæ°å»ñÈ¡£©
+    // è®¾ç½®å·²é€‰æ‹©çš„å…µç§ï¼ˆä»è®­ç»ƒé¢æ¿è·å–ï¼‰
     void setSelectedUnits(const std::map<int, int>& units);
 
 private:
-    // UI×é¼ş
-    Sprite* _background = nullptr;              // ±³¾°Í¼
-    Label* _titleLabel = nullptr;               // ±êÌâ
-    Node* _levelButtonArea = nullptr;           // ¹Ø¿¨°´Å¥ÇøÓò
-    Node* _unitPreviewArea = nullptr;           // ±øÖÖÔ¤ÀÀÇøÓò
-    Button* _exitButton = nullptr;              // ÍË³ö°´Å¥
+    // UIç»„ä»¶
+    Sprite* _background = nullptr;              // èƒŒæ™¯å›¾
+    Label* _titleLabel = nullptr;               // æ ‡é¢˜
+    Node* _levelButtonArea = nullptr;           // å…³å¡æŒ‰é’®åŒºåŸŸ
+    Node* _unitPreviewArea = nullptr;           // å…µç§é¢„è§ˆåŒºåŸŸ
+    Button* _exitButton = nullptr;              // é€€å‡ºæŒ‰é’®
     
-    // ¹Ø¿¨Êı¾İ
+    // å…³å¡æ•°æ®
     std::vector<LevelInfo> _levels;
     
-    // ÒÑÑ¡ÔñµÄ±øÖÖ <±øÖÖID, ÊıÁ¿>
+    // å·²é€‰æ‹©çš„å…µç§ <å…µç§ID, æ•°é‡>
     std::map<int, int> _selectedUnits;
     
-    // µ±Ç°Ñ¡ÖĞµÄ¹Ø¿¨
+    // å½“å‰é€‰ä¸­çš„å…³å¡
     int _selectedLevel = 0;
     
-    // ³õÊ¼»¯·½·¨
+    // åˆå§‹åŒ–æ–¹æ³•
     void setupBackground();
     void setupTitle();
     void setupLevelButtons();
     void setupUnitPreview();
     void setupExitButton();
     
-    // ³õÊ¼»¯¹Ø¿¨Êı¾İ
+    // åˆå§‹åŒ–å…³å¡æ•°æ®
     void initLevelData();
     
-    // ´´½¨µ¥¸ö¹Ø¿¨°´Å¥
+    // åˆ›å»ºå•ä¸ªå…³å¡æŒ‰é’®
     Node* createLevelButton(const LevelInfo& level, int index);
     
-    // ´´½¨±øÖÖÔ¤ÀÀÍ¼±ê
+    // åˆ›å»ºå…µç§é¢„è§ˆå›¾æ ‡
     Node* createUnitPreviewIcon(int unitId, int count);
     
-    // ¸üĞÂ±øÖÖÔ¤ÀÀÏÔÊ¾
+    // æ›´æ–°å…µç§é¢„è§ˆæ˜¾ç¤º
     void updateUnitPreview();
     
-    // ¹Ø¿¨Ñ¡Ôñ»Øµ÷
+    // å…³å¡é€‰æ‹©å›è°ƒ
     void onLevelSelected(int levelId);
     
-    // ¿ªÊ¼Õ½¶·
+    // å¼€å§‹æˆ˜æ–—
     void startBattle(int levelId);
     
-    // ÍË³ö»Øµ÷
+    // é€€å‡ºå›è°ƒ
     void onExitButton(Ref* sender);
 };
 

@@ -1,5 +1,5 @@
-// LevelSelectScene.cpp
-// ¹Ø¿¨Ñ¡Ôñ³¡¾°ÊµÏÖ
+ï»¿// LevelSelectScene.cpp
+// å…³å¡é€‰æ‹©åœºæ™¯å®ç°
 
 #include "LevelSelectScene.h"
 #include "BaseScene.h"
@@ -7,7 +7,7 @@
 #include "Soldier/UnitData.h"
 
 // ===================================================
-// ³¡¾°´´½¨
+// åœºæ™¯åˆ›å»º
 // ===================================================
 
 Scene* LevelSelectScene::createScene() {
@@ -23,7 +23,7 @@ Scene* LevelSelectScene::createScene(const std::map<int, int>& selectedUnits) {
 }
 
 // ===================================================
-// ³õÊ¼»¯
+// åˆå§‹åŒ–
 // ===================================================
 
 bool LevelSelectScene::init() {
@@ -31,12 +31,12 @@ bool LevelSelectScene::init() {
         return false;
     }
     
-    CCLOG("[¹Ø¿¨Ñ¡Ôñ] ³õÊ¼»¯¹Ø¿¨Ñ¡Ôñ³¡¾°");
+    CCLOG("[å…³å¡é€‰æ‹©] åˆå§‹åŒ–å…³å¡é€‰æ‹©åœºæ™¯");
     
-    // ³õÊ¼»¯¹Ø¿¨Êı¾İ
+    // åˆå§‹åŒ–å…³å¡æ•°æ®
     initLevelData();
     
-    // ÉèÖÃ¸÷¸öUI×é¼ş
+    // è®¾ç½®å„ä¸ªUIç»„ä»¶
     setupBackground();
     setupTitle();
     setupLevelButtons();
@@ -47,7 +47,7 @@ bool LevelSelectScene::init() {
 }
 
 // ===================================================
-// ÉèÖÃÒÑÑ¡ÔñµÄ±øÖÖ
+// è®¾ç½®å·²é€‰æ‹©çš„å…µç§
 // ===================================================
 
 void LevelSelectScene::setSelectedUnits(const std::map<int, int>& units) {
@@ -56,17 +56,17 @@ void LevelSelectScene::setSelectedUnits(const std::map<int, int>& units) {
 }
 
 // ===================================================
-// ³õÊ¼»¯¹Ø¿¨Êı¾İ
+// åˆå§‹åŒ–å…³å¡æ•°æ®
 // ===================================================
 
 void LevelSelectScene::initLevelData() {
-    // ³õÊ¼»¯5¸ö¹Ø¿¨
+    // åˆå§‹åŒ–5ä¸ªå…³å¡
     for (int i = 1; i <= LevelSelectConfig::MAX_LEVELS; ++i) {
         LevelInfo level;
         level.levelId = i;
         level.name = "Level " + std::to_string(i);
-        level.isUnlocked = (i <= 3);  // Ç°3¹Ø½âËø
-        level.starCount = (i == 1) ? 3 : (i == 2) ? 2 : 0;  // Ä£ÄâÒÑÍê³É×´Ì¬
+        level.isUnlocked = (i <= 3);  // å‰3å…³è§£é”
+        level.starCount = (i == 1) ? 3 : (i == 2) ? 2 : 0;  // æ¨¡æ‹Ÿå·²å®ŒæˆçŠ¶æ€
         level.description = "Challenge Level " + std::to_string(i);
         
         _levels.push_back(level);
@@ -74,17 +74,17 @@ void LevelSelectScene::initLevelData() {
 }
 
 // ===================================================
-// ±³¾°ÉèÖÃ
+// èƒŒæ™¯è®¾ç½®
 // ===================================================
 
 void LevelSelectScene::setupBackground() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
     
-    // ³¢ÊÔ¼ÓÔØ±³¾°Í¼Æ¬
+    // å°è¯•åŠ è½½èƒŒæ™¯å›¾ç‰‡
     _background = Sprite::create("UI/level_select_bg.png");
     if (!_background) {
-        // Èç¹û±³¾°Í¼²»´æÔÚ£¬Ê¹ÓÃ½¥±äÉ«±³¾°
+        // å¦‚æœèƒŒæ™¯å›¾ä¸å­˜åœ¨ï¼Œä½¿ç”¨æ¸å˜è‰²èƒŒæ™¯
         auto bgLayer = LayerColor::create(
             Color4B(30, 40, 60, 255),
             visibleSize.width,
@@ -93,7 +93,7 @@ void LevelSelectScene::setupBackground() {
         bgLayer->setPosition(origin);
         this->addChild(bgLayer, 0);
         
-        // Ìí¼Ó×°ÊÎĞÔ½¥±ä²ã
+        // æ·»åŠ è£…é¥°æ€§æ¸å˜å±‚
         auto gradientLayer = LayerGradient::create(
             Color4B(20, 30, 50, 200),
             Color4B(50, 70, 100, 200),
@@ -103,7 +103,7 @@ void LevelSelectScene::setupBackground() {
         gradientLayer->setPosition(origin);
         this->addChild(gradientLayer, 1);
     } else {
-        // Ëõ·Å±³¾°ÒÔ¸²¸ÇÆÁÄ»
+        // ç¼©æ”¾èƒŒæ™¯ä»¥è¦†ç›–å±å¹•
         float scaleX = visibleSize.width / _background->getContentSize().width;
         float scaleY = visibleSize.height / _background->getContentSize().height;
         _background->setScale(MAX(scaleX, scaleY));
@@ -116,7 +116,7 @@ void LevelSelectScene::setupBackground() {
 }
 
 // ===================================================
-// ±êÌâÉèÖÃ
+// æ ‡é¢˜è®¾ç½®
 // ===================================================
 
 void LevelSelectScene::setupTitle() {
@@ -135,14 +135,14 @@ void LevelSelectScene::setupTitle() {
     );
     _titleLabel->setColor(Color3B::WHITE);
     
-    // Ìí¼ÓÒõÓ°Ğ§¹û
+    // æ·»åŠ é˜´å½±æ•ˆæœ
     _titleLabel->enableShadow(Color4B::BLACK, Size(2, -2), 3);
     
     this->addChild(_titleLabel, 10);
 }
 
 // ===================================================
-// ¹Ø¿¨°´Å¥ÇøÓòÉèÖÃ
+// å…³å¡æŒ‰é’®åŒºåŸŸè®¾ç½®
 // ===================================================
 
 void LevelSelectScene::setupLevelButtons() {
@@ -153,7 +153,7 @@ void LevelSelectScene::setupLevelButtons() {
     _levelButtonArea->setPosition(origin);
     this->addChild(_levelButtonArea, 10);
     
-    // ¼ÆËã°´Å¥ÆğÊ¼Î»ÖÃ£¨Ë®Æ½¾ÓÖĞ£©
+    // è®¡ç®—æŒ‰é’®èµ·å§‹ä½ç½®ï¼ˆæ°´å¹³å±…ä¸­ï¼‰
     float totalWidth = _levels.size() * LevelSelectConfig::LEVEL_BUTTON_SIZE + 
                        (_levels.size() - 1) * LevelSelectConfig::LEVEL_BUTTON_SPACING;
     float startX = (visibleSize.width - totalWidth) / 2 + LevelSelectConfig::LEVEL_BUTTON_SIZE / 2;
@@ -171,22 +171,22 @@ void LevelSelectScene::setupLevelButtons() {
 }
 
 // ===================================================
-// ´´½¨µ¥¸ö¹Ø¿¨°´Å¥
+// åˆ›å»ºå•ä¸ªå…³å¡æŒ‰é’®
 // ===================================================
 
 Node* LevelSelectScene::createLevelButton(const LevelInfo& level, int index) {
     auto node = Node::create();
     
-    // °´Å¥±³¾°
+    // æŒ‰é’®èƒŒæ™¯
     Button* btn = nullptr;
     if (level.isUnlocked) {
         btn = Button::create("btn_normal.png", "btn_pressed.png");
     } else {
-        btn = Button::create("btn_normal.png");  // Ëø¶¨×´Ì¬
+        btn = Button::create("btn_normal.png");  // é”å®šçŠ¶æ€
     }
     
     if (!btn) {
-        // Èç¹û°´Å¥Í¼Æ¬²»´æÔÚ£¬´´½¨¼òµ¥±³¾°
+        // å¦‚æœæŒ‰é’®å›¾ç‰‡ä¸å­˜åœ¨ï¼Œåˆ›å»ºç®€å•èƒŒæ™¯
         auto bg = LayerColor::create(
             level.isUnlocked ? Color4B(80, 120, 180, 255) : Color4B(80, 80, 80, 255),
             LevelSelectConfig::LEVEL_BUTTON_SIZE,
@@ -196,7 +196,7 @@ Node* LevelSelectScene::createLevelButton(const LevelInfo& level, int index) {
         bg->setIgnoreAnchorPointForPosition(false);
         node->addChild(bg);
         
-        // ´´½¨Ò»¸öÍ¸Ã÷°´Å¥¸²¸ÇÔÚÉÏÃæ½ÓÊÕµã»÷
+        // åˆ›å»ºä¸€ä¸ªé€æ˜æŒ‰é’®è¦†ç›–åœ¨ä¸Šé¢æ¥æ”¶ç‚¹å‡»
         btn = Button::create();
         btn->setContentSize(Size(
             LevelSelectConfig::LEVEL_BUTTON_SIZE,
@@ -207,7 +207,7 @@ Node* LevelSelectScene::createLevelButton(const LevelInfo& level, int index) {
     btn->setScale(1.5f);
     node->addChild(btn);
     
-    // ¹Ø¿¨±àºÅ
+    // å…³å¡ç¼–å·
     auto numLabel = Label::createWithSystemFont(
         std::to_string(level.levelId),
         "ScienceGothic",
@@ -217,11 +217,11 @@ Node* LevelSelectScene::createLevelButton(const LevelInfo& level, int index) {
     numLabel->setColor(level.isUnlocked ? Color3B::WHITE : Color3B::GRAY);
     node->addChild(numLabel);
     
-    // ĞÇĞÇÏÔÊ¾£¨ÒÑÍê³ÉµÄ¹Ø¿¨£©
+    // æ˜Ÿæ˜Ÿæ˜¾ç¤ºï¼ˆå·²å®Œæˆçš„å…³å¡ï¼‰
     if (level.starCount > 0) {
         std::string starStr = "";
         for (int s = 0; s < level.starCount; ++s) {
-            starStr += "¡ï";
+            starStr += "â˜…";
         }
         auto starLabel = Label::createWithSystemFont(starStr, "Arial", 12);
         starLabel->setPosition(Vec2(0, -25));
@@ -229,21 +229,21 @@ Node* LevelSelectScene::createLevelButton(const LevelInfo& level, int index) {
         node->addChild(starLabel);
     }
     
-    // Ëø¶¨Í¼±ê
+    // é”å®šå›¾æ ‡
     if (!level.isUnlocked) {
         auto lockLabel = Label::createWithSystemFont("??", "Arial", 20);
         lockLabel->setPosition(Vec2(0, -25));
         node->addChild(lockLabel);
     }
     
-    // °ó¶¨µã»÷ÊÂ¼ş
+    // ç»‘å®šç‚¹å‡»äº‹ä»¶
     int levelId = level.levelId;
     bool unlocked = level.isUnlocked;
     btn->addClickEventListener([this, levelId, unlocked](Ref* sender) {
         if (unlocked) {
             this->onLevelSelected(levelId);
         } else {
-            CCLOG("[¹Ø¿¨Ñ¡Ôñ] ¹Ø¿¨ %d ÉĞÎ´½âËø", levelId);
+            CCLOG("[å…³å¡é€‰æ‹©] å…³å¡ %d å°šæœªè§£é”", levelId);
         }
     });
     
@@ -251,14 +251,14 @@ Node* LevelSelectScene::createLevelButton(const LevelInfo& level, int index) {
 }
 
 // ===================================================
-// ±øÖÖÔ¤ÀÀÇøÓòÉèÖÃ
+// å…µç§é¢„è§ˆåŒºåŸŸè®¾ç½®
 // ===================================================
 
 void LevelSelectScene::setupUnitPreview() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
     
-    // ´´½¨Ô¤ÀÀÇøÓò±³¾°
+    // åˆ›å»ºé¢„è§ˆåŒºåŸŸèƒŒæ™¯
     auto previewBg = LayerColor::create(
         Color4B(0, 0, 0, 150),
         visibleSize.width,
@@ -267,7 +267,7 @@ void LevelSelectScene::setupUnitPreview() {
     previewBg->setPosition(origin.x, origin.y + LevelSelectConfig::UNIT_PREVIEW_BOTTOM);
     this->addChild(previewBg, 5);
     
-    // Ô¤ÀÀÇøÓò±êÌâ
+    // é¢„è§ˆåŒºåŸŸæ ‡é¢˜
     auto previewTitle = Label::createWithSystemFont(
         "Deploy Units:",
         "Arial",
@@ -281,7 +281,7 @@ void LevelSelectScene::setupUnitPreview() {
     previewTitle->setColor(Color3B::WHITE);
     this->addChild(previewTitle, 10);
     
-    // ±øÖÖÍ¼±êÇøÓò
+    // å…µç§å›¾æ ‡åŒºåŸŸ
     _unitPreviewArea = Node::create();
     _unitPreviewArea->setPosition(Vec2(
         origin.x + 30,
@@ -293,7 +293,7 @@ void LevelSelectScene::setupUnitPreview() {
 }
 
 // ===================================================
-// ¸üĞÂ±øÖÖÔ¤ÀÀÏÔÊ¾
+// æ›´æ–°å…µç§é¢„è§ˆæ˜¾ç¤º
 // ===================================================
 
 void LevelSelectScene::updateUnitPreview() {
@@ -302,7 +302,7 @@ void LevelSelectScene::updateUnitPreview() {
     _unitPreviewArea->removeAllChildren();
     
     if (_selectedUnits.empty()) {
-        // Ã»ÓĞÑ¡Ôñ±øÖÖÊ±ÏÔÊ¾ÌáÊ¾
+        // æ²¡æœ‰é€‰æ‹©å…µç§æ—¶æ˜¾ç¤ºæç¤º
         auto noUnitLabel = Label::createWithSystemFont(
             "No units. Train in barracks first.",
             "Arial",
@@ -327,17 +327,17 @@ void LevelSelectScene::updateUnitPreview() {
 }
 
 // ===================================================
-// ´´½¨±øÖÖÔ¤ÀÀÍ¼±ê
+// åˆ›å»ºå…µç§é¢„è§ˆå›¾æ ‡
 // ===================================================
 
 Node* LevelSelectScene::createUnitPreviewIcon(int unitId, int count) {
     auto node = Node::create();
     
-    // »ñÈ¡±øÖÖÅäÖÃ
+    // è·å–å…µç§é…ç½®
     const UnitConfig* config = UnitManager::getInstance()->getConfig(unitId);
     std::string unitName = config ? config->name : "???";
     
-    // Í¼±ê±³¾°
+    // å›¾æ ‡èƒŒæ™¯
     auto bg = LayerColor::create(
         Color4B(60, 80, 100, 255),
         LevelSelectConfig::UNIT_ICON_SIZE,
@@ -345,7 +345,7 @@ Node* LevelSelectScene::createUnitPreviewIcon(int unitId, int count) {
     );
     node->addChild(bg);
     
-    // ±øÖÖÃû³Æ£¨¼òĞ´£©
+    // å…µç§åç§°ï¼ˆç®€å†™ï¼‰
     auto nameLabel = Label::createWithSystemFont(
         unitName.substr(0, 3),
         "Arial",
@@ -358,7 +358,7 @@ Node* LevelSelectScene::createUnitPreviewIcon(int unitId, int count) {
     nameLabel->setColor(Color3B::WHITE);
     node->addChild(nameLabel);
     
-    // ÊıÁ¿
+    // æ•°é‡
     auto countLabel = Label::createWithSystemFont(
         "x" + std::to_string(count),
         "Arial",
@@ -375,7 +375,7 @@ Node* LevelSelectScene::createUnitPreviewIcon(int unitId, int count) {
 }
 
 // ===================================================
-// ÍË³ö°´Å¥ÉèÖÃ
+// é€€å‡ºæŒ‰é’®è®¾ç½®
 // ===================================================
 
 void LevelSelectScene::setupExitButton() {
@@ -403,30 +403,30 @@ void LevelSelectScene::setupExitButton() {
 }
 
 // ===================================================
-// ¹Ø¿¨Ñ¡Ôñ»Øµ÷
+// å…³å¡é€‰æ‹©å›è°ƒ
 // ===================================================
 
 void LevelSelectScene::onLevelSelected(int levelId) {
-    CCLOG("[¹Ø¿¨Ñ¡Ôñ] Ñ¡ÔñÁË¹Ø¿¨: %d", levelId);
+    CCLOG("[å…³å¡é€‰æ‹©] é€‰æ‹©äº†å…³å¡: %d", levelId);
     _selectedLevel = levelId;
     
-    // ¿ÉÒÔÔÚÕâÀïÏÔÊ¾È·ÈÏ¶Ô»°¿ò»òÖ±½Ó¿ªÊ¼Õ½¶·
+    // å¯ä»¥åœ¨è¿™é‡Œæ˜¾ç¤ºç¡®è®¤å¯¹è¯æ¡†æˆ–ç›´æ¥å¼€å§‹æˆ˜æ–—
     startBattle(levelId);
 }
 
 // ===================================================
-// ¿ªÊ¼Õ½¶·
+// å¼€å§‹æˆ˜æ–—
 // ===================================================
 
 void LevelSelectScene::startBattle(int levelId) {
-    CCLOG("[¹Ø¿¨Ñ¡Ôñ] ¿ªÊ¼Õ½¶·: ¹Ø¿¨ %d", levelId);
+    CCLOG("[å…³å¡é€‰æ‹©] å¼€å§‹æˆ˜æ–—: å…³å¡ %d", levelId);
     
-    // TODO: ÕâÀïÓ¦¸ÃÌø×ªµ½Õ½¶·³¡¾°
-    // Ä¿Ç°ÔİÊ±·µ»ØBaseScene
+    // TODO: è¿™é‡Œåº”è¯¥è·³è½¬åˆ°æˆ˜æ–—åœºæ™¯
+    // ç›®å‰æš‚æ—¶è¿”å›BaseScene
     // auto battleScene = BattleScene::createScene(levelId, _selectedUnits);
     // Director::getInstance()->replaceScene(TransitionFade::create(0.5f, battleScene));
     
-    // ÁÙÊ±£ºÏÔÊ¾ÌáÊ¾
+    // ä¸´æ—¶ï¼šæ˜¾ç¤ºæç¤º
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
     
@@ -442,7 +442,7 @@ void LevelSelectScene::startBattle(int levelId) {
     tipLabel->setColor(Color3B::YELLOW);
     this->addChild(tipLabel, 100);
     
-    // 2Ãëºó·µ»Ø
+    // 2ç§’åè¿”å›
     this->scheduleOnce([](float dt) {
         auto scene = BaseScene::createScene();
         Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
@@ -450,11 +450,11 @@ void LevelSelectScene::startBattle(int levelId) {
 }
 
 // ===================================================
-// ÍË³ö°´Å¥»Øµ÷
+// é€€å‡ºæŒ‰é’®å›è°ƒ
 // ===================================================
 
 void LevelSelectScene::onExitButton(Ref* sender) {
-    CCLOG("[¹Ø¿¨Ñ¡Ôñ] ·µ»Ø»ùµØ");
+    CCLOG("[å…³å¡é€‰æ‹©] è¿”å›åŸºåœ°");
     
     auto scene = BaseScene::createScene();
     Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
