@@ -53,10 +53,10 @@ list(APPEND GAME_SOURCE
      Classes/Scenes/MainMenuScene.cpp
      Classes/Scenes/BaseScene.cpp
      Classes/Scenes/LevelSelectScene.cpp
-     Classes/Scenes/Components/BuildShopPanel.cpp
-     Classes/Scenes/Components/PlacementManager.cpp
-     Classes/Scenes/Components/BaseUIPanel.cpp
-     Classes/Scenes/Components/GridBackground.cpp
+     Classes/Scenes/components/BuildShopPanel.cpp
+     Classes/Scenes/components/PlacementManager.cpp
+     Classes/Scenes/components/BaseUIPanel.cpp
+     Classes/Scenes/components/GridBackground.cpp
      Classes/Buildings/DefenceBuilding.cpp
      Classes/Buildings/ProductionBuilding.cpp
      Classes/Buildings/StorageBuilding.cpp
@@ -76,10 +76,10 @@ list(APPEND GAME_HEADER
      Classes/Scenes/MainMenuScene.h
      Classes/Scenes/BaseScene.h
      Classes/Scenes/LevelSelectScene.h
-     Classes/Scenes/Components/BuildShopPanel.h
-     Classes/Scenes/Components/PlacementManager.h
-     Classes/Scenes/Components/BaseUIPanel.h
-     Classes/Scenes/Components/GridBackground.h
+     Classes/Scenes/components/BuildShopPanel.h
+     Classes/Scenes/components/PlacementManager.h
+     Classes/Scenes/components/BaseUIPanel.h
+     Classes/Scenes/components/GridBackground.h
      Classes/Buildings/DefenceBuilding.h
      Classes/Buildings/DefenseBuildingData.h
      Classes/Buildings/ProductionBuilding.h

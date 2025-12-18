@@ -13,7 +13,7 @@
 		<Filter Include="src\Scenes">
 			<UniqueIdentifier>{11111111-1111-1111-1111-111111111111}</UniqueIdentifier>
 		</Filter>
-		<Filter Include="src\Scenes\Components">
+		<Filter Include="src\Scenes\components">
 			<UniqueIdentifier>{11111111-1111-1111-1111-222222222222}</UniqueIdentifier>
 		</Filter>
 		<Filter Include="src\Buildings">
@@ -51,17 +51,17 @@
 		<ClCompile Include="..\Classes\Scenes\LevelSelectScene.cpp">
 			<Filter>src\Scenes</Filter>
 		</ClCompile>
-		<ClCompile Include="..\Classes\Scenes\Components\BuildShopPanel.cpp">
-			<Filter>src\Scenes\Components</Filter>
+		<ClCompile Include="..\Classes\Scenes\components\BuildShopPanel.cpp">
+			<Filter>src\Scenes\components</Filter>
 		</ClCompile>
-		<ClCompile Include="..\Classes\Scenes\Components\PlacementManager.cpp">
-			<Filter>src\Scenes\Components</Filter>
+		<ClCompile Include="..\Classes\Scenes\components\PlacementManager.cpp">
+			<Filter>src\Scenes\components</Filter>
 		</ClCompile>
-		<ClCompile Include="..\Classes\Scenes\Components\BaseUIPanel.cpp">
-			<Filter>src\Scenes\Components</Filter>
+		<ClCompile Include="..\Classes\Scenes\components\BaseUIPanel.cpp">
+			<Filter>src\Scenes\components</Filter>
 		</ClCompile>
-		<ClCompile Include="..\Classes\Scenes\Components\GridBackground.cpp">
-			<Filter>src\Scenes\Components</Filter>
+		<ClCompile Include="..\Classes\Scenes\components\GridBackground.cpp">
+			<Filter>src\Scenes\components</Filter>
 		</ClCompile>
 		<ClCompile Include="..\Classes\Buildings\DefenceBuilding.cpp">
 			<Filter>src\Buildings</Filter>
@@ -119,17 +119,17 @@
 		<ClInclude Include="..\Classes\Scenes\LevelSelectScene.h">
 			<Filter>src\Scenes</Filter>
 		</ClInclude>
-		<ClInclude Include="..\Classes\Scenes\Components\BuildShopPanel.h">
-			<Filter>src\Scenes\Components</Filter>
+		<ClInclude Include="..\Classes\Scenes\components\BuildShopPanel.h">
+			<Filter>src\Scenes\components</Filter>
 		</ClInclude>
-		<ClInclude Include="..\Classes\Scenes\Components\PlacementManager.h">
-			<Filter>src\Scenes\Components</Filter>
+		<ClInclude Include="..\Classes\Scenes\components\PlacementManager.h">
+			<Filter>src\Scenes\components</Filter>
 		</ClInclude>
-		<ClInclude Include="..\Classes\Scenes\Components\BaseUIPanel.h">
-			<Filter>src\Scenes\Components</Filter>
+		<ClInclude Include="..\Classes\Scenes\components\BaseUIPanel.h">
+			<Filter>src\Scenes\components</Filter>
 		</ClInclude>
-		<ClInclude Include="..\Classes\Scenes\Components\GridBackground.h">
-			<Filter>src\Scenes\Components</Filter>
+		<ClInclude Include="..\Classes\Scenes\components\GridBackground.h">
+			<Filter>src\Scenes\components</Filter>
 		</ClInclude>
 		<ClInclude Include="..\Classes\Buildings\DefenceBuilding.h">
 			<Filter>src\Buildings</Filter>
