@@ -7,6 +7,12 @@
  * - 兵种训练
  * - 资源显示
  * - 进攻关卡入口
+ * 
+ * 该场景采用高度模块化设计，各功能由独立组件实现：
+ * - BuildShopPanel: 建筑商店面板
+ * - PlacementManager: 建筑放置管理器
+ * - BaseUIPanel: UI面板
+ * - GridBackground: 网格背景
  */
 
 #ifndef __BASE_SCENE_H__
@@ -17,18 +23,32 @@
 #include "Map/GridMap.h"
 #include "Buildings/BuildingManager.h"
 #include "UI/TrainPanel.h"
+#include "Scenes/Components/BuildShopPanel.h"
+#include "Scenes/Components/PlacementManager.h"
+#include "Scenes/Components/BaseUIPanel.h"
+#include "Scenes/Components/GridBackground.h"
 
 USING_NS_CC;
 using namespace cocos2d::ui;
 
 // 前向声明
 class TrainPanel;
+class BuildShopPanel;
+class PlacementManager;
+class BaseUIPanel;
+class GridBackground;
 
 /**
  * @class BaseScene
  * @brief 基地场景类
  * 
- * 玩家的主基地场景，管理建筑放置、兵种训练、资源显示等功能
+ * 玩家的主基地场景，采用模块化设计管理建筑放置、兵种训练、资源显示等功能。
+ * 建筑格子占用遵循部落冲突设定：
+ * - 防御塔类（箭塔、炮塔等）：3x3格子
+ * - 资源建筑（仓库等）：3x3格子
+ * - 兵营：5x5格子
+ * - 大本营：4x4格子
+ * - 装饰物（树等）：2x2格子
  */
 class BaseScene : public Scene {
 public:
@@ -46,86 +66,40 @@ public:
     
     CREATE_FUNC(BaseScene);
 
-    /**
-     * @brief 进攻按钮回调，跳转到关卡选择场景
-     */
-    void onAttackButton(Ref* sender);
-    
-    /**
-     * @brief 建造按钮回调，显示建筑商店
-     */
-    void onBuildButton(Ref* sender);
-    
-    /**
-     * @brief 退出按钮回调，返回主菜单
-     */
-    void onExitButton(Ref* sender);
 
 private:
     // ==================== 核心组件 ====================
-    GridMap* _gridMap = nullptr;           // 网格地图，管理建筑位置
-    Node* _buildingLayer = nullptr;        // 建筑层，所有建筑的父节点
-    Node* _uiLayer = nullptr;              // UI层，存放按钮等界面元素
-    Node* _buildShopLayer = nullptr;       // 建筑商店层
-    TrainPanel* _trainPanel = nullptr;     // 训练面板（点击兵营时显示）
-    
-    // ==================== 建造模式状态 ====================
-    bool _isPlacingMode = false;           // 是否处于建造模式
-    Node* _draggingBuilding = nullptr;     // 正在拖拽的建筑（暂未使用）
-    Sprite* _placementPreview = nullptr;   // 建造预览精灵
-    int _previewWidth = 0;                 // 预览建筑宽度（格子数）
-    int _previewHeight = 0;                // 预览建筑高度（格子数）
-    int _selectedBuildingType = 0;         // 当前选中的建筑类型
-    int _selectedLevel = 0;                // 当前选中的建筑等级
+    GridMap* _gridMap = nullptr;                   // 网格地图，管理建筑位置
+    Node* _buildingLayer = nullptr;                // 建筑层，所有建筑的父节点
+    GridBackground* _gridBackground = nullptr;     // 网格背景组件
+    BaseUIPanel* _uiPanel = nullptr;               // UI面板组件
+    BuildShopPanel* _buildShopPanel = nullptr;     // 建筑商店面板组件
+    PlacementManager* _placementManager = nullptr; // 建筑放置管理器组件
+    TrainPanel* _trainPanel = nullptr;             // 训练面板    
     
     // ==================== 资源管理 ====================
-    int _currentGold = 0;                  // 当前金币数量
-    int _currentDiamond = 0;               // 当前钻石数量
-    Label* _goldLabel = nullptr;           // 金币显示标签
-    Label* _diamondLabel = nullptr;        // 钻石显示标签
+    int _currentGold = 0;                          // 当前金币数量
+    int _currentDiamond = 0;                       // 当前钻石数量
     
     // ==================== 建筑配置 ====================
-    ProductionBuildingConfig _baseConfig;  // 基地建筑配置
-    
-    // ==================== 网格显示 ====================
-    DrawNode* _gridBackgroundNode = nullptr;  // 网格背景绘制节点
-    DrawNode* _placementGridNode = nullptr;   // 放置状态网格显示节点
+    ProductionBuildingConfig _baseConfig;          // 基地建筑配置
     
     // ==================== 初始化方法 ====================
     
     /**
-     * @brief 创建网格背景
-     * 绘制黑白虚线网格作为建造参考
+     * @brief 初始化网格地图和背景
      */
-    void createGridBackground();
+    void initGridMap();
     
     /**
-     * @brief 创建主UI界面
-     * 包含进攻、建造、退出按钮和资源显示
+     * @brief 初始化UI组件
      */
-    void createUI();
+    void initUIComponents();
     
     /**
-     * @brief 创建工具提示面板
-     * @param text 提示文字
-     * @param size 面板尺寸
-     * @return 创建的提示节点
+     * @brief 初始化建造系统组件
      */
-    Node* createTooltip(const std::string& text, const Size& size);
-    
-    /**
-     * @brief 绑定工具提示到按钮
-     * @param owner 提示的父节点
-     * @param targetBtn 目标按钮
-     * @param tooltip 提示节点
-     * @param offsetX X方向偏移量
-     */
-    void bindTooltip(Node* owner, Node* targetBtn, Node* tooltip, float offsetX = 10.0f);
-    
-    /**
-     * @brief 创建建筑商店界面
-     */
-    void createBuildShop();
+    void initBuildingSystem();
     
     /**
      * @brief 创建训练面板
@@ -134,55 +108,43 @@ private:
     
     /**
      * @brief 初始化基地默认建筑
-     * 在地图中心放置初始的基地建筑
+     * 在地图中心放置初始的基地建筑（4x4格子）
      */
     void initBaseBuilding();
-
-    // ==================== 建造相关方法 ====================
-    
     /**
-     * @brief 建筑选择回调
-     * @param buildingType 选中的建筑类型ID
+    * @brief 初始化触摸事件监听
+    */
+    void initTouchListener();
+    
+    // ==================== 回调方法 ====================
+    /**
+     * @brief 进攻按钮回调，跳转到关卡选择场景
      */
-    void onBuildingSelected(int buildingType);
+    void onAttackClicked();
     
     /**
-     * @brief 更新建造预览显示
-     * 根据当前触摸位置更新预览位置和颜色
+     * @brief 建造按钮回调，显示建筑商店
      */
-    void updatePlacementPreview();
+    void onBuildClicked();
     
     /**
-     * @brief 更新放置网格颜色显示
+     * @brief 退出按钮回调，返回主菜单
+     */
+    void onExitClicked();
+    
+    /**
+     * @brief 建筑选择回调（从建筑商店）
+     * @param option 选中的建筑选项
+     */
+    void onBuildingSelected(const BuildingOption& option);
+    
+    /**
+     * @brief 建筑放置确认回调
+     * @param option 建筑选项
      * @param gridX 网格X坐标
      * @param gridY 网格Y坐标
-     * @param canPlace 是否可以放置
      */
-    void updatePlacementGrid(int gridX, int gridY, bool canPlace);
-    
-    /**
-     * @brief 确认放置建筑
-     * 在当前位置创建实际建筑并扣除资源
-     */
-    void confirmPlacement();
-    
-    /**
-     * @brief 取消建造模式
-     * 移除预览并退出建造状态
-     */
-    void cancelPlacement();
-    
-    /**
-     * @brief 计算建筑在世界坐标系中的位置
-     * @param gridX 网格X坐标（左下角）
-     * @param gridY 网格Y坐标（左下角）
-     * @param width 建筑宽度（格子数）
-     * @param height 建筑高度（格子数）
-     * @return 建筑中心的世界坐标
-     */
-    Vec2 calculateBuildingPosition(int gridX, int gridY, int width, int height);
-    
-    // ==================== 训练相关方法 ====================
+    void onPlacementConfirmed(const BuildingOption& option, int gridX, int gridY);
     
     /**
      * @brief 显示训练面板
@@ -196,6 +158,25 @@ private:
      */
     void onUnitTrainComplete(int unitId);
     
+    // ==================== 建筑创建方法 ====================
+
+    /**
+     * @brief 根据建筑选项创建实际建筑
+     * @param option 建筑选项
+     * @return 创建的建筑节点
+     */
+    Node* createBuildingFromOption(const BuildingOption& option);
+
+    /**
+     * @brief 计算建筑在世界坐标系中的位置
+     * @param gridX 网格X坐标（左下角）
+     * @param gridY 网格Y坐标（左下角）
+     * @param width 建筑宽度（格子数）
+     * @param height 建筑高度（格子数）
+     * @return 建筑中心的世界坐标
+     */
+    Vec2 calculateBuildingPosition(int gridX, int gridY, int width, int height);
+
     // ==================== 触摸事件处理 ====================
     
     /**

@@ -80,8 +80,10 @@ _deps
 
 # Visual Studio
 .vs/
-*.vcxproj.filters
 *.vcxproj.user
+
+# CodeQL temp files
+_codeql_detected_source_root
 
 # Xcode
 *.pbxuser
