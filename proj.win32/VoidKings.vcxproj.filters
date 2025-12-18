@@ -13,6 +13,9 @@
     <Filter Include="src\Scenes">
       <UniqueIdentifier>{11111111-1111-1111-1111-111111111111}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Scenes\Components">
+      <UniqueIdentifier>{11111111-1111-1111-1111-222222222222}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Buildings">
       <UniqueIdentifier>{22222222-2222-2222-2222-222222222222}</UniqueIdentifier>
     </Filter>
@@ -44,6 +47,21 @@
     </ClCompile>
     <ClCompile Include="..\Classes\Scenes\BaseScene.cpp">
       <Filter>src\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Scenes\LevelSelectScene.cpp">
+      <Filter>src\Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Scenes\Components\BuildShopPanel.cpp">
+      <Filter>src\Scenes\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Scenes\Components\PlacementManager.cpp">
+      <Filter>src\Scenes\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Scenes\Components\BaseUIPanel.cpp">
+      <Filter>src\Scenes\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Scenes\Components\GridBackground.cpp">
+      <Filter>src\Scenes\Components</Filter>
     </ClCompile>
     <ClCompile Include="..\Classes\Buildings\DefenceBuilding.cpp">
       <Filter>src\Buildings</Filter>
@@ -78,11 +96,9 @@
     <ClCompile Include="..\Classes\UI\TrainPanel.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\Scenes\LevelSelectScene.cpp">
+    <ClCompile Include="..\Classes\UI\IDCardPanel.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\UI\IDCardPanel.cpp" />
-    <ClCompile Include="Classes\Scenes\BaseScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -99,6 +115,21 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Scenes\BaseScene.h">
       <Filter>src\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Scenes\LevelSelectScene.h">
+      <Filter>src\Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Scenes\Components\BuildShopPanel.h">
+      <Filter>src\Scenes\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Scenes\Components\PlacementManager.h">
+      <Filter>src\Scenes\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Scenes\Components\BaseUIPanel.h">
+      <Filter>src\Scenes\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Scenes\Components\GridBackground.h">
+      <Filter>src\Scenes\Components</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Buildings\DefenceBuilding.h">
       <Filter>src\Buildings</Filter>
@@ -145,7 +176,7 @@
     <ClInclude Include="..\Classes\UI\TrainPanel.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Scenes\LevelSelectScene.h">
+    <ClInclude Include="..\Classes\UI\IDCardPanel.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

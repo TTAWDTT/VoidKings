@@ -49,10 +49,52 @@ endif()
 list(APPEND GAME_SOURCE
      Classes/AppDelegate.cpp
      Classes/HelloWorldScene.cpp
+     Classes/Core/Core.cpp
+     Classes/Scenes/MainMenuScene.cpp
+     Classes/Scenes/BaseScene.cpp
+     Classes/Scenes/LevelSelectScene.cpp
+     Classes/Scenes/Components/BuildShopPanel.cpp
+     Classes/Scenes/Components/PlacementManager.cpp
+     Classes/Scenes/Components/BaseUIPanel.cpp
+     Classes/Scenes/Components/GridBackground.cpp
+     Classes/Buildings/DefenceBuilding.cpp
+     Classes/Buildings/ProductionBuilding.cpp
+     Classes/Buildings/StorageBuilding.cpp
+     Classes/Buildings/BuildingManager.cpp
+     Classes/Soldier/Soldier.cpp
+     Classes/Soldier/UnitManager.cpp
+     Classes/Bullet/Bullet.cpp
+     Classes/Map/GridMap.cpp
+     Classes/UI/IDCardPanel.cpp
+     Classes/UI/TrainPanel.cpp
+     Classes/Utils/AnimationUtils.cpp
      )
 list(APPEND GAME_HEADER
      Classes/AppDelegate.h
      Classes/HelloWorldScene.h
+     Classes/Core/Core.h
+     Classes/Scenes/MainMenuScene.h
+     Classes/Scenes/BaseScene.h
+     Classes/Scenes/LevelSelectScene.h
+     Classes/Scenes/Components/BuildShopPanel.h
+     Classes/Scenes/Components/PlacementManager.h
+     Classes/Scenes/Components/BaseUIPanel.h
+     Classes/Scenes/Components/GridBackground.h
+     Classes/Buildings/DefenceBuilding.h
+     Classes/Buildings/DefenseBuildingData.h
+     Classes/Buildings/ProductionBuilding.h
+     Classes/Buildings/ProductionBuildingData.h
+     Classes/Buildings/StorageBuilding.h
+     Classes/Buildings/StorageBuildingData.h
+     Classes/Buildings/BuildingManager.h
+     Classes/Soldier/Soldier.h
+     Classes/Soldier/UnitData.h
+     Classes/Soldier/UnitManager.h
+     Classes/Bullet/Bullet.h
+     Classes/Map/GridMap.h
+     Classes/UI/IDCardPanel.h
+     Classes/UI/TrainPanel.h
+     Classes/Utils/AnimationUtils.h
      )
 
 if(ANDROID)
@@ -124,7 +166,7 @@ if (OHOS)
     add_library(${APP_NAME} STATIC ${all_code_files})
     target_include_directories(${APP_NAME} PUBLIC ${COCOS2DX_ROOT_PATH}/cocos/platform/ohos)
 elseif(NOT ANDROID)
-    add_executable(${APP_NAME} ${all_code_files} "Classes/Scenes/MainMenuScene.cpp" "Classes/Scenes/MainMenuScene.h")
+    add_executable(${APP_NAME} ${all_code_files})
 else()
     add_library(${APP_NAME} SHARED ${all_code_files})
     add_subdirectory(${COCOS2DX_ROOT_PATH}/cocos/platform/android ${ENGINE_BINARY_PATH}/cocos/platform)

@@ -157,6 +157,10 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\Scenes\LevelSelectScene.cpp" />
     <ClCompile Include="..\Classes\Scenes\MainMenuScene.cpp" />
     <ClCompile Include="..\Classes\Scenes\BaseScene.cpp" />
+    <ClCompile Include="..\Classes\Scenes\Components\BuildShopPanel.cpp" />
+    <ClCompile Include="..\Classes\Scenes\Components\PlacementManager.cpp" />
+    <ClCompile Include="..\Classes\Scenes\Components\BaseUIPanel.cpp" />
+    <ClCompile Include="..\Classes\Scenes\Components\GridBackground.cpp" />
     <ClCompile Include="..\Classes\Soldier\Soldier.cpp" />
     <ClCompile Include="..\Classes\Soldier\UnitManager.cpp" />
     <ClCompile Include="..\Classes\Buildings\DefenceBuilding.cpp" />
@@ -177,6 +181,10 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\Scenes\LevelSelectScene.h" />
     <ClInclude Include="..\Classes\Scenes\MainMenuScene.h" />
     <ClInclude Include="..\Classes\Scenes\BaseScene.h" />
+    <ClInclude Include="..\Classes\Scenes\Components\BuildShopPanel.h" />
+    <ClInclude Include="..\Classes\Scenes\Components\PlacementManager.h" />
+    <ClInclude Include="..\Classes\Scenes\Components\BaseUIPanel.h" />
+    <ClInclude Include="..\Classes\Scenes\Components\GridBackground.h" />
     <ClInclude Include="..\Classes\Soldier\Soldier.h" />
     <ClInclude Include="..\Classes\Soldier\UnitData.h" />
     <ClInclude Include="..\Classes\Soldier\UnitManager.h" />
