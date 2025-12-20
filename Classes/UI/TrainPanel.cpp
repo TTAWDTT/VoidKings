@@ -292,8 +292,10 @@ Node* TrainPanel::createUnitCard(int unitId, int row, int col) {
     recruitBorder->drawRect(Vec2(-btnWidth / 2, -btnHeight / 2), Vec2(btnWidth / 2, btnHeight / 2), Color4F::WHITE);
     recruitNode->addChild(recruitBorder, 1);
     
+    // 使用配置常量替代魔法数字
+    int recruitCost = config->COST_COIN > 0 ? config->COST_COIN : TrainPanelConfig::DEFAULT_RECRUIT_COST;
     char recruitText[32];
-    snprintf(recruitText, sizeof(recruitText), "Recruit\n%dG", config->COST_COIN > 0 ? config->COST_COIN : 50);
+    snprintf(recruitText, sizeof(recruitText), "Recruit\n%dG", recruitCost);
     auto recruitLabel = Label::createWithTTF(recruitText, "fonts/arial.ttf", 9);
     if (!recruitLabel) {
         recruitLabel = Label::createWithSystemFont(recruitText, "Arial", 9);
@@ -394,34 +396,39 @@ Sprite* TrainPanel::createIdleAnimationSprite(int unitId) {
         auto placeholder = DrawNode::create();
         placeholder->drawSolidRect(Vec2(-30, -30), Vec2(30, 30), Color4F(0.3f, 0.3f, 0.3f, 1.0f));
         sprite->addChild(placeholder);
+        return sprite;  // 占位精灵不需要动画
     }
     
-    if (sprite) {
-        // 缩放到合适尺寸
-        float targetSize = TrainPanelConfig::ANIM_SIZE;
-        Size contentSize = sprite->getContentSize();
-        if (contentSize.width > 0 && contentSize.height > 0) {
-            float scale = targetSize / std::max(contentSize.width, contentSize.height);
-            sprite->setScale(scale);
-        }
+    // 缩放到合适尺寸
+    float targetSize = TrainPanelConfig::ANIM_SIZE;
+    Size contentSize = sprite->getContentSize();
+    if (contentSize.width > 0 && contentSize.height > 0) {
+        float scale = targetSize / std::max(contentSize.width, contentSize.height);
+        sprite->setScale(scale);
+    }
+    
+    // 尝试创建待机动画 - 使用Sprite::create加载每帧获取正确尺寸
+    Vector<SpriteFrame*> frames;
+    for (int i = 1; i <= config->anim_idle_frames; ++i) {
+        char framePath[256];
+        snprintf(framePath, sizeof(framePath), "unit/%s/%s_idle_%d.png", 
+                 folderName.c_str(), baseName.c_str(), i);
         
-        // 尝试创建待机动画
-        Vector<SpriteFrame*> frames;
-        for (int i = 1; i <= config->anim_idle_frames; ++i) {
-            char framePath[256];
-            snprintf(framePath, sizeof(framePath), "unit/%s/%s_idle_%d.png", 
-                     folderName.c_str(), baseName.c_str(), i);
-            auto frame = SpriteFrame::create(framePath, Rect(0, 0, contentSize.width, contentSize.height));
+        // 使用Texture2D获取正确的纹理尺寸
+        auto texture = Director::getInstance()->getTextureCache()->addImage(framePath);
+        if (texture) {
+            Size texSize = texture->getContentSize();
+            auto frame = SpriteFrame::createWithTexture(texture, Rect(0, 0, texSize.width, texSize.height));
             if (frame) {
                 frames.pushBack(frame);
             }
         }
-        
-        if (frames.size() > 0) {
-            auto animation = Animation::createWithSpriteFrames(frames, config->anim_idle_delay);
-            auto animate = Animate::create(animation);
-            sprite->runAction(RepeatForever::create(animate));
-        }
+    }
+    
+    if (frames.size() > 0) {
+        auto animation = Animation::createWithSpriteFrames(frames, config->anim_idle_delay);
+        auto animate = Animate::create(animation);
+        sprite->runAction(RepeatForever::create(animate));
     }
     
     return sprite;
@@ -434,8 +441,8 @@ void TrainPanel::recruitUnit(int unitId) {
     const UnitConfig* config = UnitManager::getInstance()->getConfig(unitId);
     if (!config) return;
     
-    // 使用金币招募（如果COST_COIN为0，使用默认值50）
-    int cost = config->COST_COIN > 0 ? config->COST_COIN : 50;
+    // 使用金币招募（如果COST_COIN为0，使用默认值）
+    int cost = config->COST_COIN > 0 ? config->COST_COIN : TrainPanelConfig::DEFAULT_RECRUIT_COST;
     
     int coin = Core::getInstance()->getResource(ResourceType::COIN);
     if (coin < cost) {

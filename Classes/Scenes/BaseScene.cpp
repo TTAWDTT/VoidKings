@@ -219,18 +219,26 @@ void BaseScene::initBaseBuilding() {
     }
 }
 
+// ==================== 建筑缩放调整常量 ====================
+namespace BuildingScaleConfig {
+    constexpr float PADDING_FACTOR = 0.85f;  // 建筑与格子边缘的间距系数
+}
+
 // ==================== 建筑缩放调整 ====================
 
 void BaseScene::scaleBuildingToFit(Node* building, int gridWidth, int gridHeight, float cellSize) {
     if (!building) return;
+    
+    // 检查是否有子节点
+    if (building->getChildrenCount() == 0) return;
     
     // 获取建筑的精灵
     auto sprite = dynamic_cast<Sprite*>(building->getChildren().at(0));
     if (!sprite) return;
     
     // 计算目标尺寸（占据的格子空间，留一点边距）
-    float targetWidth = gridWidth * cellSize * 0.85f;
-    float targetHeight = gridHeight * cellSize * 0.85f;
+    float targetWidth = gridWidth * cellSize * BuildingScaleConfig::PADDING_FACTOR;
+    float targetHeight = gridHeight * cellSize * BuildingScaleConfig::PADDING_FACTOR;
     
     // 获取精灵原始尺寸
     Size originalSize = sprite->getContentSize();
@@ -241,7 +249,7 @@ void BaseScene::scaleBuildingToFit(Node* building, int gridWidth, int gridHeight
     float scaleY = targetHeight / originalSize.height;
     float scale = std::min(scaleX, scaleY);
     
-    // 应用缩放（最小缩放1.0，确保小图能放大）
+    // 应用缩放（最小缩放0.1，确保小图能放大）
     if (scale > 0.1f) {
         sprite->setScale(scale);
         CCLOG("[基地场景] 建筑缩放调整: 原尺寸(%.1f, %.1f) -> 目标(%.1f, %.1f), scale=%.2f",

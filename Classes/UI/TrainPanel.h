@@ -58,6 +58,9 @@ namespace TrainPanelConfig {
     constexpr float BUTTON_WIDTH = 70.0f;
     constexpr float BUTTON_HEIGHT = 30.0f;
     
+    // 默认招募费用（当配置中COST_COIN为0时使用）
+    constexpr int DEFAULT_RECRUIT_COST = 50;
+    
     // 关闭按钮配置
     constexpr float CLOSE_BUTTON_BOTTOM = 30.0f;
 }
