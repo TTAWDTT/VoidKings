@@ -4,6 +4,7 @@
 
 #include "TrainPanel.h"
 #include "Core/Core.h"
+#include <algorithm>
 
 // ===================================================
 // 创建与初始化

@@ -10,6 +10,7 @@
  */
 
 #include "BuildShopPanel.h"
+#include <algorithm>
 
 // ===================================================
 // 创建与初始化

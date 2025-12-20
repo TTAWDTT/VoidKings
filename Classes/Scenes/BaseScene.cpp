@@ -18,6 +18,7 @@
 #include "UI/TrainPanel.h"
 #include "Soldier/UnitManager.h"
 #include "UI/IDCardPanel.h"
+#include <algorithm>
 
 USING_NS_CC;
 
