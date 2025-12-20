@@ -53,6 +53,7 @@ list(APPEND GAME_SOURCE
      Classes/Scenes/MainMenuScene.cpp
      Classes/Scenes/BaseScene.cpp
      Classes/Scenes/LevelSelectScene.cpp
+     Classes/Scenes/BattleScene.cpp
      Classes/Scenes/Components/BuildShopPanel.cpp
      Classes/Scenes/Components/PlacementManager.cpp
      Classes/Scenes/Components/BaseUIPanel.cpp
@@ -76,6 +77,7 @@ list(APPEND GAME_HEADER
      Classes/Scenes/MainMenuScene.h
      Classes/Scenes/BaseScene.h
      Classes/Scenes/LevelSelectScene.h
+     Classes/Scenes/BattleScene.h
      Classes/Scenes/Components/BuildShopPanel.h
      Classes/Scenes/Components/PlacementManager.h
      Classes/Scenes/Components/BaseUIPanel.h

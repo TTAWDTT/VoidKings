@@ -14,28 +14,28 @@ USING_NS_CC;
 using namespace cocos2d::ui;
 
 // ===================================================
-// 关卡选择场景配置
+// 关卡选择场景配置（优化后的紧凑布局）
 // ===================================================
 namespace LevelSelectConfig {
-    // 关卡按钮配置
+    // 关卡按钮配置 - 缩小尺寸使布局更紧凑
     constexpr int MAX_LEVELS = 5;                    // 最大关卡数
-    constexpr float LEVEL_BUTTON_SIZE = 80.0f;       // 关卡按钮尺寸
-    constexpr float LEVEL_BUTTON_SPACING = 30.0f;    // 关卡按钮间距
+    constexpr float LEVEL_BUTTON_SIZE = 50.0f;       // 关卡按钮尺寸（缩小）
+    constexpr float LEVEL_BUTTON_SPACING = 20.0f;    // 关卡按钮间距（缩小）
     constexpr float LEVEL_AREA_Y_RATIO = 0.55f;      // 关卡区域Y位置（相对屏幕高度）
     
-    // 兵种预览区域配置
-    constexpr float UNIT_PREVIEW_HEIGHT = 120.0f;    // 兵种预览区域高度
-    constexpr float UNIT_PREVIEW_BOTTOM = 20.0f;     // 距离底部距离
-    constexpr float UNIT_ICON_SIZE = 60.0f;          // 兵种图标尺寸
-    constexpr float UNIT_ICON_SPACING = 15.0f;       // 兵种图标间距
+    // 兵种预览区域配置 - 缩小尺寸
+    constexpr float UNIT_PREVIEW_HEIGHT = 80.0f;     // 兵种预览区域高度（缩小）
+    constexpr float UNIT_PREVIEW_BOTTOM = 10.0f;     // 距离底部距离（缩小）
+    constexpr float UNIT_ICON_SIZE = 40.0f;          // 兵种图标尺寸（缩小）
+    constexpr float UNIT_ICON_SPACING = 10.0f;       // 兵种图标间距（缩小）
     
-    // 标题配置
-    constexpr int TITLE_FONT_SIZE = 36;
-    constexpr float TITLE_TOP_OFFSET = 50.0f;
+    // 标题配置 - 缩小字体
+    constexpr int TITLE_FONT_SIZE = 24;              // 标题字体大小（缩小）
+    constexpr float TITLE_TOP_OFFSET = 30.0f;        // 标题顶部偏移（缩小）
     
-    // 退出按钮配置
-    constexpr float EXIT_BUTTON_SIZE = 50.0f;
-    constexpr float EXIT_BUTTON_MARGIN = 30.0f;
+    // 退出按钮配置 - 缩小尺寸
+    constexpr float EXIT_BUTTON_SIZE = 30.0f;        // 退出按钮尺寸（缩小）
+    constexpr float EXIT_BUTTON_MARGIN = 15.0f;      // 退出按钮边距（缩小）
 }
 
 // ===================================================
