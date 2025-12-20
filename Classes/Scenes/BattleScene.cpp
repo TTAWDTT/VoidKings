@@ -109,14 +109,15 @@ void BattleScene::initLevel() {
 // ===================================================
 
 void BattleScene::createLevel1() {
-    // 在地图右侧放置敌方基地
-    createEnemyBase(30, 12);
+    // 在地图中右侧放置敌方基地（40x30网格，确保4x4基地在网格内）
+    // 基地位置需要留出足够空间：右边界为40，所以最大X为36
+    createEnemyBase(28, 13);
     
-    // 放置一些防御塔
-    createDefenseTower(25, 10, 1);  // 箭塔
-    createDefenseTower(25, 14, 1);  // 箭塔
-    createDefenseTower(27, 8, 2);   // 炮塔
-    createDefenseTower(27, 16, 2);  // 炮塔
+    // 放置一些防御塔（3x3建筑需要确保在网格内）
+    createDefenseTower(22, 11, 1);  // 箭塔
+    createDefenseTower(22, 17, 1);  // 箭塔
+    createDefenseTower(24, 8, 2);   // 炮塔
+    createDefenseTower(24, 20, 2);  // 炮塔
 }
 
 // ===================================================
