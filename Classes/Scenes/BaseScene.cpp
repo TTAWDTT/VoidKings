@@ -18,6 +18,7 @@
 #include "UI/TrainPanel.h"
 #include "Soldier/UnitManager.h"
 #include "UI/IDCardPanel.h"
+#include <algorithm>
 
 USING_NS_CC;
 
@@ -163,6 +164,9 @@ void BaseScene::onUnitTrainComplete(int unitId) {
 // ==================== 基地建筑初始化 ====================
 
 void BaseScene::initBaseBuilding() {
+    BuildingManager::getInstance()->setGridMap(_gridMap);
+    float cellSize = _gridMap->getCellSize();
+
     // 初始化基地建筑配置（4x4格子，符合部落冲突设定）
     _baseConfig.id = 3001;
     _baseConfig.name = "Base";
@@ -180,10 +184,77 @@ void BaseScene::initBaseBuilding() {
     auto base = ProductionBuilding::create(&_baseConfig, 0);
     if (base) {
         _buildingLayer->addChild(base);
-        BuildingManager::getInstance()->setGridMap(_gridMap);
         // 将基地放置在地图中心位置（4x4格子）
         BuildingManager::getInstance()->placeBuilding(base, 18, 18, 4, 4);
+
+        // 调整建筑缩放以适应格子大小
+        scaleBuildingToFit(base, 4, 4, cellSize);
+
         CCLOG("[基地场景] 基地建筑放置完成 (4x4格子)");
+    }
+
+    // 初始化兵营建筑配置（5x5格子）
+    _barracksConfig.id = 3002;
+    _barracksConfig.name = "SoldierBuilder";
+    _barracksConfig.spriteFrameName = "buildings/soldierbuilder.png";
+    _barracksConfig.HP = { 600, 750, 900 };
+    _barracksConfig.DP = { 0, 0, 0 };
+    _barracksConfig.length = 5;  // 兵营 5x5
+    _barracksConfig.width = 5;
+    _barracksConfig.MAXLEVEL = 2;
+    _barracksConfig.PRODUCE_GOLD = { 0, 0, 0 };
+    _barracksConfig.PRODUCE_ELIXIR = { 0, 0, 0 };
+    _barracksConfig.STORAGE_GOLD_CAPACITY = { 0, 0, 0 };
+    _barracksConfig.STORAGE_ELIXIR_CAPACITY = { 0, 0, 0 };
+
+    auto barracks = ProductionBuilding::create(&_barracksConfig, 0);
+    if (barracks) {
+        _buildingLayer->addChild(barracks);
+        // 将兵营放置在基地旁边（5x5格子）
+        BuildingManager::getInstance()->placeBuilding(barracks, 12, 18, 5, 5);
+
+        // 调整建筑缩放以适应格子大小
+        scaleBuildingToFit(barracks, 5, 5, cellSize);
+
+        CCLOG("[基地场景] 兵营建筑放置完成 (5x5格子)");
+    }
+}
+
+// ==================== 建筑缩放调整常量 ====================
+namespace BuildingScaleConfig {
+    constexpr float PADDING_FACTOR = 0.85f;  // 建筑与格子边缘的间距系数
+}
+
+// ==================== 建筑缩放调整 ====================
+
+void BaseScene::scaleBuildingToFit(Node* building, int gridWidth, int gridHeight, float cellSize) {
+    if (!building) return;
+
+    // 检查是否有子节点
+    if (building->getChildrenCount() == 0) return;
+
+    // 获取建筑的精灵
+    auto sprite = dynamic_cast<Sprite*>(building->getChildren().at(0));
+    if (!sprite) return;
+
+    // 计算目标尺寸（占据的格子空间，留一点边距）
+    float targetWidth = gridWidth * cellSize * BuildingScaleConfig::PADDING_FACTOR;
+    float targetHeight = gridHeight * cellSize * BuildingScaleConfig::PADDING_FACTOR;
+
+    // 获取精灵原始尺寸
+    Size originalSize = sprite->getContentSize();
+    if (originalSize.width <= 0 || originalSize.height <= 0) return;
+
+    // 计算缩放比例
+    float scaleX = targetWidth / originalSize.width;
+    float scaleY = targetHeight / originalSize.height;
+    float scale = std::min(scaleX, scaleY);
+
+    // 应用缩放（最小缩放0.1，确保小图能放大）
+    if (scale > 0.1f) {
+        sprite->setScale(scale);
+        CCLOG("[基地场景] 建筑缩放调整: 原尺寸(%.1f, %.1f) -> 目标(%.1f, %.1f), scale=%.2f",
+            originalSize.width, originalSize.height, targetWidth, targetHeight, scale);
     }
 }
 
@@ -251,6 +322,10 @@ void BaseScene::onPlacementConfirmed(const BuildingOption& option, int gridX, in
         // 计算建筑位置
         Vec2 buildingPos = calculateBuildingPosition(gridX, gridY, option.gridWidth, option.gridHeight);
         newBuilding->setPosition(buildingPos);
+
+        // 调整建筑缩放以适应格子大小
+        float cellSize = _gridMap->getCellSize();
+        scaleBuildingToFit(newBuilding, option.gridWidth, option.gridHeight, cellSize);
 
         // 标记网格为已占用
         _gridMap->occupyCell(gridX, gridY, option.gridWidth, option.gridHeight, newBuilding);

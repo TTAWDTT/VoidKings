@@ -22,19 +22,21 @@ using namespace cocos2d::ui;
 // ===================================================
 namespace BuildShopConfig {
     // 面板尺寸
-    const Size PANEL_SIZE = Size(400.0f, 500.0f);
+    const Size PANEL_SIZE = Size(600.0f, 500.0f);
 
     // 标题配置
     constexpr int TITLE_FONT_SIZE = 28;
     constexpr float TITLE_TOP_OFFSET = 40.0f;
 
-    // 按钮配置
-    constexpr float BUTTON_SPACING = 60.0f;
-    constexpr float BUTTON_START_Y = 400.0f;
-    constexpr int BUTTON_FONT_SIZE = 18;
-
+    // 网格布局配置
+    constexpr int GRID_COLS = 3;                    // 每行显示的建筑数量
+    constexpr float GRID_ITEM_SIZE = 140.0f;        // 每个网格项的尺寸
+    constexpr float GRID_SPACING = 20.0f;           // 网格项之间的间距
+    constexpr float GRID_START_Y = 380.0f;          // 网格起始Y位置
+    constexpr float ICON_SIZE = 80.0f;              // 建筑图标尺寸
+    
     // 关闭按钮配置
-    constexpr float CLOSE_BUTTON_BOTTOM = 50.0f;
+    constexpr float CLOSE_BUTTON_BOTTOM = 40.0f;
 }
 
 // ===================================================
@@ -47,6 +49,7 @@ struct BuildingOption {
     int gridWidth;          // 占用格子宽度（部落冲突设定）
     int gridHeight;         // 占用格子高度（部落冲突设定）
     std::string spritePath; // 建筑图片路径
+    bool canBuild;          // 是否可以建造（基地和兵营只能有一个）
 };
 
 // ===================================================
@@ -93,11 +96,19 @@ public:
      */
     const std::vector<BuildingOption>& getBuildingOptions() const { return _buildingOptions; }
 
+    /**
+     * @brief 设置建筑是否可建造
+     * @param type 建筑类型
+     * @param canBuild 是否可建造
+     */
+    void setBuildingCanBuild(int type, bool canBuild);
+
 private:
     // UI组件
     LayerColor* _background = nullptr;      // 半透明背景
     LayerColor* _panel = nullptr;           // 面板主体
     Label* _titleLabel = nullptr;           // 标题
+    Node* _gridContainer = nullptr;         // 网格容器
 
     // 建筑选项列表
     std::vector<BuildingOption> _buildingOptions;
@@ -113,7 +124,7 @@ private:
     void setupBackground();
     void setupPanel();
     void setupTitle();
-    void setupBuildingButtons();
+    void setupBuildingGrid();
     void setupCloseButton();
 
     /**
@@ -123,12 +134,14 @@ private:
     void initBuildingOptions();
 
     /**
-     * @brief 创建建筑按钮
+     * @brief 创建单个建筑网格项（带图标）
      * @param option 建筑选项
-     * @param yPos Y轴位置
-     * @return 创建的按钮
+     * @param row 行号
+     * @param col 列号
+     * @return 创建的网格项节点
      */
     Button* createBuildingButton(const BuildingOption& option, float yPos);
+    Node* createBuildingGridItem(const BuildingOption& option, int row, int col);
 };
 
 #endif // __BUILD_SHOP_PANEL_H__
