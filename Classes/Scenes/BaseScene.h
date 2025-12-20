@@ -83,6 +83,7 @@ private:
     
     // ==================== 建筑配置 ====================
     ProductionBuildingConfig _baseConfig;          // 基地建筑配置
+    ProductionBuildingConfig _barracksConfig;      // 兵营建筑配置
     
     // ==================== 初始化方法 ====================
     
@@ -176,6 +177,15 @@ private:
      * @return 建筑中心的世界坐标
      */
     Vec2 calculateBuildingPosition(int gridX, int gridY, int width, int height);
+
+    /**
+     * @brief 调整建筑缩放以适应格子大小
+     * @param building 建筑节点
+     * @param gridWidth 格子宽度
+     * @param gridHeight 格子高度
+     * @param cellSize 单个格子的像素尺寸
+     */
+    void scaleBuildingToFit(Node* building, int gridWidth, int gridHeight, float cellSize);
 
     // ==================== 触摸事件处理 ====================
     
