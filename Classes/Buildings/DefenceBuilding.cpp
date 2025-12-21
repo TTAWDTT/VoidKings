@@ -236,29 +236,38 @@ void DefenceBuilding::tryPlayIdleAnimation() {
     
     // 如果是buildings/Tree/sprite_XXXX.png格式，尝试加载帧动画
     if (spritePath.find("buildings/Tree/") != std::string::npos) {
-        // Tree有16帧动画 (sprite_0000.png 到 sprite_0015.png)
-        Animation* anim = Animation::create();
-        bool hasFrames = false;
+        // Tree动画配置
+        constexpr int TREE_FRAME_COUNT = 16;    // 帧数
+        constexpr float TREE_FRAME_DELAY = 0.1f; // 每帧延迟（秒）
         
-        for (int i = 0; i < 16; ++i) {
-            char framePath[128];
-            snprintf(framePath, sizeof(framePath), "buildings/Tree/sprite_%04d.png", i);
-            auto frame = SpriteFrame::create(framePath, Rect(0, 0, 64, 64));
-            if (frame) {
-                anim->addSpriteFrame(frame);
-                hasFrames = true;
+        Animation* anim = Animation::create();
+        int loadedFrames = 0;
+        
+        for (int i = 0; i < TREE_FRAME_COUNT; ++i) {
+            // 使用StringUtils::format更安全地格式化路径
+            std::string framePath = StringUtils::format("buildings/Tree/sprite_%04d.png", i);
+            
+            // 尝试直接创建精灵获取真实尺寸
+            auto tempSprite = Sprite::create(framePath);
+            if (tempSprite) {
+                Size frameSize = tempSprite->getContentSize();
+                auto frame = SpriteFrame::create(framePath, Rect(0, 0, frameSize.width, frameSize.height));
+                if (frame) {
+                    anim->addSpriteFrame(frame);
+                    loadedFrames++;
+                }
             }
         }
         
-        if (hasFrames) {
-            anim->setDelayPerUnit(0.1f);  // 每帧0.1秒
+        if (loadedFrames > 0) {
+            anim->setDelayPerUnit(TREE_FRAME_DELAY);
             anim->setRestoreOriginalFrame(false);
             
             auto animate = Animate::create(anim);
             _bodySprite->runAction(RepeatForever::create(animate));
             _currentActionKey = "idle";
             
-            CCLOG("[防御建筑] Tree动画加载成功，共16帧");
+            CCLOG("[防御建筑] Tree动画加载成功，共%d帧", loadedFrames);
         }
     }
 }
