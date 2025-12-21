@@ -4,6 +4,7 @@
 
 #include "cocos2d.h"
 #include "UnitData.h"
+#include <vector>
 
 // 此处开始写士兵类
 // 说明 - 这里为什么继承Node而不是Sprite？
@@ -17,6 +18,9 @@ public:
 
     virtual bool init(const UnitConfig* config, int level = 0); // 初始化并添加子节点
     virtual void update(float dt) override;
+
+    // 设置敌方建筑列表（由战斗场景提供）
+    static void setEnemyBuildings(const std::vector<cocos2d::Node*>* buildings);
 
     // 状态操作
     void takeDamage(float damage);
@@ -36,17 +40,21 @@ public:
     Direction getDirection() const { return _direction; }
 
 private:
+    static const std::vector<cocos2d::Node*>* s_enemyBuildings;
+
     // 配置模板——一个指针引用的指针 (享元模式,不需要保存配置结构体)
     const UnitConfig* _config;
 
     // 运行时数据
     int _level;                   // 当前等级
     float _currentHP;
+    float _lastAttackTime;
     cocos2d::Sprite* _bodySprite; // 以后会定义这个为动画,暂时应该渲染成图片
     cocos2d::Sprite* _healthBar;  // 血条精灵
     cocos2d::Node* _target;       // 当前锁定的攻击目标（也是一个Node）
     // 动画支持
     std::string _currentActionKey;     // 当前动画的键
+    std::string _spriteBaseName;       // 动画资源基准名（可含目录）
     Direction _direction;              // 当前方向 (LEFT/RIGHT)
 
     // 带方向动画接口 - 只需要一个方向(RIGHT),LEFT方向通过翻转实现
@@ -56,6 +64,10 @@ private:
     
     // 方向转换辅助函数
     Direction calcDirection(const cocos2d::Vec2& from, const cocos2d::Vec2& to);
+
+    float getBodyRadius() const;
+    float getTargetRadius(const cocos2d::Node* target) const;
+    float getAttackDistance(const cocos2d::Node* target) const;
 
     // 内部行为逻辑
     void findTarget();            // 寻敌逻辑

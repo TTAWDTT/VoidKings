@@ -42,6 +42,7 @@ Node* IDCardPanel::createResourceLabel(
         (icon ? spacing : 0) +
         textSize.width;
 
+    // 固定在左上角区域，避免遮挡主场景
     auto panel = Node::create();
     panel->setContentSize(Size(width, height));
     panel->setIgnoreAnchorPointForPosition(false);
@@ -85,15 +86,17 @@ Node* IDCardPanel::createResourceLabel(
 Node* IDCardPanel::createPanel(Node* backgroundLayer)
 {
     auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
 
-    float panelWidth = visibleSize.width * 0.35f;
-    float panelHeight = visibleSize.height * 0.20f;
+    float panelWidth = visibleSize.width * 0.32f;
+    float panelHeight = visibleSize.height * 0.18f;
+    float margin = 24.0f;
 
   
     auto panel = Node::create();
     panel->setPosition(Vec2(
-        visibleSize.width / 2 ,
-        visibleSize.height / 2 - 25
+        origin.x + margin + panelWidth / 2,
+        origin.y + visibleSize.height - margin - panelHeight / 2
     ));
     backgroundLayer->addChild(panel, 1);
 

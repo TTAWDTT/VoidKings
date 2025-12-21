@@ -321,10 +321,7 @@ void LevelSelectScene::setupUnitPreview() {
 
     // 兵种图标区域
     _unitPreviewArea = Node::create();
-    _unitPreviewArea->setPosition(Vec2(
-        origin.x + 20,
-        origin.y + LevelSelectConfig::UNIT_PREVIEW_BOTTOM + 25
-    ));
+    _unitPreviewArea->setPosition(origin);
     this->addChild(_unitPreviewArea, 10);
 
     updateUnitPreview();
@@ -339,6 +336,13 @@ void LevelSelectScene::updateUnitPreview() {
 
     _unitPreviewArea->removeAllChildren();
 
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+    float size = LevelSelectConfig::UNIT_ICON_SIZE;
+    float spacing = LevelSelectConfig::UNIT_ICON_SPACING;
+    float baseY = origin.y + LevelSelectConfig::UNIT_PREVIEW_BOTTOM +
+        (LevelSelectConfig::UNIT_PREVIEW_HEIGHT - size) / 2;
+
     if (_selectedUnits.empty()) {
         // 没有选择兵种时显示提示（缩小字体）
         auto noUnitLabel = Label::createWithTTF(
@@ -349,20 +353,23 @@ void LevelSelectScene::updateUnitPreview() {
         if (!noUnitLabel) {
             noUnitLabel = Label::createWithSystemFont("No units trained.", "Arial", 10);
         }
-        noUnitLabel->setAnchorPoint(Vec2(0, 0.5f));
-        noUnitLabel->setPosition(Vec2(0, LevelSelectConfig::UNIT_ICON_SIZE / 2));
+        noUnitLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
+        noUnitLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, baseY + size / 2));
         noUnitLabel->setColor(Color3B::GRAY);
         _unitPreviewArea->addChild(noUnitLabel);
         return;
     }
 
-    float xPos = 0;
+    // 水平居中兵种预览行
+    float totalWidth = _selectedUnits.size() * size +
+        (_selectedUnits.size() - 1) * spacing;
+    float xPos = origin.x + (visibleSize.width - totalWidth) / 2;
     for (const auto& pair : _selectedUnits) {
         auto iconNode = createUnitPreviewIcon(pair.first, pair.second);
         if (iconNode) {
-            iconNode->setPosition(Vec2(xPos, 0));
+            iconNode->setPosition(Vec2(xPos, baseY));
             _unitPreviewArea->addChild(iconNode);
-            xPos += LevelSelectConfig::UNIT_ICON_SIZE + LevelSelectConfig::UNIT_ICON_SPACING;
+            xPos += size + spacing;
         }
     }
 }

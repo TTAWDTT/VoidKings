@@ -21,9 +21,9 @@ using namespace cocos2d::ui;
 // ===================================================
 namespace BaseUIConfig {
     // 按钮布局配置
-    constexpr float BUTTON_PANEL_X = 20.0f;
-    constexpr float BUTTON_SPACING = 30.0f;
-    constexpr float BUTTON_SCALE = 4.0f;
+    constexpr float EDGE_MARGIN = 24.0f;
+    constexpr float BUTTON_SPACING = 18.0f;
+    constexpr float BUTTON_SCALE = 3.0f;
     
     // 提示框配置
     constexpr float TOOLTIP_OFFSET_X = 10.0f;

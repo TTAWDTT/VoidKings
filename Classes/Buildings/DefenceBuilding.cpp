@@ -1,7 +1,15 @@
 #include "DefenceBuilding.h"
+#include "Soldier/Soldier.h"
 #include "Utils/AnimationUtils.h"
 
 USING_NS_CC;
+
+const std::vector<Soldier*>* DefenceBuilding::s_enemySoldiers = nullptr;
+
+void DefenceBuilding::setEnemySoldiers(const std::vector<Soldier*>* soldiers) {
+    s_enemySoldiers = soldiers;
+}
+
 
 DefenceBuilding* DefenceBuilding::create(const DefenceBuildingConfig* config, int level) {
     DefenceBuilding* pRet = new(std::nothrow) DefenceBuilding();
@@ -117,10 +125,19 @@ int DefenceBuilding::getWidth() const {
 }
 
 void DefenceBuilding::update(float dt) {
+    if (_currentHP <= 0) {
+        return;
+    }
+
+    if (_target && !_target->getParent()) {
+        _target = nullptr;
+    }
+
     if (!_target) {
         findTarget();
     }
-    else {
+
+    if (_target) {
         float dist = this->getPosition().distance(_target->getPosition());
         if (dist <= getCurrentATK_RANGE()) {
             attackTarget();
@@ -132,7 +149,55 @@ void DefenceBuilding::update(float dt) {
 }
 
 void DefenceBuilding::findTarget() {
-    // TODO: Implement with GameWorld
+    const std::vector<Soldier*>* candidates = s_enemySoldiers;
+    std::vector<Soldier*> tempList;
+
+    if (!candidates || candidates->empty()) {
+        // 兜底：尝试从当前网格节点中找士兵，避免列表未绑定
+        Node* parent = this->getParent();
+        Node* gridRoot = parent ? parent->getParent() : nullptr;
+        if (gridRoot) {
+            for (auto* layer : gridRoot->getChildren()) {
+                if (!layer) {
+                    continue;
+                }
+                for (auto* node : layer->getChildren()) {
+                    auto* soldier = dynamic_cast<Soldier*>(node);
+                    if (soldier) {
+                        tempList.push_back(soldier);
+                    }
+                }
+            }
+        }
+        if (!tempList.empty()) {
+            candidates = &tempList;
+        }
+    }
+
+    if (!candidates || candidates->empty()) {
+        return;
+    }
+
+    Soldier* nearest = nullptr;
+    float nearestDist = 999999.0f;
+    const auto selfPos = this->getPosition();
+
+    for (auto* soldier : *candidates) {
+        if (!soldier || !soldier->getParent()) {
+            continue;
+        }
+        if (soldier->getCurrentHP() <= 0) {
+            continue;
+        }
+
+        float dist = selfPos.distance(soldier->getPosition());
+        if (dist < nearestDist) {
+            nearestDist = dist;
+            nearest = soldier;
+        }
+    }
+
+    _target = nearest;
 }
 
 void DefenceBuilding::takeDamage(float damage) {
@@ -147,16 +212,24 @@ void DefenceBuilding::takeDamage(float damage) {
 }
 
 void DefenceBuilding::attackTarget() {
-    if (!_target) return;
+    if (!_target || !_target->getParent()) {
+        _target = nullptr;
+        return;
+    }
 
     float currentTime = Director::getInstance()->getTotalFrames() / 60.0f;
     float attackSpeed = getCurrentATK_SPEED();
+    if (attackSpeed <= 0.0f) {
+        attackSpeed = 0.5f;
+    }
 
     if (currentTime - _lastAttackTime >= attackSpeed) {
         playAnimation(_config->anim_attack, _config->anim_attack_frames, _config->anim_attack_delay, false);
         _lastAttackTime = currentTime;
 
-        // TODO: Create and fire bullet
+        if (auto soldier = dynamic_cast<Soldier*>(_target)) {
+            soldier->takeDamage(getCurrentATK());
+        }
     }
 }
 

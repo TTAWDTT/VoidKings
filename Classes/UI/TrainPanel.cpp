@@ -209,7 +209,14 @@ Node* TrainPanel::createUnitCard(int unitId, int row, int col) {
     // 计算起始位置使网格居中
     float totalWidth = TrainPanelConfig::GRID_COLS * cardWidth + (TrainPanelConfig::GRID_COLS - 1) * spacing;
     float startX = (TrainPanelConfig::PANEL_SIZE.width - totalWidth) / 2 + cardWidth / 2;
-    float startY = TrainPanelConfig::PANEL_SIZE.height - TrainPanelConfig::UNIT_AREA_TOP_OFFSET - cardHeight / 2;
+    // 纵向居中：在标题栏与关闭按钮之间居中兵种卡片区域
+    int totalUnits = static_cast<int>(_availableUnits.size());
+    int rows = (totalUnits + TrainPanelConfig::GRID_COLS - 1) / TrainPanelConfig::GRID_COLS;
+    float gridHeight = rows * cardHeight + (rows - 1) * spacing;
+    float topY = TrainPanelConfig::PANEL_SIZE.height - 50.0f - 10.0f;
+    float bottomY = TrainPanelConfig::CLOSE_BUTTON_BOTTOM + 50.0f;
+    float availableHeight = topY - bottomY;
+    float startY = topY - (availableHeight - gridHeight) / 2 - cardHeight / 2;
 
     float x = startX + col * (cardWidth + spacing);
     float y = startY - row * (cardHeight + spacing);
@@ -306,6 +313,7 @@ Node* TrainPanel::createUnitCard(int unitId, int row, int col) {
     recruitNode->addChild(recruitLabel, 2);
 
     auto recruitBtn = Button::create();
+    recruitBtn->setScale9Enabled(true);
     recruitBtn->setContentSize(Size(btnWidth, btnHeight));
     recruitBtn->addClickEventListener([this, unitId](Ref* sender) {
         this->recruitUnit(unitId);
@@ -348,6 +356,7 @@ Node* TrainPanel::createUnitCard(int unitId, int row, int col) {
 
     if (!maxLevel) {
         auto upgradeBtn = Button::create();
+        upgradeBtn->setScale9Enabled(true);
         upgradeBtn->setContentSize(Size(btnWidth, btnHeight));
         upgradeBtn->addClickEventListener([this, unitId](Ref* sender) {
             this->upgradeUnit(unitId);
@@ -576,6 +585,7 @@ void TrainPanel::setupCloseButton() {
     closeNode->addChild(label, 2);
 
     auto closeBtn = Button::create();
+    closeBtn->setScale9Enabled(true);
     closeBtn->setContentSize(Size(btnWidth, btnHeight));
     closeBtn->addClickEventListener([this](Ref* sender) {
         this->hide();
@@ -600,10 +610,10 @@ void TrainPanel::setupResourceDisplay() {
     if (!_resourceLabel) {
         _resourceLabel = Label::createWithSystemFont("", "Arial", 10);
     }
-    _resourceLabel->setAnchorPoint(Vec2(1.0f, 1.0f));
+    _resourceLabel->setAnchorPoint(Vec2(1.0f, 0.5f));
     _resourceLabel->setPosition(Vec2(
         TrainPanelConfig::PANEL_SIZE.width - 10,
-        TrainPanelConfig::PANEL_SIZE.height - 40
+        TrainPanelConfig::PANEL_SIZE.height - 25
     ));
     _resourceLabel->setColor(Color3B::YELLOW);
     _panel->addChild(_resourceLabel, 3);

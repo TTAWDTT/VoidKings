@@ -33,8 +33,8 @@ namespace BattleConfig {
     constexpr float CELL_SIZE = 32.0f;      // 每格像素大小
 
     // UI配置
-    constexpr float UI_TOP_HEIGHT = 50.0f;      // 顶部UI高度
-    constexpr float UI_BOTTOM_HEIGHT = 80.0f;   // 底部部署区域高度
+    constexpr float UI_TOP_HEIGHT = 60.0f;      // 顶部UI高度（稍微增加）
+    constexpr float UI_BOTTOM_HEIGHT = 100.0f;   // 底部部署区域高度（增加以容纳更大图标）
 
     // 战斗配置
     constexpr float BATTLE_TIME_LIMIT = 180.0f;  // 战斗时间限制（秒）
@@ -54,6 +54,7 @@ public:
 
     virtual bool init() override;
     virtual void update(float dt) override;
+    virtual void onExit() override;
 
     CREATE_FUNC(BattleScene);
 

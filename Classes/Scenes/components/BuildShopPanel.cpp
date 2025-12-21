@@ -210,8 +210,17 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
     float totalWidth = BuildShopConfig::GRID_COLS * itemWidth + (BuildShopConfig::GRID_COLS - 1) * spacing;
     float startX = (BuildShopConfig::PANEL_SIZE.width - totalWidth) / 2 + itemWidth / 2;
 
+    // 网格区域纵向居中，避免挤到标题/按钮
+    int totalItems = static_cast<int>(_buildingOptions.size());
+    int totalRows = (totalItems + BuildShopConfig::GRID_COLS - 1) / BuildShopConfig::GRID_COLS;
+    float gridHeight = totalRows * itemHeight + (totalRows - 1) * spacing;
+    float topY = BuildShopConfig::PANEL_SIZE.height - 35.0f - 10.0f;
+    float bottomY = BuildShopConfig::CLOSE_BUTTON_BOTTOM + 40.0f;
+    float availableHeight = topY - bottomY;
+    float startY = topY - (availableHeight - gridHeight) / 2 - itemHeight / 2;
+
     float x = startX + col * (itemWidth + spacing);
-    float y = BuildShopConfig::GRID_START_Y - row * (itemHeight + spacing);
+    float y = startY - row * (itemHeight + spacing);
 
     itemNode->setPosition(Vec2(x, y));
 

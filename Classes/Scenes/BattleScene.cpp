@@ -10,11 +10,9 @@
 
 #include "BattleScene.h"
 #include "BaseScene.h"
-#include "LevelSelectScene.h"
 #include "Buildings/DefenceBuilding.h"
 #include "Buildings/ProductionBuilding.h"
 #include "Soldier/UnitManager.h"
-#include "Buildings/BuildingManager.h"
 #include <algorithm>
 
 USING_NS_CC;
@@ -43,14 +41,29 @@ bool BattleScene::init() {
 
     CCLOG("[战斗场景] 初始化关卡 %d", _levelId);
 
+    // 确保兵种配置已加载（避免直接进入战斗时配置缺失）
+    if (!UnitManager::getInstance()->hasConfig(101)) {
+        UnitManager::getInstance()->loadConfig("res/units_config.json");
+    }
+
+    // 初始化剩余可部署单位
+    if (_deployableUnits.empty()) {
+        _remainingUnits[101] = 10;
+        _remainingUnits[102] = 5;
+        _remainingUnits[103] = 8;
+    }
+    else {
+        _remainingUnits = _deployableUnits;
+    }
+
     // 初始化各个组件
     initGridMap();
     initLevel();
+    // 绑定战斗对象列表，便于自动寻敌
+    Soldier::setEnemyBuildings(&_enemyBuildings);
+    DefenceBuilding::setEnemySoldiers(&_soldiers);
     initUI();
     initTouchListener();
-
-    // 初始化剩余可部署单位
-    _remainingUnits = _deployableUnits;
 
     // 设置更新
     this->scheduleUpdate();
@@ -66,46 +79,44 @@ void BattleScene::initGridMap() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
-    // 创建战斗场景网格地图
     _gridMap = GridMap::create(
         BattleConfig::GRID_WIDTH,
         BattleConfig::GRID_HEIGHT,
         BattleConfig::CELL_SIZE
     );
 
-    // 设置地图位置，使地图在可见区域内居中显示
     float mapWidth = BattleConfig::GRID_WIDTH * BattleConfig::CELL_SIZE;
     float mapHeight = BattleConfig::GRID_HEIGHT * BattleConfig::CELL_SIZE;
 
-    // 考虑UI区域的偏移（顶部和底部UI）
+    // 将地图缩放到上下UI之间，避免被裁切
+    float availableWidth = visibleSize.width;
     float availableHeight = visibleSize.height - BattleConfig::UI_TOP_HEIGHT - BattleConfig::UI_BOTTOM_HEIGHT;
-    float offsetX = origin.x + (visibleSize.width - mapWidth) / 2;
-    float offsetY = origin.y + BattleConfig::UI_BOTTOM_HEIGHT + (availableHeight - mapHeight) / 2;
+    float scale = std::min(1.0f, std::min(availableWidth / mapWidth, availableHeight / mapHeight));
 
-    // 确保地图至少显示在负数区
-    if (offsetX < origin.x) offsetX = origin.x;
-    if (offsetY < origin.y + BattleConfig::UI_BOTTOM_HEIGHT) offsetY = origin.y + BattleConfig::UI_BOTTOM_HEIGHT;
+    float scaledWidth = mapWidth * scale;
+    float scaledHeight = mapHeight * scale;
+
+    float offsetX = origin.x + (visibleSize.width - scaledWidth) / 2;
+    float offsetY = origin.y + BattleConfig::UI_BOTTOM_HEIGHT + (availableHeight - scaledHeight) / 2;
 
     _gridMap->setPosition(Vec2(offsetX, offsetY));
+    _gridMap->setScale(scale);
     this->addChild(_gridMap, 0);
 
-    // 创建草地背景（在gridMap内部）
     auto bgColor = LayerColor::create(Color4B(60, 100, 60, 255), mapWidth, mapHeight);
     _gridMap->addChild(bgColor, -2);
 
-    // 创建建筑层
     _buildingLayer = Node::create();
     _gridMap->addChild(_buildingLayer, 5);
 
-    // 创建士兵层
     _soldierLayer = Node::create();
     _gridMap->addChild(_soldierLayer, 10);
 
-    // 显示网格线（调试用）
     _gridMap->showGrid(true);
 
-    CCLOG("[战斗场景] 网格地图初始化完成，地图将居中显示");
+    CCLOG("[BattleScene] Grid map initialized");
 }
+
 
 // ===================================================
 // 关卡初始化
@@ -172,6 +183,7 @@ void BattleScene::createEnemyBase(int gridX, int gridY) {
         _gridMap->occupyCell(gridX, gridY, 4, 4, base);
 
         _enemyBuildings.push_back(base);
+        base->retain();
         _totalBuildingCount++;
 
         CCLOG("[战斗场景] 敌方基地创建完成");
@@ -234,6 +246,7 @@ void BattleScene::createDefenseTower(int gridX, int gridY, int type) {
         _gridMap->occupyCell(gridX, gridY, 3, 3, tower);
 
         _enemyBuildings.push_back(tower);
+        tower->retain();
         _totalBuildingCount++;
 
         CCLOG("[战斗场景] 防御塔创建完成 (类型%d)", type);
@@ -285,7 +298,7 @@ void BattleScene::initUI() {
     _uiLayer = Node::create();
     this->addChild(_uiLayer, 100);
 
-    // 顶部UI区域
+    // 顶部信息条
     auto topBg = LayerColor::create(
         Color4B(30, 30, 30, 220),
         visibleSize.width,
@@ -294,31 +307,24 @@ void BattleScene::initUI() {
     topBg->setPosition(origin.x, origin.y + visibleSize.height - BattleConfig::UI_TOP_HEIGHT);
     _uiLayer->addChild(topBg);
 
-    // 计时器
+    float topY = origin.y + visibleSize.height - BattleConfig::UI_TOP_HEIGHT / 2;
+
     _timerLabel = Label::createWithTTF("3:00", "fonts/arial.ttf", 18);
     if (!_timerLabel) {
         _timerLabel = Label::createWithSystemFont("3:00", "Arial", 18);
     }
-    _timerLabel->setPosition(Vec2(
-        origin.x + visibleSize.width / 2,
-        origin.y + visibleSize.height - 25
-    ));
+    _timerLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, topY));
     _timerLabel->setColor(Color3B::WHITE);
     _uiLayer->addChild(_timerLabel);
 
-    // 进度显示
     _progressLabel = Label::createWithTTF("0%", "fonts/arial.ttf", 14);
     if (!_progressLabel) {
         _progressLabel = Label::createWithSystemFont("0%", "Arial", 14);
     }
-    _progressLabel->setPosition(Vec2(
-        origin.x + visibleSize.width - 50,
-        origin.y + visibleSize.height - 25
-    ));
+    _progressLabel->setPosition(Vec2(origin.x + visibleSize.width - 60, topY));
     _progressLabel->setColor(Color3B::YELLOW);
     _uiLayer->addChild(_progressLabel);
 
-    // 退出按钮 - 使用透明Button确保点击可靠
     auto exitNode = Node::create();
     float btnWidth = 60.0f;
     float btnHeight = 25.0f;
@@ -339,25 +345,23 @@ void BattleScene::initUI() {
     exitLabel->setColor(Color3B::WHITE);
     exitNode->addChild(exitLabel, 2);
 
-    float btnX = origin.x + 40;
-    float btnY = origin.y + visibleSize.height - 25;
-    exitNode->setPosition(Vec2(btnX, btnY));
+    float exitX = origin.x + 40.0f;
+    exitNode->setPosition(Vec2(exitX, topY));
     _uiLayer->addChild(exitNode);
 
-    // 创建透明Button覆盖在节点上，确保点击可靠
     auto exitBtn = Button::create();
     exitBtn->setContentSize(Size(btnWidth, btnHeight));
     exitBtn->setScale9Enabled(true);
-    exitBtn->setPosition(Vec2(btnX, btnY));
+    exitBtn->setPosition(Vec2(exitX, topY));
     exitBtn->addClickEventListener([this](Ref* sender) {
-        CCLOG("[战斗场景] 点击退出按钮");
+        CCLOG("[BattleScene] Exit battle");
         this->onExitButton(sender);
         });
     _uiLayer->addChild(exitBtn, 10);
 
-    // 底部部署区域
     setupDeployArea();
 }
+
 
 // ===================================================
 // 设置部署区域
@@ -367,7 +371,7 @@ void BattleScene::setupDeployArea() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
-    // 底部UI区域
+    // 底部部署条
     auto bottomBg = LayerColor::create(
         Color4B(30, 30, 30, 220),
         visibleSize.width,
@@ -376,42 +380,46 @@ void BattleScene::setupDeployArea() {
     bottomBg->setPosition(origin.x, origin.y);
     _uiLayer->addChild(bottomBg);
 
-    // 部署区域容器
+    if (_remainingUnits.empty()) {
+        _remainingUnits[101] = 10;
+        _remainingUnits[102] = 5;
+        _remainingUnits[103] = 8;
+    }
+
     _unitDeployArea = Node::create();
-    _unitDeployArea->setPosition(Vec2(origin.x + 20, origin.y + BattleConfig::UI_BOTTOM_HEIGHT / 2));
+    _unitDeployArea->setPosition(Vec2::ZERO);
     _uiLayer->addChild(_unitDeployArea);
 
-    // 创建可部署单位的按钮
-    float xPos = 0;
-    float btnSpacing = 70.0f;
+    float btnSize = 50.0f;
+    float spacing = 16.0f;
+    int unitCount = static_cast<int>(_remainingUnits.size());
+    float totalWidth = unitCount * btnSize + (unitCount - 1) * spacing;
+    float startX = origin.x + (visibleSize.width - totalWidth) / 2 + btnSize / 2;
+    float centerY = origin.y + BattleConfig::UI_BOTTOM_HEIGHT / 2;
 
-    // 如果用户没有指定单位，使用默认测试单位
-    if (_remainingUnits.empty()) {
-        _remainingUnits[101] = 10;  // 10个Goblin
-        _remainingUnits[102] = 5;   // 5个Barbarian
-        _remainingUnits[103] = 8;   // 8个Archer
-    }
-
+    int index = 0;
     for (const auto& pair : _remainingUnits) {
+        float xPos = startX + index * (btnSize + spacing);
         auto btn = createDeployButton(pair.first, pair.second, xPos);
         if (btn) {
+            btn->setPosition(Vec2(xPos, centerY));
             _unitDeployArea->addChild(btn);
         }
-        xPos += btnSpacing;
+        index++;
     }
 
-    // 提示文字
     auto tipLabel = Label::createWithTTF("Tap on map to deploy", "fonts/arial.ttf", 10);
     if (!tipLabel) {
         tipLabel = Label::createWithSystemFont("Tap on map to deploy", "Arial", 10);
     }
     tipLabel->setPosition(Vec2(
-        origin.x + visibleSize.width - 80,
-        origin.y + BattleConfig::UI_BOTTOM_HEIGHT / 2
+        origin.x + visibleSize.width - 90,
+        centerY
     ));
     tipLabel->setColor(Color3B::GRAY);
     _uiLayer->addChild(tipLabel);
 }
+
 
 // ===================================================
 // 创建部署按钮
@@ -480,6 +488,7 @@ void BattleScene::deploySoldier(int unitId, const Vec2& position) {
     if (soldier) {
         _soldierLayer->addChild(soldier);
         _soldiers.push_back(soldier);
+        soldier->retain();
 
         // 更新剩余数量
         it->second--;
@@ -565,15 +574,47 @@ void BattleScene::update(float dt) {
     checkBattleEnd();
 }
 
+void BattleScene::onExit() {
+    // 释放保留的引用，避免内存泄漏
+    for (auto& soldier : _soldiers) {
+        if (soldier) {
+            soldier->release();
+            soldier = nullptr;
+        }
+    }
+    for (auto& building : _enemyBuildings) {
+        if (building) {
+            building->release();
+            building = nullptr;
+        }
+    }
+    _soldiers.clear();
+    _enemyBuildings.clear();
+
+    Scene::onExit();
+}
+
 // ===================================================
 // 战斗逻辑更新
 // ===================================================
 
 void BattleScene::updateBattle(float dt) {
-    // 检查被摧毁的建筑
+    // 清理已移除的士兵，避免悬空指针
+    for (auto& soldier : _soldiers) {
+        if (soldier && !soldier->getParent()) {
+            soldier->release();
+            soldier = nullptr;
+        }
+    }
+
+    // 检查被摧毁的建筑并释放引用
     int destroyed = 0;
     for (auto& building : _enemyBuildings) {
-        if (!building || !building->getParent()) {
+        if (building && !building->getParent()) {
+            building->release();
+            building = nullptr;
+        }
+        if (!building) {
             destroyed++;
         }
     }

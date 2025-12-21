@@ -129,8 +129,9 @@ void MainMenuScene::createHeadLogo()
     auto origin = Director::getInstance()->getVisibleOrigin();
     headLogo = Label::createWithTTF("Void Kings", "fonts/Marker Felt.ttf", 48);
     headLogo->setTextColor(Color4B(255, 200, 50, 255));
+    headLogo->setAnchorPoint(Vec2(0.5f, 1.0f));
     headLogo->setPosition(Vec2(origin.x + visibleSize.width / 2,
-        origin.y + visibleSize.height - headLogo->getContentSize().height));
+        origin.y + visibleSize.height - 24.0f));
     this->addChild(headLogo, 1);
 }
 
@@ -162,13 +163,13 @@ void MainMenuScene::createOtherThings()
     anim->setDelayPerUnit(0.1f);
 
     // 配置精灵并播放动画
-    dinosaur->setScale(5.0f);
+    dinosaur->setScale(4.0f);
     dinosaur->setAnchorPoint(Vec2(1.0f, 0.0f)); // 右下角锚点
     
-    // 位置：右下角，留20px边距
-    float margin = 20.0f;
-    dinosaur->setPosition(Vec2(origin.x + visibleSize.width + 12 * margin,
-                               origin.y - 12 * margin));
+    // 位置：右下角，留边距
+    float margin = 24.0f;
+    dinosaur->setPosition(Vec2(origin.x + visibleSize.width - margin,
+                               origin.y + margin));
 
     // 添加到场景（不是mainMenuLayer，而是直接添加到Scene）
     this->addChild(dinosaur, 5);
@@ -197,7 +198,7 @@ Button* MainMenuScene::createIconButton(
 
     // 文字
     button->setTitleFontName("fonts/ScienceGothic.ttf");
-    button->setTitleFontSize(22);
+    button->setTitleFontSize(28); // 增大字体
     button->setTitleText(title);
  
     auto titleRenderer = button->getTitleRenderer();
@@ -210,7 +211,7 @@ Button* MainMenuScene::createIconButton(
     float tmpHeight = std::max(icon->getContentSize().height, titleSize.height) + padding;
 
     // 图标自动缩放
-    float targetHeight = tmpHeight * 0.75f;
+    float targetHeight = tmpHeight * 0.85f; // 稍微增大图标比例
     float scale = targetHeight / icon->getContentSize().height;
     icon->setScale(scale);
 
@@ -218,10 +219,10 @@ Button* MainMenuScene::createIconButton(
     float iconHeight = icon->getContentSize().height * scale;
 
     // 计算按钮最终大小
-    float buttonWidth = 160;
+    float buttonWidth = 200; // 增大按钮宽度
 
     float buttonHeight =
-        std::max(iconHeight, titleSize.height) + padding;
+        std::max(iconHeight, titleSize.height) + padding + 10; // 增加高度padding
 
     button->setContentSize(Size(buttonWidth, buttonHeight));
 
@@ -255,13 +256,15 @@ Button* MainMenuScene::createIconButton(
 
 void MainMenuScene::createMainMenuLayer() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
 
     mainMenuLayer = Node::create();
+    mainMenuLayer->setPosition(origin);
     this->addChild(mainMenuLayer, 10);
 
-    float startY = visibleSize.height * 0.6f;
-    float spacingY = 50;
-	float spacingX = 10;
+    // 按钮组居中布局
+    float spacingY = 60.0f;
+    float centerX = origin.x + visibleSize.width / 2;
 
     // Start
     auto startBtn = createIconButton(
@@ -269,7 +272,10 @@ void MainMenuScene::createMainMenuLayer() {
         "start.png",
         CC_CALLBACK_2(MainMenuScene::onStartTouch, this)
     );
-    startBtn->setPosition(Vec2(visibleSize.width / 2+ spacingX, startY));
+    float btnHeight = startBtn->getContentSize().height;
+    float totalHeight = btnHeight * 4 + spacingY * 3;
+    float startY = origin.y + visibleSize.height / 2 + totalHeight / 2 - btnHeight / 2;
+    startBtn->setPosition(Vec2(centerX, startY));
     mainMenuLayer->addChild(startBtn);
 
     // Settings
@@ -278,7 +284,7 @@ void MainMenuScene::createMainMenuLayer() {
         "settings.png",
         CC_CALLBACK_2(MainMenuScene::onSettingsTouch, this)
     );
-    settingsBtn->setPosition(Vec2(visibleSize.width / 2 + spacingX, startY - spacingY));
+    settingsBtn->setPosition(Vec2(centerX, startY - (btnHeight + spacingY)));
     mainMenuLayer->addChild(settingsBtn);
 
     // Rules
@@ -287,7 +293,7 @@ void MainMenuScene::createMainMenuLayer() {
         "rules.png",
         CC_CALLBACK_2(MainMenuScene::onRuleTouch, this)
     );
-    rulesBtn->setPosition(Vec2(visibleSize.width / 2 + spacingX, startY - spacingY * 2));
+    rulesBtn->setPosition(Vec2(centerX, startY - 2 * (btnHeight + spacingY)));
     mainMenuLayer->addChild(rulesBtn);
 
     // Exit
@@ -296,7 +302,7 @@ void MainMenuScene::createMainMenuLayer() {
         "exit.png",
         CC_CALLBACK_2(MainMenuScene::onExitTouch, this)
     );
-    exitBtn->setPosition(Vec2(visibleSize.width / 2 + spacingX, startY - spacingY * 3));
+    exitBtn->setPosition(Vec2(centerX, startY - 3 * (btnHeight + spacingY)));
     mainMenuLayer->addChild(exitBtn);
 }
 
@@ -450,4 +456,3 @@ void MainMenuScene::onExit(Ref* sender)
 {
     Director::getInstance()->end();
 }
-

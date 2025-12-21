@@ -3,12 +3,18 @@
 
 #include "cocos2d.h"
 #include "DefenseBuildingData.h"
+#include <vector>
+
+class Soldier;
 
 class DefenceBuilding : public cocos2d::Node {
 public:
     static DefenceBuilding* create(const DefenceBuildingConfig* config, int level = 0);
     virtual bool init(const DefenceBuildingConfig* config, int level = 0);
     virtual void update(float dt) override;
+
+    // 设置敌方士兵列表（由战斗场景提供）
+    static void setEnemySoldiers(const std::vector<Soldier*>* soldiers);
 
     void takeDamage(float damage);
 
@@ -25,6 +31,8 @@ public:
     int getWidth() const;
 
 private:
+    static const std::vector<Soldier*>* s_enemySoldiers;
+
     const DefenceBuildingConfig* _config;
     int _level;
     float _currentHP;

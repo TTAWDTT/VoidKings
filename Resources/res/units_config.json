@@ -73,7 +73,7 @@
       "anim_walk": "walk",
       "anim_walk_frames": 4,
       "anim_walk_delay": 0.1,
-      "anim_attack": "shoot",
+      "anim_attack": "attack",
       "anim_attack_frames": 6,
       "anim_attack_delay": 0.08,
       "anim_idle": "idle",

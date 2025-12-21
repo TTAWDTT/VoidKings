@@ -33,6 +33,9 @@ bool BaseScene::init() {
         return false;
     }
 
+    // 清理战斗场景的静态引用，避免野指针
+    DefenceBuilding::setEnemySoldiers(nullptr);
+
     // 初始化资源
     _currentGold = 1000;
     _currentDiamond = 100;
@@ -42,11 +45,12 @@ bool BaseScene::init() {
     initBaseBuilding();
     initUIComponents();
     initBuildingSystem();
-    createTrainPanel();
-    initTouchListener();
 
     // 加载兵种配置
     UnitManager::getInstance()->loadConfig("res/units_config.json");
+
+    createTrainPanel();
+    initTouchListener();
 
     CCLOG("[基地场景] 初始化完成（模块化版本）");
 
@@ -64,11 +68,18 @@ void BaseScene::initGridMap() {
     
     // 计算初始位置：将视图中心对准地图中心（建筑区域）
     // 建筑放置在(36,36)附近，将视图移动使其可见
+    // 1280x720分辨率下，需要确保建筑区域在屏幕中心
     float cellSize = 32.0f;
-    float mapCenterX = 36.0f * cellSize;  // 建筑区域中心
-    float mapCenterY = 36.0f * cellSize;
-    float offsetX = origin.x + visibleSize.width / 2 - mapCenterX;
-    float offsetY = origin.y + visibleSize.height / 2 - mapCenterY;
+    float mapCenterX = 36.0f * cellSize;  // 建筑区域中心X
+    float mapCenterY = 36.0f * cellSize;  // 建筑区域中心Y
+    
+    // 计算偏移量：屏幕中心 - 地图上的目标点
+    // 为左侧UI预留空间，地图中心略向右偏
+    float targetCenterX = origin.x + visibleSize.width * 0.60f;
+    float targetCenterY = origin.y + visibleSize.height * 0.52f;
+    float offsetX = targetCenterX - mapCenterX;
+    float offsetY = targetCenterY - mapCenterY;
+
     _gridMap->setPosition(Vec2(offsetX, offsetY));
     this->addChild(_gridMap, 0);
 
@@ -353,7 +364,7 @@ Node* BaseScene::createBuildingFromOption(const BuildingOption& option) {
 
     switch (option.type) {
     case 1: { // 箭塔 (3x3格子)
-        DefenceBuildingConfig config;
+        static DefenceBuildingConfig config;
         config.id = 2001;
         config.name = "ArrowTower";
         config.spriteFrameName = option.spritePath;
@@ -371,7 +382,7 @@ Node* BaseScene::createBuildingFromOption(const BuildingOption& option) {
         break;
     }
     case 2: { // 炮塔 (3x3格子)
-        DefenceBuildingConfig config;
+        static DefenceBuildingConfig config;
         config.id = 2002;
         config.name = "BoomTower";
         config.spriteFrameName = option.spritePath;
@@ -389,7 +400,7 @@ Node* BaseScene::createBuildingFromOption(const BuildingOption& option) {
         break;
     }
     case 3: { // 装饰树 (2x2格子)
-        DefenceBuildingConfig config;
+        static DefenceBuildingConfig config;
         config.id = 2003;
         config.name = "Tree";
         config.spriteFrameName = option.spritePath;
@@ -407,7 +418,7 @@ Node* BaseScene::createBuildingFromOption(const BuildingOption& option) {
         break;
     }
     case 4: { // 雪人仓库 (3x3格子)
-        StorageBuildingConfig config;
+        static StorageBuildingConfig config;
         config.id = 4001;
         config.name = "Snowman";
         config.spriteFrameName = option.spritePath;
@@ -422,7 +433,7 @@ Node* BaseScene::createBuildingFromOption(const BuildingOption& option) {
         break;
     }
     case 5: { // 兵营 (5x5格子)
-        ProductionBuildingConfig config;
+        static ProductionBuildingConfig config;
         config.id = 3002;
         config.name = "SoldierBuilder";
         config.spriteFrameName = option.spritePath;
@@ -473,24 +484,41 @@ bool BaseScene::onTouchBegan(Touch* touch, Event* event) {
 
     // 检查是否点击了兵营建筑
     Vec2 touchPos = touch->getLocation();
-    Vec2 localPos = _gridMap->convertToNodeSpace(touchPos);
+    Vec2 localInLayer = _buildingLayer->convertToNodeSpace(touchPos);
 
     auto& buildings = _buildingLayer->getChildren();
     for (auto& child : buildings) {
         auto building = dynamic_cast<ProductionBuilding*>(child);
-        if (building) {
-            auto boundingBox = building->getBoundingBox();
-            if (boundingBox.containsPoint(localPos)) {
-                // 只有兵营（SoldierBuilder, ID=3002）才打开训练面板
-                if (building->getId() == 3002 || building->getName() == "SoldierBuilder") {
-                    CCLOG("[基地场景] 点击兵营，打开训练面板");
-                    showTrainPanel();
-                    return true;
-                }
-                else {
-                    CCLOG("[基地场景] 点击建筑: %s (ID: %d)",
-                        building->getName().c_str(), building->getId());
-                }
+        if (!building) continue;
+
+        // 使用建筑子精灵包围盒做点击检测，避免Node尺寸为0导致失效
+        bool isHit = false;
+        Sprite* bodySprite = nullptr;
+        for (auto& bChild : building->getChildren()) {
+            bodySprite = dynamic_cast<Sprite*>(bChild);
+            if (bodySprite) break;
+        }
+
+        if (bodySprite) {
+            // 使用世界坐标转到建筑本地坐标，避免坐标系不一致导致点击失效
+            Vec2 localInBuilding = building->convertToNodeSpace(touchPos);
+            Rect spriteBox = bodySprite->getBoundingBox();
+            isHit = spriteBox.containsPoint(localInBuilding);
+        }
+        else {
+            isHit = building->getBoundingBox().containsPoint(localInLayer);
+        }
+
+        if (isHit) {
+            // 只有兵营（SoldierBuilder, ID=3002）才打开训练面板
+            if (building->getId() == 3002 || building->getName() == "SoldierBuilder") {
+                CCLOG("[基地场景] 点击兵营，打开训练面板");
+                showTrainPanel();
+                return true;
+            }
+            else {
+                CCLOG("[基地场景] 点击建筑: %s (ID: %d)",
+                    building->getName().c_str(), building->getId());
             }
         }
     }

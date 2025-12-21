@@ -43,71 +43,72 @@ void BaseUIPanel::setupButtons() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-    float panelX = origin.x + BaseUIConfig::BUTTON_PANEL_X;
-    float startY = visibleSize.height / 2 + 100;
+    float scale = BaseUIConfig::BUTTON_SCALE;
+    float spacing = BaseUIConfig::BUTTON_SPACING;
 
-    // 进攻按钮
+    // 按钮组整体居中，左侧留边距
+    float buttonX = origin.x + BaseUIConfig::EDGE_MARGIN;
+    float startY = origin.y + visibleSize.height / 2;
+    float btnHeight = 0.0f;
+
     _attackButton = Button::create("UI/attack.png");
     if (_attackButton) {
-        _attackButton->setScale(BaseUIConfig::BUTTON_SCALE);
-        _attackButton->setPosition(Vec2(panelX, startY - BaseUIConfig::BUTTON_SPACING));
+        Size btnSize = _attackButton->getContentSize();
+        float btnWidth = btnSize.width * scale;
+        btnHeight = btnSize.height * scale;
+
+        // 计算三按钮整体高度，保持等距
+        float totalHeight = btnHeight * 3 + spacing * 2;
+        startY = origin.y + visibleSize.height / 2 + totalHeight / 2 - btnHeight / 2;
+        buttonX = origin.x + BaseUIConfig::EDGE_MARGIN + btnWidth / 2;
+
+        _attackButton->setScale(scale);
+        _attackButton->setPosition(Vec2(buttonX, startY));
         _attackButton->addClickEventListener([this](Ref* sender) {
             if (_callbacks.onAttack) _callbacks.onAttack();
             });
         this->addChild(_attackButton);
 
-        // 添加提示框
         auto attackTip = createTooltip("Attack", Size(80, 30));
         bindTooltip(_attackButton, attackTip);
     }
 
-    // 建造按钮
     _buildButton = Button::create("UI/build.png");
     if (_buildButton) {
-        _buildButton->setScale(BaseUIConfig::BUTTON_SCALE);
-        _buildButton->setPosition(Vec2(panelX, startY - BaseUIConfig::BUTTON_SPACING * 2));
+        _buildButton->setScale(scale);
+        _buildButton->setPosition(Vec2(buttonX, startY - (btnHeight + spacing)));
         _buildButton->addClickEventListener([this](Ref* sender) {
             if (_callbacks.onBuild) _callbacks.onBuild();
             });
         this->addChild(_buildButton);
 
-        // 添加提示框
         auto buildTip = createTooltip("Build", Size(60, 30));
         bindTooltip(_buildButton, buildTip);
     }
 
-    // 退出按钮
     _exitButton = Button::create("UI/exit.png");
     if (_exitButton) {
-        _exitButton->setScale(BaseUIConfig::BUTTON_SCALE);
-        _exitButton->setPosition(Vec2(panelX, startY - BaseUIConfig::BUTTON_SPACING * 3));
+        _exitButton->setScale(scale);
+        _exitButton->setPosition(Vec2(buttonX, startY - 2 * (btnHeight + spacing)));
         _exitButton->addClickEventListener([this](Ref* sender) {
             if (_callbacks.onExit) _callbacks.onExit();
             });
         this->addChild(_exitButton);
 
-        // 添加提示框
         auto exitTip = createTooltip("Exit", Size(60, 30));
         bindTooltip(_exitButton, exitTip);
     }
 }
 
+
+
 // ===================================================
 // 创建资源显示面板
 // ===================================================
 void BaseUIPanel::setupResourcePanel() {
-    auto visibleSize = Director::getInstance()->getVisibleSize();
-    Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
-    float panelX = origin.x + BaseUIConfig::BUTTON_PANEL_X;
-    float startY = visibleSize.height / 2 + 100;
-
-    // 使用IDCardPanel显示资源
     _idCardPanel = IDCardPanel::createPanel(this);
-    if (_idCardPanel) {
-        _idCardPanel->setPosition(Vec2(panelX + 50, startY + 20));
-    }
 }
+
 
 // ===================================================
 // 创建提示框
