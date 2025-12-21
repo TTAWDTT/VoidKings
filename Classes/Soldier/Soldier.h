@@ -1,4 +1,7 @@
 ﻿// Soldier.h
+#ifndef __SOLDIER_H__
+#define __SOLDIER_H__
+
 #include "cocos2d.h"
 #include "UnitData.h"
 
@@ -60,3 +63,5 @@ private:
     void attackTarget();          // 攻击逻辑
     void updateHealthBar(bool animate = true); // 血条更新
 };
+
+#endif  // __SOLDIER_H__

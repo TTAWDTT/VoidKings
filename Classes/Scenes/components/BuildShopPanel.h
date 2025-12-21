@@ -2,8 +2,8 @@
  * @file BuildShopPanel.h
  * @brief 建筑商店面板组件
  *
- * 将建筑商店逻辑从BaseScene中提取出来，实现高度模块化。
- * 该面板显示可建造的建筑列表，玩家可以选择要建造的建筑。
+ * 将建筑商店逻辑从BaseScene中抽取出来，实现高度模块化。
+ * 本组件显示可建造的建筑列表，玩家可以选择要建造的建筑。
  */
 
 #ifndef __BUILD_SHOP_PANEL_H__
@@ -34,13 +34,13 @@ namespace BuildShopConfig {
     constexpr float GRID_SPACING = 20.0f;           // 网格项之间的间距
     constexpr float GRID_START_Y = 380.0f;          // 网格起始Y位置
     constexpr float ICON_SIZE = 80.0f;              // 建筑图标尺寸
-    
+
     // 关闭按钮配置
     constexpr float CLOSE_BUTTON_BOTTOM = 40.0f;
 }
 
 // ===================================================
-// 建筑选项结构（按照部落冲突设定）
+// 建筑选项结构（含部落冲突设定）
 // ===================================================
 struct BuildingOption {
     int type;               // 建筑类型ID
@@ -140,7 +140,6 @@ private:
      * @param col 列号
      * @return 创建的网格项节点
      */
-    Button* createBuildingButton(const BuildingOption& option, float yPos);
     Node* createBuildingGridItem(const BuildingOption& option, int row, int col);
 };
 

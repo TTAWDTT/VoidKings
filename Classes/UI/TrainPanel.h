@@ -36,33 +36,33 @@ struct UnitLevelInfo {
 };
 
 // ===================================================
-// 训练面板配置常量
+// 训练面板配置常量（优化后的紧凑布局）
 // ===================================================
 namespace TrainPanelConfig {
-    // 面板尺寸
-    const Size PANEL_SIZE = Size(700.0f, 500.0f);
+    // 面板尺寸 - 缩小使布局更紧凑
+    const Size PANEL_SIZE = Size(500.0f, 380.0f);
 
-    // 标题配置
-    constexpr int TITLE_FONT_SIZE = 28;
-    constexpr float TITLE_TOP_OFFSET = 30.0f;
+    // 标题配置 - 缩小字体
+    constexpr int TITLE_FONT_SIZE = 20;
+    constexpr float TITLE_TOP_OFFSET = 20.0f;
 
-    // 兵种卡片配置
+    // 兵种卡片配置 - 缩小尺寸
     constexpr int GRID_COLS = 3;                    // 每行显示的兵种数量
-    constexpr float UNIT_CARD_WIDTH = 180.0f;       // 兵种卡片宽度
-    constexpr float UNIT_CARD_HEIGHT = 200.0f;      // 兵种卡片高度
-    constexpr float UNIT_CARD_SPACING = 20.0f;      // 卡片之间的间距
-    constexpr float UNIT_AREA_TOP_OFFSET = 70.0f;   // 兵种区域距离顶部的偏移
-    constexpr float ANIM_SIZE = 64.0f;              // 动画显示尺寸
+    constexpr float UNIT_CARD_WIDTH = 140.0f;       // 兵种卡片宽度（缩小）
+    constexpr float UNIT_CARD_HEIGHT = 160.0f;      // 兵种卡片高度（缩小）
+    constexpr float UNIT_CARD_SPACING = 15.0f;      // 卡片之间的间距（缩小）
+    constexpr float UNIT_AREA_TOP_OFFSET = 50.0f;   // 兵种区域距离顶部的偏移（缩小）
+    constexpr float ANIM_SIZE = 48.0f;              // 动画显示尺寸（缩小）
 
-    // 按钮配置
-    constexpr float BUTTON_WIDTH = 70.0f;
-    constexpr float BUTTON_HEIGHT = 30.0f;
+    // 按钮配置 - 缩小尺寸
+    constexpr float BUTTON_WIDTH = 55.0f;
+    constexpr float BUTTON_HEIGHT = 24.0f;
 
     // 默认招募费用（当配置中COST_COIN为0时使用）
     constexpr int DEFAULT_RECRUIT_COST = 50;
 
     // 关闭按钮配置
-    constexpr float CLOSE_BUTTON_BOTTOM = 30.0f;
+    constexpr float CLOSE_BUTTON_BOTTOM = 20.0f;
 }
 
 // ===================================================

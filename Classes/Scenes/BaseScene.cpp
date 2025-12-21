@@ -56,11 +56,20 @@ bool BaseScene::init() {
 // ==================== 网格地图初始化 ====================
 
 void BaseScene::initGridMap() {
+    auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
-    // 创建网格地图（40x40格子，每格32像素）
-    _gridMap = GridMap::create(40, 40, 32.0f);
-    _gridMap->setPosition(origin);
+    // 创建网格地图（80x80格子，每格32像素 - 4倍于原来的40x40）
+    _gridMap = GridMap::create(80, 80, 32.0f);
+    
+    // 计算初始位置：将视图中心对准地图中心（建筑区域）
+    // 建筑放置在(36,36)附近，将视图移动使其可见
+    float cellSize = 32.0f;
+    float mapCenterX = 36.0f * cellSize;  // 建筑区域中心
+    float mapCenterY = 36.0f * cellSize;
+    float offsetX = origin.x + visibleSize.width / 2 - mapCenterX;
+    float offsetY = origin.y + visibleSize.height / 2 - mapCenterY;
+    _gridMap->setPosition(Vec2(offsetX, offsetY));
     this->addChild(_gridMap, 0);
 
     // 创建建筑层（作为GridMap的子节点）
@@ -68,12 +77,12 @@ void BaseScene::initGridMap() {
     _gridMap->addChild(_buildingLayer, 10);
 
     // 创建网格背景组件
-    _gridBackground = GridBackground::create(40, 40, 32.0f);
+    _gridBackground = GridBackground::create(80, 80, 32.0f);
     if (_gridBackground) {
         _gridMap->addChild(_gridBackground, -1);
     }
 
-    CCLOG("[基地场景] 网格地图初始化完成");
+    CCLOG("[基地场景] 网格地图初始化完成（80x80格子），视图已居中到建筑区域");
 }
 
 // ==================== UI组件初始化 ====================
@@ -184,13 +193,13 @@ void BaseScene::initBaseBuilding() {
     auto base = ProductionBuilding::create(&_baseConfig, 0);
     if (base) {
         _buildingLayer->addChild(base);
-        // 将基地放置在地图中心位置（4x4格子）
-        BuildingManager::getInstance()->placeBuilding(base, 18, 18, 4, 4);
+        // 将基地放置在地图中心位置（80x80网格的中心为36,36附近，确保4x4建筑在网格内）
+        BuildingManager::getInstance()->placeBuilding(base, 36, 36, 4, 4);
 
         // 调整建筑缩放以适应格子大小
         scaleBuildingToFit(base, 4, 4, cellSize);
 
-        CCLOG("[基地场景] 基地建筑放置完成 (4x4格子)");
+        CCLOG("[基地场景] 基地建筑放置完成 (4x4格子，位置36,36)");
     }
 
     // 初始化兵营建筑配置（5x5格子）
@@ -210,13 +219,13 @@ void BaseScene::initBaseBuilding() {
     auto barracks = ProductionBuilding::create(&_barracksConfig, 0);
     if (barracks) {
         _buildingLayer->addChild(barracks);
-        // 将兵营放置在基地旁边（5x5格子）
-        BuildingManager::getInstance()->placeBuilding(barracks, 12, 18, 5, 5);
+        // 将兵营放置在基地旁边（5x5格子，确保在网格内）
+        BuildingManager::getInstance()->placeBuilding(barracks, 30, 36, 5, 5);
 
         // 调整建筑缩放以适应格子大小
         scaleBuildingToFit(barracks, 5, 5, cellSize);
 
-        CCLOG("[基地场景] 兵营建筑放置完成 (5x5格子)");
+        CCLOG("[基地场景] 兵营建筑放置完成 (5x5格子，位置30,36)");
     }
 }
 
