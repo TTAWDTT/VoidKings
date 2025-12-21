@@ -1,11 +1,11 @@
 /**
  * @file BattleScene.h
- * @brief ս������ͷ�ļ�
+ * @brief 战斗场景头文件
  *
- * ս���������ڲ���ս��ϵͳ��������
- * - �з����غͷ�������
- * - ��Ҳ����ʿ��
- * - ս���߼�����
+ * 战斗场景用于测试战斗系统，包括：
+ * - 敌方基地和防御建筑
+ * - 玩家部署士兵
+ * - 战斗逻辑更新
  */
 
 #ifndef __BATTLE_SCENE_H__
@@ -24,31 +24,31 @@ USING_NS_CC;
 using namespace cocos2d::ui;
 
 // ===================================================
-// ս����������
+// 战斗场景配置
 // ===================================================
 namespace BattleConfig {
-    // ��������
-    constexpr int GRID_WIDTH = 40;          // ս����ͼ���ȣ���������
-    constexpr int GRID_HEIGHT = 30;         // ս����ͼ�߶ȣ���������
-    constexpr float CELL_SIZE = 32.0f;      // ÿ�����ش�С
+    // 网格配置
+    constexpr int GRID_WIDTH = 40;          // 战斗地图宽度（格子数）
+    constexpr int GRID_HEIGHT = 30;         // 战斗地图高度（格子数）
+    constexpr float CELL_SIZE = 32.0f;      // 每格像素大小
 
-    // UI����
-    constexpr float UI_TOP_HEIGHT = 50.0f;      // ����UI�߶�
-    constexpr float UI_BOTTOM_HEIGHT = 80.0f;   // �ײ���������߶�
+    // UI配置
+    constexpr float UI_TOP_HEIGHT = 50.0f;      // 顶部UI高度
+    constexpr float UI_BOTTOM_HEIGHT = 80.0f;   // 底部部署区域高度
 
-    // ս������
-    constexpr float BATTLE_TIME_LIMIT = 180.0f;  // ս��ʱ�����ƣ��룩
+    // 战斗配置
+    constexpr float BATTLE_TIME_LIMIT = 180.0f;  // 战斗时间限制（秒）
 }
 
 // ===================================================
-// ս��������
+// 战斗场景类
 // ===================================================
 class BattleScene : public Scene {
 public:
     /**
-     * @brief ����ս������
-     * @param levelId �ؿ�ID
-     * @param units �ɲ���ı��� <����ID, ����>
+     * @brief 创建战斗场景
+     * @param levelId 关卡ID
+     * @param units 可部署的单位 <单位ID, 数量>
      */
     static Scene* createScene(int levelId = 1, const std::map<int, int>& units = {});
 
@@ -57,38 +57,38 @@ public:
 
     CREATE_FUNC(BattleScene);
 
-    // ���ùؿ�ID
+    // 设置关卡ID
     void setLevelId(int levelId) { _levelId = levelId; }
 
-    // ���ÿɲ���ı���
+    // 设置可部署的单位
     void setDeployableUnits(const std::map<int, int>& units) { _deployableUnits = units; }
 
 private:
-    // ==================== ������� ====================
-    GridMap* _gridMap = nullptr;                    // �����ͼ
-    Node* _buildingLayer = nullptr;                 // ������
-    Node* _soldierLayer = nullptr;                  // ʿ����
-    Node* _uiLayer = nullptr;                       // UI��
+    // ==================== 核心组件 ====================
+    GridMap* _gridMap = nullptr;                    // 网格地图
+    Node* _buildingLayer = nullptr;                 // 建筑层
+    Node* _soldierLayer = nullptr;                  // 士兵层
+    Node* _uiLayer = nullptr;                       // UI层
 
-    // ==================== �ؿ����� ====================
-    int _levelId = 1;                               // ��ǰ�ؿ�ID
-    std::map<int, int> _deployableUnits;            // �ɲ���ı��� <ID, ����>
-    std::map<int, int> _remainingUnits;             // ʣ��ɲ���ı���
+    // ==================== 关卡数据 ====================
+    int _levelId = 1;                               // 当前关卡ID
+    std::map<int, int> _deployableUnits;            // 可部署的单位 <ID, 数量>
+    std::map<int, int> _remainingUnits;             // 剩余可部署的单位
 
-    // ==================== ս��״̬ ====================
-    std::vector<Soldier*> _soldiers;                // ���ϵ�ʿ��
-    std::vector<Node*> _enemyBuildings;             // �з�����
-    float _battleTime = 0.0f;                       // ս��ʱ��
-    bool _battleEnded = false;                      // ս���Ƿ����
-    int _destroyedBuildingCount = 0;                // �ѴݻٵĽ�������
-    int _totalBuildingCount = 0;                    // �ܽ�������
+    // ==================== 战斗状态 ====================
+    std::vector<Soldier*> _soldiers;                // 场上的士兵
+    std::vector<Node*> _enemyBuildings;             // 敌方建筑
+    float _battleTime = 0.0f;                       // 战斗时间
+    bool _battleEnded = false;                      // 战斗是否结束
+    int _destroyedBuildingCount = 0;                // 已摧毁的建筑数量
+    int _totalBuildingCount = 0;                    // 总建筑数量
 
-    // ==================== UI��� ====================
-    Label* _timerLabel = nullptr;                   // ��ʱ��
-    Label* _progressLabel = nullptr;                // ������ʾ
-    Node* _unitDeployArea = nullptr;                // ���ֲ�������
+    // ==================== UI组件 ====================
+    Label* _timerLabel = nullptr;                   // 计时器
+    Label* _progressLabel = nullptr;                // 进度显示
+    Node* _unitDeployArea = nullptr;                // 单位部署区域
 
-    // ==================== ��ʼ������ ====================
+    // ==================== 初始化方法 ====================
     void initGridMap();
     void initLevel();
     void initUI();

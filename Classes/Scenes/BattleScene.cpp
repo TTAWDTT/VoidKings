@@ -1,11 +1,11 @@
 /**
  * @file BattleScene.cpp
- * @brief ս������ʵ��
+ * @brief 战斗场景实现
  *
- * ʵ��ս��ϵͳ�ĺ����߼���������
- * - �ؿ���ʼ���͵з���������
- * - ���ʿ������
- * - ս���߼�����
+ * 实现战斗系统的核心逻辑，包括：
+ * - 关卡初始化和敌方建筑生成
+ * - 玩家士兵部署
+ * - 战斗逻辑更新
  */
 
 #include "BattleScene.h"
@@ -20,7 +20,7 @@
 USING_NS_CC;
 
 // ===================================================
-// ��������
+// 场景创建
 // ===================================================
 
 Scene* BattleScene::createScene(int levelId, const std::map<int, int>& units) {
@@ -33,7 +33,7 @@ Scene* BattleScene::createScene(int levelId, const std::map<int, int>& units) {
 }
 
 // ===================================================
-// ��ʼ��
+// 初始化
 // ===================================================
 
 bool BattleScene::init() {
@@ -41,24 +41,23 @@ bool BattleScene::init() {
         return false;
     }
 
-    CCLOG("[ս������] ��ʼ���ؿ� %d", _levelId);
+    CCLOG("[战斗场景] 初始化关卡 %d", _levelId);
 
-    // ��ʼ�������
+    // 初始化各个组件
     initGridMap();
     initLevel();
     initUI();
     initTouchListener();
 
-    // ��ʼ��ʣ��ɲ������
+    // 初始化剩余可部署单位
     _remainingUnits = _deployableUnits;
 
-    // ���ø���
+    // 设置更新
     this->scheduleUpdate();
 
     return true;
 }
 
-// ===================================================
 // ===================================================
 // 网格地图初始化
 // ===================================================
@@ -109,11 +108,11 @@ void BattleScene::initGridMap() {
 }
 
 // ===================================================
-// �ؿ���ʼ��
+// 关卡初始化
 // ===================================================
 
 void BattleScene::initLevel() {
-    // ���ݹؿ�ID������ͬ�Ĺؿ�
+    // 根据关卡ID创建不同的关卡
     switch (_levelId) {
     case 1:
     default:
@@ -121,27 +120,25 @@ void BattleScene::initLevel() {
         break;
     }
 
-    CCLOG("[ս������] �ؿ� %d ��ʼ����ɣ��� %d ������", _levelId, _totalBuildingCount);
+    CCLOG("[战斗场景] 关卡 %d 初始化完成，共 %d 个建筑", _levelId, _totalBuildingCount);
 }
 
 // ===================================================
-// ������1�� - �򵥲��Թؿ�
+// 创建第1关 - 简单测试关卡
 // ===================================================
 
 void BattleScene::createLevel1() {
-    // �ڵ�ͼ���Ҳ���õз����أ�40x30����ȷ��4x4�����������ڣ�
-    // ����λ����Ҫ�����㹻�ռ䣺�ұ߽�Ϊ40���������XΪ36
+    // 在地图右侧放置敌方基地（40x30，确保4x4建筑在边界内）
+    // 基地位置需要留足够空间：右边界为40，最大X为36
     createEnemyBase(28, 13);
 
-    // ����һЩ��������3x3������Ҫȷ���������ڣ�
-    createDefenseTower(22, 11, 1);  // ����
-    createDefenseTower(22, 17, 1);  // ����
-    createDefenseTower(24, 8, 2);   // ����
-    createDefenseTower(24, 20, 2);  // ����
+    // 创建一些防御塔（3x3），需要确保在边界内
+    createDefenseTower(22, 11, 1);  // 箭塔
+    createDefenseTower(22, 17, 1);  // 箭塔
+    createDefenseTower(24, 8, 2);   // 炮塔
+    createDefenseTower(24, 20, 2);  // 炮塔
 }
 
-// ===================================================
-// �����з�����
 // ===================================================
 // 创建敌方基地
 // ===================================================
@@ -297,7 +294,7 @@ void BattleScene::initUI() {
     topBg->setPosition(origin.x, origin.y + visibleSize.height - BattleConfig::UI_TOP_HEIGHT);
     _uiLayer->addChild(topBg);
 
-    // ��ʱ��
+    // 计时器
     _timerLabel = Label::createWithTTF("3:00", "fonts/arial.ttf", 18);
     if (!_timerLabel) {
         _timerLabel = Label::createWithSystemFont("3:00", "Arial", 18);
@@ -309,7 +306,7 @@ void BattleScene::initUI() {
     _timerLabel->setColor(Color3B::WHITE);
     _uiLayer->addChild(_timerLabel);
 
-    // ������ʾ
+    // 进度显示
     _progressLabel = Label::createWithTTF("0%", "fonts/arial.ttf", 14);
     if (!_progressLabel) {
         _progressLabel = Label::createWithSystemFont("0%", "Arial", 14);
@@ -363,14 +360,14 @@ void BattleScene::initUI() {
 }
 
 // ===================================================
-// ������������
+// 设置部署区域
 // ===================================================
 
 void BattleScene::setupDeployArea() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
-    // �ײ�UI����
+    // 底部UI区域
     auto bottomBg = LayerColor::create(
         Color4B(30, 30, 30, 220),
         visibleSize.width,
@@ -379,20 +376,20 @@ void BattleScene::setupDeployArea() {
     bottomBg->setPosition(origin.x, origin.y);
     _uiLayer->addChild(bottomBg);
 
-    // ������������
+    // 部署区域容器
     _unitDeployArea = Node::create();
     _unitDeployArea->setPosition(Vec2(origin.x + 20, origin.y + BattleConfig::UI_BOTTOM_HEIGHT / 2));
     _uiLayer->addChild(_unitDeployArea);
 
-    // �����ɲ�����ֵİ�ť
+    // 创建可部署单位的按钮
     float xPos = 0;
     float btnSpacing = 70.0f;
 
-    // ���û��ָ�����֣�ʹ��Ĭ�ϲ��Ա���
+    // 如果用户没有指定单位，使用默认测试单位
     if (_remainingUnits.empty()) {
-        _remainingUnits[101] = 10;  // 10��Goblin
-        _remainingUnits[102] = 5;   // 5��Barbarian
-        _remainingUnits[103] = 8;   // 8��Archer
+        _remainingUnits[101] = 10;  // 10个Goblin
+        _remainingUnits[102] = 5;   // 5个Barbarian
+        _remainingUnits[103] = 8;   // 8个Archer
     }
 
     for (const auto& pair : _remainingUnits) {
@@ -403,7 +400,7 @@ void BattleScene::setupDeployArea() {
         xPos += btnSpacing;
     }
 
-    // ������ʾ
+    // 提示文字
     auto tipLabel = Label::createWithTTF("Tap on map to deploy", "fonts/arial.ttf", 10);
     if (!tipLabel) {
         tipLabel = Label::createWithSystemFont("Tap on map to deploy", "Arial", 10);
@@ -417,7 +414,7 @@ void BattleScene::setupDeployArea() {
 }
 
 // ===================================================
-// ��������ť
+// 创建部署按钮
 // ===================================================
 
 Node* BattleScene::createDeployButton(int unitId, int count, float x) {
@@ -426,22 +423,22 @@ Node* BattleScene::createDeployButton(int unitId, int count, float x) {
 
     float btnSize = 50.0f;
 
-    // ��ȡ��������
+    // 获取单位配置
     const UnitConfig* config = UnitManager::getInstance()->getConfig(unitId);
     std::string unitName = config ? config->name.substr(0, 3) : "???";
 
-    // ��ť����
+    // 按钮背景
     auto bg = LayerColor::create(Color4B(50, 70, 50, 255), btnSize, btnSize);
     bg->setAnchorPoint(Vec2(0.5f, 0.5f));
     bg->setIgnoreAnchorPointForPosition(false);
     node->addChild(bg);
 
-    // �߿�
+    // 边框
     auto border = DrawNode::create();
     border->drawRect(Vec2(-btnSize / 2, -btnSize / 2), Vec2(btnSize / 2, btnSize / 2), Color4F::WHITE);
     node->addChild(border, 1);
 
-    // ��������
+    // 单位名称
     auto nameLabel = Label::createWithTTF(unitName, "fonts/arial.ttf", 10);
     if (!nameLabel) {
         nameLabel = Label::createWithSystemFont(unitName, "Arial", 10);
@@ -450,7 +447,7 @@ Node* BattleScene::createDeployButton(int unitId, int count, float x) {
     nameLabel->setColor(Color3B::WHITE);
     node->addChild(nameLabel, 2);
 
-    // ����
+    // 数量
     auto countLabel = Label::createWithTTF("x" + std::to_string(count), "fonts/arial.ttf", 10);
     if (!countLabel) {
         countLabel = Label::createWithSystemFont("x" + std::to_string(count), "Arial", 10);
@@ -460,37 +457,37 @@ Node* BattleScene::createDeployButton(int unitId, int count, float x) {
     countLabel->setName("countLabel");
     node->addChild(countLabel, 2);
 
-    // ����unitId�Ա㲿��ʱʹ��
+    // 存储unitId以便部署时使用
     node->setTag(unitId);
 
     return node;
 }
 
 // ===================================================
-// ����ʿ��
+// 部署士兵
 // ===================================================
 
 void BattleScene::deploySoldier(int unitId, const Vec2& position) {
-    // ����Ƿ��пɲ���ĸ����ͱ���
+    // 检查是否有可部署的该类型单位
     auto it = _remainingUnits.find(unitId);
     if (it == _remainingUnits.end() || it->second <= 0) {
-        CCLOG("[ս������] û�пɲ���ı���: %d", unitId);
+        CCLOG("[战斗场景] 没有可部署的单位: %d", unitId);
         return;
     }
 
-    // ����ʿ��
+    // 创建士兵
     auto soldier = UnitManager::getInstance()->spawnSoldier(unitId, position, 0);
     if (soldier) {
         _soldierLayer->addChild(soldier);
         _soldiers.push_back(soldier);
 
-        // ����ʣ������
+        // 更新剩余数量
         it->second--;
 
-        CCLOG("[ս������] ����ʿ��: %d ��λ�� (%.1f, %.1f), ʣ�� %d",
+        CCLOG("[战斗场景] 部署士兵: %d 在位置 (%.1f, %.1f), 剩余 %d",
             unitId, position.x, position.y, it->second);
 
-        // ����UI
+        // 更新UI
         for (auto& child : _unitDeployArea->getChildren()) {
             if (child->getTag() == unitId) {
                 auto countLabel = child->getChildByName("countLabel");
@@ -504,7 +501,7 @@ void BattleScene::deploySoldier(int unitId, const Vec2& position) {
 }
 
 // ===================================================
-// �����¼���ʼ��
+// 触摸事件初始化
 // ===================================================
 
 void BattleScene::initTouchListener() {
@@ -519,17 +516,17 @@ bool BattleScene::onTouchBegan(Touch* touch, Event* event) {
 
     Vec2 touchPos = touch->getLocation();
 
-    // ����Ƿ��ڲ��������ڣ��ײ���
+    // 检查是否在部署区域内（底部）
     if (touchPos.y < origin.y + BattleConfig::UI_BOTTOM_HEIGHT) {
         return false;
     }
 
-    // ����Ƿ��ڶ���UI����
+    // 检查是否在顶部UI区域
     if (touchPos.y > origin.y + visibleSize.height - BattleConfig::UI_TOP_HEIGHT) {
         return false;
     }
 
-    // �ڵ�ͼ�ϲ���ʿ����Ĭ�ϲ����һ����ʣ��ı��֣�
+    // 在地图上部署士兵（默认部署第一个有剩余的单位）
     for (auto& pair : _remainingUnits) {
         if (pair.second > 0) {
             Vec2 localPos = _gridMap->convertToNodeSpace(touchPos);
@@ -542,16 +539,16 @@ bool BattleScene::onTouchBegan(Touch* touch, Event* event) {
 }
 
 // ===================================================
-// ÿ֡����
+// 每帧更新
 // ===================================================
 
 void BattleScene::update(float dt) {
     if (_battleEnded) return;
 
-    // ����ս��ʱ��
+    // 更新战斗时间
     _battleTime += dt;
 
-    // ���¼�ʱ����ʾ
+    // 更新计时器显示
     float remainingTime = std::max(0.0f, BattleConfig::BATTLE_TIME_LIMIT - _battleTime);
     int minutes = static_cast<int>(remainingTime) / 60;
     int seconds = static_cast<int>(remainingTime) % 60;
@@ -561,19 +558,19 @@ void BattleScene::update(float dt) {
         _timerLabel->setString(timeStr);
     }
 
-    // ����ս���߼�
+    // 更新战斗逻辑
     updateBattle(dt);
 
-    // ���ս������
+    // 检查战斗结束
     checkBattleEnd();
 }
 
 // ===================================================
-// ս���߼�����
+// 战斗逻辑更新
 // ===================================================
 
 void BattleScene::updateBattle(float dt) {
-    // ��鱻�ݻٵĽ���
+    // 检查被摧毁的建筑
     int destroyed = 0;
     for (auto& building : _enemyBuildings) {
         if (!building || !building->getParent()) {
@@ -582,7 +579,7 @@ void BattleScene::updateBattle(float dt) {
     }
     _destroyedBuildingCount = destroyed;
 
-    // ���½�����ʾ
+    // 更新进度显示
     int progress = _totalBuildingCount > 0 ?
         (destroyed * 100 / _totalBuildingCount) : 0;
     char progressStr[16];
@@ -593,23 +590,23 @@ void BattleScene::updateBattle(float dt) {
 }
 
 // ===================================================
-// ���ս������
+// 检查战斗结束
 // ===================================================
 
 void BattleScene::checkBattleEnd() {
-    // ���н������ݻ� - ʤ��
+    // 所有建筑被摧毁 - 胜利
     if (_destroyedBuildingCount >= _totalBuildingCount) {
         onBattleWin();
         return;
     }
 
-    // ʱ��ľ� - ʧ��
+    // 时间耗尽 - 失败
     if (_battleTime >= BattleConfig::BATTLE_TIME_LIMIT) {
         onBattleLose();
         return;
     }
 
-    // ����ʿ��������û��ʣ��ɲ������ - ʧ��
+    // 所有士兵阵亡且没有剩余可部署单位 - 失败
     bool hasSurvivors = false;
     for (auto& soldier : _soldiers) {
         if (soldier && soldier->getParent()) {
@@ -632,17 +629,17 @@ void BattleScene::checkBattleEnd() {
 }
 
 // ===================================================
-// ս��ʤ��
+// 战斗胜利
 // ===================================================
 
 void BattleScene::onBattleWin() {
     _battleEnded = true;
-    CCLOG("[ս������] ս��ʤ����");
+    CCLOG("[战斗场景] 战斗胜利！");
 
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
-    // ��ʾʤ����Ϣ
+    // 显示胜利消息
     auto winLabel = Label::createWithTTF("VICTORY!", "fonts/arial.ttf", 36);
     if (!winLabel) {
         winLabel = Label::createWithSystemFont("VICTORY!", "Arial", 36);
@@ -654,7 +651,7 @@ void BattleScene::onBattleWin() {
     winLabel->setColor(Color3B::YELLOW);
     _uiLayer->addChild(winLabel, 100);
 
-    // 3��󷵻�
+    // 3秒后返回
     this->scheduleOnce([](float dt) {
         auto scene = BaseScene::createScene();
         Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
@@ -662,17 +659,17 @@ void BattleScene::onBattleWin() {
 }
 
 // ===================================================
-// ս��ʧ��
+// 战斗失败
 // ===================================================
 
 void BattleScene::onBattleLose() {
     _battleEnded = true;
-    CCLOG("[ս������] ս��ʧ�ܣ�");
+    CCLOG("[战斗场景] 战斗失败！");
 
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
-    // ��ʾʧ����Ϣ
+    // 显示失败消息
     auto loseLabel = Label::createWithTTF("DEFEAT", "fonts/arial.ttf", 36);
     if (!loseLabel) {
         loseLabel = Label::createWithSystemFont("DEFEAT", "Arial", 36);
@@ -684,7 +681,7 @@ void BattleScene::onBattleLose() {
     loseLabel->setColor(Color3B::RED);
     _uiLayer->addChild(loseLabel, 100);
 
-    // 3��󷵻�
+    // 3秒后返回
     this->scheduleOnce([](float dt) {
         auto scene = BaseScene::createScene();
         Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
@@ -692,11 +689,11 @@ void BattleScene::onBattleLose() {
 }
 
 // ===================================================
-// �˳���ť�ص�
+// 退出按钮回调
 // ===================================================
 
 void BattleScene::onExitButton(Ref* sender) {
-    CCLOG("[ս������] �˳�ս��");
+    CCLOG("[战斗场景] 退出战斗");
 
     auto scene = BaseScene::createScene();
     Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));

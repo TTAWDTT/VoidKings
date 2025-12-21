@@ -1,20 +1,20 @@
 /**
  * @file BuildShopPanel.cpp
- * @brief �����̵����ʵ��
+ * @brief 建筑商店面板实现
  *
- * �������񲼾���ʾ����ͼ�꣬ÿ�������������
- * - ����ͼ�꣨logo��
- * - ��������
- * - �������
- * - ���ӳߴ���Ϣ
+ * 采用网格布局显示建筑图标，每个建筑项包含：
+ * - 建筑图标（logo）
+ * - 建筑名称
+ * - 建筑费用
+ * - 格子尺寸信息
  */
 
 #include "BuildShopPanel.h"
 #include <algorithm>
 
- // ===================================================
- // �������ʼ��
- // ===================================================
+// ===================================================
+// 创建和初始化
+// ===================================================
 
 BuildShopPanel* BuildShopPanel::create(
     const std::function<void(const BuildingOption&)>& onBuildingSelected,
@@ -41,48 +41,48 @@ bool BuildShopPanel::init(
     _onClose = onClose;
     _isShowing = false;
 
-    // ��ʼ������ѡ��������ͻ�趨��
+    // 初始化建筑选项（部落冲突设定）
     initBuildingOptions();
 
-    // ��ʼ������UI���
+    // 初始化各个UI组件
     setupBackground();
     setupPanel();
     setupTitle();
     setupBuildingGrid();
     setupCloseButton();
 
-    // ��ʼ����
+    // 初始隐藏
     this->setVisible(false);
 
-    CCLOG("[�����̵�] ����ʼ�����");
+    CCLOG("[建筑商店] 面板初始化完成");
 
     return true;
 }
 
 // ===================================================
-// ��ʼ������ѡ��������ͻ�趨��
+// 初始化建筑选项（部落冲突设定）
 // ===================================================
 void BuildShopPanel::initBuildingOptions() {
-    // ���ղ����ͻ�Ľ����ߴ��趨��
-    // - �������ࣨ�����������ȣ���3x3����
-    // - ��Դ�������ֿ�ȣ���3x3����
-    // - ��Ӫ��5x5���ӣ����ɽ��죬����Ĭ�ϱ�Ӫ��
-    // - ��Ӫ��4x4���ӣ����ɽ��죬����Ĭ�ϻ��أ�
-    // - װ������ȣ���2x2����
+    // 根据部落冲突的建筑尺寸设定：
+    // - 防御塔类（箭塔、炮塔等）：3x3格子
+    // - 资源建筑（仓库等）：3x3格子
+    // - 兵营：5x5格子（不可建造，已有默认兵营）
+    // - 大本营：4x4格子（不可建造，已有默认基地）
+    // - 装饰物（树等）：2x2格子
 
     _buildingOptions = {
-        {1, "Arrow Tower", 100, 3, 3, "buildings/ArrowTower.png", true},      // ���� 3x3
-        {2, "Boom Tower", 150, 3, 3, "buildings/BoomTower.png", true},        // ���� 3x3
-        {3, "Tree", 80, 2, 2, "buildings/Tree/sprite_0000.png", true},        // װ���� 2x2
-        {4, "Storage", 200, 3, 3, "buildings/snowman.png", true},             // �ֿ� 3x3
-        {5, "Barracks", 300, 5, 5, "buildings/soldierbuilder.png", false}     // ��Ӫ 5x5�����ɽ��죩
+        {1, "Arrow Tower", 100, 3, 3, "buildings/ArrowTower.png", true},      // 箭塔 3x3
+        {2, "Boom Tower", 150, 3, 3, "buildings/BoomTower.png", true},        // 炮塔 3x3
+        {3, "Tree", 80, 2, 2, "buildings/Tree/sprite_0000.png", true},        // 装饰树 2x2
+        {4, "Storage", 200, 3, 3, "buildings/snowman.png", true},             // 仓库 3x3
+        {5, "Barracks", 300, 5, 5, "buildings/soldierbuilder.png", false}     // 兵营 5x5（不可建造）
     };
 
-    CCLOG("[�����̵�] ��ʼ�� %zu ������ѡ��", _buildingOptions.size());
+    CCLOG("[建筑商店] 初始化 %zu 个建筑选项", _buildingOptions.size());
 }
 
 // ===================================================
-// ���ý����Ƿ�ɽ���
+// 设置建筑是否可建造
 // ===================================================
 void BuildShopPanel::setBuildingCanBuild(int type, bool canBuild) {
     for (auto& option : _buildingOptions) {
@@ -94,7 +94,7 @@ void BuildShopPanel::setBuildingCanBuild(int type, bool canBuild) {
 }
 
 // ===================================================
-// �������� - ��͸�����ָ���ȫ��
+// 设置背景 - 半透明遮罩覆盖全屏
 // ===================================================
 void BuildShopPanel::setupBackground() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
@@ -110,25 +110,25 @@ void BuildShopPanel::setupBackground() {
 }
 
 // ===================================================
-// ����������� - �ڰ�������
+// 设置面板主体 - 黑白简约风格
 // ===================================================
 void BuildShopPanel::setupPanel() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
-    // ����� - ���ɫ����
+    // 主面板 - 深灰色背景
     _panel = LayerColor::create(
         Color4B(40, 40, 40, 255),
         BuildShopConfig::PANEL_SIZE.width,
         BuildShopConfig::PANEL_SIZE.height
     );
 
-    // ���ж�λ
+    // 居中定位
     float panelX = origin.x + (visibleSize.width - BuildShopConfig::PANEL_SIZE.width) / 2;
     float panelY = origin.y + (visibleSize.height - BuildShopConfig::PANEL_SIZE.height) / 2;
     _panel->setPosition(panelX, panelY);
 
-    // ���ӱ߿�Ч��
+    // 添加边框效果
     auto border = DrawNode::create();
     border->drawRect(
         Vec2(0, 0),
@@ -140,8 +140,6 @@ void BuildShopPanel::setupPanel() {
     this->addChild(_panel, 1);
 }
 
-// ===================================================
-// ��������
 // ===================================================
 // 标题设置（缩小版本）
 // ===================================================
@@ -174,7 +172,7 @@ void BuildShopPanel::setupTitle() {
 }
 
 // ===================================================
-// �������񲼾�
+// 设置建筑网格布局
 // ===================================================
 void BuildShopPanel::setupBuildingGrid() {
     _gridContainer = Node::create();
@@ -198,17 +196,17 @@ void BuildShopPanel::setupBuildingGrid() {
 }
 
 // ===================================================
-// �������������������ͼ�꣩
+// 创建建筑网格项（包含小图标）- 缩小版本
 // ===================================================
 Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int row, int col) {
     auto itemNode = Node::create();
 
-    // ����λ��
+    // 计算位置
     float itemWidth = BuildShopConfig::GRID_ITEM_SIZE;
     float itemHeight = BuildShopConfig::GRID_ITEM_SIZE;
     float spacing = BuildShopConfig::GRID_SPACING;
 
-    // ������ʼλ��ʹ�������
+    // 计算起始位置使网格居中
     float totalWidth = BuildShopConfig::GRID_COLS * itemWidth + (BuildShopConfig::GRID_COLS - 1) * spacing;
     float startX = (BuildShopConfig::PANEL_SIZE.width - totalWidth) / 2 + itemWidth / 2;
 
@@ -217,14 +215,14 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
 
     itemNode->setPosition(Vec2(x, y));
 
-    // ������� - �ڰ�������
+    // 背景方块 - 黑白风格
     Color4B bgColor = option.canBuild ? Color4B(60, 60, 60, 255) : Color4B(40, 40, 40, 255);
     auto bg = LayerColor::create(bgColor, itemWidth, itemHeight);
     bg->setAnchorPoint(Vec2(0.5f, 0.5f));
     bg->setIgnoreAnchorPointForPosition(false);
     itemNode->addChild(bg);
 
-    // �߿�
+    // 边框
     auto border = DrawNode::create();
     Color4F borderColor = option.canBuild ? Color4F::WHITE : Color4F(0.5f, 0.5f, 0.5f, 1.0f);
     border->drawRect(
@@ -234,10 +232,10 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
     );
     itemNode->addChild(border, 1);
 
-    // ����ͼ��
+    // 建筑图标（缩小版本）
     auto icon = Sprite::create(option.spritePath);
     if (icon) {
-        // ������������Ӧͼ������
+        // 缩放建筑图标以适应图标区域
         float iconTargetSize = BuildShopConfig::ICON_SIZE;
         float scaleX = iconTargetSize / icon->getContentSize().width;
         float scaleY = iconTargetSize / icon->getContentSize().height;
@@ -245,7 +243,7 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
         icon->setScale(scale);
         icon->setPosition(Vec2(0, 8));
 
-        // ������ɽ��죬���û�ɫ
+        // 如果不可建造，设置灰色
         if (!option.canBuild) {
             icon->setColor(Color3B(100, 100, 100));
         }
@@ -253,7 +251,7 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
         itemNode->addChild(icon, 2);
     }
 
-    // ��������
+    // 建筑名称（缩小字体）
     auto nameLabel = Label::createWithTTF(option.name, "fonts/arial.ttf", 9);
     if (!nameLabel) {
         nameLabel = Label::createWithSystemFont(option.name, "Arial", 9);
@@ -263,7 +261,7 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
     nameLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
     itemNode->addChild(nameLabel, 2);
 
-    // ���úͳߴ���Ϣ
+    // 费用和尺寸信息（缩小字体）
     char infoText[64];
     snprintf(infoText, sizeof(infoText), "%dG %dx%d", option.cost, option.gridWidth, option.gridHeight);
     auto infoLabel = Label::createWithTTF(infoText, "fonts/arial.ttf", 8);
@@ -275,7 +273,7 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
     infoLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
     itemNode->addChild(infoLabel, 2);
 
-    // ������ɽ��죬����"����"��ǩ
+    // 如果不可建造，添加"已有"标签
     if (!option.canBuild) {
         auto lockedLabel = Label::createWithTTF("Owned", "fonts/arial.ttf", 8);
         if (!lockedLabel) {
@@ -286,21 +284,21 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
         itemNode->addChild(lockedLabel, 3);
     }
 
-    // ����͸���������
+    // 创建透明点击按钮
     auto touchBtn = Button::create();
     touchBtn->setContentSize(Size(itemWidth, itemHeight));
     touchBtn->setScale9Enabled(true);
     touchBtn->setPosition(Vec2(0, 0));
 
-    // �󶨵���¼�
+    // 绑定点击事件
     BuildingOption optionCopy = option;
     touchBtn->addClickEventListener([this, optionCopy](Ref* sender) {
         if (!optionCopy.canBuild) {
-            CCLOG("[�����̵�] �ý�����ӵ�У��޷��ٽ���: %s", optionCopy.name.c_str());
+            CCLOG("[建筑商店] 该建筑已拥有，无法再建造: %s", optionCopy.name.c_str());
             return;
         }
 
-        CCLOG("[�����̵�] ѡ����: %s (�ߴ�: %dx%d)",
+        CCLOG("[建筑商店] 选择了: %s (尺寸: %dx%d)",
             optionCopy.name.c_str(), optionCopy.gridWidth, optionCopy.gridHeight);
 
         if (_onBuildingSelected) {
@@ -344,19 +342,19 @@ void BuildShopPanel::setupCloseButton() {
 }
 
 // ===================================================
-// ��ʾ���
+// 显示面板
 // ===================================================
 void BuildShopPanel::show() {
     this->setVisible(true);
     _isShowing = true;
-    CCLOG("[�����̵�] ��ʾ���");
+    CCLOG("[建筑商店] 显示面板");
 }
 
 // ===================================================
-// �������
+// 隐藏面板
 // ===================================================
 void BuildShopPanel::hide() {
     this->setVisible(false);
     _isShowing = false;
-    CCLOG("[�����̵�] �������");
+    CCLOG("[建筑商店] 隐藏面板");
 }
