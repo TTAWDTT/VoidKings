@@ -156,6 +156,15 @@ bool UnitManager::hasConfig(int unitId) const {
     return _configCache.find(unitId) != _configCache.end();
 }
 
+std::vector<int> UnitManager::getAllUnitIds() const {
+    std::vector<int> ids;
+    ids.reserve(_configCache.size());
+    for (const auto& pair : _configCache) {
+        ids.push_back(pair.first);
+    }
+    return ids;
+}
+
 Soldier* UnitManager::spawnSoldier(int unitId, cocos2d::Vec2 position, int level) {
     // 1. 查找配置
     const UnitConfig* cfg = getConfig(unitId);

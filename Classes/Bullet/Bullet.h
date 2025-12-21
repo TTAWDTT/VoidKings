@@ -9,6 +9,7 @@ public:
     static Bullet* create(const std::string& spriteFrame, float damage, float speed);
     virtual bool init(const std::string& spriteFrame, float damage, float speed);
     virtual void update(float dt) override;
+    void onExit() override;
 
     void setTarget(cocos2d::Node* target);
     float getDamage() const { return _damage; }

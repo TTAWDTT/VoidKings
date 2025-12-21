@@ -35,8 +35,36 @@ bool TrainPanel::init(
     _onClose = onClose;
     _isShowing = false;
 
-    // 初始化可训练兵种列表
-    _availableUnits = { 101, 102, 103 };  // Goblin, Barbarian, Archer
+    // 初始化可训练兵种列表（从配置读取）
+    _availableUnits = UnitManager::getInstance()->getAllUnitIds();
+    if (_availableUnits.empty()) {
+        UnitManager::getInstance()->loadConfig("res/units_config.json");
+        _availableUnits = UnitManager::getInstance()->getAllUnitIds();
+    }
+    std::sort(_availableUnits.begin(), _availableUnits.end());
+
+    // 仅保留资源存在的兵种
+    auto fileUtils = FileUtils::getInstance();
+    std::vector<int> filteredUnits;
+    filteredUnits.reserve(_availableUnits.size());
+    for (int unitId : _availableUnits) {
+        const UnitConfig* cfg = UnitManager::getInstance()->getConfig(unitId);
+        if (!cfg) {
+            continue;
+        }
+        std::string spritePath = cfg->spriteFrameName;
+        if (spritePath.empty()) {
+            continue;
+        }
+        if (spritePath.find(".png") == std::string::npos) {
+            spritePath += ".png";
+        }
+        if (!fileUtils->isFileExist(spritePath)) {
+            continue;
+        }
+        filteredUnits.push_back(unitId);
+    }
+    _availableUnits.swap(filteredUnits);
 
     // 初始化兵种等级信息
     initUnitLevels();
@@ -64,6 +92,7 @@ bool TrainPanel::init(
 // 初始化兵种等级信息
 // ===================================================
 void TrainPanel::initUnitLevels() {
+    _unitLevels.clear();
     for (int unitId : _availableUnits) {
         UnitLevelInfo info;
         info.unitId = unitId;
@@ -155,8 +184,17 @@ void TrainPanel::setupTitle() {
 // 兵种卡片区域设置
 // ===================================================
 void TrainPanel::setupUnitCards() {
-    _unitCardArea = Node::create();
-    _unitCardArea->setPosition(Vec2(0, 0));
+    float topY = TrainPanelConfig::PANEL_SIZE.height - 50.0f - 10.0f;
+    float bottomY = TrainPanelConfig::CLOSE_BUTTON_BOTTOM + 40.0f;
+    float scrollHeight = topY - bottomY;
+
+    _unitCardArea = ScrollView::create();
+    _unitCardArea->setDirection(ScrollView::Direction::VERTICAL);
+    _unitCardArea->setBounceEnabled(true);
+    _unitCardArea->setScrollBarEnabled(true);
+    _unitCardArea->setContentSize(Size(TrainPanelConfig::PANEL_SIZE.width, scrollHeight));
+    _unitCardArea->setAnchorPoint(Vec2(0.0f, 0.0f));
+    _unitCardArea->setPosition(Vec2(0.0f, bottomY));
     _panel->addChild(_unitCardArea);
 
     refreshUnitCards();
@@ -166,29 +204,58 @@ void TrainPanel::setupUnitCards() {
 // 刷新兵种卡片显示
 // ===================================================
 void TrainPanel::refreshUnitCards() {
-    _unitCardArea->removeAllChildren();
+    if (!_unitCardArea) {
+        return;
+    }
 
-    int row = 0;
-    int col = 0;
+    auto inner = _unitCardArea->getInnerContainer();
+    if (!inner) {
+        return;
+    }
 
+    inner->removeAllChildren();
+
+    int totalUnits = static_cast<int>(_availableUnits.size());
+    if (totalUnits == 0) {
+        return;
+    }
+
+    float cardWidth = TrainPanelConfig::UNIT_CARD_WIDTH;
+    float cardHeight = TrainPanelConfig::UNIT_CARD_HEIGHT;
+    float spacing = TrainPanelConfig::UNIT_CARD_SPACING;
+
+    int rows = (totalUnits + TrainPanelConfig::GRID_COLS - 1) / TrainPanelConfig::GRID_COLS;
+    float innerHeight = rows * cardHeight + (rows - 1) * spacing + 10.0f;
+    float scrollHeight = _unitCardArea->getContentSize().height;
+    if (innerHeight < scrollHeight) {
+        innerHeight = scrollHeight;
+    }
+
+    _unitCardArea->setInnerContainerSize(Size(TrainPanelConfig::PANEL_SIZE.width, innerHeight));
+
+    float totalWidth = TrainPanelConfig::GRID_COLS * cardWidth + (TrainPanelConfig::GRID_COLS - 1) * spacing;
+    float startX = (TrainPanelConfig::PANEL_SIZE.width - totalWidth) / 2 + cardWidth / 2;
+    float startY = innerHeight - 10.0f - cardHeight / 2;
+
+    int index = 0;
     for (int unitId : _availableUnits) {
-        auto card = createUnitCard(unitId, row, col);
+        int row = index / TrainPanelConfig::GRID_COLS;
+        int col = index % TrainPanelConfig::GRID_COLS;
+        auto card = createUnitCard(unitId);
         if (card) {
-            _unitCardArea->addChild(card);
+            float x = startX + col * (cardWidth + spacing);
+            float y = startY - row * (cardHeight + spacing);
+            card->setPosition(Vec2(x, y));
+            inner->addChild(card);
         }
-
-        col++;
-        if (col >= TrainPanelConfig::GRID_COLS) {
-            col = 0;
-            row++;
-        }
+        index++;
     }
 }
 
 // ===================================================
 // 创建兵种卡片（带动画和按钮）
 // ===================================================
-Node* TrainPanel::createUnitCard(int unitId, int row, int col) {
+Node* TrainPanel::createUnitCard(int unitId) {
     auto cardNode = Node::create();
 
     // 获取兵种配置
@@ -201,27 +268,9 @@ Node* TrainPanel::createUnitCard(int unitId, int row, int col) {
     // 获取等级信息
     UnitLevelInfo& levelInfo = _unitLevels[unitId];
 
-    // 计算位置
+    // 计算尺寸
     float cardWidth = TrainPanelConfig::UNIT_CARD_WIDTH;
     float cardHeight = TrainPanelConfig::UNIT_CARD_HEIGHT;
-    float spacing = TrainPanelConfig::UNIT_CARD_SPACING;
-
-    // 计算起始位置使网格居中
-    float totalWidth = TrainPanelConfig::GRID_COLS * cardWidth + (TrainPanelConfig::GRID_COLS - 1) * spacing;
-    float startX = (TrainPanelConfig::PANEL_SIZE.width - totalWidth) / 2 + cardWidth / 2;
-    // 纵向居中：在标题栏与关闭按钮之间居中兵种卡片区域
-    int totalUnits = static_cast<int>(_availableUnits.size());
-    int rows = (totalUnits + TrainPanelConfig::GRID_COLS - 1) / TrainPanelConfig::GRID_COLS;
-    float gridHeight = rows * cardHeight + (rows - 1) * spacing;
-    float topY = TrainPanelConfig::PANEL_SIZE.height - 50.0f - 10.0f;
-    float bottomY = TrainPanelConfig::CLOSE_BUTTON_BOTTOM + 50.0f;
-    float availableHeight = topY - bottomY;
-    float startY = topY - (availableHeight - gridHeight) / 2 - cardHeight / 2;
-
-    float x = startX + col * (cardWidth + spacing);
-    float y = startY - row * (cardHeight + spacing);
-
-    cardNode->setPosition(Vec2(x, y));
 
     // 卡片背景 - 黑白网格风格
     auto bg = LayerColor::create(Color4B(50, 50, 50, 255), cardWidth, cardHeight);
@@ -246,9 +295,9 @@ Node* TrainPanel::createUnitCard(int unitId, int row, int col) {
     }
 
     // 兵种名称（缩小字体）
-    auto nameLabel = Label::createWithTTF(config->name, "fonts/arial.ttf", 12);
+    auto nameLabel = Label::createWithTTF(config->name, "fonts/arial.ttf", 13);
     if (!nameLabel) {
-        nameLabel = Label::createWithSystemFont(config->name, "Arial", 12);
+        nameLabel = Label::createWithSystemFont(config->name, "Arial", 13);
     }
     nameLabel->setPosition(Vec2(0, -10));
     nameLabel->setColor(Color3B::WHITE);
@@ -263,9 +312,9 @@ Node* TrainPanel::createUnitCard(int unitId, int row, int col) {
     else {
         snprintf(levelText, sizeof(levelText), "Lv.%d", levelInfo.currentLevel + 1);
     }
-    auto levelLabel = Label::createWithTTF(levelText, "fonts/arial.ttf", 9);
+    auto levelLabel = Label::createWithTTF(levelText, "fonts/arial.ttf", 10);
     if (!levelLabel) {
-        levelLabel = Label::createWithSystemFont(levelText, "Arial", 9);
+        levelLabel = Label::createWithSystemFont(levelText, "Arial", 10);
     }
     levelLabel->setPosition(Vec2(0, -23));
     levelLabel->setColor(maxLevel ? Color3B::YELLOW : Color3B::WHITE);
@@ -274,9 +323,9 @@ Node* TrainPanel::createUnitCard(int unitId, int row, int col) {
     // 数量显示（缩小字体）
     char countText[32];
     snprintf(countText, sizeof(countText), "x%d", levelInfo.count);
-    auto countLabel = Label::createWithTTF(countText, "fonts/arial.ttf", 9);
+    auto countLabel = Label::createWithTTF(countText, "fonts/arial.ttf", 10);
     if (!countLabel) {
-        countLabel = Label::createWithSystemFont(countText, "Arial", 9);
+        countLabel = Label::createWithSystemFont(countText, "Arial", 10);
     }
     countLabel->setPosition(Vec2(0, -35));
     countLabel->setColor(Color3B::GREEN);
@@ -305,9 +354,9 @@ Node* TrainPanel::createUnitCard(int unitId, int row, int col) {
     int recruitCost = config->COST_COIN > 0 ? config->COST_COIN : TrainPanelConfig::DEFAULT_RECRUIT_COST;
     char recruitText[32];
     snprintf(recruitText, sizeof(recruitText), "%dG", recruitCost);
-    auto recruitLabel = Label::createWithTTF(recruitText, "fonts/arial.ttf", 8);
+    auto recruitLabel = Label::createWithTTF(recruitText, "fonts/arial.ttf", 9);
     if (!recruitLabel) {
-        recruitLabel = Label::createWithSystemFont(recruitText, "Arial", 8);
+        recruitLabel = Label::createWithSystemFont(recruitText, "Arial", 9);
     }
     recruitLabel->setColor(Color3B::WHITE);
     recruitNode->addChild(recruitLabel, 2);
@@ -347,9 +396,9 @@ Node* TrainPanel::createUnitCard(int unitId, int row, int col) {
         snprintf(buf, sizeof(buf), "%dD", 10 * (levelInfo.currentLevel + 1));
         upgradeText = buf;
     }
-    auto upgradeLabel = Label::createWithTTF(upgradeText, "fonts/arial.ttf", 8);
+    auto upgradeLabel = Label::createWithTTF(upgradeText, "fonts/arial.ttf", 9);
     if (!upgradeLabel) {
-        upgradeLabel = Label::createWithSystemFont(upgradeText, "Arial", 8);
+        upgradeLabel = Label::createWithSystemFont(upgradeText, "Arial", 9);
     }
     upgradeLabel->setColor(maxLevel ? Color3B::GRAY : Color3B::WHITE);
     upgradeNode->addChild(upgradeLabel, 2);
@@ -377,31 +426,61 @@ Sprite* TrainPanel::createIdleAnimationSprite(int unitId) {
     if (!config) return nullptr;
 
     // 根据配置的spriteFrameName构建动画路径
-    // 动画帧格式: unit/{folder}/{name}_idle_{frame}.png
-    std::string baseName = config->spriteFrameName;
-    std::string folderName;
+    // 动画帧格式: {folder}/{name}_idle_{frame}.png
+    std::string baseName;
+    std::string folderPath;
+    std::string spritePath = config->spriteFrameName;
+    if (spritePath.size() > 4 && spritePath.substr(spritePath.size() - 4) == ".png") {
+        spritePath = spritePath.substr(0, spritePath.size() - 4);
+    }
 
-    // 根据兵种ID确定文件夹
-    if (unitId == 101) {
-        folderName = "MiniSpearMan_output";
-        baseName = "spearman";
+    auto slashPos = spritePath.find_last_of('/');
+    if (slashPos != std::string::npos) {
+        folderPath = spritePath.substr(0, slashPos);
+        baseName = spritePath.substr(slashPos + 1);
     }
-    else if (unitId == 102) {
-        folderName = "MiniSwordMan_output";
-        baseName = "swordman";
+    else {
+        switch (unitId) {
+        case 101:
+            folderPath = "unit/MiniSpearMan_output";
+            baseName = "spearman";
+            break;
+        case 102:
+            folderPath = "unit/MiniSwordMan_output";
+            baseName = "swordman";
+            break;
+        case 103:
+            folderPath = "unit/MiniArcherMan_output";
+            baseName = "archer";
+            break;
+        case 104:
+            folderPath = "unit/MiniMage_output";
+            baseName = "mage";
+            break;
+        case 105:
+            folderPath = "unit/MiniArchMage_output";
+            baseName = "archmage";
+            break;
+        default:
+            break;
+        }
     }
-    else if (unitId == 103) {
-        folderName = "MiniArcherMan_output";
-        baseName = "archer";
+
+    if (folderPath.empty() || baseName.empty()) {
+        auto placeholder = Sprite::create();
+        auto marker = DrawNode::create();
+        marker->drawSolidRect(Vec2(-30, -30), Vec2(30, 30), Color4F(0.3f, 0.3f, 0.3f, 1.0f));
+        placeholder->addChild(marker);
+        return placeholder;
     }
 
     // 首先尝试加载静态图片
-    std::string staticPath = "unit/" + folderName + "/" + baseName + ".png";
+    std::string staticPath = folderPath + "/" + baseName + ".png";
     auto sprite = Sprite::create(staticPath);
 
     if (!sprite) {
         // 如果静态图片不存在，尝试加载第一帧idle动画
-        std::string idlePath = "unit/" + folderName + "/" + baseName + "_idle_1.png";
+        std::string idlePath = folderPath + "/" + baseName + "_idle_1.png";
         sprite = Sprite::create(idlePath);
     }
 
@@ -426,8 +505,8 @@ Sprite* TrainPanel::createIdleAnimationSprite(int unitId) {
     Vector<SpriteFrame*> frames;
     for (int i = 1; i <= config->anim_idle_frames; ++i) {
         char framePath[256];
-        snprintf(framePath, sizeof(framePath), "unit/%s/%s_idle_%d.png",
-            folderName.c_str(), baseName.c_str(), i);
+        snprintf(framePath, sizeof(framePath), "%s/%s_idle_%d.png",
+            folderPath.c_str(), baseName.c_str(), i);
 
         // 使用Texture2D获取正确的纹理尺寸
         auto texture = Director::getInstance()->getTextureCache()->addImage(framePath);
@@ -577,9 +656,9 @@ void TrainPanel::setupCloseButton() {
     border->drawRect(Vec2(-btnWidth / 2, -btnHeight / 2), Vec2(btnWidth / 2, btnHeight / 2), Color4F::WHITE);
     closeNode->addChild(border, 1);
 
-    auto label = Label::createWithTTF("CLOSE", "fonts/arial.ttf", 12);
+    auto label = Label::createWithTTF("CLOSE", "fonts/arial.ttf", 13);
     if (!label) {
-        label = Label::createWithSystemFont("CLOSE", "Arial", 12);
+        label = Label::createWithSystemFont("CLOSE", "Arial", 13);
     }
     label->setColor(Color3B::WHITE);
     closeNode->addChild(label, 2);
@@ -608,7 +687,7 @@ void TrainPanel::setupResourceDisplay() {
         10
     );
     if (!_resourceLabel) {
-        _resourceLabel = Label::createWithSystemFont("", "Arial", 10);
+        _resourceLabel = Label::createWithSystemFont("", "Arial", 11);
     }
     _resourceLabel->setAnchorPoint(Vec2(1.0f, 0.5f));
     _resourceLabel->setPosition(Vec2(

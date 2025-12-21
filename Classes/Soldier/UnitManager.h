@@ -26,6 +26,9 @@ public:
     // 检查配置是否存在
     bool hasConfig(int unitId) const;
 
+    // 获取所有已加载的兵种ID
+    std::vector<int> getAllUnitIds() const;
+
 private:
     UnitManager() = default;
     ~UnitManager() = default;

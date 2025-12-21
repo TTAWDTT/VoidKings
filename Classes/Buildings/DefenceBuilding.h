@@ -12,6 +12,7 @@ public:
     static DefenceBuilding* create(const DefenceBuildingConfig* config, int level = 0);
     virtual bool init(const DefenceBuildingConfig* config, int level = 0);
     virtual void update(float dt) override;
+    virtual void onExit() override;
 
     // 设置敌方士兵列表（由战斗场景提供）
     static void setEnemySoldiers(const std::vector<Soldier*>* soldiers);
@@ -42,6 +43,7 @@ private:
     cocos2d::Node* _target;
     std::string _currentActionKey;
 
+    void setTarget(cocos2d::Node* target);
     void findTarget();
     void attackTarget();
     void updateHealthBar(bool animate = true);

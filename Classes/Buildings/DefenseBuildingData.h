@@ -32,6 +32,11 @@ struct DefenceBuildingConfig {
     std::string anim_attack = "attack";
     int anim_attack_frames = 1;
     float anim_attack_delay = 0.1f;
+
+    std::string bulletSpriteFrameName;
+    float bulletSpeed = 0.0f;
+    bool bulletIsAOE = false;
+    float bulletAOERange = 0.0f;
 };
 
 #endif // __DEFENSE_BUILDING_DATA_H__

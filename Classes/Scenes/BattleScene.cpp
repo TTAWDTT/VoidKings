@@ -22,12 +22,17 @@ USING_NS_CC;
 // ===================================================
 
 Scene* BattleScene::createScene(int levelId, const std::map<int, int>& units) {
-    auto scene = BattleScene::create();
+    auto scene = new (std::nothrow) BattleScene();
     if (scene) {
         scene->setLevelId(levelId);
         scene->setDeployableUnits(units);
+        if (scene->init()) {
+            scene->autorelease();
+            return scene;
+        }
     }
-    return scene;
+    CC_SAFE_DELETE(scene);
+    return nullptr;
 }
 
 // ===================================================
@@ -42,15 +47,21 @@ bool BattleScene::init() {
     CCLOG("[战斗场景] 初始化关卡 %d", _levelId);
 
     // 确保兵种配置已加载（避免直接进入战斗时配置缺失）
-    if (!UnitManager::getInstance()->hasConfig(101)) {
+    if (UnitManager::getInstance()->getAllUnitIds().empty()) {
         UnitManager::getInstance()->loadConfig("res/units_config.json");
     }
 
     // 初始化剩余可部署单位
     if (_deployableUnits.empty()) {
-        _remainingUnits[101] = 10;
-        _remainingUnits[102] = 5;
-        _remainingUnits[103] = 8;
+        auto unitIds = UnitManager::getInstance()->getAllUnitIds();
+        int defaultCounts[] = { 10, 5, 8 };
+        int maxDefaults = static_cast<int>(unitIds.size());
+        if (maxDefaults > 3) {
+            maxDefaults = 3;
+        }
+        for (int i = 0; i < maxDefaults; ++i) {
+            _remainingUnits[unitIds[i]] = defaultCounts[i];
+        }
     }
     else {
         _remainingUnits = _deployableUnits;
@@ -210,6 +221,10 @@ void BattleScene::createDefenseTower(int gridX, int gridY, int type) {
         towerConfig.ATK_SPEED = { 1.0f, 0.9f, 0.8f };
         towerConfig.SKY_ABLE = true;
         towerConfig.GROUND_ABLE = true;
+        towerConfig.bulletSpriteFrameName = "bullet/arrow.png";
+        towerConfig.bulletSpeed = 400.0f;
+        towerConfig.bulletIsAOE = false;
+        towerConfig.bulletAOERange = 0.0f;
     }
     else {
         // 炮塔
@@ -223,6 +238,10 @@ void BattleScene::createDefenseTower(int gridX, int gridY, int type) {
         towerConfig.ATK_SPEED = { 1.5f, 1.4f, 1.3f };
         towerConfig.SKY_ABLE = false;
         towerConfig.GROUND_ABLE = true;
+        towerConfig.bulletSpriteFrameName = "bullet/bomb.png";
+        towerConfig.bulletSpeed = 200.0f;
+        towerConfig.bulletIsAOE = true;
+        towerConfig.bulletAOERange = 40.0f;
     }
 
     towerConfig.length = 3;
@@ -381,9 +400,15 @@ void BattleScene::setupDeployArea() {
     _uiLayer->addChild(bottomBg);
 
     if (_remainingUnits.empty()) {
-        _remainingUnits[101] = 10;
-        _remainingUnits[102] = 5;
-        _remainingUnits[103] = 8;
+        auto unitIds = UnitManager::getInstance()->getAllUnitIds();
+        int defaultCounts[] = { 10, 5, 8 };
+        int maxDefaults = static_cast<int>(unitIds.size());
+        if (maxDefaults > 3) {
+            maxDefaults = 3;
+        }
+        for (int i = 0; i < maxDefaults; ++i) {
+            _remainingUnits[unitIds[i]] = defaultCounts[i];
+        }
     }
 
     _unitDeployArea = Node::create();

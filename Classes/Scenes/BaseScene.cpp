@@ -375,6 +375,10 @@ Node* BaseScene::createBuildingFromOption(const BuildingOption& option) {
         config.ATK_SPEED = { 1.0f, 0.9f, 0.8f };
         config.SKY_ABLE = true;
         config.GROUND_ABLE = true;
+        config.bulletSpriteFrameName = "bullet/arrow.png";
+        config.bulletSpeed = 400.0f;
+        config.bulletIsAOE = false;
+        config.bulletAOERange = 0.0f;
         config.length = 3;  // 3x3格子
         config.width = 3;
         config.MAXLEVEL = 2;
@@ -393,6 +397,10 @@ Node* BaseScene::createBuildingFromOption(const BuildingOption& option) {
         config.ATK_SPEED = { 1.5f, 1.4f, 1.3f };
         config.SKY_ABLE = false;
         config.GROUND_ABLE = true;
+        config.bulletSpriteFrameName = "bullet/bomb.png";
+        config.bulletSpeed = 200.0f;
+        config.bulletIsAOE = true;
+        config.bulletAOERange = 40.0f;
         config.length = 3;  // 3x3格子
         config.width = 3;
         config.MAXLEVEL = 2;

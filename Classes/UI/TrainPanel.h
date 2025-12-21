@@ -40,10 +40,10 @@ struct UnitLevelInfo {
 // ===================================================
 namespace TrainPanelConfig {
     // 面板尺寸 - 缩小使布局更紧凑
-    const Size PANEL_SIZE = Size(500.0f, 380.0f);
+    const Size PANEL_SIZE = Size(500.0f, 480.0f);
 
     // 标题配置 - 缩小字体
-    constexpr int TITLE_FONT_SIZE = 20;
+    constexpr int TITLE_FONT_SIZE = 22;
     constexpr float TITLE_TOP_OFFSET = 20.0f;
 
     // 兵种卡片配置 - 缩小尺寸
@@ -105,7 +105,7 @@ private:
     LayerColor* _background = nullptr;      // 半透明背景
     LayerColor* _panel = nullptr;           // 面板主体
     Label* _titleLabel = nullptr;           // 标题
-    Node* _unitCardArea = nullptr;          // 兵种卡片区域
+    ScrollView* _unitCardArea = nullptr;          // 兵种卡片区域
     Label* _resourceLabel = nullptr;        // 资源显示
 
     // 训练队列
@@ -158,7 +158,7 @@ private:
     bool isMaxLevel(int unitId);
 
     // 创建兵种卡片（带动画和按钮）
-    Node* createUnitCard(int unitId, int row, int col);
+    Node* createUnitCard(int unitId);
 
     // 创建待机动画精灵
     Sprite* createIdleAnimationSprite(int unitId);

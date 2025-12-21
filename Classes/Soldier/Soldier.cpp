@@ -58,6 +58,7 @@ bool Soldier::init(const UnitConfig* config, int level) {
    _lastAttackTime = 0.0f;
    _direction = Direction::RIGHT;  // 默认朝右
    _currentActionKey.clear();
+   _target = nullptr;
 
    // 4. 创建精灵
    _spriteBaseName = resolveSpriteBaseName(_config);
@@ -170,7 +171,7 @@ void Soldier::update(float dt) {
     }
 
     if (_target && !_target->getParent()) {
-        _target = nullptr;
+        setTarget(nullptr);
     }
 
     if (!_target) {
@@ -186,6 +187,24 @@ void Soldier::update(float dt) {
         else {
             moveToTarget(dt);
         }
+    }
+}
+
+void Soldier::onExit() {
+    setTarget(nullptr);
+    Node::onExit();
+}
+
+void Soldier::setTarget(cocos2d::Node* target) {
+    if (_target == target) {
+        return;
+    }
+    if (_target) {
+        _target->release();
+    }
+    _target = target;
+    if (_target) {
+        _target->retain();
     }
 }
 
@@ -240,7 +259,7 @@ void Soldier::findTarget() {
         target = pickNearest(false, false);
     }
 
-    _target = target;
+    setTarget(target);
 }
 
 void Soldier::moveToTarget(float dt) {
@@ -291,7 +310,7 @@ void Soldier::takeDamage(float damage) {
 
 void Soldier::attackTarget() {
     if (!_target || !_target->getParent()) {
-        _target = nullptr;
+        setTarget(nullptr);
         return;
     }
 

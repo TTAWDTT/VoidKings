@@ -18,6 +18,7 @@ public:
 
     virtual bool init(const UnitConfig* config, int level = 0); // 初始化并添加子节点
     virtual void update(float dt) override;
+    virtual void onExit() override;
 
     // 设置敌方建筑列表（由战斗场景提供）
     static void setEnemyBuildings(const std::vector<cocos2d::Node*>* buildings);
@@ -70,6 +71,7 @@ private:
     float getAttackDistance(const cocos2d::Node* target) const;
 
     // 内部行为逻辑
+    void setTarget(cocos2d::Node* target);
     void findTarget();            // 寻敌逻辑
     void moveToTarget(float dt);  // 移动逻辑
     void attackTarget();          // 攻击逻辑

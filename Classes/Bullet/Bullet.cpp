@@ -31,11 +31,20 @@ bool Bullet::init(const std::string& spriteFrame, float damage, float speed) {
 }
 
 void Bullet::setTarget(cocos2d::Node* target) {
+    if (_target == target) {
+        return;
+    }
+    if (_target) {
+        _target->release();
+    }
     _target = target;
+    if (_target) {
+        _target->retain();
+    }
 }
 
 void Bullet::update(float dt) {
-    if (!_target) {
+    if (!_target || !_target->getParent()) {
         this->removeFromParent();
         return;
     }
@@ -62,6 +71,14 @@ void Bullet::update(float dt) {
     if (_sprite) {
         _sprite->setRotation(-angle);
     }
+}
+
+void Bullet::onExit() {
+    if (_target) {
+        _target->release();
+        _target = nullptr;
+    }
+    Node::onExit();
 }
 
 void Bullet::onReachTarget() {

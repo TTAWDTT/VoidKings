@@ -1,10 +1,64 @@
 #include "DefenceBuilding.h"
 #include "Soldier/Soldier.h"
+#include "Bullet/Bullet.h"
 #include "Utils/AnimationUtils.h"
 
 USING_NS_CC;
 
 const std::vector<Soldier*>* DefenceBuilding::s_enemySoldiers = nullptr;
+
+namespace {
+class DefenceBullet : public Bullet {
+public:
+    static DefenceBullet* create(const std::string& spriteFrame,
+                                 float damage,
+                                 float speed,
+                                 bool isAOE,
+                                 float aoeRange,
+                                 const std::vector<Soldier*>* enemySoldiers) {
+        auto* bullet = new(std::nothrow) DefenceBullet();
+        if (bullet && bullet->init(spriteFrame, damage, speed)) {
+            bullet->_isAOE = isAOE;
+            bullet->_aoeRange = aoeRange;
+            bullet->_enemySoldiers = enemySoldiers;
+            bullet->autorelease();
+            return bullet;
+        }
+        CC_SAFE_DELETE(bullet);
+        return nullptr;
+    }
+
+protected:
+    void onReachTarget() override {
+        float damage = getDamage();
+        if (_isAOE && _enemySoldiers && _aoeRange > 0.0f) {
+            Vec2 impactPos = this->getPosition();
+            for (auto* soldier : *_enemySoldiers) {
+                if (!soldier || !soldier->getParent()) {
+                    continue;
+                }
+                if (soldier->getCurrentHP() <= 0) {
+                    continue;
+                }
+                if (impactPos.distance(soldier->getPosition()) <= _aoeRange) {
+                    soldier->takeDamage(damage);
+                }
+            }
+            return;
+        }
+
+        if (auto* soldier = dynamic_cast<Soldier*>(_target)) {
+            soldier->takeDamage(damage);
+        }
+    }
+
+private:
+    bool _isAOE = false;
+    float _aoeRange = 0.0f;
+    const std::vector<Soldier*>* _enemySoldiers = nullptr;
+};
+} // namespace
+
 
 void DefenceBuilding::setEnemySoldiers(const std::vector<Soldier*>* soldiers) {
     s_enemySoldiers = soldiers;
@@ -130,7 +184,7 @@ void DefenceBuilding::update(float dt) {
     }
 
     if (_target && !_target->getParent()) {
-        _target = nullptr;
+        setTarget(nullptr);
     }
 
     if (!_target) {
@@ -145,6 +199,24 @@ void DefenceBuilding::update(float dt) {
         else {
             _target = nullptr;
         }
+    }
+}
+
+void DefenceBuilding::onExit() {
+    setTarget(nullptr);
+    Node::onExit();
+}
+
+void DefenceBuilding::setTarget(cocos2d::Node* target) {
+    if (_target == target) {
+        return;
+    }
+    if (_target) {
+        _target->release();
+    }
+    _target = target;
+    if (_target) {
+        _target->retain();
     }
 }
 
@@ -197,7 +269,7 @@ void DefenceBuilding::findTarget() {
         }
     }
 
-    _target = nearest;
+    setTarget(nearest);
 }
 
 void DefenceBuilding::takeDamage(float damage) {
@@ -213,7 +285,7 @@ void DefenceBuilding::takeDamage(float damage) {
 
 void DefenceBuilding::attackTarget() {
     if (!_target || !_target->getParent()) {
-        _target = nullptr;
+        setTarget(nullptr);
         return;
     }
 
@@ -227,9 +299,32 @@ void DefenceBuilding::attackTarget() {
         playAnimation(_config->anim_attack, _config->anim_attack_frames, _config->anim_attack_delay, false);
         _lastAttackTime = currentTime;
 
-        if (auto soldier = dynamic_cast<Soldier*>(_target)) {
-            soldier->takeDamage(getCurrentATK());
+        auto* soldier = dynamic_cast<Soldier*>(_target);
+        if (!soldier) {
+            return;
         }
+
+        if (!_config->bulletSpriteFrameName.empty() && _config->bulletSpeed > 0.0f) {
+            auto* bullet = DefenceBullet::create(
+                _config->bulletSpriteFrameName,
+                getCurrentATK(),
+                _config->bulletSpeed,
+                _config->bulletIsAOE,
+                _config->bulletAOERange,
+                s_enemySoldiers
+            );
+            if (bullet) {
+                auto* parent = this->getParent();
+                if (parent) {
+                    parent->addChild(bullet, 20);
+                    bullet->setPosition(this->getPosition());
+                    bullet->setTarget(soldier);
+                    return;
+                }
+            }
+        }
+
+        soldier->takeDamage(getCurrentATK());
     }
 }
 
