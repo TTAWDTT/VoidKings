@@ -1,9 +1,9 @@
 /**
  * @file BuildShopPanel.h
- * @brief ½¨ÖşÉÌµêÃæ°å×é¼ş
+ * @brief ï¿½ï¿½ï¿½ï¿½ï¿½Ìµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
  *
- * ½«½¨ÖşÉÌµêÂß¼­´ÓBaseSceneÖĞ³éÈ¡³öÀ´£¬ÊµÏÖ¸ß¶ÈÄ£¿é»¯¡£
- * ±¾×é¼şÏÔÊ¾¿É½¨ÔìµÄ½¨ÖşÁĞ±í£¬Íæ¼Ò¿ÉÒÔÑ¡ÔñÒª½¨ÔìµÄ½¨Öş¡£
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ìµï¿½ï¿½ß¼ï¿½ï¿½ï¿½BaseSceneï¿½Ğ³ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½Ö¸ß¶ï¿½Ä£ï¿½é»¯ï¿½ï¿½
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½É½ï¿½ï¿½ï¿½Ä½ï¿½ï¿½ï¿½ï¿½Ğ±ï¿½ï¿½ï¿½ï¿½ï¿½Ò¿ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½Ä½ï¿½ï¿½ï¿½ï¿½ï¿½
  */
 
 #ifndef __BUILD_SHOP_PANEL_H__
@@ -18,50 +18,50 @@ USING_NS_CC;
 using namespace cocos2d::ui;
 
 // ===================================================
-// ½¨ÖşÉÌµêÅäÖÃ³£Á¿
+// ï¿½ï¿½ï¿½ï¿½ï¿½Ìµï¿½ï¿½ï¿½ï¿½Ã³ï¿½ï¿½ï¿½
 // ===================================================
 namespace BuildShopConfig {
-    // Ãæ°å³ß´ç
-    const Size PANEL_SIZE = Size(600.0f, 500.0f);
+    // é¢æ¿å°ºå¯¸ï¼ˆç¼©å°ä»¥é€‚åº”æ›´å°çš„å»ºç­‘å›¾æ ‡ï¼‰
+    const Size PANEL_SIZE = Size(450.0f, 350.0f);
 
-    // ±êÌâÅäÖÃ
-    constexpr int TITLE_FONT_SIZE = 28;
-    constexpr float TITLE_TOP_OFFSET = 40.0f;
+    // æ ‡é¢˜é…ç½®
+    constexpr int TITLE_FONT_SIZE = 22;
+    constexpr float TITLE_TOP_OFFSET = 30.0f;
 
-    // Íø¸ñ²¼¾ÖÅäÖÃ
-    constexpr int GRID_COLS = 3;                    // Ã¿ĞĞÏÔÊ¾µÄ½¨ÖşÊıÁ¿
-    constexpr float GRID_ITEM_SIZE = 140.0f;        // Ã¿¸öÍø¸ñÏîµÄ³ß´ç
-    constexpr float GRID_SPACING = 20.0f;           // Íø¸ñÏîÖ®¼äµÄ¼ä¾à
-    constexpr float GRID_START_Y = 380.0f;          // Íø¸ñÆğÊ¼YÎ»ÖÃ
-    constexpr float ICON_SIZE = 80.0f;              // ½¨ÖşÍ¼±ê³ß´ç
+    // ç½‘æ ¼å¸ƒå±€é…ç½®ï¼ˆç¼©å°è‡³åŸæ¥çš„1/4å¤§å°ï¼‰
+    constexpr int GRID_COLS = 3;                    // æ¯è¡Œæ˜¾ç¤ºçš„å»ºç­‘æ•°é‡
+    constexpr float GRID_ITEM_SIZE = 70.0f;         // æ¯ä¸ªå»ºç­‘é¡¹çš„å°ºå¯¸ï¼ˆåŸ140/2ï¼‰
+    constexpr float GRID_SPACING = 15.0f;           // å»ºç­‘é¡¹ä¹‹é—´çš„é—´è·
+    constexpr float GRID_START_Y = 260.0f;          // ç½‘æ ¼èµ·å§‹Yä½ç½®ï¼ˆè°ƒæ•´é€‚åº”æ–°é¢æ¿å¤§å°ï¼‰
+    constexpr float ICON_SIZE = 40.0f;              // å»ºç­‘å›¾æ ‡å°ºå¯¸ï¼ˆåŸ80/2ï¼‰
 
-    // ¹Ø±Õ°´Å¥ÅäÖÃ
-    constexpr float CLOSE_BUTTON_BOTTOM = 40.0f;
+    // å…³é—­æŒ‰é’®é…ç½®
+    constexpr float CLOSE_BUTTON_BOTTOM = 30.0f;
 }
 
 // ===================================================
-// ½¨ÖşÑ¡Ïî½á¹¹£¨º¬²¿Âä³åÍ»Éè¶¨£©
+// ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½á¹¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í»ï¿½è¶¨ï¿½ï¿½
 // ===================================================
 struct BuildingOption {
-    int type;               // ½¨ÖşÀàĞÍID
-    std::string name;       // ½¨ÖşÃû³Æ
-    int cost;               // ½¨Ôì·ÑÓÃ
-    int gridWidth;          // Õ¼ÓÃ¸ñ×Ó¿í¶È£¨²¿Âä³åÍ»Éè¶¨£©
-    int gridHeight;         // Õ¼ÓÃ¸ñ×Ó¸ß¶È£¨²¿Âä³åÍ»Éè¶¨£©
-    std::string spritePath; // ½¨ÖşÍ¼Æ¬Â·¾¶
-    bool canBuild;          // ÊÇ·ñ¿ÉÒÔ½¨Ôì£¨»ùµØºÍ±øÓªÖ»ÄÜÓĞÒ»¸ö£©
+    int type;               // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ID
+    std::string name;       // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    int cost;               // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    int gridWidth;          // Õ¼ï¿½Ã¸ï¿½ï¿½Ó¿ï¿½ï¿½È£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í»ï¿½è¶¨ï¿½ï¿½
+    int gridHeight;         // Õ¼ï¿½Ã¸ï¿½ï¿½Ó¸ß¶È£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í»ï¿½è¶¨ï¿½ï¿½
+    std::string spritePath; // ï¿½ï¿½ï¿½ï¿½Í¼Æ¬Â·ï¿½ï¿½
+    bool canBuild;          // ï¿½Ç·ï¿½ï¿½ï¿½Ô½ï¿½ï¿½ì£¨ï¿½ï¿½ï¿½ØºÍ±ï¿½ÓªÖ»ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½
 };
 
 // ===================================================
-// ½¨ÖşÉÌµêÃæ°åÀà
+// ï¿½ï¿½ï¿½ï¿½ï¿½Ìµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 // ===================================================
 class BuildShopPanel : public Node {
 public:
     /**
-     * @brief ´´½¨½¨ÖşÉÌµêÃæ°å
-     * @param onBuildingSelected Ñ¡Ôñ½¨ÖşÊ±µÄ»Øµ÷£¬²ÎÊıÎª½¨ÖşÑ¡Ïî
-     * @param onClose ¹Ø±ÕÃæ°åÊ±µÄ»Øµ÷
-     * @return ´´½¨µÄÃæ°åÊµÀı
+     * @brief ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ìµï¿½ï¿½ï¿½ï¿½
+     * @param onBuildingSelected Ñ¡ï¿½ï¿½ï¿½ï¿½Ê±ï¿½Ä»Øµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½
+     * @param onClose ï¿½Ø±ï¿½ï¿½ï¿½ï¿½Ê±ï¿½Ä»Øµï¿½
+     * @return ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½
      */
     static BuildShopPanel* create(
         const std::function<void(const BuildingOption&)>& onBuildingSelected = nullptr,
@@ -69,7 +69,7 @@ public:
     );
 
     /**
-     * @brief ³õÊ¼»¯Ãæ°å
+     * @brief ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½
      */
     virtual bool init(
         const std::function<void(const BuildingOption&)>& onBuildingSelected,
@@ -77,50 +77,50 @@ public:
     );
 
     /**
-     * @brief ÏÔÊ¾Ãæ°å
+     * @brief ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½
      */
     void show();
 
     /**
-     * @brief Òş²ØÃæ°å
+     * @brief ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
      */
     void hide();
 
     /**
-     * @brief ¼ì²éÃæ°åÊÇ·ñÕıÔÚÏÔÊ¾
+     * @brief ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾
      */
     bool isShowing() const { return _isShowing; }
 
     /**
-     * @brief »ñÈ¡½¨ÖşÑ¡ÏîÁĞ±í
+     * @brief ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½Ğ±ï¿½
      */
     const std::vector<BuildingOption>& getBuildingOptions() const { return _buildingOptions; }
 
     /**
-     * @brief ÉèÖÃ½¨ÖşÊÇ·ñ¿É½¨Ôì
-     * @param type ½¨ÖşÀàĞÍ
-     * @param canBuild ÊÇ·ñ¿É½¨Ôì
+     * @brief ï¿½ï¿½ï¿½Ã½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½É½ï¿½ï¿½ï¿½
+     * @param type ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+     * @param canBuild ï¿½Ç·ï¿½É½ï¿½ï¿½ï¿½
      */
     void setBuildingCanBuild(int type, bool canBuild);
 
 private:
-    // UI×é¼ş
-    LayerColor* _background = nullptr;      // °ëÍ¸Ã÷±³¾°
-    LayerColor* _panel = nullptr;           // Ãæ°åÖ÷Ìå
-    Label* _titleLabel = nullptr;           // ±êÌâ
-    Node* _gridContainer = nullptr;         // Íø¸ñÈİÆ÷
+    // UIï¿½ï¿½ï¿½
+    LayerColor* _background = nullptr;      // ï¿½ï¿½Í¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    LayerColor* _panel = nullptr;           // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    Label* _titleLabel = nullptr;           // ï¿½ï¿½ï¿½ï¿½
+    Node* _gridContainer = nullptr;         // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-    // ½¨ÖşÑ¡ÏîÁĞ±í
+    // ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½Ğ±ï¿½
     std::vector<BuildingOption> _buildingOptions;
 
-    // »Øµ÷º¯Êı
+    // ï¿½Øµï¿½ï¿½ï¿½ï¿½ï¿½
     std::function<void(const BuildingOption&)> _onBuildingSelected;
     std::function<void()> _onClose;
 
     // ×´Ì¬
     bool _isShowing = false;
 
-    // ³õÊ¼»¯·½·¨
+    // ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     void setupBackground();
     void setupPanel();
     void setupTitle();
@@ -128,17 +128,17 @@ private:
     void setupCloseButton();
 
     /**
-     * @brief ³õÊ¼»¯½¨ÖşÑ¡Ïî
-     * °´ÕÕ²¿Âä³åÍ»µÄÉè¶¨ÅäÖÃ½¨Öş³ß´ç
+     * @brief ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½
+     * ï¿½ï¿½ï¿½Õ²ï¿½ï¿½ï¿½ï¿½Í»ï¿½ï¿½ï¿½è¶¨ï¿½ï¿½ï¿½Ã½ï¿½ï¿½ï¿½ï¿½ß´ï¿½
      */
     void initBuildingOptions();
 
     /**
-     * @brief ´´½¨µ¥¸ö½¨ÖşÍø¸ñÏî£¨´øÍ¼±ê£©
-     * @param option ½¨ÖşÑ¡Ïî
-     * @param row ĞĞºÅ
-     * @param col ÁĞºÅ
-     * @return ´´½¨µÄÍø¸ñÏî½Úµã
+     * @brief ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½î£¨ï¿½ï¿½Í¼ï¿½ê£©
+     * @param option ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½
+     * @param row ï¿½Ğºï¿½
+     * @param col ï¿½Ğºï¿½
+     * @return ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Úµï¿½
      */
     Node* createBuildingGridItem(const BuildingOption& option, int row, int col);
 };

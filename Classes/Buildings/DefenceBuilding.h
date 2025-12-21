@@ -39,6 +39,12 @@ private:
     void updateHealthBar(bool animate = true);
     void playAnimation(const std::string& animType, int frameCount, float delay, bool loop);
     void stopCurrentAnimation();
+    
+    /**
+     * @brief 尝试播放待机动画
+     * 对于有帧动画的建筑（如Tree），自动加载并播放循环动画
+     */
+    void tryPlayIdleAnimation();
 };
 
 #endif // __DEFENCE_BUILDING_H__

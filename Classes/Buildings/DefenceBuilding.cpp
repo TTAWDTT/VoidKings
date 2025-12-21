@@ -29,15 +29,16 @@ bool DefenceBuilding::init(const DefenceBuildingConfig* config, int level) {
     _bodySprite = Sprite::create(_config->spriteFrameName);
     if (_bodySprite) {
         this->addChild(_bodySprite);
+        
+        // 检查是否是有动画的建筑（如Tree），如果是则播放帧动画
+        tryPlayIdleAnimation();
     }
 
-    // Create health bar using DrawNode if image not available
+    // 如果没有血条图片，则创建简单的彩色血条
     _healthBar = Sprite::create("res/health_bar.png");
     if (!_healthBar) {
-        // Create a simple colored sprite as health bar
         auto healthBarBg = Sprite::create();
         if (healthBarBg) {
-            // Create a 1x1 white texture and scale it
             unsigned char data[] = {255, 255, 255, 255};
             auto texture = new Texture2D();
             texture->initWithData(data, 1, Texture2D::PixelFormat::RGBA8888, 1, 1, Size(1, 1));
@@ -225,4 +226,39 @@ void DefenceBuilding::stopCurrentAnimation() {
     if (!_bodySprite) return;
     _bodySprite->stopAllActions();
     _currentActionKey.clear();
+}
+
+void DefenceBuilding::tryPlayIdleAnimation() {
+    if (!_bodySprite || !_config) return;
+    
+    // 检查spriteFrameName是否是Tree类型（目录路径格式）
+    const std::string& spritePath = _config->spriteFrameName;
+    
+    // 如果是buildings/Tree/sprite_XXXX.png格式，尝试加载帧动画
+    if (spritePath.find("buildings/Tree/") != std::string::npos) {
+        // Tree有16帧动画 (sprite_0000.png 到 sprite_0015.png)
+        Animation* anim = Animation::create();
+        bool hasFrames = false;
+        
+        for (int i = 0; i < 16; ++i) {
+            char framePath[128];
+            snprintf(framePath, sizeof(framePath), "buildings/Tree/sprite_%04d.png", i);
+            auto frame = SpriteFrame::create(framePath, Rect(0, 0, 64, 64));
+            if (frame) {
+                anim->addSpriteFrame(frame);
+                hasFrames = true;
+            }
+        }
+        
+        if (hasFrames) {
+            anim->setDelayPerUnit(0.1f);  // 每帧0.1秒
+            anim->setRestoreOriginalFrame(false);
+            
+            auto animate = Animate::create(anim);
+            _bodySprite->runAction(RepeatForever::create(animate));
+            _currentActionKey = "idle";
+            
+            CCLOG("[防御建筑] Tree动画加载成功，共16帧");
+        }
+    }
 }
