@@ -1,9 +1,9 @@
 /**
  * @file BuildShopPanel.h
- * @brief 建筑商店面板组件
+ * @brief 建筑商店面板
  *
  * 将建筑商店逻辑从BaseScene中抽取出来，实现高度模块化。
- * 本组件显示可建造的建筑列表，玩家可以选择要建造的建筑。
+ * 面板用于显示可建造的建筑列表，玩家可以选择要建造的建筑。
  */
 
 #ifndef __BUILD_SHOP_PANEL_H__
@@ -21,31 +21,31 @@ using namespace cocos2d::ui;
 // 建筑商店配置常量
 // ===================================================
 namespace BuildShopConfig {
-    // 面板尺寸
-    const Size PANEL_SIZE = Size(600.0f, 500.0f);
+    // 面板尺寸（缩小以适应更小的建筑图标）
+    const Size PANEL_SIZE = Size(450.0f, 350.0f);
 
     // 标题配置
-    constexpr int TITLE_FONT_SIZE = 28;
-    constexpr float TITLE_TOP_OFFSET = 40.0f;
+    constexpr int TITLE_FONT_SIZE = 22;
+    constexpr float TITLE_TOP_OFFSET = 30.0f;
 
-    // 网格布局配置
+    // 网格布局配置（缩小至原来的1/2大小，保持美观）
     constexpr int GRID_COLS = 3;                    // 每行显示的建筑数量
-    constexpr float GRID_ITEM_SIZE = 140.0f;        // 每个网格项的尺寸
-    constexpr float GRID_SPACING = 20.0f;           // 网格项之间的间距
-    constexpr float GRID_START_Y = 380.0f;          // 网格起始Y位置
-    constexpr float ICON_SIZE = 80.0f;              // 建筑图标尺寸
+    constexpr float GRID_ITEM_SIZE = 70.0f;         // 每个建筑项的尺寸（原140的一半）
+    constexpr float GRID_SPACING = 15.0f;           // 建筑项之间的间距
+    constexpr float GRID_START_Y = 260.0f;          // 网格起始Y位置（调整适应新面板大小）
+    constexpr float ICON_SIZE = 40.0f;              // 建筑图标尺寸（原80的一半）
 
     // 关闭按钮配置
-    constexpr float CLOSE_BUTTON_BOTTOM = 40.0f;
+    constexpr float CLOSE_BUTTON_BOTTOM = 30.0f;
 }
 
 // ===================================================
-// 建筑选项结构（含部落冲突设定）
+// 建筑选项结构（部落冲突设定）
 // ===================================================
 struct BuildingOption {
     int type;               // 建筑类型ID
     std::string name;       // 建筑名称
-    int cost;               // 建造费用
+    int cost;               // 建筑费用
     int gridWidth;          // 占用格子宽度（部落冲突设定）
     int gridHeight;         // 占用格子高度（部落冲突设定）
     std::string spritePath; // 建筑图片路径
@@ -61,7 +61,7 @@ public:
      * @brief 创建建筑商店面板
      * @param onBuildingSelected 选择建筑时的回调，参数为建筑选项
      * @param onClose 关闭面板时的回调
-     * @return 创建的面板实例
+     * @return 面板实例
      */
     static BuildShopPanel* create(
         const std::function<void(const BuildingOption&)>& onBuildingSelected = nullptr,
@@ -105,8 +105,8 @@ public:
 
 private:
     // UI组件
-    LayerColor* _background = nullptr;      // 半透明背景
-    LayerColor* _panel = nullptr;           // 面板主体
+    LayerColor* _background = nullptr;      // 半透明遮罩
+    LayerColor* _panel = nullptr;           // 主面板
     Label* _titleLabel = nullptr;           // 标题
     Node* _gridContainer = nullptr;         // 网格容器
 
@@ -129,16 +129,16 @@ private:
 
     /**
      * @brief 初始化建筑选项
-     * 按照部落冲突的设定配置建筑尺寸
+     * 根据部落冲突的设定设置建筑尺寸
      */
     void initBuildingOptions();
 
     /**
-     * @brief 创建单个建筑网格项（带图标）
+     * @brief 创建建筑网格项（包含小图标）
      * @param option 建筑选项
      * @param row 行号
      * @param col 列号
-     * @return 创建的网格项节点
+     * @return 建筑网格项节点
      */
     Node* createBuildingGridItem(const BuildingOption& option, int row, int col);
 };

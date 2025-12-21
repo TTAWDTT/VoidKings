@@ -2,10 +2,10 @@
  * @file BattleScene.h
  * @brief 战斗场景头文件
  *
- * 战斗场景用于测试战斗系统，包含：
+ * 战斗场景用于测试战斗系统，包括：
  * - 敌方基地和防御建筑
- * - 玩家部署的士兵
- * - 战斗逻辑处理
+ * - 玩家部署士兵
+ * - 战斗逻辑更新
  */
 
 #ifndef __BATTLE_SCENE_H__
@@ -48,7 +48,7 @@ public:
     /**
      * @brief 创建战斗场景
      * @param levelId 关卡ID
-     * @param units 可部署的兵种 <兵种ID, 数量>
+     * @param units 可部署的单位 <单位ID, 数量>
      */
     static Scene* createScene(int levelId = 1, const std::map<int, int>& units = {});
 
@@ -60,7 +60,7 @@ public:
     // 设置关卡ID
     void setLevelId(int levelId) { _levelId = levelId; }
 
-    // 设置可部署的兵种
+    // 设置可部署的单位
     void setDeployableUnits(const std::map<int, int>& units) { _deployableUnits = units; }
 
 private:
@@ -72,8 +72,8 @@ private:
 
     // ==================== 关卡数据 ====================
     int _levelId = 1;                               // 当前关卡ID
-    std::map<int, int> _deployableUnits;            // 可部署的兵种 <ID, 数量>
-    std::map<int, int> _remainingUnits;             // 剩余可部署的兵种
+    std::map<int, int> _deployableUnits;            // 可部署的单位 <ID, 数量>
+    std::map<int, int> _remainingUnits;             // 剩余可部署的单位
 
     // ==================== 战斗状态 ====================
     std::vector<Soldier*> _soldiers;                // 场上的士兵
@@ -86,7 +86,7 @@ private:
     // ==================== UI组件 ====================
     Label* _timerLabel = nullptr;                   // 计时器
     Label* _progressLabel = nullptr;                // 进度显示
-    Node* _unitDeployArea = nullptr;                // 兵种部署区域
+    Node* _unitDeployArea = nullptr;                // 单位部署区域
 
     // ==================== 初始化方法 ====================
     void initGridMap();
@@ -98,6 +98,16 @@ private:
     void createLevel1();  // 创建第1关
     void createEnemyBase(int gridX, int gridY);
     void createDefenseTower(int gridX, int gridY, int type);
+
+    // ==================== 辅助方法 ====================
+    /**
+     * @brief 缩放建筑以适应格子大小
+     * @param building 建筑节点
+     * @param gridWidth 格子宽度
+     * @param gridHeight 格子高度
+     * @param cellSize 单个格子的像素尺寸
+     */
+    void scaleBuildingToFit(Node* building, int gridWidth, int gridHeight, float cellSize);
 
     // ==================== 部署系统 ====================
     void setupDeployArea();

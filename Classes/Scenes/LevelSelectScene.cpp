@@ -424,15 +424,19 @@ Node* LevelSelectScene::createUnitPreviewIcon(int unitId, int count) {
 // ===================================================
 // 退出按钮设置 - 黑白风格（缩小尺寸）
 // ===================================================
+// 退出按钮设置 - 使用Button组件确保点击可靠
+// ===================================================
 
 void LevelSelectScene::setupExitButton() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
-    // 创建简单的文字按钮（缩小尺寸）
-    auto exitNode = Node::create();
+    // 按钮尺寸
     float btnWidth = 60.0f;
     float btnHeight = 25.0f;
+
+    // 创建按钮容器节点
+    auto exitNode = Node::create();
 
     // 按钮背景
     auto bg = LayerColor::create(Color4B(40, 40, 40, 255), btnWidth, btnHeight);
@@ -445,7 +449,7 @@ void LevelSelectScene::setupExitButton() {
     border->drawRect(Vec2(-btnWidth / 2, -btnHeight / 2), Vec2(btnWidth / 2, btnHeight / 2), Color4F::WHITE);
     exitNode->addChild(border, 1);
 
-    // 文字（缩小字体）
+    // 文字
     auto label = Label::createWithTTF("BACK", "fonts/arial.ttf", 11);
     if (!label) {
         label = Label::createWithSystemFont("BACK", "Arial", 11);
@@ -453,30 +457,22 @@ void LevelSelectScene::setupExitButton() {
     label->setColor(Color3B::WHITE);
     exitNode->addChild(label, 2);
 
-    exitNode->setPosition(Vec2(
-        origin.x + LevelSelectConfig::EXIT_BUTTON_MARGIN + btnWidth / 2,
-        origin.y + visibleSize.height - LevelSelectConfig::EXIT_BUTTON_MARGIN - btnHeight / 2
-    ));
+    // 设置位置
+    float btnX = origin.x + LevelSelectConfig::EXIT_BUTTON_MARGIN + btnWidth / 2;
+    float btnY = origin.y + visibleSize.height - LevelSelectConfig::EXIT_BUTTON_MARGIN - btnHeight / 2;
+    exitNode->setPosition(Vec2(btnX, btnY));
     this->addChild(exitNode, 20);
 
-    // 点击按钮 - 使用TouchListener代替空Button
-    auto touchListener = EventListenerTouchOneByOne::create();
-    touchListener->setSwallowTouches(true);
-    touchListener->onTouchBegan = [this, btnWidth, btnHeight, origin, visibleSize](Touch* touch, Event* event) -> bool {
-        Vec2 touchPos = touch->getLocation();
-        Rect btnRect(
-            origin.x + LevelSelectConfig::EXIT_BUTTON_MARGIN,
-            origin.y + visibleSize.height - LevelSelectConfig::EXIT_BUTTON_MARGIN - btnHeight,
-            btnWidth,
-            btnHeight
-        );
-        if (btnRect.containsPoint(touchPos)) {
-            this->onExitButton(nullptr);
-            return true;
-        }
-        return false;
-    };
-    _eventDispatcher->addEventListenerWithSceneGraphPriority(touchListener, exitNode);
+    // 创建透明Button覆盖在上面，确保点击可靠
+    auto touchBtn = Button::create();
+    touchBtn->setContentSize(Size(btnWidth, btnHeight));
+    touchBtn->setScale9Enabled(true);
+    touchBtn->setPosition(Vec2(btnX, btnY));
+    touchBtn->addClickEventListener([this](Ref* sender) {
+        CCLOG("[关卡选择] 点击返回按钮");
+        this->onExitButton(nullptr);
+        });
+    this->addChild(touchBtn, 21);
 }
 
 // ===================================================

@@ -20,7 +20,7 @@ bool DefenceBuilding::init(const DefenceBuildingConfig* config, int level) {
     _level = level;
     if (_level < 0) _level = 0;
     if (_level > _config->MAXLEVEL) _level = _config->MAXLEVEL;
-    
+
     _currentHP = getCurrentMaxHP();
     _target = nullptr;
     _lastAttackTime = 0.0f;
@@ -29,16 +29,17 @@ bool DefenceBuilding::init(const DefenceBuildingConfig* config, int level) {
     _bodySprite = Sprite::create(_config->spriteFrameName);
     if (_bodySprite) {
         this->addChild(_bodySprite);
+
+        // 检查是否是有动画的建筑（如Tree），如果是则播放帧动画
+        tryPlayIdleAnimation();
     }
 
-    // Create health bar using DrawNode if image not available
+    // 如果没有血条图片，则创建简单的彩色血条
     _healthBar = Sprite::create("res/health_bar.png");
     if (!_healthBar) {
-        // Create a simple colored sprite as health bar
         auto healthBarBg = Sprite::create();
         if (healthBarBg) {
-            // Create a 1x1 white texture and scale it
-            unsigned char data[] = {255, 255, 255, 255};
+            unsigned char data[] = { 255, 255, 255, 255 };
             auto texture = new Texture2D();
             texture->initWithData(data, 1, Texture2D::PixelFormat::RGBA8888, 1, 1, Size(1, 1));
             healthBarBg->initWithTexture(texture);
@@ -118,11 +119,13 @@ int DefenceBuilding::getWidth() const {
 void DefenceBuilding::update(float dt) {
     if (!_target) {
         findTarget();
-    } else {
+    }
+    else {
         float dist = this->getPosition().distance(_target->getPosition());
         if (dist <= getCurrentATK_RANGE()) {
             attackTarget();
-        } else {
+        }
+        else {
             _target = nullptr;
         }
     }
@@ -135,9 +138,9 @@ void DefenceBuilding::findTarget() {
 void DefenceBuilding::takeDamage(float damage) {
     _currentHP -= damage;
     if (_currentHP < 0) _currentHP = 0;
-    
+
     updateHealthBar(true);
-    
+
     if (_currentHP <= 0) {
         this->removeFromParent();
     }
@@ -145,14 +148,14 @@ void DefenceBuilding::takeDamage(float damage) {
 
 void DefenceBuilding::attackTarget() {
     if (!_target) return;
-    
+
     float currentTime = Director::getInstance()->getTotalFrames() / 60.0f;
     float attackSpeed = getCurrentATK_SPEED();
-    
+
     if (currentTime - _lastAttackTime >= attackSpeed) {
         playAnimation(_config->anim_attack, _config->anim_attack_frames, _config->anim_attack_delay, false);
         _lastAttackTime = currentTime;
-        
+
         // TODO: Create and fire bullet
     }
 }
@@ -174,50 +177,55 @@ void DefenceBuilding::updateHealthBar(bool animate) {
         _healthBar->stopAllActions();
         auto action = ScaleTo::create(0.12f, targetScaleX, 1.0f);
         _healthBar->runAction(action);
-    } else {
+    }
+    else {
         _healthBar->setScaleX(targetScaleX);
     }
 
     if (pct > 0.5f) {
         _healthBar->setColor(Color3B::GREEN);
-    } else if (pct > 0.2f) {
+    }
+    else if (pct > 0.2f) {
         _healthBar->setColor(Color3B::YELLOW);
-    } else {
+    }
+    else {
         _healthBar->setColor(Color3B::RED);
     }
 
     if (pct <= 0.0f) {
         _healthBar->setVisible(false);
-    } else {
+    }
+    else {
         _healthBar->setVisible(true);
     }
 }
 
 void DefenceBuilding::playAnimation(const std::string& animType, int frameCount, float delay, bool loop) {
     if (!_bodySprite || !_config) return;
-    
+
     std::string key = animType;
     if (_currentActionKey == key) return;
-    
+
     auto anim = AnimationUtils::buildAnimationFromFrames(_config->spriteFrameName, animType, frameCount, delay);
     if (!anim) return;
-    
+
     _bodySprite->stopAllActions();
-    
+
     if (loop) {
         auto act = RepeatForever::create(Animate::create(anim));
         _bodySprite->runAction(act);
-    } else {
+    }
+    else {
         auto sequence = Sequence::create(
             Animate::create(anim),
             CallFunc::create([this]() {
                 _currentActionKey.clear();
-            }),
+                }),
             nullptr
         );
         _bodySprite->runAction(sequence);
     }
-    
+
     _currentActionKey = key;
 }
 
@@ -225,4 +233,48 @@ void DefenceBuilding::stopCurrentAnimation() {
     if (!_bodySprite) return;
     _bodySprite->stopAllActions();
     _currentActionKey.clear();
+}
+
+void DefenceBuilding::tryPlayIdleAnimation() {
+    if (!_bodySprite || !_config) return;
+
+    // 检查spriteFrameName是否是Tree类型（目录路径格式）
+    const std::string& spritePath = _config->spriteFrameName;
+
+    // 如果是buildings/Tree/sprite_XXXX.png格式，尝试加载帧动画
+    if (spritePath.find("buildings/Tree/") != std::string::npos) {
+        // Tree动画配置
+        constexpr int TREE_FRAME_COUNT = 16;    // 帧数
+        constexpr float TREE_FRAME_DELAY = 0.1f; // 每帧延迟（秒）
+
+        Animation* anim = Animation::create();
+        int loadedFrames = 0;
+
+        for (int i = 0; i < TREE_FRAME_COUNT; ++i) {
+            // 使用StringUtils::format更安全地格式化路径
+            std::string framePath = StringUtils::format("buildings/Tree/sprite_%04d.png", i);
+
+            // 尝试直接创建精灵获取真实尺寸
+            auto tempSprite = Sprite::create(framePath);
+            if (tempSprite) {
+                Size frameSize = tempSprite->getContentSize();
+                auto frame = SpriteFrame::create(framePath, Rect(0, 0, frameSize.width, frameSize.height));
+                if (frame) {
+                    anim->addSpriteFrame(frame);
+                    loadedFrames++;
+                }
+            }
+        }
+
+        if (loadedFrames > 0) {
+            anim->setDelayPerUnit(TREE_FRAME_DELAY);
+            anim->setRestoreOriginalFrame(false);
+
+            auto animate = Animate::create(anim);
+            _bodySprite->runAction(RepeatForever::create(animate));
+            _currentActionKey = "idle";
+
+            CCLOG("[防御建筑] Tree动画加载成功，共%d帧", loadedFrames);
+        }
+    }
 }
