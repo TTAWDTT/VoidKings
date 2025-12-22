@@ -72,42 +72,42 @@ void ProductionBuilding::setLevel(int level) {
 }
 
 float ProductionBuilding::getCurrentMaxHP() const {
-    if (_level >= 0 && _level < _config->HP.size()) {
+    if (_level >= 0 && static_cast<size_t>(_level) < _config->HP.size()) {
         return _config->HP[_level];
     }
     return _config->HP.empty() ? 0.0f : _config->HP[0];
 }
 
 float ProductionBuilding::getCurrentDP() const {
-    if (_level >= 0 && _level < _config->DP.size()) {
+    if (_level >= 0 && static_cast<size_t>(_level) < _config->DP.size()) {
         return _config->DP[_level];
     }
     return _config->DP.empty() ? 0.0f : _config->DP[0];
 }
 
 float ProductionBuilding::getCurrentPRODUCE_ELIXIR() const {
-    if (_level >= 0 && _level < _config->PRODUCE_ELIXIR.size()) {
+    if (_level >= 0 && static_cast<size_t>(_level) < _config->PRODUCE_ELIXIR.size()) {
         return _config->PRODUCE_ELIXIR[_level];
     }
     return _config->PRODUCE_ELIXIR.empty() ? 0.0f : _config->PRODUCE_ELIXIR[0];
 }
 
 float ProductionBuilding::getCurrentSTORAGE_ELIXIR_CAPACITY() const {
-    if (_level >= 0 && _level < _config->STORAGE_ELIXIR_CAPACITY.size()) {
+    if (_level >= 0 && static_cast<size_t>(_level) < _config->STORAGE_ELIXIR_CAPACITY.size()) {
         return _config->STORAGE_ELIXIR_CAPACITY[_level];
     }
     return _config->STORAGE_ELIXIR_CAPACITY.empty() ? 0.0f : _config->STORAGE_ELIXIR_CAPACITY[0];
 }
 
 float ProductionBuilding::getCurrentPRODUCE_GOLD() const {
-    if (_level >= 0 && _level < _config->PRODUCE_GOLD.size()) {
+    if (_level >= 0 && static_cast<size_t>(_level) < _config->PRODUCE_GOLD.size()) {
         return _config->PRODUCE_GOLD[_level];
     }
     return _config->PRODUCE_GOLD.empty() ? 0.0f : _config->PRODUCE_GOLD[0];
 }
 
 float ProductionBuilding::getCurrentSTORAGE_GOLD_CAPACITY() const {
-    if (_level >= 0 && _level < _config->STORAGE_GOLD_CAPACITY.size()) {
+    if (_level >= 0 && static_cast<size_t>(_level) < _config->STORAGE_GOLD_CAPACITY.size()) {
         return _config->STORAGE_GOLD_CAPACITY[_level];
     }
     return _config->STORAGE_GOLD_CAPACITY.empty() ? 0.0f : _config->STORAGE_GOLD_CAPACITY[0];

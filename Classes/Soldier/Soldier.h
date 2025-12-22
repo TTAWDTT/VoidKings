@@ -40,6 +40,9 @@ public:
     // 获取当前方向
     Direction getDirection() const { return _direction; }
 
+    // 是否为飞行单位（用于防御建筑判定可攻击目标）
+    bool isFlying() const { return _config ? _config->ISFLY : false; }
+
 private:
     static const std::vector<cocos2d::Node*>* s_enemyBuildings;
 

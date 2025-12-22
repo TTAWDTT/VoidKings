@@ -1,4 +1,4 @@
-#include "DefenceBuilding.h"
+ï»¿#include "DefenceBuilding.h"
 #include "Soldier/Soldier.h"
 #include "Bullet/Bullet.h"
 #include "Utils/AnimationUtils.h"
@@ -15,11 +15,15 @@ public:
                                  float speed,
                                  bool isAOE,
                                  float aoeRange,
+                                 bool allowSky,
+                                 bool allowGround,
                                  const std::vector<Soldier*>* enemySoldiers) {
         auto* bullet = new(std::nothrow) DefenceBullet();
         if (bullet && bullet->init(spriteFrame, damage, speed)) {
             bullet->_isAOE = isAOE;
             bullet->_aoeRange = aoeRange;
+            bullet->_allowSky = allowSky;
+            bullet->_allowGround = allowGround;
             bullet->_enemySoldiers = enemySoldiers;
             bullet->autorelease();
             return bullet;
@@ -34,10 +38,7 @@ protected:
         if (_isAOE && _enemySoldiers && _aoeRange > 0.0f) {
             Vec2 impactPos = this->getPosition();
             for (auto* soldier : *_enemySoldiers) {
-                if (!soldier || !soldier->getParent()) {
-                    continue;
-                }
-                if (soldier->getCurrentHP() <= 0) {
+                if (!canHitSoldier(soldier)) {
                     continue;
                 }
                 if (impactPos.distance(soldier->getPosition()) <= _aoeRange) {
@@ -48,13 +49,31 @@ protected:
         }
 
         if (auto* soldier = dynamic_cast<Soldier*>(_target)) {
-            soldier->takeDamage(damage);
+            if (canHitSoldier(soldier)) {
+                soldier->takeDamage(damage);
+            }
         }
     }
 
 private:
+    // ç›®æ ‡è¿‡æ»¤ï¼šæ­»äº¡/ç©ºåœ°å¯æ”»å‡»åˆ¤æ–­
+    bool canHitSoldier(const Soldier* soldier) const {
+        if (!soldier || !soldier->getParent()) {
+            return false;
+        }
+        if (soldier->getCurrentHP() <= 0) {
+            return false;
+        }
+        if (soldier->isFlying()) {
+            return _allowSky;
+        }
+        return _allowGround;
+    }
+
     bool _isAOE = false;
     float _aoeRange = 0.0f;
+    bool _allowSky = false;
+    bool _allowGround = false;
     const std::vector<Soldier*>* _enemySoldiers = nullptr;
 };
 } // namespace
@@ -92,11 +111,11 @@ bool DefenceBuilding::init(const DefenceBuildingConfig* config, int level) {
     if (_bodySprite) {
         this->addChild(_bodySprite);
 
-        // ¼ì²éÊÇ·ñÊÇÓĞ¶¯»­µÄ½¨Öş£¨ÈçTree£©£¬Èç¹ûÊÇÔò²¥·ÅÖ¡¶¯»­
+        // æ£€æŸ¥æ˜¯å¦æ˜¯æœ‰åŠ¨ç”»çš„å»ºç­‘ï¼ˆå¦‚Treeï¼‰ï¼Œå¦‚æœæ˜¯åˆ™æ’­æ”¾å¸§åŠ¨ç”»
         tryPlayIdleAnimation();
     }
 
-    // Èç¹ûÃ»ÓĞÑªÌõÍ¼Æ¬£¬Ôò´´½¨¼òµ¥µÄ²ÊÉ«ÑªÌõ
+    // å¦‚æœæ²¡æœ‰è¡€æ¡å›¾ç‰‡ï¼Œåˆ™åˆ›å»ºç®€å•çš„å½©è‰²è¡€æ¡
     _healthBar = Sprite::create("res/health_bar.png");
     if (!_healthBar) {
         auto healthBarBg = Sprite::create();
@@ -136,35 +155,35 @@ void DefenceBuilding::setLevel(int level) {
 }
 
 float DefenceBuilding::getCurrentMaxHP() const {
-    if (_level >= 0 && _level < _config->HP.size()) {
+    if (_level >= 0 && static_cast<size_t>(_level) < _config->HP.size()) {
         return _config->HP[_level];
     }
     return _config->HP.empty() ? 0.0f : _config->HP[0];
 }
 
 float DefenceBuilding::getCurrentDP() const {
-    if (_level >= 0 && _level < _config->DP.size()) {
+    if (_level >= 0 && static_cast<size_t>(_level) < _config->DP.size()) {
         return _config->DP[_level];
     }
     return _config->DP.empty() ? 0.0f : _config->DP[0];
 }
 
 float DefenceBuilding::getCurrentATK_SPEED() const {
-    if (_level >= 0 && _level < _config->ATK_SPEED.size()) {
+    if (_level >= 0 && static_cast<size_t>(_level) < _config->ATK_SPEED.size()) {
         return _config->ATK_SPEED[_level];
     }
     return _config->ATK_SPEED.empty() ? 0.0f : _config->ATK_SPEED[0];
 }
 
 float DefenceBuilding::getCurrentATK() const {
-    if (_level >= 0 && _level < _config->ATK.size()) {
+    if (_level >= 0 && static_cast<size_t>(_level) < _config->ATK.size()) {
         return _config->ATK[_level];
     }
     return _config->ATK.empty() ? 0.0f : _config->ATK[0];
 }
 
 float DefenceBuilding::getCurrentATK_RANGE() const {
-    if (_level >= 0 && _level < _config->ATK_RANGE.size()) {
+    if (_level >= 0 && static_cast<size_t>(_level) < _config->ATK_RANGE.size()) {
         return _config->ATK_RANGE[_level];
     }
     return _config->ATK_RANGE.empty() ? 0.0f : _config->ATK_RANGE[0];
@@ -183,8 +202,11 @@ void DefenceBuilding::update(float dt) {
         return;
     }
 
-    if (_target && !_target->getParent()) {
-        setTarget(nullptr);
+    if (_target) {
+        auto* soldier = dynamic_cast<Soldier*>(_target);
+        if (!canTargetSoldier(soldier)) {
+            setTarget(nullptr);
+        }
     }
 
     if (!_target) {
@@ -192,12 +214,17 @@ void DefenceBuilding::update(float dt) {
     }
 
     if (_target) {
+        auto* soldier = dynamic_cast<Soldier*>(_target);
+        if (!canTargetSoldier(soldier)) {
+            setTarget(nullptr);
+            return;
+        }
         float dist = this->getPosition().distance(_target->getPosition());
         if (dist <= getCurrentATK_RANGE()) {
             attackTarget();
         }
         else {
-            _target = nullptr;
+            setTarget(nullptr);
         }
     }
 }
@@ -220,32 +247,75 @@ void DefenceBuilding::setTarget(cocos2d::Node* target) {
     }
 }
 
-void DefenceBuilding::findTarget() {
-    const std::vector<Soldier*>* candidates = s_enemySoldiers;
-    std::vector<Soldier*> tempList;
+bool DefenceBuilding::canTargetSoldier(const Soldier* soldier) const {
+    // è¿‡æ»¤ä¸å¯æ”»å‡»ç›®æ ‡ï¼ˆç©º/åœ°ã€æ­»äº¡ã€å¤±å»çˆ¶èŠ‚ç‚¹ï¼‰
+    if (!soldier || !soldier->getParent()) {
+        return false;
+    }
+    if (soldier->getCurrentHP() <= 0) {
+        return false;
+    }
+    if (!_config) {
+        return false;
+    }
+    if (soldier->isFlying()) {
+        return _config->SKY_ABLE;
+    }
+    return _config->GROUND_ABLE;
+}
 
-    if (!candidates || candidates->empty()) {
-        // ¶µµ×£º³¢ÊÔ´Óµ±Ç°Íø¸ñ½ÚµãÖĞÕÒÊ¿±ø£¬±ÜÃâÁĞ±íÎ´°ó¶¨
-        Node* parent = this->getParent();
-        Node* gridRoot = parent ? parent->getParent() : nullptr;
-        if (gridRoot) {
-            for (auto* layer : gridRoot->getChildren()) {
-                if (!layer) {
-                    continue;
-                }
-                for (auto* node : layer->getChildren()) {
-                    auto* soldier = dynamic_cast<Soldier*>(node);
-                    if (soldier) {
-                        tempList.push_back(soldier);
-                    }
-                }
-            }
+const std::vector<Soldier*>* DefenceBuilding::getEnemySoldiers(std::vector<Soldier*>& fallback) const {
+    if (s_enemySoldiers && !s_enemySoldiers->empty()) {
+        return s_enemySoldiers;
+    }
+
+    fallback.clear();
+    const Node* parent = this->getParent();
+    const Node* gridRoot = parent ? parent->getParent() : nullptr;
+    if (!gridRoot) {
+        return nullptr;
+    }
+
+    for (auto* layer : gridRoot->getChildren()) {
+        if (!layer) {
+            continue;
         }
-        if (!tempList.empty()) {
-            candidates = &tempList;
+        for (auto* node : layer->getChildren()) {
+            auto* soldier = dynamic_cast<Soldier*>(node);
+            if (soldier) {
+                fallback.push_back(soldier);
+            }
         }
     }
 
+    return fallback.empty() ? nullptr : &fallback;
+}
+
+void DefenceBuilding::applyAoeDamage(const Vec2& center, float range, float damage) const {
+    if (range <= 0.0f) {
+        return;
+    }
+
+    std::vector<Soldier*> fallback;
+    const auto* candidates = getEnemySoldiers(fallback);
+    if (!candidates) {
+        return;
+    }
+
+    for (auto* soldier : *candidates) {
+        if (!canTargetSoldier(soldier)) {
+            continue;
+        }
+        if (center.distance(soldier->getPosition()) <= range) {
+            soldier->takeDamage(damage);
+        }
+    }
+}
+
+
+void DefenceBuilding::findTarget() {
+    std::vector<Soldier*> fallback;
+    const std::vector<Soldier*>* candidates = getEnemySoldiers(fallback);
     if (!candidates || candidates->empty()) {
         return;
     }
@@ -253,16 +323,17 @@ void DefenceBuilding::findTarget() {
     Soldier* nearest = nullptr;
     float nearestDist = 999999.0f;
     const auto selfPos = this->getPosition();
+    float attackRange = getCurrentATK_RANGE();
 
     for (auto* soldier : *candidates) {
-        if (!soldier || !soldier->getParent()) {
-            continue;
-        }
-        if (soldier->getCurrentHP() <= 0) {
+        if (!canTargetSoldier(soldier)) {
             continue;
         }
 
         float dist = selfPos.distance(soldier->getPosition());
+        if (attackRange > 0.0f && dist > attackRange) {
+            continue;
+        }
         if (dist < nearestDist) {
             nearestDist = dist;
             nearest = soldier;
@@ -284,7 +355,8 @@ void DefenceBuilding::takeDamage(float damage) {
 }
 
 void DefenceBuilding::attackTarget() {
-    if (!_target || !_target->getParent()) {
+    auto* soldier = dynamic_cast<Soldier*>(_target);
+    if (!canTargetSoldier(soldier)) {
         setTarget(nullptr);
         return;
     }
@@ -299,18 +371,17 @@ void DefenceBuilding::attackTarget() {
         playAnimation(_config->anim_attack, _config->anim_attack_frames, _config->anim_attack_delay, false);
         _lastAttackTime = currentTime;
 
-        auto* soldier = dynamic_cast<Soldier*>(_target);
-        if (!soldier) {
-            return;
-        }
+        float damage = getCurrentATK();
 
         if (!_config->bulletSpriteFrameName.empty() && _config->bulletSpeed > 0.0f) {
             auto* bullet = DefenceBullet::create(
                 _config->bulletSpriteFrameName,
-                getCurrentATK(),
+                damage,
                 _config->bulletSpeed,
                 _config->bulletIsAOE,
                 _config->bulletAOERange,
+                _config->SKY_ABLE,
+                _config->GROUND_ABLE,
                 s_enemySoldiers
             );
             if (bullet) {
@@ -324,7 +395,12 @@ void DefenceBuilding::attackTarget() {
             }
         }
 
-        soldier->takeDamage(getCurrentATK());
+        if (_config->bulletIsAOE && _config->bulletAOERange > 0.0f) {
+            applyAoeDamage(soldier->getPosition(), _config->bulletAOERange, damage);
+        }
+        else {
+            soldier->takeDamage(damage);
+        }
     }
 }
 
@@ -406,23 +482,23 @@ void DefenceBuilding::stopCurrentAnimation() {
 void DefenceBuilding::tryPlayIdleAnimation() {
     if (!_bodySprite || !_config) return;
 
-    // ¼ì²éspriteFrameNameÊÇ·ñÊÇTreeÀàĞÍ£¨Ä¿Â¼Â·¾¶¸ñÊ½£©
+    // æ£€æŸ¥spriteFrameNameæ˜¯å¦æ˜¯Treeç±»å‹ï¼ˆç›®å½•è·¯å¾„æ ¼å¼ï¼‰
     const std::string& spritePath = _config->spriteFrameName;
 
-    // Èç¹ûÊÇbuildings/Tree/sprite_XXXX.png¸ñÊ½£¬³¢ÊÔ¼ÓÔØÖ¡¶¯»­
+    // å¦‚æœæ˜¯buildings/Tree/sprite_XXXX.pngæ ¼å¼ï¼Œå°è¯•åŠ è½½å¸§åŠ¨ç”»
     if (spritePath.find("buildings/Tree/") != std::string::npos) {
-        // Tree¶¯»­ÅäÖÃ
-        constexpr int TREE_FRAME_COUNT = 16;    // Ö¡Êı
-        constexpr float TREE_FRAME_DELAY = 0.1f; // Ã¿Ö¡ÑÓ³Ù£¨Ãë£©
+        // TreeåŠ¨ç”»é…ç½®
+        constexpr int TREE_FRAME_COUNT = 16;    // å¸§æ•°
+        constexpr float TREE_FRAME_DELAY = 0.1f; // æ¯å¸§å»¶è¿Ÿï¼ˆç§’ï¼‰
 
         Animation* anim = Animation::create();
         int loadedFrames = 0;
 
         for (int i = 0; i < TREE_FRAME_COUNT; ++i) {
-            // Ê¹ÓÃStringUtils::format¸ü°²È«µØ¸ñÊ½»¯Â·¾¶
+            // ä½¿ç”¨StringUtils::formatæ›´å®‰å…¨åœ°æ ¼å¼åŒ–è·¯å¾„
             std::string framePath = StringUtils::format("buildings/Tree/sprite_%04d.png", i);
 
-            // ³¢ÊÔÖ±½Ó´´½¨¾«Áé»ñÈ¡ÕæÊµ³ß´ç
+            // å°è¯•ç›´æ¥åˆ›å»ºç²¾çµè·å–çœŸå®å°ºå¯¸
             auto tempSprite = Sprite::create(framePath);
             if (tempSprite) {
                 Size frameSize = tempSprite->getContentSize();
@@ -442,7 +518,7 @@ void DefenceBuilding::tryPlayIdleAnimation() {
             _bodySprite->runAction(RepeatForever::create(animate));
             _currentActionKey = "idle";
 
-            CCLOG("[·ÀÓù½¨Öş] Tree¶¯»­¼ÓÔØ³É¹¦£¬¹²%dÖ¡", loadedFrames);
+            CCLOG("[é˜²å¾¡å»ºç­‘] TreeåŠ¨ç”»åŠ è½½æˆåŠŸï¼Œå…±%då¸§", loadedFrames);
         }
     }
 }

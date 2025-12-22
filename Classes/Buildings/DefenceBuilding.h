@@ -1,4 +1,4 @@
-#ifndef __DEFENCE_BUILDING_H__
+ï»¿#ifndef __DEFENCE_BUILDING_H__
 #define __DEFENCE_BUILDING_H__
 
 #include "cocos2d.h"
@@ -14,7 +14,7 @@ public:
     virtual void update(float dt) override;
     virtual void onExit() override;
 
-    // ÉèÖÃµĞ·½Ê¿±øÁĞ±í£¨ÓÉÕ½¶·³¡¾°Ìá¹©£©
+    // è®¾ç½®æ•Œæ–¹å£«å…µåˆ—è¡¨ï¼ˆç”±æˆ˜æ–—åœºæ™¯æä¾›ï¼‰
     static void setEnemySoldiers(const std::vector<Soldier*>* soldiers);
 
     void takeDamage(float damage);
@@ -43,6 +43,13 @@ private:
     cocos2d::Node* _target;
     std::string _currentActionKey;
 
+    // åˆ¤æ–­ç›®æ ‡æ˜¯å¦å¯è¢«å½“å‰å»ºç­‘æ”»å‡»ï¼ˆç©º/åœ°åˆ¤å®šã€å­˜æ´»åˆ¤å®šï¼‰
+    bool canTargetSoldier(const Soldier* soldier) const;
+    // è·å–å¯ç”¨çš„æ•Œæ–¹å•ä½åˆ—è¡¨ï¼ˆä¼˜å…ˆä½¿ç”¨å¤–éƒ¨æ³¨å…¥ï¼Œå¿…è¦æ—¶ä¸´æ—¶æ‰«æï¼‰
+    const std::vector<Soldier*>* getEnemySoldiers(std::vector<Soldier*>& fallback) const;
+    // è¿‘æˆ˜/èŒƒå›´ä¼¤å®³çš„ç»Ÿä¸€å¤„ç†
+    void applyAoeDamage(const cocos2d::Vec2& center, float range, float damage) const;
+
     void setTarget(cocos2d::Node* target);
     void findTarget();
     void attackTarget();
@@ -51,8 +58,8 @@ private:
     void stopCurrentAnimation();
 
     /**
-     * @brief ³¢ÊÔ²¥·Å´ı»ú¶¯»­
-     * ¶ÔÓÚÓĞÖ¡¶¯»­µÄ½¨Öş£¨ÈçTree£©£¬×Ô¶¯¼ÓÔØ²¢²¥·ÅÑ­»·¶¯»­
+     * @brief å°è¯•æ’­æ”¾å¾…æœºåŠ¨ç”»
+     * å¯¹äºæœ‰å¸§åŠ¨ç”»çš„å»ºç­‘ï¼ˆå¦‚Treeï¼‰ï¼Œè‡ªåŠ¨åŠ è½½å¹¶æ’­æ”¾å¾ªç¯åŠ¨ç”»
      */
     void tryPlayIdleAnimation();
 };

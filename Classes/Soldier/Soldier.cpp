@@ -134,28 +134,28 @@ void Soldier::setLevel(int level) {
 }
 
 float Soldier::getCurrentMaxHP() const {
-    if (_level >= 0 && _level < _config->HP.size()) {
+    if (_level >= 0 && static_cast<size_t>(_level) < _config->HP.size()) {
         return _config->HP[_level];
     }
     return _config->HP.empty() ? 0.0f : _config->HP[0];
 }
 
 float Soldier::getCurrentSpeed() const {
-    if (_level >= 0 && _level < _config->SPEED.size()) {
+    if (_level >= 0 && static_cast<size_t>(_level) < _config->SPEED.size()) {
         return _config->SPEED[_level];
     }
     return _config->SPEED.empty() ? 0.0f : _config->SPEED[0];
 }
 
 float Soldier::getCurrentATK() const {
-    if (_level >= 0 && _level < _config->ATK.size()) {
+    if (_level >= 0 && static_cast<size_t>(_level) < _config->ATK.size()) {
         return _config->ATK[_level];
     }
     return _config->ATK.empty() ? 0.0f : _config->ATK[0];
 }
 
 float Soldier::getCurrentRange() const {
-    if (_level >= 0 && _level < _config->RANGE.size()) {
+    if (_level >= 0 && static_cast<size_t>(_level) < _config->RANGE.size()) {
         return _config->RANGE[_level];
     }
     return _config->RANGE.empty() ? 0.0f : _config->RANGE[0];
