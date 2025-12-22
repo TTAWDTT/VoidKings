@@ -46,6 +46,13 @@ void BaseUIPanel::setupButtons() {
     float scale = BaseUIConfig::BUTTON_SCALE;
     float spacing = BaseUIConfig::BUTTON_SPACING;
 
+    auto applyPressStyle = [](Button* button) {
+        if (!button) return;
+        button->setPressedActionEnabled(true);
+        button->setZoomScale(0.05f);
+        button->setSwallowTouches(true);
+    };
+
     // 按钮组整体居中，左侧留边距
     float buttonX = origin.x + BaseUIConfig::EDGE_MARGIN;
     float startY = origin.y + visibleSize.height / 2;
@@ -64,6 +71,7 @@ void BaseUIPanel::setupButtons() {
 
         _attackButton->setScale(scale);
         _attackButton->setPosition(Vec2(buttonX, startY));
+        applyPressStyle(_attackButton);
         _attackButton->addClickEventListener([this](Ref* sender) {
             if (_callbacks.onAttack) _callbacks.onAttack();
             });
@@ -77,6 +85,7 @@ void BaseUIPanel::setupButtons() {
     if (_buildButton) {
         _buildButton->setScale(scale);
         _buildButton->setPosition(Vec2(buttonX, startY - (btnHeight + spacing)));
+        applyPressStyle(_buildButton);
         _buildButton->addClickEventListener([this](Ref* sender) {
             if (_callbacks.onBuild) _callbacks.onBuild();
             });
@@ -90,6 +99,7 @@ void BaseUIPanel::setupButtons() {
     if (_exitButton) {
         _exitButton->setScale(scale);
         _exitButton->setPosition(Vec2(buttonX, startY - 2 * (btnHeight + spacing)));
+        applyPressStyle(_exitButton);
         _exitButton->addClickEventListener([this](Ref* sender) {
             if (_callbacks.onExit) _callbacks.onExit();
             });
@@ -105,6 +115,20 @@ void BaseUIPanel::setupButtons() {
 // ===================================================
 // 创建资源显示面板
 // ===================================================
+// 统一控制主按钮可用状态
+void BaseUIPanel::setButtonsEnabled(bool enabled) {
+    auto applyState = [enabled](Button* button) {
+        if (!button) return;
+        button->setEnabled(enabled);
+        button->setBright(enabled);
+        button->setOpacity(enabled ? 255 : 160);
+    };
+
+    applyState(_attackButton);
+    applyState(_buildButton);
+    applyState(_exitButton);
+}
+
 void BaseUIPanel::setupResourcePanel() {
     _idCardPanel = IDCardPanel::createPanel(this);
 }
@@ -146,6 +170,14 @@ void BaseUIPanel::bindTooltip(Node* targetBtn, Node* tooltip, float offsetX) {
     auto mouseListener = EventListenerMouse::create();
     mouseListener->onMouseMove = [=](EventMouse* event) {
         Vec2 mouseWorldPos(event->getCursorX(), event->getCursorY());
+
+        // 按钮禁用时不显示提示
+        auto widget = dynamic_cast<Widget*>(targetBtn);
+        if (widget && !widget->isEnabled()) {
+            tooltip->setVisible(false);
+            return;
+        }
+
 
         // 检查鼠标是否在按钮范围内
         if (targetBtn->getBoundingBox().containsPoint(mouseWorldPos)) {

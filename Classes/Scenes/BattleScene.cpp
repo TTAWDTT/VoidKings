@@ -1,11 +1,11 @@
-/**
+ï»¿/**
  * @file BattleScene.cpp
- * @brief Õ½¶·³¡¾°ÊµÏÖ
+ * @brief æˆ˜æ–—åœºæ™¯å®ç°
  *
- * ÊµÏÖÕ½¶·ÏµÍ³µÄºËĞÄÂß¼­£¬°üÀ¨£º
- * - ¹Ø¿¨³õÊ¼»¯ºÍµĞ·½½¨ÖşÉú³É
- * - Íæ¼ÒÊ¿±ø²¿Êğ
- * - Õ½¶·Âß¼­¸üĞÂ
+ * å®ç°æˆ˜æ–—ç³»ç»Ÿçš„æ ¸å¿ƒé€»è¾‘ï¼ŒåŒ…æ‹¬ï¼š
+ * - å…³å¡åˆå§‹åŒ–å’Œæ•Œæ–¹å»ºç­‘ç”Ÿæˆ
+ * - ç©å®¶å£«å…µéƒ¨ç½²
+ * - æˆ˜æ–—é€»è¾‘æ›´æ–°
  */
 
 #include "BattleScene.h"
@@ -18,7 +18,7 @@
 USING_NS_CC;
 
 // ===================================================
-// ³¡¾°´´½¨
+// åœºæ™¯åˆ›å»º
 // ===================================================
 
 Scene* BattleScene::createScene(int levelId, const std::map<int, int>& units) {
@@ -36,7 +36,7 @@ Scene* BattleScene::createScene(int levelId, const std::map<int, int>& units) {
 }
 
 // ===================================================
-// ³õÊ¼»¯
+// åˆå§‹åŒ–
 // ===================================================
 
 bool BattleScene::init() {
@@ -44,14 +44,14 @@ bool BattleScene::init() {
         return false;
     }
 
-    CCLOG("[Õ½¶·³¡¾°] ³õÊ¼»¯¹Ø¿¨ %d", _levelId);
+    CCLOG("[æˆ˜æ–—åœºæ™¯] åˆå§‹åŒ–å…³å¡ %d", _levelId);
 
-    // È·±£±øÖÖÅäÖÃÒÑ¼ÓÔØ£¨±ÜÃâÖ±½Ó½øÈëÕ½¶·Ê±ÅäÖÃÈ±Ê§£©
+    // ç¡®ä¿å…µç§é…ç½®å·²åŠ è½½ï¼ˆé¿å…ç›´æ¥è¿›å…¥æˆ˜æ–—æ—¶é…ç½®ç¼ºå¤±ï¼‰
     if (UnitManager::getInstance()->getAllUnitIds().empty()) {
         UnitManager::getInstance()->loadConfig("res/units_config.json");
     }
 
-    // ³õÊ¼»¯Ê£Óà¿É²¿Êğµ¥Î»
+    // åˆå§‹åŒ–å‰©ä½™å¯éƒ¨ç½²å•ä½
     if (_deployableUnits.empty()) {
         auto unitIds = UnitManager::getInstance()->getAllUnitIds();
         int defaultCounts[] = { 10, 5, 8 };
@@ -67,23 +67,23 @@ bool BattleScene::init() {
         _remainingUnits = _deployableUnits;
     }
 
-    // ³õÊ¼»¯¸÷¸ö×é¼ş
+    // åˆå§‹åŒ–å„ä¸ªç»„ä»¶
     initGridMap();
     initLevel();
-    // °ó¶¨Õ½¶·¶ÔÏóÁĞ±í£¬±ãÓÚ×Ô¶¯Ñ°µĞ
+    // ç»‘å®šæˆ˜æ–—å¯¹è±¡åˆ—è¡¨ï¼Œä¾¿äºè‡ªåŠ¨å¯»æ•Œ
     Soldier::setEnemyBuildings(&_enemyBuildings);
     DefenceBuilding::setEnemySoldiers(&_soldiers);
     initUI();
     initTouchListener();
 
-    // ÉèÖÃ¸üĞÂ
+    // è®¾ç½®æ›´æ–°
     this->scheduleUpdate();
 
     return true;
 }
 
 // ===================================================
-// Íø¸ñµØÍ¼³õÊ¼»¯
+// ç½‘æ ¼åœ°å›¾åˆå§‹åŒ–
 // ===================================================
 
 void BattleScene::initGridMap() {
@@ -99,7 +99,7 @@ void BattleScene::initGridMap() {
     float mapWidth = BattleConfig::GRID_WIDTH * BattleConfig::CELL_SIZE;
     float mapHeight = BattleConfig::GRID_HEIGHT * BattleConfig::CELL_SIZE;
 
-    // ½«µØÍ¼Ëõ·Åµ½ÉÏÏÂUIÖ®¼ä£¬±ÜÃâ±»²ÃÇĞ
+    // å°†åœ°å›¾ç¼©æ”¾åˆ°ä¸Šä¸‹UIä¹‹é—´ï¼Œé¿å…è¢«è£åˆ‡
     float availableWidth = visibleSize.width;
     float availableHeight = visibleSize.height - BattleConfig::UI_TOP_HEIGHT - BattleConfig::UI_BOTTOM_HEIGHT;
     float scale = std::min(1.0f, std::min(availableWidth / mapWidth, availableHeight / mapHeight));
@@ -130,11 +130,11 @@ void BattleScene::initGridMap() {
 
 
 // ===================================================
-// ¹Ø¿¨³õÊ¼»¯
+// å…³å¡åˆå§‹åŒ–
 // ===================================================
 
 void BattleScene::initLevel() {
-    // ¸ù¾İ¹Ø¿¨ID´´½¨²»Í¬µÄ¹Ø¿¨
+    // æ ¹æ®å…³å¡IDåˆ›å»ºä¸åŒçš„å…³å¡
     switch (_levelId) {
     case 1:
     default:
@@ -142,31 +142,31 @@ void BattleScene::initLevel() {
         break;
     }
 
-    CCLOG("[Õ½¶·³¡¾°] ¹Ø¿¨ %d ³õÊ¼»¯Íê³É£¬¹² %d ¸ö½¨Öş", _levelId, _totalBuildingCount);
+    CCLOG("[æˆ˜æ–—åœºæ™¯] å…³å¡ %d åˆå§‹åŒ–å®Œæˆï¼Œå…± %d ä¸ªå»ºç­‘", _levelId, _totalBuildingCount);
 }
 
 // ===================================================
-// ´´½¨µÚ1¹Ø - ¼òµ¥²âÊÔ¹Ø¿¨
+// åˆ›å»ºç¬¬1å…³ - ç®€å•æµ‹è¯•å…³å¡
 // ===================================================
 
 void BattleScene::createLevel1() {
-    // ÔÚµØÍ¼ÓÒ²à·ÅÖÃµĞ·½»ùµØ£¨40x30£¬È·±£4x4½¨ÖşÔÚ±ß½çÄÚ£©
-    // »ùµØÎ»ÖÃĞèÒªÁô×ã¹»¿Õ¼ä£ºÓÒ±ß½çÎª40£¬×î´óXÎª36
+    // åœ¨åœ°å›¾å³ä¾§æ”¾ç½®æ•Œæ–¹åŸºåœ°ï¼ˆ40x30ï¼Œç¡®ä¿4x4å»ºç­‘åœ¨è¾¹ç•Œå†…ï¼‰
+    // åŸºåœ°ä½ç½®éœ€è¦ç•™è¶³å¤Ÿç©ºé—´ï¼šå³è¾¹ç•Œä¸º40ï¼Œæœ€å¤§Xä¸º36
     createEnemyBase(28, 13);
 
-    // ´´½¨Ò»Ğ©·ÀÓùËş£¨3x3£©£¬ĞèÒªÈ·±£ÔÚ±ß½çÄÚ
-    createDefenseTower(22, 11, 1);  // ¼ıËş
-    createDefenseTower(22, 17, 1);  // ¼ıËş
-    createDefenseTower(24, 8, 2);   // ÅÚËş
-    createDefenseTower(24, 20, 2);  // ÅÚËş
+    // åˆ›å»ºä¸€äº›é˜²å¾¡å¡”ï¼ˆ3x3ï¼‰ï¼Œéœ€è¦ç¡®ä¿åœ¨è¾¹ç•Œå†…
+    createDefenseTower(22, 11, 1);  // ç®­å¡”
+    createDefenseTower(22, 17, 1);  // ç®­å¡”
+    createDefenseTower(24, 8, 2);   // ç‚®å¡”
+    createDefenseTower(24, 20, 2);  // ç‚®å¡”
 }
 
 // ===================================================
-// ´´½¨µĞ·½»ùµØ
+// åˆ›å»ºæ•Œæ–¹åŸºåœ°
 // ===================================================
 
 void BattleScene::createEnemyBase(int gridX, int gridY) {
-    // ´´½¨µĞ·½»ùµØ½¨ÖşÅäÖÃ
+    // åˆ›å»ºæ•Œæ–¹åŸºåœ°å»ºç­‘é…ç½®
     static ProductionBuildingConfig baseConfig;
     baseConfig.id = 9001;
     baseConfig.name = "EnemyBase";
@@ -181,36 +181,36 @@ void BattleScene::createEnemyBase(int gridX, int gridY) {
     if (base) {
         _buildingLayer->addChild(base);
 
-        // ¼ÆËãÎ»ÖÃ
+        // è®¡ç®—ä½ç½®
         float cellSize = _gridMap->getCellSize();
         float centerX = (gridX + 2.0f) * cellSize;
         float centerY = (gridY + 2.0f) * cellSize;
         base->setPosition(Vec2(centerX, centerY));
 
-        // Ëõ·Å½¨ÖşÒÔÊÊÓ¦¸ñ×Ó´óĞ¡
+        // ç¼©æ”¾å»ºç­‘ä»¥é€‚åº”æ ¼å­å¤§å°
         scaleBuildingToFit(base, 4, 4, cellSize);
 
-        // ±ê¼Ç¸ñ×ÓÕ¼ÓÃ
+        // æ ‡è®°æ ¼å­å ç”¨
         _gridMap->occupyCell(gridX, gridY, 4, 4, base);
 
         _enemyBuildings.push_back(base);
         base->retain();
         _totalBuildingCount++;
 
-        CCLOG("[Õ½¶·³¡¾°] µĞ·½»ùµØ´´½¨Íê³É");
+        CCLOG("[æˆ˜æ–—åœºæ™¯] æ•Œæ–¹åŸºåœ°åˆ›å»ºå®Œæˆ");
     }
 }
 
 // ===================================================
-// ´´½¨·ÀÓùËş
+// åˆ›å»ºé˜²å¾¡å¡”
 // ===================================================
 
 void BattleScene::createDefenseTower(int gridX, int gridY, int type) {
-    // ´´½¨·ÀÓùËş½¨ÖşÅäÖÃ
+    // åˆ›å»ºé˜²å¾¡å¡”å»ºç­‘é…ç½®
     static DefenceBuildingConfig towerConfig;
 
     if (type == 1) {
-        // ¼ıËş
+        // ç®­å¡”
         towerConfig.id = 9101;
         towerConfig.name = "EnemyArrowTower";
         towerConfig.spriteFrameName = "buildings/ArrowTower.png";
@@ -227,7 +227,7 @@ void BattleScene::createDefenseTower(int gridX, int gridY, int type) {
         towerConfig.bulletAOERange = 0.0f;
     }
     else {
-        // ÅÚËş
+        // ç‚®å¡”
         towerConfig.id = 9102;
         towerConfig.name = "EnemyBoomTower";
         towerConfig.spriteFrameName = "buildings/BoomTower.png";
@@ -252,62 +252,62 @@ void BattleScene::createDefenseTower(int gridX, int gridY, int type) {
     if (tower) {
         _buildingLayer->addChild(tower);
 
-        // ¼ÆËãÎ»ÖÃ
+        // è®¡ç®—ä½ç½®
         float cellSize = _gridMap->getCellSize();
         float centerX = (gridX + 1.5f) * cellSize;
         float centerY = (gridY + 1.5f) * cellSize;
         tower->setPosition(Vec2(centerX, centerY));
 
-        // Ëõ·Å½¨ÖşÒÔÊÊÓ¦¸ñ×Ó´óĞ¡
+        // ç¼©æ”¾å»ºç­‘ä»¥é€‚åº”æ ¼å­å¤§å°
         scaleBuildingToFit(tower, 3, 3, cellSize);
 
-        // ±ê¼Ç¸ñ×ÓÕ¼ÓÃ
+        // æ ‡è®°æ ¼å­å ç”¨
         _gridMap->occupyCell(gridX, gridY, 3, 3, tower);
 
         _enemyBuildings.push_back(tower);
         tower->retain();
         _totalBuildingCount++;
 
-        CCLOG("[Õ½¶·³¡¾°] ·ÀÓùËş´´½¨Íê³É (ÀàĞÍ%d)", type);
+        CCLOG("[æˆ˜æ–—åœºæ™¯] é˜²å¾¡å¡”åˆ›å»ºå®Œæˆ (ç±»å‹%d)", type);
     }
 }
 
 // ===================================================
-// ½¨ÖşËõ·Åµ÷Õû
+// å»ºç­‘ç¼©æ”¾è°ƒæ•´
 // ===================================================
 
 void BattleScene::scaleBuildingToFit(Node* building, int gridWidth, int gridHeight, float cellSize) {
     if (!building) return;
 
-    // ¼ì²éÊÇ·ñÓĞ×Ó½Úµã
+    // æ£€æŸ¥æ˜¯å¦æœ‰å­èŠ‚ç‚¹
     if (building->getChildrenCount() == 0) return;
 
-    // »ñÈ¡½¨ÖşµÄ¾«Áé
+    // è·å–å»ºç­‘çš„ç²¾çµ
     auto sprite = dynamic_cast<Sprite*>(building->getChildren().at(0));
     if (!sprite) return;
 
-    // ¼ÆËãÄ¿±ê³ß´ç£¨Õ¼¾İµÄ¸ñ×Ó¿Õ¼ä£¬ÁôÒ»µã±ß¾à£©
+    // è®¡ç®—ç›®æ ‡å°ºå¯¸ï¼ˆå æ®çš„æ ¼å­ç©ºé—´ï¼Œç•™ä¸€ç‚¹è¾¹è·ï¼‰
     constexpr float PADDING_FACTOR = 0.85f;
     float targetWidth = gridWidth * cellSize * PADDING_FACTOR;
     float targetHeight = gridHeight * cellSize * PADDING_FACTOR;
 
-    // »ñÈ¡¾«ÁéÔ­Ê¼³ß´ç
+    // è·å–ç²¾çµåŸå§‹å°ºå¯¸
     Size originalSize = sprite->getContentSize();
     if (originalSize.width <= 0 || originalSize.height <= 0) return;
 
-    // ¼ÆËãËõ·Å±ÈÀı
+    // è®¡ç®—ç¼©æ”¾æ¯”ä¾‹
     float scaleX = targetWidth / originalSize.width;
     float scaleY = targetHeight / originalSize.height;
     float scale = std::min(scaleX, scaleY);
 
-    // Ó¦ÓÃËõ·Å£¨×îĞ¡Ëõ·Å0.1£¬È·±£Ğ¡Í¼ÄÜ·Å´ó£©
+    // åº”ç”¨ç¼©æ”¾ï¼ˆæœ€å°ç¼©æ”¾0.1ï¼Œç¡®ä¿å°å›¾èƒ½æ”¾å¤§ï¼‰
     if (scale > 0.1f) {
         sprite->setScale(scale);
     }
 }
 
 // ===================================================
-// UI³õÊ¼»¯
+// UIåˆå§‹åŒ–
 // ===================================================
 
 void BattleScene::initUI() {
@@ -317,7 +317,7 @@ void BattleScene::initUI() {
     _uiLayer = Node::create();
     this->addChild(_uiLayer, 100);
 
-    // ¶¥²¿ĞÅÏ¢Ìõ
+    // é¡¶éƒ¨ä¿¡æ¯æ¡
     auto topBg = LayerColor::create(
         Color4B(30, 30, 30, 220),
         visibleSize.width,
@@ -372,10 +372,25 @@ void BattleScene::initUI() {
     exitBtn->setContentSize(Size(btnWidth, btnHeight));
     exitBtn->setScale9Enabled(true);
     exitBtn->setPosition(Vec2(exitX, topY));
-    exitBtn->addClickEventListener([this](Ref* sender) {
+    exitBtn->setSwallowTouches(true);
+    const float originScale = exitNode->getScale();
+    exitBtn->addTouchEventListener([this, exitNode, originScale](Ref* sender, Widget::TouchEventType type) {
+        if (type == Widget::TouchEventType::BEGAN) {
+            exitNode->setScale(originScale * 0.96f);
+            return;
+        }
+        if (type == Widget::TouchEventType::CANCELED) {
+            exitNode->setScale(originScale);
+            return;
+        }
+        if (type != Widget::TouchEventType::ENDED) {
+            return;
+        }
+
+        exitNode->setScale(originScale);
         CCLOG("[BattleScene] Exit battle");
         this->onExitButton(sender);
-        });
+    });
     _uiLayer->addChild(exitBtn, 10);
 
     setupDeployArea();
@@ -383,14 +398,14 @@ void BattleScene::initUI() {
 
 
 // ===================================================
-// ÉèÖÃ²¿ÊğÇøÓò
+// è®¾ç½®éƒ¨ç½²åŒºåŸŸ
 // ===================================================
 
 void BattleScene::setupDeployArea() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
-    // µ×²¿²¿ÊğÌõ
+    // åº•éƒ¨éƒ¨ç½²æ¡
     auto bottomBg = LayerColor::create(
         Color4B(30, 30, 30, 220),
         visibleSize.width,
@@ -415,12 +430,15 @@ void BattleScene::setupDeployArea() {
     _unitDeployArea->setPosition(Vec2::ZERO);
     _uiLayer->addChild(_unitDeployArea);
 
-    float btnSize = 50.0f;
-    float spacing = 16.0f;
+    float btnSize = BattleConfig::DEPLOY_BUTTON_SIZE;
+    float spacing = BattleConfig::DEPLOY_BUTTON_SPACING;
     int unitCount = static_cast<int>(_remainingUnits.size());
     float totalWidth = unitCount * btnSize + (unitCount - 1) * spacing;
     float startX = origin.x + (visibleSize.width - totalWidth) / 2 + btnSize / 2;
     float centerY = origin.y + BattleConfig::UI_BOTTOM_HEIGHT / 2;
+
+    _deployButtons.clear();
+    _selectedUnitId = -1;
 
     int index = 0;
     for (const auto& pair : _remainingUnits) {
@@ -429,9 +447,13 @@ void BattleScene::setupDeployArea() {
         if (btn) {
             btn->setPosition(Vec2(xPos, centerY));
             _unitDeployArea->addChild(btn);
+            _deployButtons[pair.first] = btn;
+            refreshDeployButton(pair.first);
         }
         index++;
     }
+
+    setSelectedUnit(getFirstAvailableUnitId());
 
     auto tipLabel = Label::createWithTTF("Tap on map to deploy", "fonts/arial.ttf", 10);
     if (!tipLabel) {
@@ -447,40 +469,51 @@ void BattleScene::setupDeployArea() {
 
 
 // ===================================================
-// ´´½¨²¿Êğ°´Å¥
+// åˆ›å»ºéƒ¨ç½²æŒ‰é’®
 // ===================================================
 
 Node* BattleScene::createDeployButton(int unitId, int count, float x) {
     auto node = Node::create();
     node->setPosition(Vec2(x, 0));
 
-    float btnSize = 50.0f;
+    float btnSize = BattleConfig::DEPLOY_BUTTON_SIZE;
+    node->setContentSize(Size(btnSize, btnSize));
 
-    // »ñÈ¡µ¥Î»ÅäÖÃ
+    // è·å–å•ä½é…ç½®
     const UnitConfig* config = UnitManager::getInstance()->getConfig(unitId);
     std::string unitName = config ? config->name.substr(0, 3) : "???";
 
-    // °´Å¥±³¾°
+    // æŒ‰é’®èƒŒæ™¯
     auto bg = LayerColor::create(Color4B(50, 70, 50, 255), btnSize, btnSize);
     bg->setAnchorPoint(Vec2(0.5f, 0.5f));
     bg->setIgnoreAnchorPointForPosition(false);
+    bg->setName("bg");
     node->addChild(bg);
 
-    // ±ß¿ò
+    // è¾¹æ¡†
     auto border = DrawNode::create();
     border->drawRect(Vec2(-btnSize / 2, -btnSize / 2), Vec2(btnSize / 2, btnSize / 2), Color4F::WHITE);
+    border->setName("border");
     node->addChild(border, 1);
 
-    // µ¥Î»Ãû³Æ
+    // é€‰ä¸­é«˜äº®
+    auto selectBorder = DrawNode::create();
+    selectBorder->drawRect(Vec2(-btnSize / 2, -btnSize / 2), Vec2(btnSize / 2, btnSize / 2), Color4F::YELLOW);
+    selectBorder->setVisible(false);
+    selectBorder->setName("selectBorder");
+    node->addChild(selectBorder, 3);
+
+    // å•ä½åç§°
     auto nameLabel = Label::createWithTTF(unitName, "fonts/arial.ttf", 10);
     if (!nameLabel) {
         nameLabel = Label::createWithSystemFont(unitName, "Arial", 10);
     }
     nameLabel->setPosition(Vec2(0, 8));
     nameLabel->setColor(Color3B::WHITE);
+    nameLabel->setName("nameLabel");
     node->addChild(nameLabel, 2);
 
-    // ÊıÁ¿
+    // æ•°é‡
     auto countLabel = Label::createWithTTF("x" + std::to_string(count), "fonts/arial.ttf", 10);
     if (!countLabel) {
         countLabel = Label::createWithSystemFont("x" + std::to_string(count), "Arial", 10);
@@ -490,52 +523,164 @@ Node* BattleScene::createDeployButton(int unitId, int count, float x) {
     countLabel->setName("countLabel");
     node->addChild(countLabel, 2);
 
-    // ´æ´¢unitIdÒÔ±ã²¿ÊğÊ±Ê¹ÓÃ
+    // ç‚¹å‡»é€‰æ‹©å•ä½
+    auto selectButton = Button::create();
+    selectButton->setContentSize(Size(btnSize, btnSize));
+    selectButton->setScale9Enabled(true);
+    selectButton->setAnchorPoint(Vec2(0.5f, 0.5f));
+    selectButton->setPosition(Vec2::ZERO);
+    const float originScale = node->getScale();
+    selectButton->setSwallowTouches(true);
+    selectButton->addTouchEventListener([this, unitId, node, originScale](Ref*, Widget::TouchEventType type) {
+        if (type == Widget::TouchEventType::BEGAN) {
+            node->setScale(originScale * 0.96f);
+            return;
+        }
+        if (type == Widget::TouchEventType::CANCELED) {
+            node->setScale(originScale);
+            return;
+        }
+        if (type != Widget::TouchEventType::ENDED) {
+            return;
+        }
+
+        node->setScale(originScale);
+        setSelectedUnit(unitId);
+    });
+    selectButton->setName("selectButton");
+    node->addChild(selectButton, 4);
+
+    // å­˜å‚¨unitIdä»¥ä¾¿éƒ¨ç½²æ—¶ä½¿ç”¨
     node->setTag(unitId);
 
     return node;
 }
 
 // ===================================================
-// ²¿ÊğÊ¿±ø
+// è·å–ç¬¬ä¸€ä¸ªå¯éƒ¨ç½²å•ä½
 // ===================================================
 
-void BattleScene::deploySoldier(int unitId, const Vec2& position) {
-    // ¼ì²éÊÇ·ñÓĞ¿É²¿ÊğµÄ¸ÃÀàĞÍµ¥Î»
-    auto it = _remainingUnits.find(unitId);
-    if (it == _remainingUnits.end() || it->second <= 0) {
-        CCLOG("[Õ½¶·³¡¾°] Ã»ÓĞ¿É²¿ÊğµÄµ¥Î»: %d", unitId);
+int BattleScene::getFirstAvailableUnitId() const {
+    for (const auto& pair : _remainingUnits) {
+        if (pair.second > 0) {
+            return pair.first;
+        }
+    }
+    return -1;
+}
+
+// ===================================================
+// è®¾ç½®å½“å‰é€‰ä¸­çš„å•ä½
+// ===================================================
+
+void BattleScene::setSelectedUnit(int unitId) {
+    if (unitId != -1) {
+        auto it = _remainingUnits.find(unitId);
+        if (it == _remainingUnits.end() || it->second <= 0) {
+            unitId = -1;
+        }
+    }
+
+    _selectedUnitId = unitId;
+
+    for (const auto& pair : _deployButtons) {
+        if (!pair.second) continue;
+        auto selectBorder = pair.second->getChildByName("selectBorder");
+        if (selectBorder) {
+            selectBorder->setVisible(pair.first == _selectedUnitId);
+        }
+    }
+}
+
+// ===================================================
+// åˆ·æ–°éƒ¨ç½²æŒ‰é’®æ˜¾ç¤º
+// ===================================================
+
+void BattleScene::refreshDeployButton(int unitId) {
+    auto buttonIt = _deployButtons.find(unitId);
+    if (buttonIt == _deployButtons.end() || !buttonIt->second) {
         return;
     }
 
-    // ´´½¨Ê¿±ø
+    int count = 0;
+    auto countIt = _remainingUnits.find(unitId);
+    if (countIt != _remainingUnits.end()) {
+        count = countIt->second;
+    }
+
+    bool hasCount = count > 0;
+    auto node = buttonIt->second;
+    auto countLabel = dynamic_cast<Label*>(node->getChildByName("countLabel"));
+    if (countLabel) {
+        countLabel->setString("x" + std::to_string(count));
+        countLabel->setColor(hasCount ? Color3B::YELLOW : Color3B(160, 160, 160));
+    }
+
+    auto nameLabel = dynamic_cast<Label*>(node->getChildByName("nameLabel"));
+    if (nameLabel) {
+        nameLabel->setColor(hasCount ? Color3B::WHITE : Color3B(160, 160, 160));
+    }
+
+    auto bg = dynamic_cast<LayerColor*>(node->getChildByName("bg"));
+    if (bg) {
+        bg->setColor(hasCount ? Color3B(50, 70, 50) : Color3B(70, 70, 70));
+    }
+
+    auto border = dynamic_cast<DrawNode*>(node->getChildByName("border"));
+    if (border) {
+        border->clear();
+        Color4F borderColor = hasCount ? Color4F::WHITE : Color4F(0.5f, 0.5f, 0.5f, 1.0f);
+        float btnSize = BattleConfig::DEPLOY_BUTTON_SIZE;
+        border->drawRect(Vec2(-btnSize / 2, -btnSize / 2), Vec2(btnSize / 2, btnSize / 2), borderColor);
+    }
+
+    auto selectBorder = node->getChildByName("selectBorder");
+    if (selectBorder) {
+        selectBorder->setVisible(hasCount && unitId == _selectedUnitId);
+    }
+
+    auto selectButton = dynamic_cast<Button*>(node->getChildByName("selectButton"));
+    if (selectButton) {
+        selectButton->setEnabled(hasCount);
+        selectButton->setBright(hasCount);
+    }
+}
+
+// ===================================================
+// éƒ¨ç½²å£«å…µ
+// ===================================================
+
+void BattleScene::deploySoldier(int unitId, const Vec2& position) {
+    // æ£€æŸ¥æ˜¯å¦æœ‰å¯éƒ¨ç½²çš„è¯¥ç±»å‹å•ä½
+    auto it = _remainingUnits.find(unitId);
+    if (it == _remainingUnits.end() || it->second <= 0) {
+        CCLOG("[æˆ˜æ–—åœºæ™¯] æ²¡æœ‰å¯éƒ¨ç½²çš„å•ä½: %d", unitId);
+        return;
+    }
+
+    // åˆ›å»ºå£«å…µ
     auto soldier = UnitManager::getInstance()->spawnSoldier(unitId, position, 0);
     if (soldier) {
         _soldierLayer->addChild(soldier);
         _soldiers.push_back(soldier);
         soldier->retain();
 
-        // ¸üĞÂÊ£ÓàÊıÁ¿
+        // æ›´æ–°å‰©ä½™æ•°é‡
         it->second--;
 
-        CCLOG("[Õ½¶·³¡¾°] ²¿ÊğÊ¿±ø: %d ÔÚÎ»ÖÃ (%.1f, %.1f), Ê£Óà %d",
+        CCLOG("[æˆ˜æ–—åœºæ™¯] éƒ¨ç½²å£«å…µ: %d åœ¨ä½ç½® (%.1f, %.1f), å‰©ä½™ %d",
             unitId, position.x, position.y, it->second);
 
-        // ¸üĞÂUI
-        for (auto& child : _unitDeployArea->getChildren()) {
-            if (child->getTag() == unitId) {
-                auto countLabel = child->getChildByName("countLabel");
-                if (countLabel) {
-                    static_cast<Label*>(countLabel)->setString("x" + std::to_string(it->second));
-                }
-                break;
-            }
+        // æ›´æ–°UIå¹¶å¤„ç†é€‰ä¸­çŠ¶æ€
+        refreshDeployButton(unitId);
+        if (it->second <= 0 && unitId == _selectedUnitId) {
+            setSelectedUnit(getFirstAvailableUnitId());
         }
     }
 }
 
 // ===================================================
-// ´¥ÃşÊÂ¼ş³õÊ¼»¯
+// è§¦æ‘¸äº‹ä»¶åˆå§‹åŒ–
 // ===================================================
 
 void BattleScene::initTouchListener() {
@@ -550,39 +695,43 @@ bool BattleScene::onTouchBegan(Touch* touch, Event* event) {
 
     Vec2 touchPos = touch->getLocation();
 
-    // ¼ì²éÊÇ·ñÔÚ²¿ÊğÇøÓòÄÚ£¨µ×²¿£©
+    // æ£€æŸ¥æ˜¯å¦åœ¨éƒ¨ç½²åŒºåŸŸå†…ï¼ˆåº•éƒ¨ï¼‰
     if (touchPos.y < origin.y + BattleConfig::UI_BOTTOM_HEIGHT) {
         return false;
     }
 
-    // ¼ì²éÊÇ·ñÔÚ¶¥²¿UIÇøÓò
+    // æ£€æŸ¥æ˜¯å¦åœ¨é¡¶éƒ¨UIåŒºåŸŸ
     if (touchPos.y > origin.y + visibleSize.height - BattleConfig::UI_TOP_HEIGHT) {
         return false;
     }
 
-    // ÔÚµØÍ¼ÉÏ²¿ÊğÊ¿±ø£¨Ä¬ÈÏ²¿ÊğµÚÒ»¸öÓĞÊ£ÓàµÄµ¥Î»£©
-    for (auto& pair : _remainingUnits) {
-        if (pair.second > 0) {
-            Vec2 localPos = _gridMap->convertToNodeSpace(touchPos);
-            deploySoldier(pair.first, localPos);
-            break;
+    // åœ¨åœ°å›¾ä¸Šéƒ¨ç½²å£«å…µï¼ˆä½¿ç”¨å½“å‰é€‰ä¸­çš„å•ä½ï¼‰
+    int unitId = _selectedUnitId;
+    if (unitId == -1) {
+        unitId = getFirstAvailableUnitId();
+        if (unitId != -1) {
+            setSelectedUnit(unitId);
         }
+    }
+    if (unitId != -1) {
+        Vec2 localPos = _gridMap->convertToNodeSpace(touchPos);
+        deploySoldier(unitId, localPos);
     }
 
     return true;
 }
 
 // ===================================================
-// Ã¿Ö¡¸üĞÂ
+// æ¯å¸§æ›´æ–°
 // ===================================================
 
 void BattleScene::update(float dt) {
     if (_battleEnded) return;
 
-    // ¸üĞÂÕ½¶·Ê±¼ä
+    // æ›´æ–°æˆ˜æ–—æ—¶é—´
     _battleTime += dt;
 
-    // ¸üĞÂ¼ÆÊ±Æ÷ÏÔÊ¾
+    // æ›´æ–°è®¡æ—¶å™¨æ˜¾ç¤º
     float remainingTime = std::max(0.0f, BattleConfig::BATTLE_TIME_LIMIT - _battleTime);
     int minutes = static_cast<int>(remainingTime) / 60;
     int seconds = static_cast<int>(remainingTime) % 60;
@@ -592,15 +741,15 @@ void BattleScene::update(float dt) {
         _timerLabel->setString(timeStr);
     }
 
-    // ¸üĞÂÕ½¶·Âß¼­
+    // æ›´æ–°æˆ˜æ–—é€»è¾‘
     updateBattle(dt);
 
-    // ¼ì²éÕ½¶·½áÊø
+    // æ£€æŸ¥æˆ˜æ–—ç»“æŸ
     checkBattleEnd();
 }
 
 void BattleScene::onExit() {
-    // ÊÍ·Å±£ÁôµÄÒıÓÃ£¬±ÜÃâÄÚ´æĞ¹Â©
+    // é‡Šæ”¾ä¿ç•™çš„å¼•ç”¨ï¼Œé¿å…å†…å­˜æ³„æ¼
     for (auto& soldier : _soldiers) {
         if (soldier) {
             soldier->release();
@@ -620,11 +769,11 @@ void BattleScene::onExit() {
 }
 
 // ===================================================
-// Õ½¶·Âß¼­¸üĞÂ
+// æˆ˜æ–—é€»è¾‘æ›´æ–°
 // ===================================================
 
 void BattleScene::updateBattle(float dt) {
-    // ÇåÀíÒÑÒÆ³ıµÄÊ¿±ø£¬±ÜÃâĞü¿ÕÖ¸Õë
+    // æ¸…ç†å·²ç§»é™¤çš„å£«å…µï¼Œé¿å…æ‚¬ç©ºæŒ‡é’ˆ
     for (auto& soldier : _soldiers) {
         if (soldier && !soldier->getParent()) {
             soldier->release();
@@ -632,7 +781,7 @@ void BattleScene::updateBattle(float dt) {
         }
     }
 
-    // ¼ì²é±»´İ»ÙµÄ½¨Öş²¢ÊÍ·ÅÒıÓÃ
+    // æ£€æŸ¥è¢«æ‘§æ¯çš„å»ºç­‘å¹¶é‡Šæ”¾å¼•ç”¨
     int destroyed = 0;
     for (auto& building : _enemyBuildings) {
         if (building && !building->getParent()) {
@@ -645,7 +794,7 @@ void BattleScene::updateBattle(float dt) {
     }
     _destroyedBuildingCount = destroyed;
 
-    // ¸üĞÂ½ø¶ÈÏÔÊ¾
+    // æ›´æ–°è¿›åº¦æ˜¾ç¤º
     int progress = _totalBuildingCount > 0 ?
         (destroyed * 100 / _totalBuildingCount) : 0;
     char progressStr[16];
@@ -656,23 +805,23 @@ void BattleScene::updateBattle(float dt) {
 }
 
 // ===================================================
-// ¼ì²éÕ½¶·½áÊø
+// æ£€æŸ¥æˆ˜æ–—ç»“æŸ
 // ===================================================
 
 void BattleScene::checkBattleEnd() {
-    // ËùÓĞ½¨Öş±»´İ»Ù - Ê¤Àû
+    // æ‰€æœ‰å»ºç­‘è¢«æ‘§æ¯ - èƒœåˆ©
     if (_destroyedBuildingCount >= _totalBuildingCount) {
         onBattleWin();
         return;
     }
 
-    // Ê±¼äºÄ¾¡ - Ê§°Ü
+    // æ—¶é—´è€—å°½ - å¤±è´¥
     if (_battleTime >= BattleConfig::BATTLE_TIME_LIMIT) {
         onBattleLose();
         return;
     }
 
-    // ËùÓĞÊ¿±øÕóÍöÇÒÃ»ÓĞÊ£Óà¿É²¿Êğµ¥Î» - Ê§°Ü
+    // æ‰€æœ‰å£«å…µé˜µäº¡ä¸”æ²¡æœ‰å‰©ä½™å¯éƒ¨ç½²å•ä½ - å¤±è´¥
     bool hasSurvivors = false;
     for (auto& soldier : _soldiers) {
         if (soldier && soldier->getParent()) {
@@ -695,17 +844,17 @@ void BattleScene::checkBattleEnd() {
 }
 
 // ===================================================
-// Õ½¶·Ê¤Àû
+// æˆ˜æ–—èƒœåˆ©
 // ===================================================
 
 void BattleScene::onBattleWin() {
     _battleEnded = true;
-    CCLOG("[Õ½¶·³¡¾°] Õ½¶·Ê¤Àû£¡");
+    CCLOG("[æˆ˜æ–—åœºæ™¯] æˆ˜æ–—èƒœåˆ©ï¼");
 
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
-    // ÏÔÊ¾Ê¤ÀûÏûÏ¢
+    // æ˜¾ç¤ºèƒœåˆ©æ¶ˆæ¯
     auto winLabel = Label::createWithTTF("VICTORY!", "fonts/arial.ttf", 36);
     if (!winLabel) {
         winLabel = Label::createWithSystemFont("VICTORY!", "Arial", 36);
@@ -717,7 +866,7 @@ void BattleScene::onBattleWin() {
     winLabel->setColor(Color3B::YELLOW);
     _uiLayer->addChild(winLabel, 100);
 
-    // 3Ãëºó·µ»Ø
+    // 3ç§’åè¿”å›
     this->scheduleOnce([](float dt) {
         auto scene = BaseScene::createScene();
         Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
@@ -725,17 +874,17 @@ void BattleScene::onBattleWin() {
 }
 
 // ===================================================
-// Õ½¶·Ê§°Ü
+// æˆ˜æ–—å¤±è´¥
 // ===================================================
 
 void BattleScene::onBattleLose() {
     _battleEnded = true;
-    CCLOG("[Õ½¶·³¡¾°] Õ½¶·Ê§°Ü£¡");
+    CCLOG("[æˆ˜æ–—åœºæ™¯] æˆ˜æ–—å¤±è´¥ï¼");
 
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
-    // ÏÔÊ¾Ê§°ÜÏûÏ¢
+    // æ˜¾ç¤ºå¤±è´¥æ¶ˆæ¯
     auto loseLabel = Label::createWithTTF("DEFEAT", "fonts/arial.ttf", 36);
     if (!loseLabel) {
         loseLabel = Label::createWithSystemFont("DEFEAT", "Arial", 36);
@@ -747,7 +896,7 @@ void BattleScene::onBattleLose() {
     loseLabel->setColor(Color3B::RED);
     _uiLayer->addChild(loseLabel, 100);
 
-    // 3Ãëºó·µ»Ø
+    // 3ç§’åè¿”å›
     this->scheduleOnce([](float dt) {
         auto scene = BaseScene::createScene();
         Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
@@ -755,11 +904,11 @@ void BattleScene::onBattleLose() {
 }
 
 // ===================================================
-// ÍË³ö°´Å¥»Øµ÷
+// é€€å‡ºæŒ‰é’®å›è°ƒ
 // ===================================================
 
 void BattleScene::onExitButton(Ref* sender) {
-    CCLOG("[Õ½¶·³¡¾°] ÍË³öÕ½¶·");
+    CCLOG("[æˆ˜æ–—åœºæ™¯] é€€å‡ºæˆ˜æ–—");
 
     auto scene = BaseScene::createScene();
     Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));

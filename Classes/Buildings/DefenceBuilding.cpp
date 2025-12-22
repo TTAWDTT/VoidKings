@@ -312,6 +312,93 @@ void DefenceBuilding::applyAoeDamage(const Vec2& center, float range, float dama
     }
 }
 
+bool DefenceBuilding::isTreeSprite() const {
+    if (!_config) {
+        return false;
+    }
+    return _config->spriteFrameName.find("buildings/Tree/") != std::string::npos;
+}
+
+bool DefenceBuilding::playTreeAnimation(int frameCount, float delay, bool loop) {
+    if (!_bodySprite) {
+        return false;
+    }
+    if (frameCount <= 0) {
+        return false;
+    }
+    if (delay <= 0.0f) {
+        delay = 0.1f;
+    }
+
+    Animation* anim = Animation::create();
+    int loadedFrames = 0;
+    for (int i = 0; i < frameCount; ++i) {
+        std::string framePath = StringUtils::format("buildings/Tree/sprite_%04d.png", i);
+        auto tempSprite = Sprite::create(framePath);
+        if (tempSprite) {
+            Size frameSize = tempSprite->getContentSize();
+            auto frame = SpriteFrame::create(framePath, Rect(0, 0, frameSize.width, frameSize.height));
+            if (frame) {
+                anim->addSpriteFrame(frame);
+                loadedFrames++;
+            }
+        }
+    }
+
+    if (loadedFrames == 0) {
+        return false;
+    }
+
+    anim->setDelayPerUnit(delay);
+    anim->setRestoreOriginalFrame(false);
+
+    _bodySprite->stopAllActions();
+    if (loop) {
+        auto animate = Animate::create(anim);
+        _bodySprite->runAction(RepeatForever::create(animate));
+    }
+    else {
+        auto sequence = Sequence::create(
+            Animate::create(anim),
+            CallFunc::create([this]() {
+                _currentActionKey.clear();
+                // 攻击动画结束后恢复待机
+                tryPlayIdleAnimation();
+            }),
+            nullptr
+        );
+        _bodySprite->runAction(sequence);
+    }
+
+    if (loop) {
+        CCLOG("[防御建筑] Tree动画加载成功，共%d帧", loadedFrames);
+    }
+    return true;
+}
+
+void DefenceBuilding::playFallbackAttackEffect() {
+    if (!_bodySprite) {
+        return;
+    }
+
+    // 没有序列帧资源时，使用轻微缩放作为攻击反馈
+    constexpr int kAttackEffectTag = 10001;
+    _bodySprite->stopActionByTag(kAttackEffectTag);
+
+    float scaleX = _bodySprite->getScaleX();
+    float scaleY = _bodySprite->getScaleY();
+    float boostX = scaleX * 1.06f;
+    float boostY = scaleY * 1.06f;
+
+    auto scaleUp = ScaleTo::create(0.05f, boostX, boostY);
+    auto scaleDown = ScaleTo::create(0.08f, scaleX, scaleY);
+    auto seq = Sequence::create(scaleUp, scaleDown, nullptr);
+    seq->setTag(kAttackEffectTag);
+    _bodySprite->runAction(seq);
+}
+
+
+
 
 void DefenceBuilding::findTarget() {
     std::vector<Soldier*> fallback;
@@ -445,13 +532,47 @@ void DefenceBuilding::updateHealthBar(bool animate) {
 }
 
 void DefenceBuilding::playAnimation(const std::string& animType, int frameCount, float delay, bool loop) {
-    if (!_bodySprite || !_config) return;
+    if (!_bodySprite || !_config) {
+        return;
+    }
 
     std::string key = animType;
-    if (_currentActionKey == key) return;
+    if (_currentActionKey == key) {
+        return;
+    }
 
-    auto anim = AnimationUtils::buildAnimationFromFrames(_config->spriteFrameName, animType, frameCount, delay);
-    if (!anim) return;
+    // Tree类型建筑优先使用现有序列帧资源
+    if (isTreeSprite()) {
+        int resolvedFrames = frameCount;
+        if (resolvedFrames <= 1) {
+            resolvedFrames = 16;
+        }
+        float resolvedDelay = delay;
+        if (resolvedDelay <= 0.0f) {
+            resolvedDelay = 0.1f;
+        }
+        if (playTreeAnimation(resolvedFrames, resolvedDelay, loop)) {
+            _currentActionKey = key;
+            return;
+        }
+    }
+
+    std::string baseName = _config->spriteFrameName;
+    if (baseName.size() > 4) {
+        std::string suffix = baseName.substr(baseName.size() - 4);
+        if (suffix == ".png" || suffix == ".PNG") {
+            baseName = baseName.substr(0, baseName.size() - 4);
+        }
+    }
+
+    auto anim = AnimationUtils::buildAnimationFromFrames(baseName, animType, frameCount, delay);
+    if (!anim) {
+        // 没有找到对应序列帧时，使用简易攻击表现
+        if (animType == _config->anim_attack || animType == "attack") {
+            playFallbackAttackEffect();
+        }
+        return;
+    }
 
     _bodySprite->stopAllActions();
 
@@ -464,7 +585,7 @@ void DefenceBuilding::playAnimation(const std::string& animType, int frameCount,
             Animate::create(anim),
             CallFunc::create([this]() {
                 _currentActionKey.clear();
-                }),
+            }),
             nullptr
         );
         _bodySprite->runAction(sequence);
@@ -480,45 +601,24 @@ void DefenceBuilding::stopCurrentAnimation() {
 }
 
 void DefenceBuilding::tryPlayIdleAnimation() {
-    if (!_bodySprite || !_config) return;
+    if (!_bodySprite || !_config) {
+        return;
+    }
 
-    // 检查spriteFrameName是否是Tree类型（目录路径格式）
-    const std::string& spritePath = _config->spriteFrameName;
+    if (!isTreeSprite()) {
+        return;
+    }
 
-    // 如果是buildings/Tree/sprite_XXXX.png格式，尝试加载帧动画
-    if (spritePath.find("buildings/Tree/") != std::string::npos) {
-        // Tree动画配置
-        constexpr int TREE_FRAME_COUNT = 16;    // 帧数
-        constexpr float TREE_FRAME_DELAY = 0.1f; // 每帧延迟（秒）
+    int frameCount = _config->anim_idle_frames;
+    if (frameCount <= 1) {
+        frameCount = 16;
+    }
+    float delay = _config->anim_idle_delay;
+    if (delay <= 0.0f) {
+        delay = 0.1f;
+    }
 
-        Animation* anim = Animation::create();
-        int loadedFrames = 0;
-
-        for (int i = 0; i < TREE_FRAME_COUNT; ++i) {
-            // 使用StringUtils::format更安全地格式化路径
-            std::string framePath = StringUtils::format("buildings/Tree/sprite_%04d.png", i);
-
-            // 尝试直接创建精灵获取真实尺寸
-            auto tempSprite = Sprite::create(framePath);
-            if (tempSprite) {
-                Size frameSize = tempSprite->getContentSize();
-                auto frame = SpriteFrame::create(framePath, Rect(0, 0, frameSize.width, frameSize.height));
-                if (frame) {
-                    anim->addSpriteFrame(frame);
-                    loadedFrames++;
-                }
-            }
-        }
-
-        if (loadedFrames > 0) {
-            anim->setDelayPerUnit(TREE_FRAME_DELAY);
-            anim->setRestoreOriginalFrame(false);
-
-            auto animate = Animate::create(anim);
-            _bodySprite->runAction(RepeatForever::create(animate));
-            _currentActionKey = "idle";
-
-            CCLOG("[防御建筑] Tree动画加载成功，共%d帧", loadedFrames);
-        }
+    if (playTreeAnimation(frameCount, delay, true)) {
+        _currentActionKey = "idle";
     }
 }

@@ -301,20 +301,38 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
 
     // 绑定点击事件
     BuildingOption optionCopy = option;
-    touchBtn->addClickEventListener([this, optionCopy](Ref* sender) {
-        if (!optionCopy.canBuild) {
-            CCLOG("[建筑商店] 该建筑已拥有，无法再建造: %s", optionCopy.name.c_str());
+    touchBtn->setSwallowTouches(true);
+    const float originScale = itemNode->getScale();
+    touchBtn->addTouchEventListener([this, optionCopy, itemNode, originScale](Ref*, Widget::TouchEventType type) {
+        if (type == Widget::TouchEventType::BEGAN) {
+            if (optionCopy.canBuild) {
+                itemNode->setScale(originScale * 0.97f);
+            }
+            return;
+        }
+        if (type == Widget::TouchEventType::CANCELED) {
+            itemNode->setScale(originScale);
+            return;
+        }
+        if (type != Widget::TouchEventType::ENDED) {
             return;
         }
 
-        CCLOG("[建筑商店] 选择了: %s (尺寸: %dx%d)",
+        itemNode->setScale(originScale);
+
+        if (!optionCopy.canBuild) {
+            CCLOG("[???????] ?y???????У?????????: %s", optionCopy.name.c_str());
+            return;
+        }
+
+        CCLOG("[???????] ?????: %s (???: %dx%d)",
             optionCopy.name.c_str(), optionCopy.gridWidth, optionCopy.gridHeight);
 
         if (_onBuildingSelected) {
             _onBuildingSelected(optionCopy);
         }
         this->hide();
-        });
+    });
 
     itemNode->addChild(touchBtn, 10);
 
@@ -339,6 +357,10 @@ void BuildShopPanel::setupCloseButton() {
         BuildShopConfig::PANEL_SIZE.width / 2,
         BuildShopConfig::CLOSE_BUTTON_BOTTOM
     ));
+
+    closeBtn->setPressedActionEnabled(true);
+    closeBtn->setZoomScale(0.05f);
+    closeBtn->setSwallowTouches(true);
 
     closeBtn->addClickEventListener([this](Ref* sender) {
         this->hide();

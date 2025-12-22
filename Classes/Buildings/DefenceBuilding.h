@@ -49,6 +49,12 @@ private:
     const std::vector<Soldier*>* getEnemySoldiers(std::vector<Soldier*>& fallback) const;
     // 近战/范围伤害的统一处理
     void applyAoeDamage(const cocos2d::Vec2& center, float range, float damage) const;
+    // 是否为树类建筑（使用序列帧资源）
+    bool isTreeSprite() const;
+    // 播放树的序列帧动画（用于待机/攻击）
+    bool playTreeAnimation(int frameCount, float delay, bool loop);
+    // 当没有对应动画资源时的攻击表现
+    void playFallbackAttackEffect();
 
     void setTarget(cocos2d::Node* target);
     void findTarget();

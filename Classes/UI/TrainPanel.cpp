@@ -6,6 +6,36 @@
 #include "Core/Core.h"
 #include <algorithm>
 
+namespace {
+// 按钮按下缩放反馈（用于无贴图按钮）
+void bindPressScale(Button* button, Node* target, const std::function<void()>& onClick) {
+    if (!button || !target) {
+        return;
+    }
+
+    const float originScale = target->getScale();
+    button->setSwallowTouches(true);
+    button->addTouchEventListener([target, onClick, originScale](Ref*, Widget::TouchEventType type) {
+        switch (type) {
+        case Widget::TouchEventType::BEGAN:
+            target->setScale(originScale * 0.96f);
+            break;
+        case Widget::TouchEventType::CANCELED:
+            target->setScale(originScale);
+            break;
+        case Widget::TouchEventType::ENDED:
+            target->setScale(originScale);
+            if (onClick) {
+                onClick();
+            }
+            break;
+        default:
+            break;
+        }
+    });
+}
+} // namespace
+
 // ===================================================
 // 创建与初始化
 // ===================================================
@@ -364,9 +394,9 @@ Node* TrainPanel::createUnitCard(int unitId) {
     auto recruitBtn = Button::create();
     recruitBtn->setScale9Enabled(true);
     recruitBtn->setContentSize(Size(btnWidth, btnHeight));
-    recruitBtn->addClickEventListener([this, unitId](Ref* sender) {
+    bindPressScale(recruitBtn, recruitNode, [this, unitId]() {
         this->recruitUnit(unitId);
-        });
+    });
     recruitNode->addChild(recruitBtn, 10);
 
     cardNode->addChild(recruitNode, 3);
@@ -407,9 +437,9 @@ Node* TrainPanel::createUnitCard(int unitId) {
         auto upgradeBtn = Button::create();
         upgradeBtn->setScale9Enabled(true);
         upgradeBtn->setContentSize(Size(btnWidth, btnHeight));
-        upgradeBtn->addClickEventListener([this, unitId](Ref* sender) {
+        bindPressScale(upgradeBtn, upgradeNode, [this, unitId]() {
             this->upgradeUnit(unitId);
-            });
+        });
         upgradeNode->addChild(upgradeBtn, 10);
     }
 
@@ -666,12 +696,12 @@ void TrainPanel::setupCloseButton() {
     auto closeBtn = Button::create();
     closeBtn->setScale9Enabled(true);
     closeBtn->setContentSize(Size(btnWidth, btnHeight));
-    closeBtn->addClickEventListener([this](Ref* sender) {
+    bindPressScale(closeBtn, closeNode, [this]() {
         this->hide();
         if (_onClose) {
             _onClose();
         }
-        });
+    });
     closeNode->addChild(closeBtn, 10);
 
     _panel->addChild(closeNode, 5);

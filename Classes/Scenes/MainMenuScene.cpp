@@ -190,11 +190,12 @@ Button* MainMenuScene::createIconButton(
     float leftPadding = 5;
     float spacing = 5;
 
-    auto visibleSize = Director::getInstance()->getVisibleSize();
-
     // 按钮背景
     auto button = Button::create("btn_normal.png", "btn_pressed.png");
     button->setScale9Enabled(true);
+    button->setPressedActionEnabled(true);
+    button->setZoomScale(0.05f);
+    button->setSwallowTouches(true);
 
     // 文字
     button->setTitleFontName("fonts/ScienceGothic.ttf");
@@ -331,7 +332,6 @@ void MainMenuScene::createSettingsLayer()
 
     auto panel = DrawNode::create();
     Color4F panelColor(0.0f, 0.0f, 0.0f, 0.45f);  // 半透明黑
-    float radius = 20.0f; // 圆角
 
     panel->drawSolidRect(Vec2(-panelWidth / 2, -panelHeight / 2),
         Vec2(panelWidth / 2, panelHeight / 2),
@@ -371,7 +371,6 @@ void MainMenuScene::createRuleLayer()
 
     auto panel = DrawNode::create();
     Color4F panelColor(0.0f, 0.0f, 0.0f, 0.45f);  // 半透明黑
-    float radius = 20.0f; // 圆角
 
     panel->drawSolidRect(Vec2(-panelWidth / 2, -panelHeight / 2),
         Vec2(panelWidth / 2, panelHeight / 2),

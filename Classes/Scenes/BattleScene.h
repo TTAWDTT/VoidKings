@@ -1,11 +1,11 @@
-/**
+ï»¿/**
  * @file BattleScene.h
- * @brief Õ½¶·³¡¾°Í·ÎÄ¼ş
+ * @brief æˆ˜æ–—åœºæ™¯å¤´æ–‡ä»¶
  *
- * Õ½¶·³¡¾°ÓÃÓÚ²âÊÔÕ½¶·ÏµÍ³£¬°üÀ¨£º
- * - µĞ·½»ùµØºÍ·ÀÓù½¨Öş
- * - Íæ¼Ò²¿ÊğÊ¿±ø
- * - Õ½¶·Âß¼­¸üĞÂ
+ * æˆ˜æ–—åœºæ™¯ç”¨äºæµ‹è¯•æˆ˜æ–—ç³»ç»Ÿï¼ŒåŒ…æ‹¬ï¼š
+ * - æ•Œæ–¹åŸºåœ°å’Œé˜²å¾¡å»ºç­‘
+ * - ç©å®¶éƒ¨ç½²å£«å…µ
+ * - æˆ˜æ–—é€»è¾‘æ›´æ–°
  */
 
 #ifndef __BATTLE_SCENE_H__
@@ -24,31 +24,33 @@ USING_NS_CC;
 using namespace cocos2d::ui;
 
 // ===================================================
-// Õ½¶·³¡¾°ÅäÖÃ
+// æˆ˜æ–—åœºæ™¯é…ç½®
 // ===================================================
 namespace BattleConfig {
-    // Íø¸ñÅäÖÃ
-    constexpr int GRID_WIDTH = 40;          // Õ½¶·µØÍ¼¿í¶È£¨¸ñ×ÓÊı£©
-    constexpr int GRID_HEIGHT = 30;         // Õ½¶·µØÍ¼¸ß¶È£¨¸ñ×ÓÊı£©
-    constexpr float CELL_SIZE = 32.0f;      // Ã¿¸ñÏñËØ´óĞ¡
+    // ç½‘æ ¼é…ç½®
+    constexpr int GRID_WIDTH = 40;          // æˆ˜æ–—åœ°å›¾å®½åº¦ï¼ˆæ ¼å­æ•°ï¼‰
+    constexpr int GRID_HEIGHT = 30;         // æˆ˜æ–—åœ°å›¾é«˜åº¦ï¼ˆæ ¼å­æ•°ï¼‰
+    constexpr float CELL_SIZE = 32.0f;      // æ¯æ ¼åƒç´ å¤§å°
 
-    // UIÅäÖÃ
-    constexpr float UI_TOP_HEIGHT = 60.0f;      // ¶¥²¿UI¸ß¶È£¨ÉÔÎ¢Ôö¼Ó£©
-    constexpr float UI_BOTTOM_HEIGHT = 100.0f;   // µ×²¿²¿ÊğÇøÓò¸ß¶È£¨Ôö¼ÓÒÔÈİÄÉ¸ü´óÍ¼±ê£©
+    // UIé…ç½®
+    constexpr float UI_TOP_HEIGHT = 60.0f;      // é¡¶éƒ¨UIé«˜åº¦ï¼ˆç¨å¾®å¢åŠ ï¼‰
+    constexpr float UI_BOTTOM_HEIGHT = 100.0f;   // åº•éƒ¨éƒ¨ç½²åŒºåŸŸé«˜åº¦ï¼ˆå¢åŠ ä»¥å®¹çº³æ›´å¤§å›¾æ ‡ï¼‰
+    constexpr float DEPLOY_BUTTON_SIZE = 50.0f;  // éƒ¨ç½²æŒ‰é’®å°ºå¯¸
+    constexpr float DEPLOY_BUTTON_SPACING = 16.0f; // éƒ¨ç½²æŒ‰é’®é—´è·
 
-    // Õ½¶·ÅäÖÃ
-    constexpr float BATTLE_TIME_LIMIT = 180.0f;  // Õ½¶·Ê±¼äÏŞÖÆ£¨Ãë£©
+    // æˆ˜æ–—é…ç½®
+    constexpr float BATTLE_TIME_LIMIT = 180.0f;  // æˆ˜æ–—æ—¶é—´é™åˆ¶ï¼ˆç§’ï¼‰
 }
 
 // ===================================================
-// Õ½¶·³¡¾°Àà
+// æˆ˜æ–—åœºæ™¯ç±»
 // ===================================================
 class BattleScene : public Scene {
 public:
     /**
-     * @brief ´´½¨Õ½¶·³¡¾°
-     * @param levelId ¹Ø¿¨ID
-     * @param units ¿É²¿ÊğµÄµ¥Î» <µ¥Î»ID, ÊıÁ¿>
+     * @brief åˆ›å»ºæˆ˜æ–—åœºæ™¯
+     * @param levelId å…³å¡ID
+     * @param units å¯éƒ¨ç½²çš„å•ä½ <å•ä½ID, æ•°é‡>
      */
     static Scene* createScene(int levelId = 1, const std::map<int, int>& units = {});
 
@@ -58,70 +60,75 @@ public:
 
     CREATE_FUNC(BattleScene);
 
-    // ÉèÖÃ¹Ø¿¨ID
+    // è®¾ç½®å…³å¡ID
     void setLevelId(int levelId) { _levelId = levelId; }
 
-    // ÉèÖÃ¿É²¿ÊğµÄµ¥Î»
+    // è®¾ç½®å¯éƒ¨ç½²çš„å•ä½
     void setDeployableUnits(const std::map<int, int>& units) { _deployableUnits = units; }
 
 private:
-    // ==================== ºËĞÄ×é¼ş ====================
-    GridMap* _gridMap = nullptr;                    // Íø¸ñµØÍ¼
-    Node* _buildingLayer = nullptr;                 // ½¨Öş²ã
-    Node* _soldierLayer = nullptr;                  // Ê¿±ø²ã
-    Node* _uiLayer = nullptr;                       // UI²ã
+    // ==================== æ ¸å¿ƒç»„ä»¶ ====================
+    GridMap* _gridMap = nullptr;                    // ç½‘æ ¼åœ°å›¾
+    Node* _buildingLayer = nullptr;                 // å»ºç­‘å±‚
+    Node* _soldierLayer = nullptr;                  // å£«å…µå±‚
+    Node* _uiLayer = nullptr;                       // UIå±‚
 
-    // ==================== ¹Ø¿¨Êı¾İ ====================
-    int _levelId = 1;                               // µ±Ç°¹Ø¿¨ID
-    std::map<int, int> _deployableUnits;            // ¿É²¿ÊğµÄµ¥Î» <ID, ÊıÁ¿>
-    std::map<int, int> _remainingUnits;             // Ê£Óà¿É²¿ÊğµÄµ¥Î»
+    // ==================== å…³å¡æ•°æ® ====================
+    int _levelId = 1;                               // å½“å‰å…³å¡ID
+    std::map<int, int> _deployableUnits;            // å¯éƒ¨ç½²çš„å•ä½ <ID, æ•°é‡>
+    std::map<int, int> _remainingUnits;             // å‰©ä½™å¯éƒ¨ç½²çš„å•ä½
 
-    // ==================== Õ½¶·×´Ì¬ ====================
-    std::vector<Soldier*> _soldiers;                // ³¡ÉÏµÄÊ¿±ø
-    std::vector<Node*> _enemyBuildings;             // µĞ·½½¨Öş
-    float _battleTime = 0.0f;                       // Õ½¶·Ê±¼ä
-    bool _battleEnded = false;                      // Õ½¶·ÊÇ·ñ½áÊø
-    int _destroyedBuildingCount = 0;                // ÒÑ´İ»ÙµÄ½¨ÖşÊıÁ¿
-    int _totalBuildingCount = 0;                    // ×Ü½¨ÖşÊıÁ¿
+    // ==================== æˆ˜æ–—çŠ¶æ€ ====================
+    std::vector<Soldier*> _soldiers;                // åœºä¸Šçš„å£«å…µ
+    std::vector<Node*> _enemyBuildings;             // æ•Œæ–¹å»ºç­‘
+    float _battleTime = 0.0f;                       // æˆ˜æ–—æ—¶é—´
+    bool _battleEnded = false;                      // æˆ˜æ–—æ˜¯å¦ç»“æŸ
+    int _destroyedBuildingCount = 0;                // å·²æ‘§æ¯çš„å»ºç­‘æ•°é‡
+    int _totalBuildingCount = 0;                    // æ€»å»ºç­‘æ•°é‡
 
-    // ==================== UI×é¼ş ====================
-    Label* _timerLabel = nullptr;                   // ¼ÆÊ±Æ÷
-    Label* _progressLabel = nullptr;                // ½ø¶ÈÏÔÊ¾
-    Node* _unitDeployArea = nullptr;                // µ¥Î»²¿ÊğÇøÓò
+    // ==================== UIç»„ä»¶ ====================
+    Label* _timerLabel = nullptr;                   // è®¡æ—¶å™¨
+    Label* _progressLabel = nullptr;                // è¿›åº¦æ˜¾ç¤º
+    Node* _unitDeployArea = nullptr;                // å•ä½éƒ¨ç½²åŒºåŸŸ
+    std::map<int, Node*> _deployButtons;            // éƒ¨ç½²æŒ‰é’®ç¼“å­˜
+    int _selectedUnitId = -1;                       // å½“å‰é€‰ä¸­çš„å•ä½ID
 
-    // ==================== ³õÊ¼»¯·½·¨ ====================
+    // ==================== åˆå§‹åŒ–æ–¹æ³• ====================
     void initGridMap();
     void initLevel();
     void initUI();
     void initTouchListener();
 
-    // ==================== ¹Ø¿¨³õÊ¼»¯ ====================
-    void createLevel1();  // ´´½¨µÚ1¹Ø
+    // ==================== å…³å¡åˆå§‹åŒ– ====================
+    void createLevel1();  // åˆ›å»ºç¬¬1å…³
     void createEnemyBase(int gridX, int gridY);
     void createDefenseTower(int gridX, int gridY, int type);
 
-    // ==================== ¸¨Öú·½·¨ ====================
+    // ==================== è¾…åŠ©æ–¹æ³• ====================
     /**
-     * @brief Ëõ·Å½¨ÖşÒÔÊÊÓ¦¸ñ×Ó´óĞ¡
-     * @param building ½¨Öş½Úµã
-     * @param gridWidth ¸ñ×Ó¿í¶È
-     * @param gridHeight ¸ñ×Ó¸ß¶È
-     * @param cellSize µ¥¸ö¸ñ×ÓµÄÏñËØ³ß´ç
+     * @brief ç¼©æ”¾å»ºç­‘ä»¥é€‚åº”æ ¼å­å¤§å°
+     * @param building å»ºç­‘èŠ‚ç‚¹
+     * @param gridWidth æ ¼å­å®½åº¦
+     * @param gridHeight æ ¼å­é«˜åº¦
+     * @param cellSize å•ä¸ªæ ¼å­çš„åƒç´ å°ºå¯¸
      */
     void scaleBuildingToFit(Node* building, int gridWidth, int gridHeight, float cellSize);
 
-    // ==================== ²¿ÊğÏµÍ³ ====================
+    // ==================== éƒ¨ç½²ç³»ç»Ÿ ====================
     void setupDeployArea();
     void deploySoldier(int unitId, const Vec2& position);
     Node* createDeployButton(int unitId, int count, float x);
+    int getFirstAvailableUnitId() const;
+    void setSelectedUnit(int unitId);
+    void refreshDeployButton(int unitId);
 
-    // ==================== Õ½¶·Âß¼­ ====================
+    // ==================== æˆ˜æ–—é€»è¾‘ ====================
     void updateBattle(float dt);
     void checkBattleEnd();
     void onBattleWin();
     void onBattleLose();
 
-    // ==================== »Øµ÷ ====================
+    // ==================== å›è°ƒ ====================
     void onExitButton(Ref* sender);
     bool onTouchBegan(Touch* touch, Event* event);
 };

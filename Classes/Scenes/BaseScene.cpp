@@ -125,6 +125,9 @@ void BaseScene::initBuildingSystem() {
         // 关闭回调
         [this]() {
             CCLOG("[基地场景] 建筑商店关闭");
+            if (_uiPanel && (!_placementManager || !_placementManager->isPlacing())) {
+                _uiPanel->setButtonsEnabled(true);
+            }
         }
     );
     if (_buildShopPanel) {
@@ -141,6 +144,9 @@ void BaseScene::initBuildingSystem() {
         // 放置取消回调
         [this]() {
             CCLOG("[基地场景] 建筑放置取消");
+            if (_uiPanel) {
+                _uiPanel->setButtonsEnabled(true);
+            }
         }
     );
     if (_placementManager) {
@@ -161,6 +167,9 @@ void BaseScene::createTrainPanel() {
         // 关闭回调
         [this]() {
             CCLOG("[基地场景] 训练面板关闭");
+            if (_uiPanel) {
+                _uiPanel->setButtonsEnabled(true);
+            }
         }
     );
 
@@ -172,6 +181,9 @@ void BaseScene::createTrainPanel() {
 
 void BaseScene::showTrainPanel() {
     if (_trainPanel) {
+        if (_uiPanel) {
+            _uiPanel->setButtonsEnabled(false);
+        }
         _trainPanel->show();
         CCLOG("[基地场景] 打开训练面板");
     }
@@ -308,6 +320,9 @@ void BaseScene::onAttackClicked() {
 
 void BaseScene::onBuildClicked() {
     if (_buildShopPanel) {
+        if (_uiPanel) {
+            _uiPanel->setButtonsEnabled(false);
+        }
         _buildShopPanel->show();
     }
 }
@@ -354,6 +369,10 @@ void BaseScene::onPlacementConfirmed(const BuildingOption& option, int gridX, in
         _currentGold -= option.cost;
 
         CCLOG("[基地场景] 建筑创建成功，剩余金币: %d", _currentGold);
+    }
+
+    if (_uiPanel) {
+        _uiPanel->setButtonsEnabled(true);
     }
 }
 

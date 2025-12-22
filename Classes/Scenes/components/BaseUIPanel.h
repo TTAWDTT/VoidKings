@@ -61,6 +61,11 @@ public:
      * @param diamond 钻石数量
      */
     void updateResourceDisplay(int gold, int diamond);
+
+    /**
+     * @brief 设置主按钮可用状态
+     */
+    void setButtonsEnabled(bool enabled);
     
 private:
     // UI组件

@@ -262,14 +262,32 @@ Node* LevelSelectScene::createLevelButton(const LevelInfo& level, int index) {
     // 绑定点击事件
     int levelId = level.levelId;
     bool unlocked = level.isUnlocked;
-    touchBtn->addClickEventListener([this, levelId, unlocked](Ref* sender) {
+    touchBtn->setSwallowTouches(true);
+    const float originScale = node->getScale();
+    touchBtn->addTouchEventListener([this, levelId, unlocked, node, originScale](Ref*, Widget::TouchEventType type) {
+        if (type == Widget::TouchEventType::BEGAN) {
+            if (unlocked) {
+                node->setScale(originScale * 0.96f);
+            }
+            return;
+        }
+        if (type == Widget::TouchEventType::CANCELED) {
+            node->setScale(originScale);
+            return;
+        }
+        if (type != Widget::TouchEventType::ENDED) {
+            return;
+        }
+
+        node->setScale(originScale);
+
         if (unlocked) {
             this->onLevelSelected(levelId);
         }
         else {
             CCLOG("[关卡选择] 关卡 %d 尚未解锁", levelId);
         }
-        });
+    });
 
     node->addChild(touchBtn, 10);
 
@@ -475,10 +493,25 @@ void LevelSelectScene::setupExitButton() {
     touchBtn->setContentSize(Size(btnWidth, btnHeight));
     touchBtn->setScale9Enabled(true);
     touchBtn->setPosition(Vec2(btnX, btnY));
-    touchBtn->addClickEventListener([this](Ref* sender) {
+    touchBtn->setSwallowTouches(true);
+    const float originScale = exitNode->getScale();
+    touchBtn->addTouchEventListener([this, exitNode, originScale](Ref*, Widget::TouchEventType type) {
+        if (type == Widget::TouchEventType::BEGAN) {
+            exitNode->setScale(originScale * 0.96f);
+            return;
+        }
+        if (type == Widget::TouchEventType::CANCELED) {
+            exitNode->setScale(originScale);
+            return;
+        }
+        if (type != Widget::TouchEventType::ENDED) {
+            return;
+        }
+
+        exitNode->setScale(originScale);
         CCLOG("[关卡选择] 点击返回按钮");
         this->onExitButton(nullptr);
-        });
+    });
     this->addChild(touchBtn, 21);
 }
 
