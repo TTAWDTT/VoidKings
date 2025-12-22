@@ -15,6 +15,7 @@
 #include "Buildings/ProductionBuilding.h"
 #include "Buildings/StorageBuilding.h"
 #include "Soldier/UnitManager.h"
+#include "Utils/AnimationUtils.h"
 #include <algorithm>
 #include <cmath>
 
@@ -867,21 +868,30 @@ Node* BattleScene::createDeployButton(int unitId, int count, float x) {
     node->addChild(selectBorder, 3);
 
     // 单位名称
-    auto nameLabel = Label::createWithTTF(unitName, "fonts/arial.ttf", 10);
+    auto nameLabel = Label::createWithTTF(unitName, "fonts/arial.ttf", 9);
     if (!nameLabel) {
-        nameLabel = Label::createWithSystemFont(unitName, "Arial", 10);
+        nameLabel = Label::createWithSystemFont(unitName, "Arial", 9);
     }
-    nameLabel->setPosition(Vec2(0, 8));
+    nameLabel->setPosition(Vec2(0, 16));
     nameLabel->setColor(Color3B::WHITE);
     nameLabel->setName("nameLabel");
     node->addChild(nameLabel, 2);
+
+    // 待机动画图标（持续显示）
+    auto idleIcon = createUnitIdleIcon(unitId, 26.0f, true);
+    if (idleIcon) {
+        idleIcon->setPosition(Vec2(0, 0));
+        idleIcon->setVisible(true);
+        idleIcon->setName("idleIcon");
+        node->addChild(idleIcon, 2);
+    }
 
     // 数量
     auto countLabel = Label::createWithTTF("x" + std::to_string(count), "fonts/arial.ttf", 10);
     if (!countLabel) {
         countLabel = Label::createWithSystemFont("x" + std::to_string(count), "Arial", 10);
     }
-    countLabel->setPosition(Vec2(0, -10));
+    countLabel->setPosition(Vec2(0, -16));
     countLabel->setColor(Color3B::YELLOW);
     countLabel->setName("countLabel");
     node->addChild(countLabel, 2);
@@ -920,6 +930,62 @@ Node* BattleScene::createDeployButton(int unitId, int count, float x) {
 }
 
 // ===================================================
+// 创建部署栏待机动画图标
+// ===================================================
+Sprite* BattleScene::createUnitIdleIcon(int unitId, float targetSize, bool forceAnimate) {
+    const UnitConfig* config = UnitManager::getInstance()->getConfig(unitId);
+    if (!config) {
+        return nullptr;
+    }
+
+    std::string baseName = config->spriteFrameName;
+    if (baseName.size() > 4) {
+        std::string suffix = baseName.substr(baseName.size() - 4);
+        if (suffix == ".png" || suffix == ".PNG") {
+            baseName = baseName.substr(0, baseName.size() - 4);
+        }
+    }
+
+    auto sprite = Sprite::create(baseName + ".png");
+    if (!sprite) {
+        sprite = Sprite::create(baseName + "_" + config->anim_idle + "_1.png");
+    }
+    if (!sprite) {
+        return nullptr;
+    }
+
+    Size contentSize = sprite->getContentSize();
+    if (contentSize.width > 0 && contentSize.height > 0) {
+        float scale = targetSize / std::max(contentSize.width, contentSize.height);
+        sprite->setScale(scale);
+    }
+
+    auto anim = AnimationUtils::buildAnimationFromFrames(
+        baseName,
+        config->anim_idle,
+        config->anim_idle_frames,
+        config->anim_idle_delay,
+        false
+    );
+    if ((!anim || config->anim_idle_frames <= 1) && forceAnimate) {
+        anim = AnimationUtils::buildAnimationFromFrames(
+            baseName,
+            config->anim_walk,
+            config->anim_walk_frames,
+            config->anim_walk_delay,
+            false
+        );
+    }
+
+    if (anim && anim->getFrames().size() > 1) {
+        auto animate = Animate::create(anim);
+        sprite->runAction(RepeatForever::create(animate));
+    }
+
+    return sprite;
+}
+
+// ===================================================
 // 获取第一个可部署单位
 // ===================================================
 
@@ -948,9 +1014,14 @@ void BattleScene::setSelectedUnit(int unitId) {
 
     for (const auto& pair : _deployButtons) {
         if (!pair.second) continue;
+        bool hasCount = false;
+        auto countIt = _remainingUnits.find(pair.first);
+        if (countIt != _remainingUnits.end()) {
+            hasCount = countIt->second > 0;
+        }
         auto selectBorder = pair.second->getChildByName("selectBorder");
         if (selectBorder) {
-            selectBorder->setVisible(pair.first == _selectedUnitId);
+            selectBorder->setVisible(hasCount && pair.first == _selectedUnitId);
         }
     }
 }
@@ -1001,6 +1072,10 @@ void BattleScene::refreshDeployButton(int unitId) {
     if (selectBorder) {
         selectBorder->setVisible(hasCount && unitId == _selectedUnitId);
     }
+    auto idleIcon = node->getChildByName("idleIcon");
+    if (idleIcon) {
+        idleIcon->setVisible(true);
+    }
 
     auto selectButton = dynamic_cast<Button*>(node->getChildByName("selectButton"));
     if (selectButton) {
@@ -1031,7 +1106,7 @@ void BattleScene::deploySoldier(int unitId, const Vec2& position) {
 
         // 更新剩余数量
         it->second--;
-        UnitManager::getInstance()->consumeTrainedUnit(unitId, 1);
+        // 训练兵种仅作为出战上限，战斗中不消耗库存
 
         CCLOG("[战斗场景] 部署士兵: %d 在位置 (%.1f, %.1f), 剩余 %d",
             unitId, position.x, position.y, it->second);
@@ -1072,7 +1147,7 @@ void BattleScene::initHoverInfo() {
     border->setName("hoverBorder");
     _hoverInfoPanel->addChild(border, 1);
 
-    _hoverInfoLabel = Label::createWithSystemFont("", "Microsoft YaHei", 18);
+    _hoverInfoLabel = Label::createWithTTF("", "fonts/ScienceGothic.ttf", 18);
     if (!_hoverInfoLabel) {
         _hoverInfoLabel = Label::createWithSystemFont("", "Arial", 18);
     }
@@ -1233,12 +1308,12 @@ void BattleScene::showBuildingInfo(Node* building) {
     std::string rangeText = hasAttack ? StringUtils::format("%.0f", range) : "-";
     std::string produceText = "-";
     if (produceGold > 0 || produceElixir > 0) {
-        produceText = StringUtils::format("金币+%d 圣水+%d", produceGold, produceElixir);
+        produceText = StringUtils::format("Gold+%d Elixir+%d", produceGold, produceElixir);
     }
 
     char infoText[256];
     snprintf(infoText, sizeof(infoText),
-        "名称: %s\n等级: %d\nHP: %.0f / %.0f\n攻击: %s\n攻击范围: %s\n产量: %s\n占地: %dx%d",
+        "Name: %s\nLevel: %d\nHP: %.0f / %.0f\nATK: %s\nRange: %s\nProduction: %s\nFootprint: %dx%d",
         name.c_str(),
         level,
         hp,

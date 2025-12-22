@@ -41,17 +41,19 @@ struct UnitLevelInfo {
 namespace TrainPanelConfig {
     // 面板尺寸 - 提升容纳量
     const Size PANEL_SIZE = Size(640.0f, 600.0f);
+    constexpr float PANEL_PADDING = 16.0f;
+    constexpr float CARD_AREA_TOP_GAP = 4.0f;
+    constexpr float CARD_AREA_BOTTOM_GAP = 4.0f;
 
     // 标题配置 - 缩小字体
     constexpr int TITLE_FONT_SIZE = 22;
-    constexpr float TITLE_TOP_OFFSET = 20.0f;
+    constexpr float TITLE_BAR_HEIGHT = 50.0f;
 
     // 兵种卡片配置 - 缩小尺寸
     constexpr int GRID_COLS = 4;                    // 每行显示的兵种数量
     constexpr float UNIT_CARD_WIDTH = 130.0f;       // 兵种卡片宽度
     constexpr float UNIT_CARD_HEIGHT = 150.0f;      // 兵种卡片高度
     constexpr float UNIT_CARD_SPACING = 12.0f;      // 卡片之间的间距
-    constexpr float UNIT_AREA_TOP_OFFSET = 50.0f;   // 兵种区域距离顶部的偏移
     constexpr float ANIM_SIZE = 44.0f;              // 动画显示尺寸
 
     // 按钮配置 - 缩小尺寸
@@ -63,6 +65,8 @@ namespace TrainPanelConfig {
 
     // 关闭按钮配置
     constexpr float CLOSE_BUTTON_BOTTOM = 20.0f;
+    constexpr float CLOSE_BUTTON_WIDTH = 80.0f;
+    constexpr float CLOSE_BUTTON_HEIGHT = 28.0f;
 }
 
 // ===================================================
@@ -105,6 +109,7 @@ private:
     LayerColor* _background = nullptr;      // 半透明背景
     LayerColor* _panel = nullptr;           // 面板主体
     Label* _titleLabel = nullptr;           // 标题
+    Node* _contentRoot = nullptr;           // 内容容器
     ScrollView* _unitCardArea = nullptr;          // 兵种卡片区域
     Label* _resourceLabel = nullptr;        // 资源显示
 
@@ -121,6 +126,12 @@ private:
     std::function<void(int)> _onTrainComplete;
     std::function<void()> _onClose;
 
+    // 选中状态
+    int _selectedUnitId = -1;
+
+    // 卡片缓存
+    std::map<int, Node*> _unitCardNodes;
+
     // 状态
     bool _isShowing = false;
 
@@ -132,6 +143,7 @@ private:
     void setupCloseButton();
     void setupResourceDisplay();
     void initUnitLevels();
+    void selectUnit(int unitId);
 
     // 招募兵种（消耗金币）
     void recruitUnit(int unitId);
@@ -158,7 +170,7 @@ private:
     Node* createUnitCard(int unitId);
 
     // 创建待机动画精灵
-    Sprite* createIdleAnimationSprite(int unitId);
+    Sprite* createIdleAnimationSprite(int unitId, bool forceAnimate = false);
 };
 
 #endif // __TRAIN_PANEL_H__

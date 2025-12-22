@@ -4,6 +4,7 @@
 
 #include "TrainPanel.h"
 #include "Core/Core.h"
+#include "Utils/AnimationUtils.h"
 #include <algorithm>
 
 namespace {
@@ -142,9 +143,12 @@ void TrainPanel::setupPanel() {
     );
 
     // 居中定位
-    float panelX = origin.x + (visibleSize.width - TrainPanelConfig::PANEL_SIZE.width) / 2;
-    float panelY = origin.y + (visibleSize.height - TrainPanelConfig::PANEL_SIZE.height) / 2;
-    _panel->setPosition(panelX, panelY);
+    _panel->setAnchorPoint(Vec2(0.5f, 0.5f));
+    _panel->setIgnoreAnchorPointForPosition(false);
+    _panel->setPosition(Vec2(
+        origin.x + visibleSize.width * 0.5f,
+        origin.y + visibleSize.height * 0.5f
+    ));
 
     // 添加边框
     auto border = DrawNode::create();
@@ -155,6 +159,16 @@ void TrainPanel::setupPanel() {
     );
     _panel->addChild(border, 1);
 
+    _contentRoot = Node::create();
+    // 统一使用内边距，确保内容居中对齐
+    float contentWidth = TrainPanelConfig::PANEL_SIZE.width - TrainPanelConfig::PANEL_PADDING * 2;
+    float contentHeight = TrainPanelConfig::PANEL_SIZE.height - TrainPanelConfig::PANEL_PADDING * 2;
+    _contentRoot->setContentSize(Size(contentWidth, contentHeight));
+    _contentRoot->setAnchorPoint(Vec2(0.0f, 0.0f));
+    _contentRoot->setIgnoreAnchorPointForPosition(false);
+    _contentRoot->setPosition(Vec2(TrainPanelConfig::PANEL_PADDING, TrainPanelConfig::PANEL_PADDING));
+    _panel->addChild(_contentRoot, 2);
+
     this->addChild(_panel, 1);
 }
 
@@ -162,14 +176,20 @@ void TrainPanel::setupPanel() {
 // 标题设置
 // ===================================================
 void TrainPanel::setupTitle() {
+    if (!_contentRoot) {
+        return;
+    }
+    Size contentSize = _contentRoot->getContentSize();
+
     // 标题背景条
     auto titleBg = LayerColor::create(
         Color4B(50, 50, 50, 255),
-        TrainPanelConfig::PANEL_SIZE.width,
-        50.0f
+        contentSize.width,
+        TrainPanelConfig::TITLE_BAR_HEIGHT
     );
-    titleBg->setPosition(Vec2(0, TrainPanelConfig::PANEL_SIZE.height - 50));
-    _panel->addChild(titleBg);
+    float titleY = contentSize.height - TrainPanelConfig::TITLE_BAR_HEIGHT;
+    titleBg->setPosition(Vec2(0.0f, titleY));
+    _contentRoot->addChild(titleBg);
 
     // 标题文字
     _titleLabel = Label::createWithTTF(
@@ -182,29 +202,41 @@ void TrainPanel::setupTitle() {
     }
     _titleLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
     _titleLabel->setPosition(
-        TrainPanelConfig::PANEL_SIZE.width / 2,
-        TrainPanelConfig::PANEL_SIZE.height - 25
+        contentSize.width / 2,
+        titleY + TrainPanelConfig::TITLE_BAR_HEIGHT * 0.5f
     );
     _titleLabel->setColor(Color3B::WHITE);
-    _panel->addChild(_titleLabel, 2);
+    _contentRoot->addChild(_titleLabel, 2);
 }
 
 // ===================================================
 // 兵种卡片区域设置
 // ===================================================
 void TrainPanel::setupUnitCards() {
-    float topY = TrainPanelConfig::PANEL_SIZE.height - 50.0f - 10.0f;
-    float bottomY = TrainPanelConfig::CLOSE_BUTTON_BOTTOM + 40.0f;
+    if (!_contentRoot) {
+        return;
+    }
+    Size contentSize = _contentRoot->getContentSize();
+    float topY = contentSize.height
+        - TrainPanelConfig::TITLE_BAR_HEIGHT
+        - TrainPanelConfig::CARD_AREA_TOP_GAP;
+    float closeButtonTop = TrainPanelConfig::CLOSE_BUTTON_BOTTOM
+        + TrainPanelConfig::CLOSE_BUTTON_HEIGHT * 0.5f;
+    float bottomY = closeButtonTop + TrainPanelConfig::CARD_AREA_BOTTOM_GAP;
     float scrollHeight = topY - bottomY;
+    if (scrollHeight < 0.0f) {
+        scrollHeight = 0.0f;
+    }
+    float cardAreaWidth = contentSize.width;
 
     _unitCardArea = ScrollView::create();
     _unitCardArea->setDirection(ScrollView::Direction::VERTICAL);
     _unitCardArea->setBounceEnabled(true);
     _unitCardArea->setScrollBarEnabled(true);
-    _unitCardArea->setContentSize(Size(TrainPanelConfig::PANEL_SIZE.width, scrollHeight));
+    _unitCardArea->setContentSize(Size(cardAreaWidth, scrollHeight));
     _unitCardArea->setAnchorPoint(Vec2(0.0f, 0.0f));
     _unitCardArea->setPosition(Vec2(0.0f, bottomY));
-    _panel->addChild(_unitCardArea);
+    _contentRoot->addChild(_unitCardArea);
 
     refreshUnitCards();
 }
@@ -225,6 +257,7 @@ void TrainPanel::refreshUnitCards() {
     initUnitLevels();
 
     inner->removeAllChildren();
+    _unitCardNodes.clear();
 
     int totalUnits = static_cast<int>(_availableUnits.size());
     if (totalUnits == 0) {
@@ -236,17 +269,17 @@ void TrainPanel::refreshUnitCards() {
     float spacing = TrainPanelConfig::UNIT_CARD_SPACING;
 
     int rows = (totalUnits + TrainPanelConfig::GRID_COLS - 1) / TrainPanelConfig::GRID_COLS;
-    float innerHeight = rows * cardHeight + (rows - 1) * spacing + 10.0f;
+    float gridHeight = rows * cardHeight + (rows - 1) * spacing;
     float scrollHeight = _unitCardArea->getContentSize().height;
-    if (innerHeight < scrollHeight) {
-        innerHeight = scrollHeight;
-    }
+    float innerHeight = std::max(gridHeight, scrollHeight);
 
-    _unitCardArea->setInnerContainerSize(Size(TrainPanelConfig::PANEL_SIZE.width, innerHeight));
+    float cardAreaWidth = _unitCardArea->getContentSize().width;
+    _unitCardArea->setInnerContainerSize(Size(cardAreaWidth, innerHeight));
 
     float totalWidth = TrainPanelConfig::GRID_COLS * cardWidth + (TrainPanelConfig::GRID_COLS - 1) * spacing;
-    float startX = (TrainPanelConfig::PANEL_SIZE.width - totalWidth) / 2 + cardWidth / 2;
-    float startY = innerHeight - 10.0f - cardHeight / 2;
+    float startX = (cardAreaWidth - totalWidth) / 2 + cardWidth / 2;
+    float verticalPadding = std::max(0.0f, (innerHeight - gridHeight) * 0.5f);
+    float startY = innerHeight - verticalPadding - cardHeight / 2;
 
     int index = 0;
     for (int unitId : _availableUnits) {
@@ -258,9 +291,16 @@ void TrainPanel::refreshUnitCards() {
             float y = startY - row * (cardHeight + spacing);
             card->setPosition(Vec2(x, y));
             inner->addChild(card);
+            _unitCardNodes[unitId] = card;
         }
         index++;
     }
+
+    if (_selectedUnitId == -1 && !_availableUnits.empty()) {
+        selectUnit(_availableUnits.front());
+    }
+
+    _unitCardArea->jumpToTop();
 }
 
 // ===================================================
@@ -283,6 +323,10 @@ Node* TrainPanel::createUnitCard(int unitId) {
     float cardWidth = TrainPanelConfig::UNIT_CARD_WIDTH;
     float cardHeight = TrainPanelConfig::UNIT_CARD_HEIGHT;
 
+    cardNode->setContentSize(Size(cardWidth, cardHeight));
+    cardNode->setAnchorPoint(Vec2(0.5f, 0.5f));
+    cardNode->setIgnoreAnchorPointForPosition(false);
+
     // 卡片背景 - 黑白网格风格
     auto bg = LayerColor::create(Color4B(50, 50, 50, 255), cardWidth, cardHeight);
     bg->setAnchorPoint(Vec2(0.5f, 0.5f));
@@ -298,10 +342,22 @@ Node* TrainPanel::createUnitCard(int unitId) {
     );
     cardNode->addChild(border, 1);
 
+    // 选中边框
+    auto selectBorder = DrawNode::create();
+    selectBorder->drawRect(
+        Vec2(-cardWidth / 2, -cardHeight / 2),
+        Vec2(cardWidth / 2, cardHeight / 2),
+        Color4F(1.0f, 0.85f, 0.3f, 1.0f)
+    );
+    selectBorder->setName("selectBorder");
+    selectBorder->setVisible(false);
+    cardNode->addChild(selectBorder, 2);
+
     // 待机动画精灵（调整位置适应紧凑布局）
-    auto animSprite = createIdleAnimationSprite(unitId);
+    auto animSprite = createIdleAnimationSprite(unitId, true);
     if (animSprite) {
         animSprite->setPosition(Vec2(0, 30));
+        animSprite->setName("animSprite");
         cardNode->addChild(animSprite, 2);
     }
 
@@ -426,13 +482,29 @@ Node* TrainPanel::createUnitCard(int unitId) {
 
     cardNode->addChild(upgradeNode, 3);
 
+    // 选中回调
+    auto listener = EventListenerTouchOneByOne::create();
+    listener->setSwallowTouches(false);
+    listener->onTouchBegan = [cardNode](Touch* touch, Event* event) {
+        auto parent = cardNode->getParent();
+        if (!parent) {
+            return false;
+        }
+        Vec2 localPos = parent->convertToNodeSpace(touch->getLocation());
+        return cardNode->getBoundingBox().containsPoint(localPos);
+    };
+    listener->onTouchEnded = [this, unitId](Touch* touch, Event* event) {
+        this->selectUnit(unitId);
+    };
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, cardNode);
+
     return cardNode;
 }
 
 // ===================================================
 // 创建待机动画精灵
 // ===================================================
-Sprite* TrainPanel::createIdleAnimationSprite(int unitId) {
+Sprite* TrainPanel::createIdleAnimationSprite(int unitId, bool forceAnimate) {
     const UnitConfig* config = UnitManager::getInstance()->getConfig(unitId);
     if (!config) return nullptr;
 
@@ -516,30 +588,60 @@ Sprite* TrainPanel::createIdleAnimationSprite(int unitId) {
     }
 
     // 尝试创建待机动画 - 使用Sprite::create加载每帧获取正确尺寸
-    Vector<SpriteFrame*> frames;
-    for (int i = 1; i <= config->anim_idle_frames; ++i) {
-        char framePath[256];
-        snprintf(framePath, sizeof(framePath), "%s/%s_%s_%d.png",
-            folderPath.c_str(), baseName.c_str(), animKey.c_str(), i);
-
-        // 使用Texture2D获取正确的纹理尺寸
-        auto texture = Director::getInstance()->getTextureCache()->addImage(framePath);
-        if (texture) {
-            Size texSize = texture->getContentSize();
-            auto frame = SpriteFrame::createWithTexture(texture, Rect(0, 0, texSize.width, texSize.height));
-            if (frame) {
-                frames.pushBack(frame);
+    auto buildFrames = [&](const std::string& key, int frameCount) {
+        Vector<SpriteFrame*> frames;
+        for (int i = 1; i <= frameCount; ++i) {
+            char framePath[256];
+            snprintf(framePath, sizeof(framePath), "%s/%s_%s_%d.png",
+                folderPath.c_str(), baseName.c_str(), key.c_str(), i);
+            auto texture = Director::getInstance()->getTextureCache()->addImage(framePath);
+            if (texture) {
+                Size texSize = texture->getContentSize();
+                auto frame = SpriteFrame::createWithTexture(texture, Rect(0, 0, texSize.width, texSize.height));
+                if (frame) {
+                    frames.pushBack(frame);
+                }
             }
         }
-    }
+        return frames;
+    };
 
-    if (frames.size() > 0) {
+    Vector<SpriteFrame*> frames = buildFrames(animKey, config->anim_idle_frames);
+    if (forceAnimate && frames.size() <= 1) {
+        frames = buildFrames(config->anim_walk, config->anim_walk_frames);
+        if (frames.size() > 1) {
+            auto animation = Animation::createWithSpriteFrames(frames, config->anim_walk_delay);
+            auto animate = Animate::create(animation);
+            sprite->runAction(RepeatForever::create(animate));
+        }
+    }
+    else if (frames.size() > 1) {
         auto animation = Animation::createWithSpriteFrames(frames, config->anim_idle_delay);
         auto animate = Animate::create(animation);
         sprite->runAction(RepeatForever::create(animate));
     }
 
     return sprite;
+}
+
+// ===================================================
+// 选中逻辑
+// ===================================================
+void TrainPanel::selectUnit(int unitId) {
+    if (_selectedUnitId == unitId) {
+        return;
+    }
+    _selectedUnitId = unitId;
+
+    for (const auto& pair : _unitCardNodes) {
+        auto node = pair.second;
+        if (!node) continue;
+        auto selectBorder = node->getChildByName("selectBorder");
+        if (selectBorder) {
+            selectBorder->setVisible(pair.first == _selectedUnitId);
+        }
+    }
+
 }
 
 // ===================================================
@@ -653,12 +755,16 @@ bool TrainPanel::canAffordUpgrade(int unitId) {
 // 关闭按钮设置（缩小尺寸）
 // ===================================================
 void TrainPanel::setupCloseButton() {
-    float btnWidth = 80.0f;
-    float btnHeight = 28.0f;
+    if (!_contentRoot) {
+        return;
+    }
+    float btnWidth = TrainPanelConfig::CLOSE_BUTTON_WIDTH;
+    float btnHeight = TrainPanelConfig::CLOSE_BUTTON_HEIGHT;
 
     auto closeNode = Node::create();
+    Size contentSize = _contentRoot->getContentSize();
     closeNode->setPosition(Vec2(
-        TrainPanelConfig::PANEL_SIZE.width / 2,
+        contentSize.width / 2,
         TrainPanelConfig::CLOSE_BUTTON_BOTTOM
     ));
 
@@ -689,13 +795,16 @@ void TrainPanel::setupCloseButton() {
     });
     closeNode->addChild(closeBtn, 10);
 
-    _panel->addChild(closeNode, 5);
+    _contentRoot->addChild(closeNode, 5);
 }
 
 // ===================================================
 // 资源显示设置（缩小字体）
 // ===================================================
 void TrainPanel::setupResourceDisplay() {
+    if (!_contentRoot) {
+        return;
+    }
     _resourceLabel = Label::createWithTTF(
         "",
         "fonts/arial.ttf",
@@ -705,12 +814,14 @@ void TrainPanel::setupResourceDisplay() {
         _resourceLabel = Label::createWithSystemFont("", "Arial", 11);
     }
     _resourceLabel->setAnchorPoint(Vec2(1.0f, 0.5f));
+    Size contentSize = _contentRoot->getContentSize();
+    float titleCenterY = contentSize.height - TrainPanelConfig::TITLE_BAR_HEIGHT * 0.5f;
     _resourceLabel->setPosition(Vec2(
-        TrainPanelConfig::PANEL_SIZE.width - 10,
-        TrainPanelConfig::PANEL_SIZE.height - 25
+        contentSize.width,
+        titleCenterY
     ));
     _resourceLabel->setColor(Color3B::YELLOW);
-    _panel->addChild(_resourceLabel, 3);
+    _contentRoot->addChild(_resourceLabel, 3);
 
     updateResourceDisplay();
 }
@@ -723,6 +834,9 @@ void TrainPanel::show() {
     _isShowing = true;
     updateResourceDisplay();
     refreshUnitCards();
+    if (_unitCardArea) {
+        _unitCardArea->jumpToTop();
+    }
     CCLOG("[训练面板] 显示面板");
 }
 

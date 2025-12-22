@@ -395,7 +395,7 @@ void BaseScene::initHoverInfo() {
     border->setName("hoverBorder");
     _hoverInfoPanel->addChild(border, 1);
 
-    _hoverInfoLabel = Label::createWithSystemFont("", "Microsoft YaHei", 18);
+    _hoverInfoLabel = Label::createWithTTF("", "fonts/ScienceGothic.ttf", 18);
     if (!_hoverInfoLabel) {
         _hoverInfoLabel = Label::createWithSystemFont("", "Arial", 18);
     }
@@ -863,12 +863,12 @@ void BaseScene::showBuildingInfo(Node* building) {
     std::string rangeText = hasAttack ? StringUtils::format("%.0f", range) : "-";
     std::string produceText = "-";
     if (produceGold > 0 || produceElixir > 0) {
-        produceText = StringUtils::format("金币+%d 圣水+%d", produceGold, produceElixir);
+        produceText = StringUtils::format("Gold+%d Elixir+%d", produceGold, produceElixir);
     }
 
     char infoText[256];
     snprintf(infoText, sizeof(infoText),
-        "名称: %s\n等级: %d\nHP: %.0f / %.0f\n攻击: %s\n攻击范围: %s\n产量: %s\n占地: %dx%d",
+        "Name: %s\nLevel: %d\nHP: %.0f / %.0f\nATK: %s\nRange: %s\nProduction: %s\nFootprint: %dx%d",
         name.c_str(),
         level,
         hp,
