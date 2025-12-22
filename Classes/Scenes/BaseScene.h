@@ -184,6 +184,20 @@ private:
     Vec2 calculateBuildingPosition(int gridX, int gridY, int width, int height);
 
     /**
+     * @brief 恢复已建造的建筑
+     * 用于从攻击场景返回时保持基地状态
+     */
+    void restoreSavedBuildings();
+
+    /**
+     * @brief 记录已建造的建筑
+     * @param option 建筑选项
+     * @param gridX 网格X坐标
+     * @param gridY 网格Y坐标
+     */
+    void savePlacedBuilding(const BuildingOption& option, int gridX, int gridY);
+
+    /**
      * @brief 调整建筑缩放以适应格子大小
      * @param building 建筑节点
      * @param gridWidth 格子宽度

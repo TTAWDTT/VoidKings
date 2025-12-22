@@ -25,8 +25,19 @@
 USING_NS_CC;
 
 namespace {
-constexpr float kHoverPanelPaddingX = 12.0f;
-constexpr float kHoverPanelPaddingY = 10.0f;
+constexpr float kHoverPanelPaddingX = 16.0f;
+constexpr float kHoverPanelPaddingY = 14.0f;
+constexpr float kHoverPanelMinWidth = 260.0f;
+constexpr float kHoverPanelMinHeight = 140.0f;
+
+struct SavedBuilding {
+    BuildingOption option;
+    int gridX = 0;
+    int gridY = 0;
+    int level = 0;
+};
+
+std::vector<SavedBuilding> s_savedBuildings;
 
 Sprite* findBodySprite(Node* building) {
     if (!building) {
@@ -314,6 +325,8 @@ void BaseScene::initBaseBuilding() {
 
         CCLOG("[基地场景] 兵营建筑放置完成 (5x5格子，位置30,36)");
     }
+
+    restoreSavedBuildings();
 }
 
 // ==================== 建筑缩放调整常量 ====================
@@ -369,26 +382,28 @@ void BaseScene::initTouchListener() {
 // ==================== 悬浮信息初始化 ====================
 
 void BaseScene::initHoverInfo() {
-    auto visibleSize = Director::getInstance()->getVisibleSize();
-    auto origin = Director::getInstance()->getVisibleOrigin();
-
     _hoverInfoPanel = Node::create();
     _hoverInfoPanel->setVisible(false);
     this->addChild(_hoverInfoPanel, 200);
 
-    _hoverInfoBg = LayerColor::create(Color4B(15, 15, 15, 220), 200, 120);
+    _hoverInfoBg = LayerColor::create(Color4B(12, 12, 12, 240), 260, 140);
     _hoverInfoBg->setAnchorPoint(Vec2(0, 1));
     _hoverInfoBg->setIgnoreAnchorPointForPosition(false);
     _hoverInfoPanel->addChild(_hoverInfoBg);
 
-    _hoverInfoLabel = Label::createWithTTF("", "fonts/ScienceGothic.ttf", 14);
+    auto border = DrawNode::create();
+    border->setName("hoverBorder");
+    _hoverInfoPanel->addChild(border, 1);
+
+    _hoverInfoLabel = Label::createWithTTF("", "fonts/ScienceGothic.ttf", 18);
     if (!_hoverInfoLabel) {
-        _hoverInfoLabel = Label::createWithSystemFont("", "Arial", 14);
+        _hoverInfoLabel = Label::createWithSystemFont("", "Arial", 18);
     }
     _hoverInfoLabel->setAnchorPoint(Vec2(0, 1));
     _hoverInfoLabel->setAlignment(TextHAlignment::LEFT);
-    _hoverInfoLabel->setTextColor(Color4B(230, 230, 230, 255));
-    _hoverInfoLabel->setWidth(240);
+    _hoverInfoLabel->setTextColor(Color4B(255, 255, 255, 255));
+    _hoverInfoLabel->enableShadow(Color4B(0, 0, 0, 200), Size(1, -1), 2);
+    _hoverInfoLabel->setWidth(300);
     _hoverInfoPanel->addChild(_hoverInfoLabel);
 
     if (_gridMap) {
@@ -483,6 +498,8 @@ void BaseScene::onPlacementConfirmed(const BuildingOption& option, int gridX, in
 
         // 标记网格为已占用
         _gridMap->occupyCell(gridX, gridY, option.gridWidth, option.gridHeight, newBuilding);
+
+        savePlacedBuilding(option, gridX, gridY);
 
         CCLOG("[基地场景] 建筑创建成功，剩余金币: %d",
             Core::getInstance()->getResource(ResourceType::COIN));
@@ -614,6 +631,49 @@ Vec2 BaseScene::calculateBuildingPosition(int gridX, int gridY, int width, int h
     float centerX = (gridX + width * 0.5f) * cellSize;
     float centerY = (gridY + height * 0.5f) * cellSize;
     return Vec2(centerX, centerY);
+}
+
+// ==================== 建筑状态保存/恢复 ====================
+
+void BaseScene::savePlacedBuilding(const BuildingOption& option, int gridX, int gridY) {
+    for (const auto& saved : s_savedBuildings) {
+        if (saved.gridX == gridX && saved.gridY == gridY && saved.option.type == option.type) {
+            return;
+        }
+    }
+
+    SavedBuilding saved;
+    saved.option = option;
+    saved.option.canBuild = true;
+    saved.gridX = gridX;
+    saved.gridY = gridY;
+    saved.level = 0;
+    s_savedBuildings.push_back(saved);
+}
+
+void BaseScene::restoreSavedBuildings() {
+    if (!_gridMap || !_buildingLayer) {
+        return;
+    }
+
+    float cellSize = _gridMap->getCellSize();
+    for (const auto& saved : s_savedBuildings) {
+        const auto& option = saved.option;
+        if (!_gridMap->canPlaceBuilding(saved.gridX, saved.gridY, option.gridWidth, option.gridHeight)) {
+            continue;
+        }
+
+        Node* building = createBuildingFromOption(option);
+        if (!building) {
+            continue;
+        }
+
+        _buildingLayer->addChild(building);
+        Vec2 buildingPos = calculateBuildingPosition(saved.gridX, saved.gridY, option.gridWidth, option.gridHeight);
+        building->setPosition(buildingPos);
+        scaleBuildingToFit(building, option.gridWidth, option.gridHeight, cellSize);
+        _gridMap->occupyCell(saved.gridX, saved.gridY, option.gridWidth, option.gridHeight, building);
+    }
 }
 
 // ==================== 触摸事件处理 ====================
@@ -822,10 +882,16 @@ void BaseScene::showBuildingInfo(Node* building) {
     _hoverInfoLabel->setString(infoText);
 
     Size textSize = _hoverInfoLabel->getContentSize();
-    float panelWidth = textSize.width + kHoverPanelPaddingX * 2;
-    float panelHeight = textSize.height + kHoverPanelPaddingY * 2;
+    float panelWidth = std::max(kHoverPanelMinWidth, textSize.width + kHoverPanelPaddingX * 2);
+    float panelHeight = std::max(kHoverPanelMinHeight, textSize.height + kHoverPanelPaddingY * 2);
     _hoverInfoBg->setContentSize(Size(panelWidth, panelHeight));
     _hoverInfoLabel->setPosition(Vec2(kHoverPanelPaddingX, -kHoverPanelPaddingY));
+
+    auto border = dynamic_cast<DrawNode*>(_hoverInfoPanel->getChildByName("hoverBorder"));
+    if (border) {
+        border->clear();
+        border->drawRect(Vec2(0, 0), Vec2(panelWidth, -panelHeight), Color4F(0.8f, 0.8f, 0.8f, 1.0f));
+    }
 
     _hoverInfoPanel->setVisible(true);
     updateHoverOverlays(building);

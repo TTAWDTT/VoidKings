@@ -21,8 +21,10 @@
 USING_NS_CC;
 
 namespace {
-constexpr float kHoverPanelPaddingX = 12.0f;
-constexpr float kHoverPanelPaddingY = 10.0f;
+constexpr float kHoverPanelPaddingX = 16.0f;
+constexpr float kHoverPanelPaddingY = 14.0f;
+constexpr float kHoverPanelMinWidth = 260.0f;
+constexpr float kHoverPanelMinHeight = 140.0f;
 
 Sprite* findBodySprite(Node* building) {
     if (!building) {
@@ -1061,19 +1063,24 @@ void BattleScene::initHoverInfo() {
     _hoverInfoPanel->setVisible(false);
     this->addChild(_hoverInfoPanel, 200);
 
-    _hoverInfoBg = LayerColor::create(Color4B(15, 15, 15, 220), 200, 120);
+    _hoverInfoBg = LayerColor::create(Color4B(12, 12, 12, 240), 260, 140);
     _hoverInfoBg->setAnchorPoint(Vec2(0, 1));
     _hoverInfoBg->setIgnoreAnchorPointForPosition(false);
     _hoverInfoPanel->addChild(_hoverInfoBg);
 
-    _hoverInfoLabel = Label::createWithTTF("", "fonts/ScienceGothic.ttf", 14);
+    auto border = DrawNode::create();
+    border->setName("hoverBorder");
+    _hoverInfoPanel->addChild(border, 1);
+
+    _hoverInfoLabel = Label::createWithTTF("", "fonts/ScienceGothic.ttf", 18);
     if (!_hoverInfoLabel) {
-        _hoverInfoLabel = Label::createWithSystemFont("", "Arial", 14);
+        _hoverInfoLabel = Label::createWithSystemFont("", "Arial", 18);
     }
     _hoverInfoLabel->setAnchorPoint(Vec2(0, 1));
     _hoverInfoLabel->setAlignment(TextHAlignment::LEFT);
-    _hoverInfoLabel->setTextColor(Color4B(230, 230, 230, 255));
-    _hoverInfoLabel->setWidth(240);
+    _hoverInfoLabel->setTextColor(Color4B(255, 255, 255, 255));
+    _hoverInfoLabel->enableShadow(Color4B(0, 0, 0, 200), Size(1, -1), 2);
+    _hoverInfoLabel->setWidth(300);
     _hoverInfoPanel->addChild(_hoverInfoLabel);
 
     if (_gridMap) {
@@ -1245,10 +1252,16 @@ void BattleScene::showBuildingInfo(Node* building) {
     _hoverInfoLabel->setString(infoText);
 
     Size textSize = _hoverInfoLabel->getContentSize();
-    float panelWidth = textSize.width + kHoverPanelPaddingX * 2;
-    float panelHeight = textSize.height + kHoverPanelPaddingY * 2;
+    float panelWidth = std::max(kHoverPanelMinWidth, textSize.width + kHoverPanelPaddingX * 2);
+    float panelHeight = std::max(kHoverPanelMinHeight, textSize.height + kHoverPanelPaddingY * 2);
     _hoverInfoBg->setContentSize(Size(panelWidth, panelHeight));
     _hoverInfoLabel->setPosition(Vec2(kHoverPanelPaddingX, -kHoverPanelPaddingY));
+
+    auto border = dynamic_cast<DrawNode*>(_hoverInfoPanel->getChildByName("hoverBorder"));
+    if (border) {
+        border->clear();
+        border->drawRect(Vec2(0, 0), Vec2(panelWidth, -panelHeight), Color4F(0.8f, 0.8f, 0.8f, 1.0f));
+    }
 
     _hoverInfoPanel->setVisible(true);
     updateHoverOverlays(building);
