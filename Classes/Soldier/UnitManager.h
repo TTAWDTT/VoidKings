@@ -29,6 +29,17 @@ public:
     // 获取所有已加载的兵种ID
     std::vector<int> getAllUnitIds() const;
 
+    // 已训练兵种数量
+    const std::map<int, int>& getTrainedUnits() const;
+    int getUnitCount(int unitId) const;
+    void addTrainedUnit(int unitId, int count = 1);
+    bool consumeTrainedUnit(int unitId, int count = 1);
+    void resetTrainedUnits();
+
+    // 兵种等级管理
+    int getUnitLevel(int unitId) const;
+    void setUnitLevel(int unitId, int level);
+
 private:
     UnitManager() = default;
     ~UnitManager() = default;
@@ -44,6 +55,12 @@ private:
 
     // ID -> Config 的映射表
     std::map<int, UnitConfig> _configCache;
+
+    // 兵种训练与等级数据（跨场景持久化）
+    std::map<int, int> _trainedUnits;
+    std::map<int, int> _unitLevels;
+
+    void initInventoryForUnits();
 
     // 单例实例
     static UnitManager* _instance;

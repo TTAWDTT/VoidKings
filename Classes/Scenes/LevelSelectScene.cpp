@@ -62,13 +62,13 @@ void LevelSelectScene::setSelectedUnits(const std::map<int, int>& units) {
 // ===================================================
 
 void LevelSelectScene::initLevelData() {
-    // 初始化5个关卡
+    // 初始化12个关卡
     for (int i = 1; i <= LevelSelectConfig::MAX_LEVELS; ++i) {
         LevelInfo level;
         level.levelId = i;
         level.name = "Level " + std::to_string(i);
-        level.isUnlocked = (i <= 3);  // 前3关解锁
-        level.starCount = (i == 1) ? 3 : (i == 2) ? 2 : 0;  // 模拟已完成状态
+        level.isUnlocked = true;  // 全部关卡开放
+        level.starCount = 0;
         level.description = "Challenge Level " + std::to_string(i);
 
         _levels.push_back(level);
@@ -83,12 +83,12 @@ void LevelSelectScene::setupBackground() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
-    // 纯黑色背景
-    auto bgLayer = LayerColor::create(
-        Color4B(20, 20, 20, 255),
-        visibleSize.width,
-        visibleSize.height
+    // 深色渐变背景
+    auto bgLayer = LayerGradient::create(
+        Color4B(18, 18, 18, 255),
+        Color4B(32, 32, 32, 255)
     );
+    bgLayer->setContentSize(visibleSize);
     bgLayer->setPosition(origin);
     this->addChild(bgLayer, 0);
 
@@ -101,7 +101,7 @@ void LevelSelectScene::setupBackground() {
         gridNode->drawLine(
             Vec2(x, 0),
             Vec2(x, visibleSize.height),
-            Color4F(0.15f, 0.15f, 0.15f, 1.0f)
+            Color4F(0.12f, 0.12f, 0.12f, 1.0f)
         );
     }
 
@@ -110,7 +110,7 @@ void LevelSelectScene::setupBackground() {
         gridNode->drawLine(
             Vec2(0, y),
             Vec2(visibleSize.width, y),
-            Color4F(0.15f, 0.15f, 0.15f, 1.0f)
+            Color4F(0.12f, 0.12f, 0.12f, 1.0f)
         );
     }
 
@@ -129,7 +129,7 @@ void LevelSelectScene::setupTitle() {
     // 使用TTF字体确保无乱码（缩小字体）
     _titleLabel = Label::createWithTTF(
         "SELECT LEVEL",
-        "fonts/arial.ttf",
+        "fonts/ScienceGothic.ttf",
         LevelSelectConfig::TITLE_FONT_SIZE
     );
     if (!_titleLabel) {
@@ -145,10 +145,10 @@ void LevelSelectScene::setupTitle() {
 
     this->addChild(_titleLabel, 10);
 
-    // 标题下方的装饰线（缩短宽度）
+    // 标题下方的装饰线
     auto decorLine = DrawNode::create();
     float lineY = origin.y + visibleSize.height - LevelSelectConfig::TITLE_TOP_OFFSET - 25;
-    float lineHalfWidth = 80.0f;
+    float lineHalfWidth = 110.0f;
     decorLine->drawLine(
         Vec2(origin.x + visibleSize.width / 2 - lineHalfWidth, lineY),
         Vec2(origin.x + visibleSize.width / 2 + lineHalfWidth, lineY),
@@ -169,15 +169,24 @@ void LevelSelectScene::setupLevelButtons() {
     _levelButtonArea->setPosition(origin);
     this->addChild(_levelButtonArea, 10);
 
-    // 计算按钮起始位置（水平居中）
+    // 计算按钮起始位置（网格居中）
     float buttonSize = LevelSelectConfig::LEVEL_BUTTON_SIZE;
     float spacing = LevelSelectConfig::LEVEL_BUTTON_SPACING;
-    float totalWidth = _levels.size() * buttonSize + (_levels.size() - 1) * spacing;
-    float startX = (visibleSize.width - totalWidth) / 2 + buttonSize / 2;
-    float buttonY = visibleSize.height * LevelSelectConfig::LEVEL_AREA_Y_RATIO;
+    int cols = LevelSelectConfig::LEVEL_GRID_COLS;
+    int rows = (_levels.size() + cols - 1) / cols;
+
+    float gridWidth = cols * buttonSize + (cols - 1) * spacing;
+    float gridHeight = rows * buttonSize + (rows - 1) * spacing;
+
+    float centerY = visibleSize.height * LevelSelectConfig::LEVEL_AREA_Y_RATIO;
+    float startX = (visibleSize.width - gridWidth) / 2 + buttonSize / 2;
+    float startY = centerY + gridHeight / 2 - buttonSize / 2;
 
     for (size_t i = 0; i < _levels.size(); ++i) {
-        float buttonX = startX + i * (buttonSize + spacing);
+        int row = static_cast<int>(i) / cols;
+        int col = static_cast<int>(i) % cols;
+        float buttonX = startX + col * (buttonSize + spacing);
+        float buttonY = startY - row * (buttonSize + spacing);
 
         auto levelNode = createLevelButton(_levels[i], static_cast<int>(i));
         if (levelNode) {
@@ -212,20 +221,29 @@ Node* LevelSelectScene::createLevelButton(const LevelInfo& level, int index) {
     );
     node->addChild(border, 1);
 
-    // 关卡编号 - 使用TTF确保无乱码（缩小字体适应紧凑布局）
+    // 关卡编号
     auto numLabel = Label::createWithTTF(
         std::to_string(level.levelId),
-        "fonts/arial.ttf",
-        18
+        "fonts/ScienceGothic.ttf",
+        26
     );
     if (!numLabel) {
-        numLabel = Label::createWithSystemFont(std::to_string(level.levelId), "Arial", 18);
+        numLabel = Label::createWithSystemFont(std::to_string(level.levelId), "Arial", 24);
     }
-    numLabel->setPosition(Vec2(0, 3));
+    numLabel->setPosition(Vec2(0, 8));
     numLabel->setColor(level.isUnlocked ? Color3B::WHITE : Color3B::GRAY);
     node->addChild(numLabel, 2);
 
-    // 星星显示（已完成的关卡）- 使用简单符号（缩小字体）
+    // 关卡名称
+    auto nameLabel = Label::createWithTTF(level.name, "fonts/arial.ttf", 10);
+    if (!nameLabel) {
+        nameLabel = Label::createWithSystemFont(level.name, "Arial", 10);
+    }
+    nameLabel->setPosition(Vec2(0, -8));
+    nameLabel->setColor(level.isUnlocked ? Color3B(210, 210, 210) : Color3B::GRAY);
+    node->addChild(nameLabel, 2);
+
+    // 星星显示（已完成的关卡）
     if (level.starCount > 0) {
         std::string starStr = "";
         for (int s = 0; s < level.starCount; ++s) {
@@ -238,7 +256,7 @@ Node* LevelSelectScene::createLevelButton(const LevelInfo& level, int index) {
         if (!starLabel) {
             starLabel = Label::createWithSystemFont(starStr, "Arial", 10);
         }
-        starLabel->setPosition(Vec2(0, -15));
+        starLabel->setPosition(Vec2(0, -22));
         starLabel->setColor(Color3B::YELLOW);
         node->addChild(starLabel, 2);
     }
@@ -302,9 +320,9 @@ void LevelSelectScene::setupUnitPreview() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
-    // 创建预览区域背景 - 深灰色（缩小高度）
+    // 创建预览区域背景 - 深灰色
     auto previewBg = LayerColor::create(
-        Color4B(30, 30, 30, 255),
+        Color4B(26, 26, 26, 255),
         visibleSize.width,
         LevelSelectConfig::UNIT_PREVIEW_HEIGHT
     );
@@ -320,10 +338,10 @@ void LevelSelectScene::setupUnitPreview() {
     );
     this->addChild(borderLine, 6);
 
-    // 预览区域标题（缩小字体）
+    // 预览区域标题
     auto previewTitle = Label::createWithTTF(
         "UNITS:",
-        "fonts/arial.ttf",
+        "fonts/ScienceGothic.ttf",
         12
     );
     if (!previewTitle) {
@@ -365,7 +383,7 @@ void LevelSelectScene::updateUnitPreview() {
         // 没有选择兵种时显示提示（缩小字体）
         auto noUnitLabel = Label::createWithTTF(
             "No units trained.",
-            "fonts/arial.ttf",
+            "fonts/ScienceGothic.ttf",
             10
         );
         if (!noUnitLabel) {
@@ -404,9 +422,9 @@ Node* LevelSelectScene::createUnitPreviewIcon(int unitId, int count) {
     const UnitConfig* config = UnitManager::getInstance()->getConfig(unitId);
     std::string unitName = config ? config->name : "???";
 
-    // 图标背景 - 深灰色方块
+    // 图标背景
     auto bg = LayerColor::create(
-        Color4B(50, 50, 50, 255),
+        Color4B(45, 45, 45, 255),
         size,
         size
     );
@@ -417,23 +435,23 @@ Node* LevelSelectScene::createUnitPreviewIcon(int unitId, int count) {
     border->drawRect(Vec2(0, 0), Vec2(size, size), Color4F::WHITE);
     node->addChild(border, 1);
 
-    // 兵种名称（简写，缩小字体）
+    // 兵种名称（简写）
     auto nameLabel = Label::createWithTTF(
         unitName.substr(0, 3),
-        "fonts/arial.ttf",
-        9
+        "fonts/ScienceGothic.ttf",
+        10
     );
     if (!nameLabel) {
         nameLabel = Label::createWithSystemFont(unitName.substr(0, 3), "Arial", 9);
     }
     nameLabel->setPosition(Vec2(size / 2, size / 2 + 6));
-    nameLabel->setColor(Color3B::WHITE);
+    nameLabel->setColor(Color3B(230, 230, 230));
     node->addChild(nameLabel, 2);
 
-    // 数量（缩小字体）
+    // 数量
     auto countLabel = Label::createWithTTF(
         "x" + std::to_string(count),
-        "fonts/arial.ttf",
+        "fonts/ScienceGothic.ttf",
         10
     );
     if (!countLabel) {
@@ -536,7 +554,8 @@ void LevelSelectScene::startBattle(int levelId) {
 
     // 引入战斗场景头文件在cpp顶部
     // 跳转到战斗场景，传入已选择的兵种
-    auto scene = BattleScene::createScene(levelId, _selectedUnits);
+    // 传入已训练兵种，不使用默认兵种
+    auto scene = BattleScene::createScene(levelId, _selectedUnits, false);
     Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
 }
 

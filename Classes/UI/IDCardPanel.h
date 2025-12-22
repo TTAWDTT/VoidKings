@@ -15,7 +15,8 @@ private:
     static Node* createResourceLabel(
         const std::string& typeName,
         const std::string& iconPath,
-        float minheight
+        float minheight,
+        const std::string& valueName
     );
 };
 

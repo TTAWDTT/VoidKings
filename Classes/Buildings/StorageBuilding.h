@@ -15,6 +15,7 @@ public:
     int getLevel() const { return _level; }
     void setLevel(int level);
     
+    float getCurrentHP() const { return _currentHP; }
     float getCurrentMaxHP() const;
     float getCurrentDP() const;
     float getCurrentADD_STORAGE_ELIXIR_CAPACITY() const;
@@ -22,6 +23,12 @@ public:
     
     int getLength() const;
     int getWidth() const;
+
+    int getId() const { return _config ? _config->id : 0; }
+    const std::string& getName() const {
+        static std::string empty = "";
+        return _config ? _config->name : empty;
+    }
 
 private:
     const StorageBuildingConfig* _config;

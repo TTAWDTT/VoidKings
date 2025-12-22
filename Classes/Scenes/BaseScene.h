@@ -77,9 +77,13 @@ private:
     PlacementManager* _placementManager = nullptr; // 建筑放置管理器组件
     TrainPanel* _trainPanel = nullptr;             // 训练面板    
 
-    // ==================== 资源管理 ====================
-    int _currentGold = 0;                          // 当前金币数量
-    int _currentDiamond = 0;                       // 当前钻石数量
+    // ==================== 悬浮信息 ====================
+    Node* _hoverInfoPanel = nullptr;               // 悬浮信息面板
+    LayerColor* _hoverInfoBg = nullptr;            // 悬浮信息背景
+    Label* _hoverInfoLabel = nullptr;              // 悬浮信息文字
+    DrawNode* _hoverRangeNode = nullptr;           // 攻击范围虚线
+    DrawNode* _hoverFootprintNode = nullptr;       // 占地实线框
+    Node* _hoveredBuilding = nullptr;              // 当前悬浮建筑
 
     // ==================== 建筑配置 ====================
     ProductionBuildingConfig _baseConfig;          // 基地建筑配置
@@ -116,6 +120,7 @@ private:
     * @brief 初始化触摸事件监听
     */
     void initTouchListener();
+    void initHoverInfo();
 
     // ==================== 回调方法 ====================
     /**
@@ -206,6 +211,14 @@ private:
      * 在建造模式下确认或取消放置
      */
     void onTouchEnded(Touch* touch, Event* event);
+
+    // ==================== 悬浮信息处理 ====================
+    void updateHoverInfo(const Vec2& worldPos);
+    Node* pickBuildingAt(const Vec2& worldPos) const;
+    void showBuildingInfo(Node* building);
+    void clearBuildingInfo();
+    void updateHoverOverlays(Node* building);
+    void updateHoverPanelPosition(const Vec2& worldPos);
 };
 
 #endif // __BASE_SCENE_H__

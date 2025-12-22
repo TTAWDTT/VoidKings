@@ -462,6 +462,10 @@ float Soldier::getTargetRadius(const cocos2d::Node* target) const {
 
 float Soldier::getAttackDistance(const cocos2d::Node* target) const {
     float range = getCurrentRange();
+    if (_config && _config->ISREMOTE) {
+        // Ranged units already use center-to-center ranges in config.
+        return range;
+    }
     float targetRadius = getTargetRadius(target);
     float selfRadius = getBodyRadius();
     return range + targetRadius + selfRadius;

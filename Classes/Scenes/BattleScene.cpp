@@ -10,22 +10,81 @@
 
 #include "BattleScene.h"
 #include "BaseScene.h"
+#include "Core/Core.h"
 #include "Buildings/DefenceBuilding.h"
 #include "Buildings/ProductionBuilding.h"
+#include "Buildings/StorageBuilding.h"
 #include "Soldier/UnitManager.h"
 #include <algorithm>
+#include <cmath>
 
 USING_NS_CC;
+
+namespace {
+constexpr float kHoverPanelPaddingX = 12.0f;
+constexpr float kHoverPanelPaddingY = 10.0f;
+
+Sprite* findBodySprite(Node* building) {
+    if (!building) {
+        return nullptr;
+    }
+    for (auto* child : building->getChildren()) {
+        auto* sprite = dynamic_cast<Sprite*>(child);
+        if (sprite) {
+            return sprite;
+        }
+    }
+    return nullptr;
+}
+
+bool hitTestBuilding(Node* building, const Vec2& worldPos) {
+    if (!building) {
+        return false;
+    }
+    auto* bodySprite = findBodySprite(building);
+    if (bodySprite) {
+        Vec2 localPos = building->convertToNodeSpace(worldPos);
+        return bodySprite->getBoundingBox().containsPoint(localPos);
+    }
+    auto* parent = building->getParent();
+    if (parent) {
+        Vec2 localPos = parent->convertToNodeSpace(worldPos);
+        return building->getBoundingBox().containsPoint(localPos);
+    }
+    return false;
+}
+
+void drawDashedCircle(DrawNode* node, const Vec2& center, float radius, const Color4F& color) {
+    if (!node || radius <= 0.0f) {
+        return;
+    }
+    node->clear();
+    const int segments = 48;
+    constexpr float kPi = 3.1415926f;
+    const float step = 2.0f * kPi / segments;
+    for (int i = 0; i < segments; ++i) {
+        if (i % 2 != 0) {
+            continue;
+        }
+        float angle1 = step * i;
+        float angle2 = step * (i + 1);
+        Vec2 p1(center.x + radius * std::cos(angle1), center.y + radius * std::sin(angle1));
+        Vec2 p2(center.x + radius * std::cos(angle2), center.y + radius * std::sin(angle2));
+        node->drawLine(p1, p2, color);
+    }
+}
+} // namespace
 
 // ===================================================
 // 场景创建
 // ===================================================
 
-Scene* BattleScene::createScene(int levelId, const std::map<int, int>& units) {
+Scene* BattleScene::createScene(int levelId, const std::map<int, int>& units, bool useDefaultUnits) {
     auto scene = new (std::nothrow) BattleScene();
     if (scene) {
         scene->setLevelId(levelId);
         scene->setDeployableUnits(units);
+        scene->_allowDefaultUnits = useDefaultUnits;
         if (scene->init()) {
             scene->autorelease();
             return scene;
@@ -52,7 +111,7 @@ bool BattleScene::init() {
     }
 
     // 初始化剩余可部署单位
-    if (_deployableUnits.empty()) {
+    if (_deployableUnits.empty() && _allowDefaultUnits) {
         auto unitIds = UnitManager::getInstance()->getAllUnitIds();
         int defaultCounts[] = { 10, 5, 8 };
         int maxDefaults = static_cast<int>(unitIds.size());
@@ -75,6 +134,7 @@ bool BattleScene::init() {
     DefenceBuilding::setEnemySoldiers(&_soldiers);
     initUI();
     initTouchListener();
+    initHoverInfo();
 
     // 设置更新
     this->scheduleUpdate();
@@ -137,6 +197,41 @@ void BattleScene::initLevel() {
     // 根据关卡ID创建不同的关卡
     switch (_levelId) {
     case 1:
+        createLevel1();
+        break;
+    case 2:
+        createLevel2();
+        break;
+    case 3:
+        createLevel3();
+        break;
+    case 4:
+        createLevel4();
+        break;
+    case 5:
+        createLevel5();
+        break;
+    case 6:
+        createLevel6();
+        break;
+    case 7:
+        createLevel7();
+        break;
+    case 8:
+        createLevel8();
+        break;
+    case 9:
+        createLevel9();
+        break;
+    case 10:
+        createLevel10();
+        break;
+    case 11:
+        createLevel11();
+        break;
+    case 12:
+        createLevel12();
+        break;
     default:
         createLevel1();
         break;
@@ -152,32 +247,287 @@ void BattleScene::initLevel() {
 void BattleScene::createLevel1() {
     // 在地图右侧放置敌方基地（40x30，确保4x4建筑在边界内）
     // 基地位置需要留足够空间：右边界为40，最大X为36
-    createEnemyBase(28, 13);
+    createEnemyBase(28, 13, 0);
 
     // 创建一些防御塔（3x3），需要确保在边界内
-    createDefenseTower(22, 11, 1);  // 箭塔
-    createDefenseTower(22, 17, 1);  // 箭塔
-    createDefenseTower(24, 8, 2);   // 炮塔
-    createDefenseTower(24, 20, 2);  // 炮塔
+    createDefenseTower(22, 11, 1, 0);  // 箭塔
+    createDefenseTower(22, 17, 1, 0);  // 箭塔
+    createDefenseTower(24, 8, 2, 0);   // 炮塔
+    createDefenseTower(24, 20, 2, 0);  // 炮塔
+}
+
+// ===================================================
+// 创建第2关 - 进阶：更多塔位与交叉火力
+// ===================================================
+
+void BattleScene::createLevel2() {
+    createEnemyBase(26, 12, 1);
+
+    // 3 箭塔 + 2 炮塔，形成左右夹击
+    createDefenseTower(20, 10, 1, 0);
+    createDefenseTower(20, 18, 1, 0);
+    createDefenseTower(30, 8, 1, 1);
+    createDefenseTower(28, 18, 2, 0);
+    createDefenseTower(32, 14, 2, 0);
+}
+
+// ===================================================
+// 创建第3关 - 中级：密集守卫与远近混合
+// ===================================================
+
+void BattleScene::createLevel3() {
+    createEnemyBase(25, 12, 1);
+
+    // 4 箭塔 + 3 炮塔，覆盖上下两条通路
+    createDefenseTower(18, 10, 1, 1);
+    createDefenseTower(18, 18, 1, 1);
+    createDefenseTower(30, 8, 1, 1);
+    createDefenseTower(30, 20, 1, 1);
+
+    createDefenseTower(26, 7, 2, 1);
+    createDefenseTower(26, 21, 2, 1);
+    createDefenseTower(34, 14, 2, 1);
+}
+
+// ===================================================
+// 创建第4关 - 高级：多点炮塔与中心重防
+// ===================================================
+
+void BattleScene::createLevel4() {
+    createEnemyBase(24, 12, 2);
+
+    // 5 箭塔 + 4 炮塔，形成多层火力网
+    createDefenseTower(16, 12, 1, 1);
+    createDefenseTower(16, 18, 1, 1);
+    createDefenseTower(28, 6, 1, 1);
+    createDefenseTower(28, 22, 1, 1);
+    createDefenseTower(34, 12, 1, 2);
+
+    createDefenseTower(24, 6, 2, 1);
+    createDefenseTower(24, 22, 2, 1);
+    createDefenseTower(32, 18, 2, 1);
+    createDefenseTower(32, 8, 2, 1);
+}
+
+// ===================================================
+// 创建第5关 - 困难：高密度火力与双侧夹击
+// ===================================================
+
+void BattleScene::createLevel5() {
+    createEnemyBase(23, 11, 2);
+
+    // 6 箭塔 + 6 炮塔，构成多重覆盖区
+    createDefenseTower(14, 10, 1, 2);
+    createDefenseTower(14, 18, 1, 2);
+    createDefenseTower(30, 4, 1, 2);
+    createDefenseTower(30, 24, 1, 2);
+    createDefenseTower(36, 10, 1, 2);
+    createDefenseTower(36, 18, 1, 2);
+
+    createDefenseTower(22, 4, 2, 2);
+    createDefenseTower(22, 24, 2, 2);
+    createDefenseTower(28, 8, 2, 2);
+    createDefenseTower(28, 18, 2, 2);
+    createDefenseTower(34, 6, 2, 2);
+    createDefenseTower(34, 20, 2, 2);
+}
+
+// ===================================================
+// 创建第6关 - 高级：内外双圈火力
+// ===================================================
+
+void BattleScene::createLevel6() {
+    createEnemyBase(22, 12, 1);
+
+    createDefenseTower(14, 10, 1, 1);
+    createDefenseTower(14, 18, 1, 1);
+    createDefenseTower(30, 10, 1, 1);
+    createDefenseTower(30, 18, 1, 1);
+
+    createDefenseTower(18, 6, 2, 1);
+    createDefenseTower(18, 22, 2, 1);
+    createDefenseTower(26, 6, 2, 1);
+    createDefenseTower(26, 22, 2, 1);
+}
+
+// ===================================================
+// 创建第7关 - 高级：外圈密集火力
+// ===================================================
+
+void BattleScene::createLevel7() {
+    createEnemyBase(22, 11, 1);
+
+    createDefenseTower(12, 8, 1, 1);
+    createDefenseTower(12, 20, 1, 1);
+    createDefenseTower(30, 8, 1, 1);
+    createDefenseTower(30, 20, 1, 1);
+    createDefenseTower(36, 14, 1, 2);
+
+    createDefenseTower(18, 4, 2, 1);
+    createDefenseTower(18, 24, 2, 1);
+    createDefenseTower(26, 4, 2, 1);
+    createDefenseTower(26, 24, 2, 1);
+    createDefenseTower(34, 10, 2, 2);
+    createDefenseTower(34, 18, 2, 2);
+}
+
+// ===================================================
+// 创建第8关 - 精英：多层交叉火力
+// ===================================================
+
+void BattleScene::createLevel8() {
+    createEnemyBase(21, 11, 2);
+
+    createDefenseTower(10, 8, 1, 1);
+    createDefenseTower(10, 20, 1, 1);
+    createDefenseTower(30, 8, 1, 2);
+    createDefenseTower(30, 20, 1, 2);
+    createDefenseTower(36, 14, 1, 2);
+    createDefenseTower(22, 6, 1, 2);
+    createDefenseTower(22, 22, 1, 2);
+
+    createDefenseTower(16, 4, 2, 1);
+    createDefenseTower(16, 24, 2, 1);
+    createDefenseTower(26, 4, 2, 2);
+    createDefenseTower(26, 24, 2, 2);
+    createDefenseTower(34, 6, 2, 2);
+    createDefenseTower(34, 22, 2, 2);
+}
+
+// ===================================================
+// 创建第9关 - 精英：纵深压制
+// ===================================================
+
+void BattleScene::createLevel9() {
+    createEnemyBase(20, 10, 2);
+
+    createDefenseTower(8, 8, 1, 2);
+    createDefenseTower(8, 20, 1, 2);
+    createDefenseTower(30, 8, 1, 2);
+    createDefenseTower(30, 20, 1, 2);
+    createDefenseTower(36, 12, 1, 2);
+    createDefenseTower(36, 18, 1, 2);
+    createDefenseTower(22, 6, 1, 2);
+    createDefenseTower(22, 22, 1, 2);
+
+    createDefenseTower(14, 4, 2, 2);
+    createDefenseTower(14, 24, 2, 2);
+    createDefenseTower(26, 4, 2, 2);
+    createDefenseTower(26, 24, 2, 2);
+    createDefenseTower(32, 6, 2, 2);
+    createDefenseTower(32, 22, 2, 2);
+    createDefenseTower(34, 10, 2, 2);
+}
+
+// ===================================================
+// 创建第10关 - 困难：火力矩阵
+// ===================================================
+
+void BattleScene::createLevel10() {
+    createEnemyBase(20, 10, 2);
+
+    createDefenseTower(8, 6, 1, 2);
+    createDefenseTower(8, 22, 1, 2);
+    createDefenseTower(30, 6, 1, 2);
+    createDefenseTower(30, 22, 1, 2);
+    createDefenseTower(36, 10, 1, 2);
+    createDefenseTower(36, 18, 1, 2);
+    createDefenseTower(22, 6, 1, 2);
+    createDefenseTower(22, 22, 1, 2);
+    createDefenseTower(14, 14, 1, 2);
+
+    createDefenseTower(12, 4, 2, 2);
+    createDefenseTower(12, 24, 2, 2);
+    createDefenseTower(26, 4, 2, 2);
+    createDefenseTower(26, 24, 2, 2);
+    createDefenseTower(32, 8, 2, 2);
+    createDefenseTower(32, 20, 2, 2);
+    createDefenseTower(34, 14, 2, 2);
+}
+
+// ===================================================
+// 创建第11关 - 困难：多点夹击
+// ===================================================
+
+void BattleScene::createLevel11() {
+    createEnemyBase(19, 9, 2);
+
+    createDefenseTower(6, 6, 1, 2);
+    createDefenseTower(6, 22, 1, 2);
+    createDefenseTower(30, 6, 1, 2);
+    createDefenseTower(30, 22, 1, 2);
+    createDefenseTower(36, 10, 1, 2);
+    createDefenseTower(36, 18, 1, 2);
+    createDefenseTower(22, 6, 1, 2);
+    createDefenseTower(22, 22, 1, 2);
+    createDefenseTower(14, 14, 1, 2);
+    createDefenseTower(28, 14, 1, 2);
+
+    createDefenseTower(10, 4, 2, 2);
+    createDefenseTower(10, 24, 2, 2);
+    createDefenseTower(26, 4, 2, 2);
+    createDefenseTower(26, 24, 2, 2);
+    createDefenseTower(32, 8, 2, 2);
+    createDefenseTower(32, 20, 2, 2);
+    createDefenseTower(34, 14, 2, 2);
+    createDefenseTower(16, 10, 2, 2);
+}
+
+// ===================================================
+// 创建第12关 - 噩梦：全域覆盖
+// ===================================================
+
+void BattleScene::createLevel12() {
+    createEnemyBase(19, 9, 2);
+
+    createDefenseTower(6, 6, 1, 2);
+    createDefenseTower(6, 22, 1, 2);
+    createDefenseTower(30, 6, 1, 2);
+    createDefenseTower(30, 22, 1, 2);
+    createDefenseTower(36, 10, 1, 2);
+    createDefenseTower(36, 18, 1, 2);
+    createDefenseTower(22, 6, 1, 2);
+    createDefenseTower(22, 22, 1, 2);
+    createDefenseTower(14, 14, 1, 2);
+    createDefenseTower(28, 14, 1, 2);
+    createDefenseTower(18, 6, 1, 2);
+    createDefenseTower(18, 22, 1, 2);
+
+    createDefenseTower(10, 4, 2, 2);
+    createDefenseTower(10, 24, 2, 2);
+    createDefenseTower(26, 4, 2, 2);
+    createDefenseTower(26, 24, 2, 2);
+    createDefenseTower(32, 8, 2, 2);
+    createDefenseTower(32, 20, 2, 2);
+    createDefenseTower(34, 14, 2, 2);
+    createDefenseTower(16, 10, 2, 2);
+    createDefenseTower(16, 18, 2, 2);
 }
 
 // ===================================================
 // 创建敌方基地
 // ===================================================
 
-void BattleScene::createEnemyBase(int gridX, int gridY) {
+void BattleScene::createEnemyBase(int gridX, int gridY, int level) {
     // 创建敌方基地建筑配置
     static ProductionBuildingConfig baseConfig;
     baseConfig.id = 9001;
     baseConfig.name = "EnemyBase";
     baseConfig.spriteFrameName = "buildings/base.png";
-    baseConfig.HP = { 1000, 1500, 2000 };
+    baseConfig.HP = { 1300, 1800, 2400 };
     baseConfig.DP = { 0, 0, 0 };
     baseConfig.length = 4;
     baseConfig.width = 4;
     baseConfig.MAXLEVEL = 2;
 
-    auto base = ProductionBuilding::create(&baseConfig, 0);
+    int resolvedLevel = level;
+    if (resolvedLevel < 0) {
+        resolvedLevel = 0;
+    }
+    if (resolvedLevel > baseConfig.MAXLEVEL) {
+        resolvedLevel = baseConfig.MAXLEVEL;
+    }
+    auto base = ProductionBuilding::create(&baseConfig, resolvedLevel);
     if (base) {
         _buildingLayer->addChild(base);
 
@@ -196,6 +546,8 @@ void BattleScene::createEnemyBase(int gridX, int gridY) {
         _enemyBuildings.push_back(base);
         base->retain();
         _totalBuildingCount++;
+        _enemyBase = base;
+        _enemyBaseDestroyed = false;
 
         CCLOG("[战斗场景] 敌方基地创建完成");
     }
@@ -205,7 +557,7 @@ void BattleScene::createEnemyBase(int gridX, int gridY) {
 // 创建防御塔
 // ===================================================
 
-void BattleScene::createDefenseTower(int gridX, int gridY, int type) {
+void BattleScene::createDefenseTower(int gridX, int gridY, int type, int level) {
     // 创建防御塔建筑配置
     static DefenceBuildingConfig towerConfig;
 
@@ -214,11 +566,11 @@ void BattleScene::createDefenseTower(int gridX, int gridY, int type) {
         towerConfig.id = 9101;
         towerConfig.name = "EnemyArrowTower";
         towerConfig.spriteFrameName = "buildings/ArrowTower.png";
-        towerConfig.HP = { 300, 400, 500 };
+        towerConfig.HP = { 320, 420, 520 };
         towerConfig.DP = { 0, 0.05f, 0.1f };
-        towerConfig.ATK = { 20, 30, 40 };
-        towerConfig.ATK_RANGE = { 150, 180, 210 };
-        towerConfig.ATK_SPEED = { 1.0f, 0.9f, 0.8f };
+        towerConfig.ATK = { 25, 35, 50 };
+        towerConfig.ATK_RANGE = { 170, 200, 230 };
+        towerConfig.ATK_SPEED = { 0.95f, 0.85f, 0.75f };
         towerConfig.SKY_ABLE = true;
         towerConfig.GROUND_ABLE = true;
         towerConfig.bulletSpriteFrameName = "bullet/arrow.png";
@@ -231,11 +583,11 @@ void BattleScene::createDefenseTower(int gridX, int gridY, int type) {
         towerConfig.id = 9102;
         towerConfig.name = "EnemyBoomTower";
         towerConfig.spriteFrameName = "buildings/BoomTower.png";
-        towerConfig.HP = { 400, 550, 700 };
+        towerConfig.HP = { 450, 600, 760 };
         towerConfig.DP = { 0.05f, 0.1f, 0.15f };
-        towerConfig.ATK = { 40, 55, 70 };
-        towerConfig.ATK_RANGE = { 120, 150, 180 };
-        towerConfig.ATK_SPEED = { 1.5f, 1.4f, 1.3f };
+        towerConfig.ATK = { 55, 75, 95 };
+        towerConfig.ATK_RANGE = { 140, 170, 200 };
+        towerConfig.ATK_SPEED = { 1.3f, 1.2f, 1.1f };
         towerConfig.SKY_ABLE = false;
         towerConfig.GROUND_ABLE = true;
         towerConfig.bulletSpriteFrameName = "bullet/bomb.png";
@@ -248,7 +600,15 @@ void BattleScene::createDefenseTower(int gridX, int gridY, int type) {
     towerConfig.width = 3;
     towerConfig.MAXLEVEL = 2;
 
-    auto tower = DefenceBuilding::create(&towerConfig, 0);
+    int resolvedLevel = level;
+    if (resolvedLevel < 0) {
+        resolvedLevel = 0;
+    }
+    if (resolvedLevel > towerConfig.MAXLEVEL) {
+        resolvedLevel = towerConfig.MAXLEVEL;
+    }
+
+    auto tower = DefenceBuilding::create(&towerConfig, resolvedLevel);
     if (tower) {
         _buildingLayer->addChild(tower);
 
@@ -415,15 +775,16 @@ void BattleScene::setupDeployArea() {
     _uiLayer->addChild(bottomBg);
 
     if (_remainingUnits.empty()) {
-        auto unitIds = UnitManager::getInstance()->getAllUnitIds();
-        int defaultCounts[] = { 10, 5, 8 };
-        int maxDefaults = static_cast<int>(unitIds.size());
-        if (maxDefaults > 3) {
-            maxDefaults = 3;
+        auto emptyLabel = Label::createWithTTF("No units trained.", "fonts/arial.ttf", 12);
+        if (!emptyLabel) {
+            emptyLabel = Label::createWithSystemFont("No units trained.", "Arial", 12);
         }
-        for (int i = 0; i < maxDefaults; ++i) {
-            _remainingUnits[unitIds[i]] = defaultCounts[i];
-        }
+        emptyLabel->setPosition(Vec2(origin.x + visibleSize.width / 2,
+            origin.y + BattleConfig::UI_BOTTOM_HEIGHT / 2));
+        emptyLabel->setColor(Color3B::GRAY);
+        _uiLayer->addChild(emptyLabel);
+        _selectedUnitId = -1;
+        return;
     }
 
     _unitDeployArea = Node::create();
@@ -658,8 +1019,9 @@ void BattleScene::deploySoldier(int unitId, const Vec2& position) {
         return;
     }
 
-    // 创建士兵
-    auto soldier = UnitManager::getInstance()->spawnSoldier(unitId, position, 0);
+    // 创建士兵（同步训练等级）
+    int unitLevel = UnitManager::getInstance()->getUnitLevel(unitId);
+    auto soldier = UnitManager::getInstance()->spawnSoldier(unitId, position, unitLevel);
     if (soldier) {
         _soldierLayer->addChild(soldier);
         _soldiers.push_back(soldier);
@@ -667,6 +1029,7 @@ void BattleScene::deploySoldier(int unitId, const Vec2& position) {
 
         // 更新剩余数量
         it->second--;
+        UnitManager::getInstance()->consumeTrainedUnit(unitId, 1);
 
         CCLOG("[战斗场景] 部署士兵: %d 在位置 (%.1f, %.1f), 剩余 %d",
             unitId, position.x, position.y, it->second);
@@ -687,6 +1050,46 @@ void BattleScene::initTouchListener() {
     auto listener = EventListenerTouchOneByOne::create();
     listener->onTouchBegan = CC_CALLBACK_2(BattleScene::onTouchBegan, this);
     _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+}
+
+// ===================================================
+// 悬浮信息初始化
+// ===================================================
+
+void BattleScene::initHoverInfo() {
+    _hoverInfoPanel = Node::create();
+    _hoverInfoPanel->setVisible(false);
+    this->addChild(_hoverInfoPanel, 200);
+
+    _hoverInfoBg = LayerColor::create(Color4B(15, 15, 15, 220), 200, 120);
+    _hoverInfoBg->setAnchorPoint(Vec2(0, 1));
+    _hoverInfoBg->setIgnoreAnchorPointForPosition(false);
+    _hoverInfoPanel->addChild(_hoverInfoBg);
+
+    _hoverInfoLabel = Label::createWithTTF("", "fonts/ScienceGothic.ttf", 14);
+    if (!_hoverInfoLabel) {
+        _hoverInfoLabel = Label::createWithSystemFont("", "Arial", 14);
+    }
+    _hoverInfoLabel->setAnchorPoint(Vec2(0, 1));
+    _hoverInfoLabel->setAlignment(TextHAlignment::LEFT);
+    _hoverInfoLabel->setTextColor(Color4B(230, 230, 230, 255));
+    _hoverInfoLabel->setWidth(240);
+    _hoverInfoPanel->addChild(_hoverInfoLabel);
+
+    if (_gridMap) {
+        _hoverRangeNode = DrawNode::create();
+        _hoverFootprintNode = DrawNode::create();
+        _hoverRangeNode->setVisible(false);
+        _hoverFootprintNode->setVisible(false);
+        _gridMap->addChild(_hoverRangeNode, 25);
+        _gridMap->addChild(_hoverFootprintNode, 26);
+    }
+
+    auto mouseListener = EventListenerMouse::create();
+    mouseListener->onMouseMove = [this](EventMouse* event) {
+        updateHoverInfo(Vec2(event->getCursorX(), event->getCursorY()));
+    };
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, this);
 }
 
 bool BattleScene::onTouchBegan(Touch* touch, Event* event) {
@@ -719,6 +1122,217 @@ bool BattleScene::onTouchBegan(Touch* touch, Event* event) {
     }
 
     return true;
+}
+
+// ===================================================
+// 悬浮信息处理
+// ===================================================
+
+void BattleScene::updateHoverInfo(const Vec2& worldPos) {
+    if (!_gridMap || !_buildingLayer || _battleEnded) {
+        clearBuildingInfo();
+        return;
+    }
+
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+    if (worldPos.y < origin.y + BattleConfig::UI_BOTTOM_HEIGHT
+        || worldPos.y > origin.y + visibleSize.height - BattleConfig::UI_TOP_HEIGHT) {
+        clearBuildingInfo();
+        return;
+    }
+
+    Node* building = pickBuildingAt(worldPos);
+    if (!building) {
+        clearBuildingInfo();
+        return;
+    }
+
+    if (building != _hoveredBuilding) {
+        _hoveredBuilding = building;
+        showBuildingInfo(building);
+    }
+    updateHoverPanelPosition(worldPos);
+}
+
+Node* BattleScene::pickBuildingAt(const Vec2& worldPos) const {
+    if (!_buildingLayer) {
+        return nullptr;
+    }
+
+    for (auto* child : _buildingLayer->getChildren()) {
+        if (!child) {
+            continue;
+        }
+        if (dynamic_cast<DefenceBuilding*>(child)
+            || dynamic_cast<ProductionBuilding*>(child)
+            || dynamic_cast<StorageBuilding*>(child)) {
+            if (hitTestBuilding(child, worldPos)) {
+                return child;
+            }
+        }
+    }
+    return nullptr;
+}
+
+void BattleScene::showBuildingInfo(Node* building) {
+    if (!_hoverInfoPanel || !_hoverInfoLabel) {
+        return;
+    }
+
+    std::string name = "Unknown";
+    int level = 0;
+    float hp = 0.0f;
+    float maxHp = 0.0f;
+    float atk = 0.0f;
+    float range = 0.0f;
+    int sizeW = 0;
+    int sizeH = 0;
+    int produceGold = 0;
+    int produceElixir = 0;
+    bool hasAttack = false;
+
+    if (auto* defence = dynamic_cast<DefenceBuilding*>(building)) {
+        name = defence->getName();
+        level = defence->getLevel() + 1;
+        hp = defence->getCurrentHP();
+        maxHp = defence->getCurrentMaxHP();
+        atk = defence->getCurrentATK();
+        range = defence->getCurrentATK_RANGE();
+        sizeW = defence->getWidth();
+        sizeH = defence->getLength();
+        hasAttack = true;
+    }
+    else if (auto* production = dynamic_cast<ProductionBuilding*>(building)) {
+        name = production->getName();
+        level = production->getLevel() + 1;
+        hp = production->getCurrentHP();
+        maxHp = production->getCurrentMaxHP();
+        sizeW = production->getWidth();
+        sizeH = production->getLength();
+        produceGold = static_cast<int>(production->getCurrentPRODUCE_GOLD());
+        produceElixir = static_cast<int>(production->getCurrentPRODUCE_ELIXIR());
+    }
+    else if (auto* storage = dynamic_cast<StorageBuilding*>(building)) {
+        name = storage->getName();
+        level = storage->getLevel() + 1;
+        hp = storage->getCurrentHP();
+        maxHp = storage->getCurrentMaxHP();
+        sizeW = storage->getWidth();
+        sizeH = storage->getLength();
+    }
+
+    std::string attackText = hasAttack ? StringUtils::format("%.0f", atk) : "-";
+    std::string rangeText = hasAttack ? StringUtils::format("%.0f", range) : "-";
+    std::string produceText = "-";
+    if (produceGold > 0 || produceElixir > 0) {
+        produceText = StringUtils::format("金币+%d 圣水+%d", produceGold, produceElixir);
+    }
+
+    char infoText[256];
+    snprintf(infoText, sizeof(infoText),
+        "名称: %s\n等级: %d\nHP: %.0f / %.0f\n攻击: %s\n攻击范围: %s\n产量: %s\n占地: %dx%d",
+        name.c_str(),
+        level,
+        hp,
+        maxHp,
+        attackText.c_str(),
+        rangeText.c_str(),
+        produceText.c_str(),
+        sizeW,
+        sizeH
+    );
+    _hoverInfoLabel->setString(infoText);
+
+    Size textSize = _hoverInfoLabel->getContentSize();
+    float panelWidth = textSize.width + kHoverPanelPaddingX * 2;
+    float panelHeight = textSize.height + kHoverPanelPaddingY * 2;
+    _hoverInfoBg->setContentSize(Size(panelWidth, panelHeight));
+    _hoverInfoLabel->setPosition(Vec2(kHoverPanelPaddingX, -kHoverPanelPaddingY));
+
+    _hoverInfoPanel->setVisible(true);
+    updateHoverOverlays(building);
+}
+
+void BattleScene::updateHoverOverlays(Node* building) {
+    if (!_hoverFootprintNode || !_hoverRangeNode || !_gridMap || !building) {
+        return;
+    }
+
+    _hoverFootprintNode->clear();
+    _hoverRangeNode->clear();
+
+    float cellSize = _gridMap->getCellSize();
+    int sizeW = 0;
+    int sizeH = 0;
+    float range = 0.0f;
+
+    if (auto* defence = dynamic_cast<DefenceBuilding*>(building)) {
+        sizeW = defence->getWidth();
+        sizeH = defence->getLength();
+        range = defence->getCurrentATK_RANGE();
+    }
+    else if (auto* production = dynamic_cast<ProductionBuilding*>(building)) {
+        sizeW = production->getWidth();
+        sizeH = production->getLength();
+    }
+    else if (auto* storage = dynamic_cast<StorageBuilding*>(building)) {
+        sizeW = storage->getWidth();
+        sizeH = storage->getLength();
+    }
+
+    Vec2 center = building->getPosition();
+    int gridX = static_cast<int>(std::floor(center.x / cellSize - sizeW * 0.5f + 0.001f));
+    int gridY = static_cast<int>(std::floor(center.y / cellSize - sizeH * 0.5f + 0.001f));
+
+    Vec2 bottomLeft(gridX * cellSize, gridY * cellSize);
+    Vec2 topRight((gridX + sizeW) * cellSize, (gridY + sizeH) * cellSize);
+    _hoverFootprintNode->drawRect(bottomLeft, topRight, Color4F(0.9f, 0.9f, 0.9f, 1.0f));
+    _hoverFootprintNode->setVisible(true);
+
+    if (range > 0.0f) {
+        drawDashedCircle(_hoverRangeNode, center, range, Color4F(0.85f, 0.85f, 0.85f, 0.8f));
+        _hoverRangeNode->setVisible(true);
+    }
+    else {
+        _hoverRangeNode->setVisible(false);
+    }
+}
+
+void BattleScene::updateHoverPanelPosition(const Vec2& worldPos) {
+    if (!_hoverInfoPanel || !_hoverInfoBg) {
+        return;
+    }
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+
+    Size panelSize = _hoverInfoBg->getContentSize();
+    Vec2 desiredPos = worldPos + Vec2(16.0f, 20.0f);
+
+    float maxX = origin.x + visibleSize.width - panelSize.width - 6.0f;
+    float minX = origin.x + 6.0f;
+    float maxY = origin.y + visibleSize.height - 6.0f;
+    float minY = origin.y + panelSize.height + 6.0f;
+
+    float clampedX = std::min(std::max(desiredPos.x, minX), maxX);
+    float clampedY = std::min(std::max(desiredPos.y, minY), maxY);
+
+    _hoverInfoPanel->setPosition(Vec2(clampedX, clampedY));
+}
+
+void BattleScene::clearBuildingInfo() {
+    _hoveredBuilding = nullptr;
+    if (_hoverInfoPanel) {
+        _hoverInfoPanel->setVisible(false);
+    }
+    if (_hoverRangeNode) {
+        _hoverRangeNode->clear();
+        _hoverRangeNode->setVisible(false);
+    }
+    if (_hoverFootprintNode) {
+        _hoverFootprintNode->clear();
+        _hoverFootprintNode->setVisible(false);
+    }
 }
 
 // ===================================================
@@ -764,6 +1378,8 @@ void BattleScene::onExit() {
     }
     _soldiers.clear();
     _enemyBuildings.clear();
+    _enemyBase = nullptr;
+    _enemyBaseDestroyed = false;
 
     Scene::onExit();
 }
@@ -785,6 +1401,10 @@ void BattleScene::updateBattle(float dt) {
     int destroyed = 0;
     for (auto& building : _enemyBuildings) {
         if (building && !building->getParent()) {
+            if (building == _enemyBase) {
+                _enemyBaseDestroyed = true;
+                _enemyBase = nullptr;
+            }
             building->release();
             building = nullptr;
         }
@@ -809,6 +1429,12 @@ void BattleScene::updateBattle(float dt) {
 // ===================================================
 
 void BattleScene::checkBattleEnd() {
+    // 基地被摧毁则直接胜利
+    if (_enemyBaseDestroyed) {
+        onBattleWin();
+        return;
+    }
+
     // 所有建筑被摧毁 - 胜利
     if (_destroyedBuildingCount >= _totalBuildingCount) {
         onBattleWin();
@@ -854,6 +1480,30 @@ void BattleScene::onBattleWin() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
+    // 计算并发放奖励
+    float destroyedRatio = _totalBuildingCount > 0
+        ? static_cast<float>(_destroyedBuildingCount) / _totalBuildingCount
+        : 1.0f;
+    float remainingRatio = std::max(0.0f, BattleConfig::BATTLE_TIME_LIMIT - _battleTime)
+        / BattleConfig::BATTLE_TIME_LIMIT;
+    float rewardFactor = 0.75f + destroyedRatio * 0.35f + remainingRatio * 0.15f;
+    if (_enemyBaseDestroyed) {
+        rewardFactor += 0.1f;
+    }
+    if (rewardFactor > 1.6f) {
+        rewardFactor = 1.6f;
+    }
+
+    int baseCoin = 180 + _levelId * 120;
+    int baseDiamond = 4 + _levelId * 2;
+    int rewardCoin = static_cast<int>(std::round(baseCoin * rewardFactor));
+    int rewardDiamond = static_cast<int>(std::round(baseDiamond * rewardFactor));
+    if (rewardCoin < 0) rewardCoin = 0;
+    if (rewardDiamond < 0) rewardDiamond = 0;
+
+    Core::getInstance()->addResource(ResourceType::COIN, rewardCoin);
+    Core::getInstance()->addResource(ResourceType::DIAMOND, rewardDiamond);
+
     // 显示胜利消息
     auto winLabel = Label::createWithTTF("VICTORY!", "fonts/arial.ttf", 36);
     if (!winLabel) {
@@ -865,6 +1515,20 @@ void BattleScene::onBattleWin() {
     ));
     winLabel->setColor(Color3B::YELLOW);
     _uiLayer->addChild(winLabel, 100);
+
+    // 奖励提示
+    char rewardText[128];
+    snprintf(rewardText, sizeof(rewardText), "+%d Gold   +%d Diamonds", rewardCoin, rewardDiamond);
+    auto rewardLabel = Label::createWithTTF(rewardText, "fonts/ScienceGothic.ttf", 18);
+    if (!rewardLabel) {
+        rewardLabel = Label::createWithSystemFont(rewardText, "Arial", 18);
+    }
+    rewardLabel->setPosition(Vec2(
+        origin.x + visibleSize.width / 2,
+        origin.y + visibleSize.height / 2 - 36
+    ));
+    rewardLabel->setColor(Color3B(220, 220, 220));
+    _uiLayer->addChild(rewardLabel, 100);
 
     // 3秒后返回
     this->scheduleOnce([](float dt) {

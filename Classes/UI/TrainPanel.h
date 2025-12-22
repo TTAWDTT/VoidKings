@@ -95,10 +95,10 @@ public:
     const std::vector<TrainQueueItem>& getTrainQueue() const { return _trainQueue; }
 
     // 获取已训练完成的兵种数量
-    const std::map<int, int>& getTrainedUnits() const { return _trainedUnits; }
+    const std::map<int, int>& getTrainedUnits() const { return UnitManager::getInstance()->getTrainedUnits(); }
 
     // 清空已训练完成的兵种（派兵后调用）
-    void clearTrainedUnits() { _trainedUnits.clear(); }
+    void clearTrainedUnits() { UnitManager::getInstance()->resetTrainedUnits(); }
 
 private:
     // UI组件
@@ -110,9 +110,6 @@ private:
 
     // 训练队列
     std::vector<TrainQueueItem> _trainQueue;
-
-    // 已训练完成的兵种 <兵种ID, 数量>
-    std::map<int, int> _trainedUnits;
 
     // 兵种等级信息 <兵种ID, 等级信息>
     std::map<int, UnitLevelInfo> _unitLevels;

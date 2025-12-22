@@ -1,9 +1,11 @@
 #include "IDCardPanel.h"
+#include "Core/Core.h"
 
 Node* IDCardPanel::createResourceLabel(
     const std::string& text,
     const std::string& iconPath,
-    float minHeight
+    float minHeight,
+    const std::string& valueName
 )
 {
     float paddingY = minHeight * 0.15f;
@@ -16,6 +18,10 @@ Node* IDCardPanel::createResourceLabel(
         minHeight * 0.85f
     );
     label->setAnchorPoint(Vec2(0, 0.5f));
+    if (!valueName.empty())
+    {
+        label->setName(valueName);
+    }
 
     Size textSize = label->getContentSize();
 
@@ -75,10 +81,6 @@ Node* IDCardPanel::createResourceLabel(
 
     label->setPosition(Vec2(cursorX, -height / 2));
     panel->addChild(label);
-
-    CCLOG("iconPath=%s  exists=%d",
-        iconPath.c_str(),
-        FileUtils::getInstance()->isFileExist(iconPath));
 
     return panel;
 }
@@ -149,11 +151,18 @@ Node* IDCardPanel::createPanel(Node* backgroundLayer)
 
     float infoX = -panelWidth / 2  + photoWidth +10;
 
+    int gold = Core::getInstance()->getResource(ResourceType::COIN);
+    int diamond = Core::getInstance()->getResource(ResourceType::DIAMOND);
+
+    char goldText[64];
+    snprintf(goldText, sizeof(goldText), "Gold: %d", gold);
     auto goldLabel = createResourceLabel(
-        "Gold: 1000",
+        goldText,
         "source/coin/coin_0001.png", 
-        15
+        15,
+        "valueLabel"
     );
+    goldLabel->setName("goldPanel");
     goldLabel->setAnchorPoint(Vec2(0, 1));
     goldLabel->setPosition(Vec2(
         infoX,
@@ -161,11 +170,15 @@ Node* IDCardPanel::createPanel(Node* backgroundLayer)
     ));
     bg->addChild(goldLabel, 2);
 
+    char diamondText[64];
+    snprintf(diamondText, sizeof(diamondText), "Diamonds: %d", diamond);
     auto diamondLabel = createResourceLabel(
-        "Diamonds: 50",
+        diamondText,
         "source/diamond/sprite_0000.png",
-        15
+        15,
+        "valueLabel"
     );
+    diamondLabel->setName("diamondPanel");
     diamondLabel->setAnchorPoint(Vec2(0, 1));
     diamondLabel->setPosition(Vec2(
         infoX,

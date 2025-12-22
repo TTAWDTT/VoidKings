@@ -55,6 +55,7 @@ bool UnitManager::loadConfig(const std::string& jsonFile) {
         }
     }
 
+    initInventoryForUnits();
     cocos2d::log("UnitManager: Successfully loaded %zu units", _configCache.size());
     return true;
 }
@@ -163,6 +164,71 @@ std::vector<int> UnitManager::getAllUnitIds() const {
         ids.push_back(pair.first);
     }
     return ids;
+}
+
+const std::map<int, int>& UnitManager::getTrainedUnits() const {
+    return _trainedUnits;
+}
+
+int UnitManager::getUnitCount(int unitId) const {
+    auto it = _trainedUnits.find(unitId);
+    return it != _trainedUnits.end() ? it->second : 0;
+}
+
+void UnitManager::addTrainedUnit(int unitId, int count) {
+    if (count <= 0) {
+        return;
+    }
+    _trainedUnits[unitId] += count;
+}
+
+bool UnitManager::consumeTrainedUnit(int unitId, int count) {
+    if (count <= 0) {
+        return false;
+    }
+    auto it = _trainedUnits.find(unitId);
+    if (it == _trainedUnits.end() || it->second < count) {
+        return false;
+    }
+    it->second -= count;
+    if (it->second <= 0) {
+        _trainedUnits.erase(it);
+    }
+    return true;
+}
+
+void UnitManager::resetTrainedUnits() {
+    _trainedUnits.clear();
+}
+
+int UnitManager::getUnitLevel(int unitId) const {
+    auto it = _unitLevels.find(unitId);
+    return it != _unitLevels.end() ? it->second : 0;
+}
+
+void UnitManager::setUnitLevel(int unitId, int level) {
+    if (level < 0) {
+        level = 0;
+    }
+    auto cfgIt = _configCache.find(unitId);
+    if (cfgIt != _configCache.end()) {
+        if (level > cfgIt->second.MAXLEVEL) {
+            level = cfgIt->second.MAXLEVEL;
+        }
+    }
+    _unitLevels[unitId] = level;
+}
+
+void UnitManager::initInventoryForUnits() {
+    for (const auto& pair : _configCache) {
+        int id = pair.first;
+        auto levelIt = _unitLevels.find(id);
+        if (levelIt == _unitLevels.end()) {
+            _unitLevels[id] = 0;
+        } else if (levelIt->second > pair.second.MAXLEVEL) {
+            levelIt->second = pair.second.MAXLEVEL;
+        }
+    }
 }
 
 Soldier* UnitManager::spawnSoldier(int unitId, cocos2d::Vec2 position, int level) {

@@ -39,7 +39,7 @@ namespace BattleConfig {
     constexpr float DEPLOY_BUTTON_SPACING = 16.0f; // 部署按钮间距
 
     // 战斗配置
-    constexpr float BATTLE_TIME_LIMIT = 180.0f;  // 战斗时间限制（秒）
+    constexpr float BATTLE_TIME_LIMIT = 160.0f;  // 战斗时间限制（秒）
 }
 
 // ===================================================
@@ -51,8 +51,9 @@ public:
      * @brief 创建战斗场景
      * @param levelId 关卡ID
      * @param units 可部署的单位 <单位ID, 数量>
+     * @param useDefaultUnits 是否允许使用默认兵种
      */
-    static Scene* createScene(int levelId = 1, const std::map<int, int>& units = {});
+    static Scene* createScene(int levelId = 1, const std::map<int, int>& units = {}, bool useDefaultUnits = true);
 
     virtual bool init() override;
     virtual void update(float dt) override;
@@ -64,7 +65,9 @@ public:
     void setLevelId(int levelId) { _levelId = levelId; }
 
     // 设置可部署的单位
-    void setDeployableUnits(const std::map<int, int>& units) { _deployableUnits = units; }
+    void setDeployableUnits(const std::map<int, int>& units) {
+        _deployableUnits = units;
+    }
 
 private:
     // ==================== 核心组件 ====================
@@ -77,10 +80,13 @@ private:
     int _levelId = 1;                               // 当前关卡ID
     std::map<int, int> _deployableUnits;            // 可部署的单位 <ID, 数量>
     std::map<int, int> _remainingUnits;             // 剩余可部署的单位
+    bool _allowDefaultUnits = true;                 // 是否允许使用默认兵种（未传入训练兵种时）
 
     // ==================== 战斗状态 ====================
     std::vector<Soldier*> _soldiers;                // 场上的士兵
     std::vector<Node*> _enemyBuildings;             // 敌方建筑
+    Node* _enemyBase = nullptr;                     // 敌方基地
+    bool _enemyBaseDestroyed = false;               // 敌方基地是否已摧毁
     float _battleTime = 0.0f;                       // 战斗时间
     bool _battleEnded = false;                      // 战斗是否结束
     int _destroyedBuildingCount = 0;                // 已摧毁的建筑数量
@@ -93,16 +99,36 @@ private:
     std::map<int, Node*> _deployButtons;            // 部署按钮缓存
     int _selectedUnitId = -1;                       // 当前选中的单位ID
 
+    // ==================== 悬浮信息 ====================
+    Node* _hoverInfoPanel = nullptr;                // 悬浮信息面板
+    LayerColor* _hoverInfoBg = nullptr;             // 悬浮信息背景
+    Label* _hoverInfoLabel = nullptr;               // 悬浮信息文字
+    DrawNode* _hoverRangeNode = nullptr;            // 攻击范围虚线
+    DrawNode* _hoverFootprintNode = nullptr;        // 占地实线框
+    Node* _hoveredBuilding = nullptr;               // 当前悬浮建筑
+
     // ==================== 初始化方法 ====================
     void initGridMap();
     void initLevel();
     void initUI();
     void initTouchListener();
+    void initHoverInfo();
 
     // ==================== 关卡初始化 ====================
     void createLevel1();  // 创建第1关
-    void createEnemyBase(int gridX, int gridY);
-    void createDefenseTower(int gridX, int gridY, int type);
+    void createLevel2();
+    void createLevel3();
+    void createLevel4();
+    void createLevel5();
+    void createLevel6();
+    void createLevel7();
+    void createLevel8();
+    void createLevel9();
+    void createLevel10();
+    void createLevel11();
+    void createLevel12();
+    void createEnemyBase(int gridX, int gridY, int level = 0);
+    void createDefenseTower(int gridX, int gridY, int type, int level = 0);
 
     // ==================== 辅助方法 ====================
     /**
@@ -121,6 +147,14 @@ private:
     int getFirstAvailableUnitId() const;
     void setSelectedUnit(int unitId);
     void refreshDeployButton(int unitId);
+
+    // ==================== 悬浮信息 ====================
+    void updateHoverInfo(const Vec2& worldPos);
+    Node* pickBuildingAt(const Vec2& worldPos) const;
+    void showBuildingInfo(Node* building);
+    void clearBuildingInfo();
+    void updateHoverOverlays(Node* building);
+    void updateHoverPanelPosition(const Vec2& worldPos);
 
     // ==================== 战斗逻辑 ====================
     void updateBattle(float dt);

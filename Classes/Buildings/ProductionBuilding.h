@@ -15,6 +15,7 @@ public:
     int getLevel() const { return _level; }
     void setLevel(int level);
     
+    float getCurrentHP() const { return _currentHP; }
     float getCurrentMaxHP() const;
     float getCurrentDP() const;
     float getCurrentPRODUCE_ELIXIR() const;

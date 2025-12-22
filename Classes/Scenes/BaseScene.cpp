@@ -16,11 +16,68 @@
 #include "Buildings/ProductionBuilding.h"
 #include "Buildings/StorageBuilding.h"
 #include "UI/TrainPanel.h"
+#include "Core/Core.h"
 #include "Soldier/UnitManager.h"
 #include "UI/IDCardPanel.h"
 #include <algorithm>
+#include <cmath>
 
 USING_NS_CC;
+
+namespace {
+constexpr float kHoverPanelPaddingX = 12.0f;
+constexpr float kHoverPanelPaddingY = 10.0f;
+
+Sprite* findBodySprite(Node* building) {
+    if (!building) {
+        return nullptr;
+    }
+    for (auto* child : building->getChildren()) {
+        auto* sprite = dynamic_cast<Sprite*>(child);
+        if (sprite) {
+            return sprite;
+        }
+    }
+    return nullptr;
+}
+
+bool hitTestBuilding(Node* building, const Vec2& worldPos) {
+    if (!building) {
+        return false;
+    }
+    auto* bodySprite = findBodySprite(building);
+    if (bodySprite) {
+        Vec2 localPos = building->convertToNodeSpace(worldPos);
+        return bodySprite->getBoundingBox().containsPoint(localPos);
+    }
+    auto* parent = building->getParent();
+    if (parent) {
+        Vec2 localPos = parent->convertToNodeSpace(worldPos);
+        return building->getBoundingBox().containsPoint(localPos);
+    }
+    return false;
+}
+
+void drawDashedCircle(DrawNode* node, const Vec2& center, float radius, const Color4F& color) {
+    if (!node || radius <= 0.0f) {
+        return;
+    }
+    node->clear();
+    const int segments = 48;
+    constexpr float kPi = 3.1415926f;
+    const float step = 2.0f * kPi / segments;
+    for (int i = 0; i < segments; ++i) {
+        if (i % 2 != 0) {
+            continue;
+        }
+        float angle1 = step * i;
+        float angle2 = step * (i + 1);
+        Vec2 p1(center.x + radius * std::cos(angle1), center.y + radius * std::sin(angle1));
+        Vec2 p2(center.x + radius * std::cos(angle2), center.y + radius * std::sin(angle2));
+        node->drawLine(p1, p2, color);
+    }
+}
+} // namespace
 
 // ==================== 场景创建与初始化 ====================
 
@@ -36,10 +93,6 @@ bool BaseScene::init() {
     // 清理战斗场景的静态引用，避免野指针
     DefenceBuilding::setEnemySoldiers(nullptr);
 
-    // 初始化资源
-    _currentGold = 1000;
-    _currentDiamond = 100;
-
     // 按模块化方式初始化各个组件
     initGridMap();
     initBaseBuilding();
@@ -51,6 +104,7 @@ bool BaseScene::init() {
 
     createTrainPanel();
     initTouchListener();
+    initHoverInfo();
 
     CCLOG("[基地场景] 初始化完成（模块化版本）");
 
@@ -168,6 +222,10 @@ void BaseScene::createTrainPanel() {
         [this]() {
             CCLOG("[基地场景] 训练面板关闭");
             if (_uiPanel) {
+                _uiPanel->updateResourceDisplay(
+                    Core::getInstance()->getResource(ResourceType::COIN),
+                    Core::getInstance()->getResource(ResourceType::DIAMOND)
+                );
                 _uiPanel->setButtonsEnabled(true);
             }
         }
@@ -191,6 +249,12 @@ void BaseScene::showTrainPanel() {
 
 void BaseScene::onUnitTrainComplete(int unitId) {
     CCLOG("[基地场景] 兵种训练完成: ID=%d", unitId);
+    if (_uiPanel) {
+        _uiPanel->updateResourceDisplay(
+            Core::getInstance()->getResource(ResourceType::COIN),
+            Core::getInstance()->getResource(ResourceType::DIAMOND)
+        );
+    }
 }
 
 // ==================== 基地建筑初始化 ====================
@@ -302,6 +366,47 @@ void BaseScene::initTouchListener() {
     CCLOG("[基地场景] 触摸事件监听初始化完成");
 }
 
+// ==================== 悬浮信息初始化 ====================
+
+void BaseScene::initHoverInfo() {
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+
+    _hoverInfoPanel = Node::create();
+    _hoverInfoPanel->setVisible(false);
+    this->addChild(_hoverInfoPanel, 200);
+
+    _hoverInfoBg = LayerColor::create(Color4B(15, 15, 15, 220), 200, 120);
+    _hoverInfoBg->setAnchorPoint(Vec2(0, 1));
+    _hoverInfoBg->setIgnoreAnchorPointForPosition(false);
+    _hoverInfoPanel->addChild(_hoverInfoBg);
+
+    _hoverInfoLabel = Label::createWithTTF("", "fonts/ScienceGothic.ttf", 14);
+    if (!_hoverInfoLabel) {
+        _hoverInfoLabel = Label::createWithSystemFont("", "Arial", 14);
+    }
+    _hoverInfoLabel->setAnchorPoint(Vec2(0, 1));
+    _hoverInfoLabel->setAlignment(TextHAlignment::LEFT);
+    _hoverInfoLabel->setTextColor(Color4B(230, 230, 230, 255));
+    _hoverInfoLabel->setWidth(240);
+    _hoverInfoPanel->addChild(_hoverInfoLabel);
+
+    if (_gridMap) {
+        _hoverRangeNode = DrawNode::create();
+        _hoverFootprintNode = DrawNode::create();
+        _hoverRangeNode->setVisible(false);
+        _hoverFootprintNode->setVisible(false);
+        _gridMap->addChild(_hoverRangeNode, 25);
+        _gridMap->addChild(_hoverFootprintNode, 26);
+    }
+
+    auto mouseListener = EventListenerMouse::create();
+    mouseListener->onMouseMove = [this](EventMouse* event) {
+        updateHoverInfo(Vec2(event->getCursorX(), event->getCursorY()));
+    };
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, this);
+}
+
 // ==================== 按钮回调 ====================
 
 void BaseScene::onAttackClicked() {
@@ -348,6 +453,20 @@ void BaseScene::onPlacementConfirmed(const BuildingOption& option, int gridX, in
     CCLOG("[基地场景] 确认放置建筑: %s 在位置 (%d, %d)",
         option.name.c_str(), gridX, gridY);
 
+    // 先扣除资源，避免放置成功但资源不足
+    int cost = option.cost;
+    if (!Core::getInstance()->consumeResource(ResourceType::COIN, cost)) {
+        CCLOG("[基地场景] 金币不足，无法建造: %s", option.name.c_str());
+        if (_uiPanel) {
+            _uiPanel->updateResourceDisplay(
+                Core::getInstance()->getResource(ResourceType::COIN),
+                Core::getInstance()->getResource(ResourceType::DIAMOND)
+            );
+            _uiPanel->setButtonsEnabled(true);
+        }
+        return;
+    }
+
     // 创建实际建筑
     Node* newBuilding = createBuildingFromOption(option);
 
@@ -365,13 +484,19 @@ void BaseScene::onPlacementConfirmed(const BuildingOption& option, int gridX, in
         // 标记网格为已占用
         _gridMap->occupyCell(gridX, gridY, option.gridWidth, option.gridHeight, newBuilding);
 
-        // 扣除费用
-        _currentGold -= option.cost;
-
-        CCLOG("[基地场景] 建筑创建成功，剩余金币: %d", _currentGold);
+        CCLOG("[基地场景] 建筑创建成功，剩余金币: %d",
+            Core::getInstance()->getResource(ResourceType::COIN));
+    }
+    else {
+        // 建筑创建失败时返还资源
+        Core::getInstance()->addResource(ResourceType::COIN, cost);
     }
 
     if (_uiPanel) {
+        _uiPanel->updateResourceDisplay(
+            Core::getInstance()->getResource(ResourceType::COIN),
+            Core::getInstance()->getResource(ResourceType::DIAMOND)
+        );
         _uiPanel->setButtonsEnabled(true);
     }
 }
@@ -572,5 +697,217 @@ void BaseScene::onTouchEnded(Touch* touch, Event* event) {
         if (!_placementManager->tryConfirmPlacement(localPos)) {
             _placementManager->cancelPlacement();
         }
+    }
+}
+
+// ==================== 悬浮信息处理 ====================
+
+void BaseScene::updateHoverInfo(const Vec2& worldPos) {
+    if (!_gridMap || !_buildingLayer) {
+        return;
+    }
+    if (_trainPanel && _trainPanel->isShowing()) {
+        clearBuildingInfo();
+        return;
+    }
+    if (_buildShopPanel && _buildShopPanel->isShowing()) {
+        clearBuildingInfo();
+        return;
+    }
+    if (_placementManager && _placementManager->isPlacing()) {
+        clearBuildingInfo();
+        return;
+    }
+
+    Node* building = pickBuildingAt(worldPos);
+    if (!building) {
+        clearBuildingInfo();
+        return;
+    }
+
+    if (building != _hoveredBuilding) {
+        _hoveredBuilding = building;
+        showBuildingInfo(building);
+    }
+    updateHoverPanelPosition(worldPos);
+}
+
+Node* BaseScene::pickBuildingAt(const Vec2& worldPos) const {
+    if (!_buildingLayer) {
+        return nullptr;
+    }
+
+    for (auto* child : _buildingLayer->getChildren()) {
+        if (!child) {
+            continue;
+        }
+        if (dynamic_cast<DefenceBuilding*>(child)
+            || dynamic_cast<ProductionBuilding*>(child)
+            || dynamic_cast<StorageBuilding*>(child)) {
+            if (hitTestBuilding(child, worldPos)) {
+                return child;
+            }
+        }
+    }
+    return nullptr;
+}
+
+void BaseScene::showBuildingInfo(Node* building) {
+    if (!_hoverInfoPanel || !_hoverInfoLabel) {
+        return;
+    }
+
+    std::string name = "Unknown";
+    int level = 0;
+    float hp = 0.0f;
+    float maxHp = 0.0f;
+    float atk = 0.0f;
+    float range = 0.0f;
+    int sizeW = 0;
+    int sizeH = 0;
+    int produceGold = 0;
+    int produceElixir = 0;
+    bool hasAttack = false;
+
+    if (auto* defence = dynamic_cast<DefenceBuilding*>(building)) {
+        name = defence->getName();
+        level = defence->getLevel() + 1;
+        hp = defence->getCurrentHP();
+        maxHp = defence->getCurrentMaxHP();
+        atk = defence->getCurrentATK();
+        range = defence->getCurrentATK_RANGE();
+        sizeW = defence->getWidth();
+        sizeH = defence->getLength();
+        hasAttack = true;
+    }
+    else if (auto* production = dynamic_cast<ProductionBuilding*>(building)) {
+        name = production->getName();
+        level = production->getLevel() + 1;
+        hp = production->getCurrentHP();
+        maxHp = production->getCurrentMaxHP();
+        sizeW = production->getWidth();
+        sizeH = production->getLength();
+        produceGold = static_cast<int>(production->getCurrentPRODUCE_GOLD());
+        produceElixir = static_cast<int>(production->getCurrentPRODUCE_ELIXIR());
+    }
+    else if (auto* storage = dynamic_cast<StorageBuilding*>(building)) {
+        name = storage->getName();
+        level = storage->getLevel() + 1;
+        hp = storage->getCurrentHP();
+        maxHp = storage->getCurrentMaxHP();
+        sizeW = storage->getWidth();
+        sizeH = storage->getLength();
+    }
+
+    std::string attackText = hasAttack ? StringUtils::format("%.0f", atk) : "-";
+    std::string rangeText = hasAttack ? StringUtils::format("%.0f", range) : "-";
+    std::string produceText = "-";
+    if (produceGold > 0 || produceElixir > 0) {
+        produceText = StringUtils::format("金币+%d 圣水+%d", produceGold, produceElixir);
+    }
+
+    char infoText[256];
+    snprintf(infoText, sizeof(infoText),
+        "名称: %s\n等级: %d\nHP: %.0f / %.0f\n攻击: %s\n攻击范围: %s\n产量: %s\n占地: %dx%d",
+        name.c_str(),
+        level,
+        hp,
+        maxHp,
+        attackText.c_str(),
+        rangeText.c_str(),
+        produceText.c_str(),
+        sizeW,
+        sizeH
+    );
+    _hoverInfoLabel->setString(infoText);
+
+    Size textSize = _hoverInfoLabel->getContentSize();
+    float panelWidth = textSize.width + kHoverPanelPaddingX * 2;
+    float panelHeight = textSize.height + kHoverPanelPaddingY * 2;
+    _hoverInfoBg->setContentSize(Size(panelWidth, panelHeight));
+    _hoverInfoLabel->setPosition(Vec2(kHoverPanelPaddingX, -kHoverPanelPaddingY));
+
+    _hoverInfoPanel->setVisible(true);
+    updateHoverOverlays(building);
+}
+
+void BaseScene::updateHoverOverlays(Node* building) {
+    if (!_hoverFootprintNode || !_hoverRangeNode || !_gridMap || !building) {
+        return;
+    }
+
+    _hoverFootprintNode->clear();
+    _hoverRangeNode->clear();
+
+    float cellSize = _gridMap->getCellSize();
+    int sizeW = 0;
+    int sizeH = 0;
+    float range = 0.0f;
+
+    if (auto* defence = dynamic_cast<DefenceBuilding*>(building)) {
+        sizeW = defence->getWidth();
+        sizeH = defence->getLength();
+        range = defence->getCurrentATK_RANGE();
+    }
+    else if (auto* production = dynamic_cast<ProductionBuilding*>(building)) {
+        sizeW = production->getWidth();
+        sizeH = production->getLength();
+    }
+    else if (auto* storage = dynamic_cast<StorageBuilding*>(building)) {
+        sizeW = storage->getWidth();
+        sizeH = storage->getLength();
+    }
+
+    Vec2 center = building->getPosition();
+    int gridX = static_cast<int>(std::floor(center.x / cellSize - sizeW * 0.5f + 0.001f));
+    int gridY = static_cast<int>(std::floor(center.y / cellSize - sizeH * 0.5f + 0.001f));
+
+    Vec2 bottomLeft(gridX * cellSize, gridY * cellSize);
+    Vec2 topRight((gridX + sizeW) * cellSize, (gridY + sizeH) * cellSize);
+    _hoverFootprintNode->drawRect(bottomLeft, topRight, Color4F(0.9f, 0.9f, 0.9f, 1.0f));
+    _hoverFootprintNode->setVisible(true);
+
+    if (range > 0.0f) {
+        drawDashedCircle(_hoverRangeNode, center, range, Color4F(0.85f, 0.85f, 0.85f, 0.8f));
+        _hoverRangeNode->setVisible(true);
+    }
+    else {
+        _hoverRangeNode->setVisible(false);
+    }
+}
+
+void BaseScene::updateHoverPanelPosition(const Vec2& worldPos) {
+    if (!_hoverInfoPanel || !_hoverInfoBg) {
+        return;
+    }
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+
+    Size panelSize = _hoverInfoBg->getContentSize();
+    Vec2 desiredPos = worldPos + Vec2(16.0f, 20.0f);
+
+    float maxX = origin.x + visibleSize.width - panelSize.width - 6.0f;
+    float minX = origin.x + 6.0f;
+    float maxY = origin.y + visibleSize.height - 6.0f;
+    float minY = origin.y + panelSize.height + 6.0f;
+
+    float clampedX = std::min(std::max(desiredPos.x, minX), maxX);
+    float clampedY = std::min(std::max(desiredPos.y, minY), maxY);
+
+    _hoverInfoPanel->setPosition(Vec2(clampedX, clampedY));
+}
+
+void BaseScene::clearBuildingInfo() {
+    _hoveredBuilding = nullptr;
+    if (_hoverInfoPanel) {
+        _hoverInfoPanel->setVisible(false);
+    }
+    if (_hoverRangeNode) {
+        _hoverRangeNode->clear();
+        _hoverRangeNode->setVisible(false);
+    }
+    if (_hoverFootprintNode) {
+        _hoverFootprintNode->clear();
+        _hoverFootprintNode->setVisible(false);
     }
 }

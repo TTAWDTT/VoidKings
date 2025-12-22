@@ -72,29 +72,7 @@ bool TrainPanel::init(
         _availableUnits = UnitManager::getInstance()->getAllUnitIds();
     }
     std::sort(_availableUnits.begin(), _availableUnits.end());
-
-    // 仅保留资源存在的兵种
-    auto fileUtils = FileUtils::getInstance();
-    std::vector<int> filteredUnits;
-    filteredUnits.reserve(_availableUnits.size());
-    for (int unitId : _availableUnits) {
-        const UnitConfig* cfg = UnitManager::getInstance()->getConfig(unitId);
-        if (!cfg) {
-            continue;
-        }
-        std::string spritePath = cfg->spriteFrameName;
-        if (spritePath.empty()) {
-            continue;
-        }
-        if (spritePath.find(".png") == std::string::npos) {
-            spritePath += ".png";
-        }
-        if (!fileUtils->isFileExist(spritePath)) {
-            continue;
-        }
-        filteredUnits.push_back(unitId);
-    }
-    _availableUnits.swap(filteredUnits);
+    // 不过滤资源缺失的兵种，缺失时使用占位图保证列表完整
 
     // 初始化兵种等级信息
     initUnitLevels();
@@ -123,11 +101,12 @@ bool TrainPanel::init(
 // ===================================================
 void TrainPanel::initUnitLevels() {
     _unitLevels.clear();
+    auto manager = UnitManager::getInstance();
     for (int unitId : _availableUnits) {
         UnitLevelInfo info;
         info.unitId = unitId;
-        info.currentLevel = 0;  // 从0级开始
-        info.count = 0;
+        info.currentLevel = manager->getUnitLevel(unitId);
+        info.count = manager->getUnitCount(unitId);
         _unitLevels[unitId] = info;
     }
 }
@@ -242,6 +221,8 @@ void TrainPanel::refreshUnitCards() {
     if (!inner) {
         return;
     }
+
+    initUnitLevels();
 
     inner->removeAllChildren();
 
@@ -456,7 +437,7 @@ Sprite* TrainPanel::createIdleAnimationSprite(int unitId) {
     if (!config) return nullptr;
 
     // 根据配置的spriteFrameName构建动画路径
-    // 动画帧格式: {folder}/{name}_idle_{frame}.png
+    // 动画帧格式: {folder}/{name}_{anim_idle}_{frame}.png
     std::string baseName;
     std::string folderPath;
     std::string spritePath = config->spriteFrameName;
@@ -504,13 +485,16 @@ Sprite* TrainPanel::createIdleAnimationSprite(int unitId) {
         return placeholder;
     }
 
+    // 使用配置中的待机动画名，优先保证与配置一致
+    std::string animKey = config->anim_idle.empty() ? "idle" : config->anim_idle;
+
     // 首先尝试加载静态图片
     std::string staticPath = folderPath + "/" + baseName + ".png";
     auto sprite = Sprite::create(staticPath);
 
     if (!sprite) {
         // 如果静态图片不存在，尝试加载第一帧idle动画
-        std::string idlePath = folderPath + "/" + baseName + "_idle_1.png";
+        std::string idlePath = folderPath + "/" + baseName + "_" + animKey + "_1.png";
         sprite = Sprite::create(idlePath);
     }
 
@@ -535,8 +519,8 @@ Sprite* TrainPanel::createIdleAnimationSprite(int unitId) {
     Vector<SpriteFrame*> frames;
     for (int i = 1; i <= config->anim_idle_frames; ++i) {
         char framePath[256];
-        snprintf(framePath, sizeof(framePath), "%s/%s_idle_%d.png",
-            folderPath.c_str(), baseName.c_str(), i);
+        snprintf(framePath, sizeof(framePath), "%s/%s_%s_%d.png",
+            folderPath.c_str(), baseName.c_str(), animKey.c_str(), i);
 
         // 使用Texture2D获取正确的纹理尺寸
         auto texture = Director::getInstance()->getTextureCache()->addImage(framePath);
@@ -578,10 +562,10 @@ void TrainPanel::recruitUnit(int unitId) {
     Core::getInstance()->consumeResource(ResourceType::COIN, cost);
 
     // 增加兵种数量
-    _unitLevels[unitId].count++;
-    _trainedUnits[unitId]++;
+    UnitManager::getInstance()->addTrainedUnit(unitId, 1);
 
-    CCLOG("[训练面板] 招募成功: %s, 当前数量: %d", config->name.c_str(), _unitLevels[unitId].count);
+    CCLOG("[训练面板] 招募成功: %s, 当前数量: %d",
+        config->name.c_str(), UnitManager::getInstance()->getUnitCount(unitId));
 
     // 触发回调
     if (_onTrainComplete) {
@@ -607,7 +591,7 @@ void TrainPanel::upgradeUnit(int unitId) {
     }
 
     // 计算升级费用（钻石）
-    int currentLevel = _unitLevels[unitId].currentLevel;
+    int currentLevel = UnitManager::getInstance()->getUnitLevel(unitId);
     int cost = 10 * (currentLevel + 1);
 
     int diamond = Core::getInstance()->getResource(ResourceType::DIAMOND);
@@ -620,9 +604,10 @@ void TrainPanel::upgradeUnit(int unitId) {
     Core::getInstance()->consumeResource(ResourceType::DIAMOND, cost);
 
     // 升级
-    _unitLevels[unitId].currentLevel++;
+    UnitManager::getInstance()->setUnitLevel(unitId, currentLevel + 1);
 
-    CCLOG("[训练面板] 升级成功: %s, 当前等级: %d", config->name.c_str(), _unitLevels[unitId].currentLevel + 1);
+    CCLOG("[训练面板] 升级成功: %s, 当前等级: %d",
+        config->name.c_str(), UnitManager::getInstance()->getUnitLevel(unitId) + 1);
 
     // 刷新显示
     refreshUnitCards();
@@ -636,7 +621,7 @@ bool TrainPanel::isMaxLevel(int unitId) {
     const UnitConfig* config = UnitManager::getInstance()->getConfig(unitId);
     if (!config) return true;
 
-    int currentLevel = _unitLevels[unitId].currentLevel;
+    int currentLevel = UnitManager::getInstance()->getUnitLevel(unitId);
     return currentLevel >= config->MAXLEVEL;
 }
 
@@ -658,7 +643,7 @@ bool TrainPanel::canAffordRecruit(int unitId) {
 bool TrainPanel::canAffordUpgrade(int unitId) {
     if (isMaxLevel(unitId)) return false;
 
-    int currentLevel = _unitLevels[unitId].currentLevel;
+    int currentLevel = UnitManager::getInstance()->getUnitLevel(unitId);
     int cost = 10 * (currentLevel + 1);
     int diamond = Core::getInstance()->getResource(ResourceType::DIAMOND);
     return diamond >= cost;

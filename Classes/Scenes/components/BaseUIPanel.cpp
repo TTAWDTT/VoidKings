@@ -198,16 +198,23 @@ void BaseUIPanel::bindTooltip(Node* targetBtn, Node* tooltip, float offsetX) {
 // 更新资源显示
 // ===================================================
 void BaseUIPanel::updateResourceDisplay(int gold, int diamond) {
-    // 资源显示已经由IDCardPanel管理
-    // 如果需要更新，可以在这里添加逻辑
-    if (_goldLabel) {
+    if (!_idCardPanel) {
+        return;
+    }
+
+    auto goldPanel = _idCardPanel->getChildByName("goldPanel");
+    auto diamondPanel = _idCardPanel->getChildByName("diamondPanel");
+    auto goldLabel = goldPanel ? dynamic_cast<Label*>(goldPanel->getChildByName("valueLabel")) : nullptr;
+    auto diamondLabel = diamondPanel ? dynamic_cast<Label*>(diamondPanel->getChildByName("valueLabel")) : nullptr;
+
+    if (goldLabel) {
         char buffer[64];
         snprintf(buffer, sizeof(buffer), "Gold: %d", gold);
-        _goldLabel->setString(buffer);
+        goldLabel->setString(buffer);
     }
-    if (_diamondLabel) {
+    if (diamondLabel) {
         char buffer[64];
-        snprintf(buffer, sizeof(buffer), "Diamond: %d", diamond);
-        _diamondLabel->setString(buffer);
+        snprintf(buffer, sizeof(buffer), "Diamonds: %d", diamond);
+        diamondLabel->setString(buffer);
     }
 }
