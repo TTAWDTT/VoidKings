@@ -185,7 +185,7 @@ private:
 
     /**
      * @brief 恢复已建造的建筑
-     * 用于从攻击场景返回时保持基地状态
+     * 用于从进攻界面返回时保持基地状态
      */
     void restoreSavedBuildings();
 

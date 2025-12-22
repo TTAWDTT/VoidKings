@@ -1072,7 +1072,7 @@ void BattleScene::initHoverInfo() {
     border->setName("hoverBorder");
     _hoverInfoPanel->addChild(border, 1);
 
-    _hoverInfoLabel = Label::createWithTTF("", "fonts/ScienceGothic.ttf", 18);
+    _hoverInfoLabel = Label::createWithSystemFont("", "Microsoft YaHei", 18);
     if (!_hoverInfoLabel) {
         _hoverInfoLabel = Label::createWithSystemFont("", "Arial", 18);
     }
@@ -1157,8 +1157,8 @@ void BattleScene::updateHoverInfo(const Vec2& worldPos) {
 
     if (building != _hoveredBuilding) {
         _hoveredBuilding = building;
-        showBuildingInfo(building);
     }
+    showBuildingInfo(building);
     updateHoverPanelPosition(worldPos);
 }
 
