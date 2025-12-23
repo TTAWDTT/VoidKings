@@ -112,6 +112,21 @@ ContentCenterInfo getContentCenterInfo(const std::string& path) {
     cache.emplace(path, info);
     return info;
 }
+
+Label* createTrainLabel(const std::string& text, float fontSize) {
+    auto label = Label::createWithSystemFont(text, TrainPanelConfig::SYSTEM_FONT_NAME, fontSize);
+    if (!label && TrainPanelConfig::SYSTEM_FONT_FALLBACK[0] != '\0') {
+        label = Label::createWithSystemFont(text, TrainPanelConfig::SYSTEM_FONT_FALLBACK, fontSize);
+    }
+    if (!label && TrainPanelConfig::FONT_PATH[0] != '\0') {
+        label = Label::createWithTTF(text, TrainPanelConfig::FONT_PATH, fontSize);
+    }
+    if (!label) {
+        label = Label::create();
+        label->setString(text);
+    }
+    return label;
+}
 } // namespace
 
 // ===================================================
@@ -282,14 +297,7 @@ void TrainPanel::setupTitle() {
     _contentRoot->addChild(titleBg);
 
     // 标题文字
-    _titleLabel = Label::createWithTTF(
-        "TRAINING CENTER",
-        "fonts/arial.ttf",
-        TrainPanelConfig::TITLE_FONT_SIZE
-    );
-    if (!_titleLabel) {
-        _titleLabel = Label::createWithSystemFont("TRAINING CENTER", "Arial", TrainPanelConfig::TITLE_FONT_SIZE);
-    }
+    _titleLabel = createTrainLabel("TRAINING CENTER", TrainPanelConfig::TITLE_FONT_SIZE);
     _titleLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
     _titleLabel->setPosition(
         contentSize.width / 2,
@@ -508,11 +516,8 @@ Node* TrainPanel::createUnitCard(int unitId) {
     }
 
     // 兵种名称（缩小字体）
-    auto nameLabel = Label::createWithTTF(config->name, "fonts/arial.ttf", 13);
-    if (!nameLabel) {
-        nameLabel = Label::createWithSystemFont(config->name, "Arial", 13);
-    }
-    nameLabel->setPosition(Vec2(0, -10));
+    auto nameLabel = createTrainLabel(config->name, TrainPanelConfig::NAME_FONT_SIZE);
+    nameLabel->setPosition(Vec2(0, -4));
     nameLabel->setColor(Color3B::WHITE);
     cardRoot->addChild(nameLabel, 2);
 
@@ -525,27 +530,21 @@ Node* TrainPanel::createUnitCard(int unitId) {
     else {
         snprintf(levelText, sizeof(levelText), "Lv.%d", levelInfo.currentLevel + 1);
     }
-    auto levelLabel = Label::createWithTTF(levelText, "fonts/arial.ttf", 10);
-    if (!levelLabel) {
-        levelLabel = Label::createWithSystemFont(levelText, "Arial", 10);
-    }
-    levelLabel->setPosition(Vec2(0, -23));
+    auto levelLabel = createTrainLabel(levelText, TrainPanelConfig::LEVEL_FONT_SIZE);
+    levelLabel->setPosition(Vec2(0, -22));
     levelLabel->setColor(maxLevel ? Color3B::YELLOW : Color3B::WHITE);
     cardRoot->addChild(levelLabel, 2);
 
     // 数量显示（缩小字体）
     char countText[32];
     snprintf(countText, sizeof(countText), "x%d", levelInfo.count);
-    auto countLabel = Label::createWithTTF(countText, "fonts/arial.ttf", 10);
-    if (!countLabel) {
-        countLabel = Label::createWithSystemFont(countText, "Arial", 10);
-    }
-    countLabel->setPosition(Vec2(0, -35));
+    auto countLabel = createTrainLabel(countText, TrainPanelConfig::COUNT_FONT_SIZE);
+    countLabel->setPosition(Vec2(0, -38));
     countLabel->setColor(Color3B::GREEN);
     cardRoot->addChild(countLabel, 2);
 
     // 按钮区域 - 招募和升级（调整位置）
-    float btnY = -cardHeight / 2 + 22;
+    float btnY = -cardHeight / 2 + 15;
     float btnSpacing = 6.0f;
     float btnWidth = TrainPanelConfig::BUTTON_WIDTH;
     float btnHeight = TrainPanelConfig::BUTTON_HEIGHT;
@@ -567,10 +566,7 @@ Node* TrainPanel::createUnitCard(int unitId) {
     int recruitCost = config->COST_COIN > 0 ? config->COST_COIN : TrainPanelConfig::DEFAULT_RECRUIT_COST;
     char recruitText[32];
     snprintf(recruitText, sizeof(recruitText), "%dG", recruitCost);
-    auto recruitLabel = Label::createWithTTF(recruitText, "fonts/arial.ttf", 9);
-    if (!recruitLabel) {
-        recruitLabel = Label::createWithSystemFont(recruitText, "Arial", 9);
-    }
+    auto recruitLabel = createTrainLabel(recruitText, TrainPanelConfig::BUTTON_FONT_SIZE);
     recruitLabel->setColor(Color3B::WHITE);
     recruitNode->addChild(recruitLabel, 2);
 
@@ -609,10 +605,7 @@ Node* TrainPanel::createUnitCard(int unitId) {
         snprintf(buf, sizeof(buf), "%dD", 10 * (levelInfo.currentLevel + 1));
         upgradeText = buf;
     }
-    auto upgradeLabel = Label::createWithTTF(upgradeText, "fonts/arial.ttf", 9);
-    if (!upgradeLabel) {
-        upgradeLabel = Label::createWithSystemFont(upgradeText, "Arial", 9);
-    }
+    auto upgradeLabel = createTrainLabel(upgradeText, TrainPanelConfig::BUTTON_FONT_SIZE);
     upgradeLabel->setColor(maxLevel ? Color3B::GRAY : Color3B::WHITE);
     upgradeNode->addChild(upgradeLabel, 2);
 
@@ -938,10 +931,7 @@ void TrainPanel::setupCloseButton() {
     border->drawRect(Vec2(-btnWidth / 2, -btnHeight / 2), Vec2(btnWidth / 2, btnHeight / 2), Color4F::WHITE);
     closeNode->addChild(border, 1);
 
-    auto label = Label::createWithTTF("CLOSE", "fonts/arial.ttf", 13);
-    if (!label) {
-        label = Label::createWithSystemFont("CLOSE", "Arial", 13);
-    }
+    auto label = createTrainLabel("CLOSE", TrainPanelConfig::CLOSE_FONT_SIZE);
     label->setColor(Color3B::WHITE);
     closeNode->addChild(label, 2);
 
@@ -966,14 +956,7 @@ void TrainPanel::setupResourceDisplay() {
     if (!_contentRoot) {
         return;
     }
-    _resourceLabel = Label::createWithTTF(
-        "",
-        "fonts/arial.ttf",
-        10
-    );
-    if (!_resourceLabel) {
-        _resourceLabel = Label::createWithSystemFont("", "Arial", 11);
-    }
+    _resourceLabel = createTrainLabel("", TrainPanelConfig::RESOURCE_FONT_SIZE);
     _resourceLabel->setAnchorPoint(Vec2(1.0f, 0.5f));
     Size contentSize = _contentRoot->getContentSize();
     float titleCenterY = contentSize.height - TrainPanelConfig::TITLE_BAR_HEIGHT * 0.5f;

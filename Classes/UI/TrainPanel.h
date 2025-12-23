@@ -35,8 +35,17 @@ namespace TrainPanelConfig {
     constexpr float CARD_AREA_TOP_GAP = 4.0f;
     constexpr float CARD_AREA_BOTTOM_GAP = 4.0f;
 
-    // 标题配置 - 缩小字体
-    constexpr int TITLE_FONT_SIZE = 22;
+    // 字体配置 - 清晰易读
+    constexpr const char* FONT_PATH = "fonts/arial.ttf";
+    constexpr const char* SYSTEM_FONT_NAME = "Arial";
+    constexpr const char* SYSTEM_FONT_FALLBACK = "Microsoft YaHei";
+    constexpr int TITLE_FONT_SIZE = 26;
+    constexpr int NAME_FONT_SIZE = 16;
+    constexpr int LEVEL_FONT_SIZE = 13;
+    constexpr int COUNT_FONT_SIZE = 13;
+    constexpr int BUTTON_FONT_SIZE = 12;
+    constexpr int CLOSE_FONT_SIZE = 15;
+    constexpr int RESOURCE_FONT_SIZE = 14;
     constexpr float TITLE_BAR_HEIGHT = 50.0f;
 
     // 兵种卡片配置 - 缩小尺寸
