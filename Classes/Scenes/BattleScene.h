@@ -38,6 +38,12 @@ namespace BattleConfig {
     constexpr float DEPLOY_BUTTON_SIZE = 50.0f;  // 部署按钮尺寸
     constexpr float DEPLOY_BUTTON_SPACING = 16.0f; // 部署按钮间距
 
+    // 部署范围配置（使用格子坐标）
+    constexpr int DEPLOY_MIN_X = 2;             // 允许部署的最小列
+    constexpr int DEPLOY_MAX_X = 10;            // 允许部署的最大列
+    constexpr int DEPLOY_MIN_Y = 2;             // 允许部署的最小行
+    constexpr int DEPLOY_MAX_Y = GRID_HEIGHT - 3; // 允许部署的最大行
+
     // 战斗配置
     constexpr float BATTLE_TIME_LIMIT = 160.0f;  // 战斗时间限制（秒）
 }
@@ -148,6 +154,10 @@ private:
     int getFirstAvailableUnitId() const;
     void setSelectedUnit(int unitId);
     void refreshDeployButton(int unitId);
+    // 部署范围提示
+    void setupDeployRangeHint();
+    // 检查格子是否在允许部署范围内
+    bool isDeployGridAllowed(int gridX, int gridY) const;
 
     // ==================== 悬浮信息 ====================
     void updateHoverInfo(const Vec2& worldPos);

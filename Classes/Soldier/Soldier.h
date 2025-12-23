@@ -65,6 +65,8 @@ private:
     void playAnimation(const std::string& animType, int frameCount, float delay, bool loop);
     void stopCurrentAnimation();
     void updateSpriteDirection(Direction dir); // 更新图片翻转
+    // 尝试播放待机动画，避免停在移动状态
+    void tryPlayIdleAnimation();
     
     // 方向转换辅助函数
     Direction calcDirection(const cocos2d::Vec2& from, const cocos2d::Vec2& to);

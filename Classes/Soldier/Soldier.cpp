@@ -183,10 +183,14 @@ void Soldier::update(float dt) {
         float attackDistance = getAttackDistance(_target);
         if (dist <= attackDistance) {
             attackTarget();
+            tryPlayIdleAnimation();
         }
         else {
             moveToTarget(dt);
         }
+    }
+    else {
+        tryPlayIdleAnimation();
     }
 }
 
@@ -398,6 +402,22 @@ void Soldier::stopCurrentAnimation() {
     if (!_bodySprite) return;
     _bodySprite->stopAllActions();
     _currentActionKey.clear();
+}
+
+void Soldier::tryPlayIdleAnimation() {
+    if (!_config) {
+        return;
+    }
+    if (_currentActionKey == _config->anim_attack || _currentActionKey == _config->anim_dead) {
+        return;
+    }
+
+    std::string prevKey = _currentActionKey;
+    playAnimation(_config->anim_idle, _config->anim_idle_frames, _config->anim_idle_delay, true);
+    if (_currentActionKey == prevKey && prevKey != _config->anim_idle) {
+        // 没有待机资源时停止循环移动动画
+        stopCurrentAnimation();
+    }
 }
 
 // buildAnimationFromFrames 已迁移到公共工具

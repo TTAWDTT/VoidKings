@@ -114,12 +114,33 @@ ContentCenterInfo getContentCenterInfo(const std::string& path) {
 }
 
 Label* createTrainLabel(const std::string& text, float fontSize) {
-    auto label = Label::createWithSystemFont(text, TrainPanelConfig::SYSTEM_FONT_NAME, fontSize);
-    if (!label && TrainPanelConfig::SYSTEM_FONT_FALLBACK[0] != '\0') {
-        label = Label::createWithSystemFont(text, TrainPanelConfig::SYSTEM_FONT_FALLBACK, fontSize);
+    Label* label = nullptr;
+    const bool hasNonAscii = std::any_of(text.begin(), text.end(), [](unsigned char ch) {
+        return ch >= 0x80;
+    });
+
+    // 优先使用更清晰的TTF字体，非ASCII文本优先走系统字体避免缺字
+    if (!hasNonAscii) {
+        if (TrainPanelConfig::FONT_PATH[0] != '\0') {
+            label = Label::createWithTTF(text, TrainPanelConfig::FONT_PATH, fontSize);
+        }
+        if (!label && TrainPanelConfig::SYSTEM_FONT_NAME[0] != '\0') {
+            label = Label::createWithSystemFont(text, TrainPanelConfig::SYSTEM_FONT_NAME, fontSize);
+        }
+        if (!label && TrainPanelConfig::SYSTEM_FONT_FALLBACK[0] != '\0') {
+            label = Label::createWithSystemFont(text, TrainPanelConfig::SYSTEM_FONT_FALLBACK, fontSize);
+        }
     }
-    if (!label && TrainPanelConfig::FONT_PATH[0] != '\0') {
-        label = Label::createWithTTF(text, TrainPanelConfig::FONT_PATH, fontSize);
+    else {
+        if (TrainPanelConfig::SYSTEM_FONT_FALLBACK[0] != '\0') {
+            label = Label::createWithSystemFont(text, TrainPanelConfig::SYSTEM_FONT_FALLBACK, fontSize);
+        }
+        if (!label && TrainPanelConfig::SYSTEM_FONT_NAME[0] != '\0') {
+            label = Label::createWithSystemFont(text, TrainPanelConfig::SYSTEM_FONT_NAME, fontSize);
+        }
+        if (!label && TrainPanelConfig::FONT_PATH[0] != '\0') {
+            label = Label::createWithTTF(text, TrainPanelConfig::FONT_PATH, fontSize);
+        }
     }
     if (!label) {
         label = Label::create();

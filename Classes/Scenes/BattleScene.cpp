@@ -180,6 +180,9 @@ void BattleScene::initGridMap() {
     auto bgColor = LayerColor::create(Color4B(60, 100, 60, 255), mapWidth, mapHeight);
     _gridMap->addChild(bgColor, -2);
 
+    // 部署范围提示
+    setupDeployRangeHint();
+
     _buildingLayer = Node::create();
     _gridMap->addChild(_buildingLayer, 5);
 
@@ -250,13 +253,13 @@ void BattleScene::initLevel() {
 void BattleScene::createLevel1() {
     // 在地图右侧放置敌方基地（40x30，确保4x4建筑在边界内）
     // 基地位置需要留足够空间：右边界为40，最大X为36
-    createEnemyBase(28, 13, 0);
+    createEnemyBase(26, 12, 0);
 
     // 创建一些防御塔（3x3），需要确保在边界内
-    createDefenseTower(22, 11, 1, 0);  // 箭塔
-    createDefenseTower(22, 17, 1, 0);  // 箭塔
-    createDefenseTower(24, 8, 2, 0);   // 炮塔
-    createDefenseTower(24, 20, 2, 0);  // 炮塔
+    createDefenseTower(18, 10, 1, 0);  // 箭塔
+    createDefenseTower(18, 18, 1, 0);  // 箭塔
+    createDefenseTower(30, 8, 2, 0);   // 炮塔
+    createDefenseTower(30, 20, 2, 0);  // 炮塔
 }
 
 // ===================================================
@@ -267,11 +270,11 @@ void BattleScene::createLevel2() {
     createEnemyBase(26, 12, 1);
 
     // 3 箭塔 + 2 炮塔，形成左右夹击
-    createDefenseTower(20, 10, 1, 0);
-    createDefenseTower(20, 18, 1, 0);
-    createDefenseTower(30, 8, 1, 1);
-    createDefenseTower(28, 18, 2, 0);
-    createDefenseTower(32, 14, 2, 0);
+    createDefenseTower(18, 10, 1, 0);
+    createDefenseTower(18, 18, 1, 0);
+    createDefenseTower(34, 14, 1, 1);
+    createDefenseTower(30, 8, 2, 0);
+    createDefenseTower(30, 20, 2, 0);
 }
 
 // ===================================================
@@ -279,17 +282,17 @@ void BattleScene::createLevel2() {
 // ===================================================
 
 void BattleScene::createLevel3() {
-    createEnemyBase(25, 12, 1);
+    createEnemyBase(26, 12, 1);
 
     // 4 箭塔 + 3 炮塔，覆盖上下两条通路
-    createDefenseTower(18, 10, 1, 1);
-    createDefenseTower(18, 18, 1, 1);
-    createDefenseTower(30, 8, 1, 1);
-    createDefenseTower(30, 20, 1, 1);
+    createDefenseTower(18, 8, 1, 1);
+    createDefenseTower(18, 20, 1, 1);
+    createDefenseTower(34, 8, 1, 1);
+    createDefenseTower(34, 20, 1, 1);
 
-    createDefenseTower(26, 7, 2, 1);
-    createDefenseTower(26, 21, 2, 1);
-    createDefenseTower(34, 14, 2, 1);
+    createDefenseTower(22, 6, 2, 1);
+    createDefenseTower(22, 22, 2, 1);
+    createDefenseTower(30, 14, 2, 1);
 }
 
 // ===================================================
@@ -297,19 +300,19 @@ void BattleScene::createLevel3() {
 // ===================================================
 
 void BattleScene::createLevel4() {
-    createEnemyBase(24, 12, 2);
+    createEnemyBase(26, 12, 2);
 
     // 5 箭塔 + 4 炮塔，形成多层火力网
-    createDefenseTower(16, 12, 1, 1);
-    createDefenseTower(16, 18, 1, 1);
-    createDefenseTower(28, 6, 1, 1);
-    createDefenseTower(28, 22, 1, 1);
+    createDefenseTower(14, 12, 1, 1);
+    createDefenseTower(18, 6, 1, 1);
+    createDefenseTower(18, 18, 1, 1);
+    createDefenseTower(30, 22, 1, 1);
     createDefenseTower(34, 12, 1, 2);
 
-    createDefenseTower(24, 6, 2, 1);
-    createDefenseTower(24, 22, 2, 1);
-    createDefenseTower(32, 18, 2, 1);
-    createDefenseTower(32, 8, 2, 1);
+    createDefenseTower(22, 6, 2, 1);
+    createDefenseTower(22, 20, 2, 1);
+    createDefenseTower(30, 8, 2, 1);
+    createDefenseTower(30, 18, 2, 1);
 }
 
 // ===================================================
@@ -317,22 +320,22 @@ void BattleScene::createLevel4() {
 // ===================================================
 
 void BattleScene::createLevel5() {
-    createEnemyBase(23, 11, 2);
+    createEnemyBase(26, 12, 2);
 
     // 6 箭塔 + 6 炮塔，构成多重覆盖区
     createDefenseTower(14, 10, 1, 2);
-    createDefenseTower(14, 18, 1, 2);
-    createDefenseTower(30, 4, 1, 2);
-    createDefenseTower(30, 24, 1, 2);
-    createDefenseTower(36, 10, 1, 2);
-    createDefenseTower(36, 18, 1, 2);
+    createDefenseTower(14, 20, 1, 2);
+    createDefenseTower(18, 14, 1, 2);
+    createDefenseTower(34, 10, 1, 2);
+    createDefenseTower(34, 20, 1, 2);
+    createDefenseTower(30, 14, 1, 2);
 
-    createDefenseTower(22, 4, 2, 2);
-    createDefenseTower(22, 24, 2, 2);
-    createDefenseTower(28, 8, 2, 2);
-    createDefenseTower(28, 18, 2, 2);
-    createDefenseTower(34, 6, 2, 2);
-    createDefenseTower(34, 20, 2, 2);
+    createDefenseTower(18, 6, 2, 2);
+    createDefenseTower(18, 22, 2, 2);
+    createDefenseTower(22, 6, 2, 2);
+    createDefenseTower(22, 22, 2, 2);
+    createDefenseTower(30, 6, 2, 2);
+    createDefenseTower(30, 22, 2, 2);
 }
 
 // ===================================================
@@ -340,17 +343,17 @@ void BattleScene::createLevel5() {
 // ===================================================
 
 void BattleScene::createLevel6() {
-    createEnemyBase(22, 12, 1);
+    createEnemyBase(26, 12, 1);
 
-    createDefenseTower(14, 10, 1, 1);
-    createDefenseTower(14, 18, 1, 1);
-    createDefenseTower(30, 10, 1, 1);
-    createDefenseTower(30, 18, 1, 1);
+    createDefenseTower(18, 10, 1, 1);
+    createDefenseTower(18, 18, 1, 1);
+    createDefenseTower(34, 10, 1, 1);
+    createDefenseTower(34, 18, 1, 1);
 
-    createDefenseTower(18, 6, 2, 1);
-    createDefenseTower(18, 22, 2, 1);
-    createDefenseTower(26, 6, 2, 1);
-    createDefenseTower(26, 22, 2, 1);
+    createDefenseTower(22, 6, 2, 1);
+    createDefenseTower(22, 22, 2, 1);
+    createDefenseTower(30, 6, 2, 1);
+    createDefenseTower(30, 22, 2, 1);
 }
 
 // ===================================================
@@ -358,20 +361,20 @@ void BattleScene::createLevel6() {
 // ===================================================
 
 void BattleScene::createLevel7() {
-    createEnemyBase(22, 11, 1);
+    createEnemyBase(26, 12, 1);
 
-    createDefenseTower(12, 8, 1, 1);
-    createDefenseTower(12, 20, 1, 1);
-    createDefenseTower(30, 8, 1, 1);
-    createDefenseTower(30, 20, 1, 1);
-    createDefenseTower(36, 14, 1, 2);
+    createDefenseTower(14, 8, 1, 1);
+    createDefenseTower(14, 20, 1, 1);
+    createDefenseTower(34, 8, 1, 1);
+    createDefenseTower(34, 20, 1, 1);
+    createDefenseTower(30, 14, 1, 2);
 
-    createDefenseTower(18, 4, 2, 1);
-    createDefenseTower(18, 24, 2, 1);
-    createDefenseTower(26, 4, 2, 1);
-    createDefenseTower(26, 24, 2, 1);
-    createDefenseTower(34, 10, 2, 2);
-    createDefenseTower(34, 18, 2, 2);
+    createDefenseTower(18, 6, 2, 1);
+    createDefenseTower(18, 22, 2, 1);
+    createDefenseTower(22, 6, 2, 1);
+    createDefenseTower(22, 22, 2, 1);
+    createDefenseTower(30, 6, 2, 2);
+    createDefenseTower(30, 22, 2, 2);
 }
 
 // ===================================================
@@ -379,22 +382,22 @@ void BattleScene::createLevel7() {
 // ===================================================
 
 void BattleScene::createLevel8() {
-    createEnemyBase(21, 11, 2);
+    createEnemyBase(26, 12, 2);
 
-    createDefenseTower(10, 8, 1, 1);
-    createDefenseTower(10, 20, 1, 1);
-    createDefenseTower(30, 8, 1, 2);
-    createDefenseTower(30, 20, 1, 2);
-    createDefenseTower(36, 14, 1, 2);
+    createDefenseTower(14, 8, 1, 1);
+    createDefenseTower(14, 20, 1, 1);
+    createDefenseTower(34, 8, 1, 2);
+    createDefenseTower(34, 20, 1, 2);
+    createDefenseTower(30, 14, 1, 2);
     createDefenseTower(22, 6, 1, 2);
     createDefenseTower(22, 22, 1, 2);
 
-    createDefenseTower(16, 4, 2, 1);
-    createDefenseTower(16, 24, 2, 1);
-    createDefenseTower(26, 4, 2, 2);
-    createDefenseTower(26, 24, 2, 2);
-    createDefenseTower(34, 6, 2, 2);
-    createDefenseTower(34, 22, 2, 2);
+    createDefenseTower(18, 6, 2, 1);
+    createDefenseTower(18, 22, 2, 1);
+    createDefenseTower(30, 6, 2, 2);
+    createDefenseTower(30, 22, 2, 2);
+    createDefenseTower(14, 14, 2, 2);
+    createDefenseTower(34, 14, 2, 2);
 }
 
 // ===================================================
@@ -402,24 +405,24 @@ void BattleScene::createLevel8() {
 // ===================================================
 
 void BattleScene::createLevel9() {
-    createEnemyBase(20, 10, 2);
+    createEnemyBase(26, 12, 2);
 
-    createDefenseTower(8, 8, 1, 2);
-    createDefenseTower(8, 20, 1, 2);
-    createDefenseTower(30, 8, 1, 2);
-    createDefenseTower(30, 20, 1, 2);
-    createDefenseTower(36, 12, 1, 2);
-    createDefenseTower(36, 18, 1, 2);
-    createDefenseTower(22, 6, 1, 2);
-    createDefenseTower(22, 22, 1, 2);
+    createDefenseTower(14, 8, 1, 2);
+    createDefenseTower(14, 20, 1, 2);
+    createDefenseTower(18, 10, 1, 2);
+    createDefenseTower(18, 18, 1, 2);
+    createDefenseTower(34, 8, 1, 2);
+    createDefenseTower(34, 20, 1, 2);
+    createDefenseTower(30, 10, 1, 2);
+    createDefenseTower(30, 18, 1, 2);
 
-    createDefenseTower(14, 4, 2, 2);
-    createDefenseTower(14, 24, 2, 2);
-    createDefenseTower(26, 4, 2, 2);
-    createDefenseTower(26, 24, 2, 2);
-    createDefenseTower(32, 6, 2, 2);
-    createDefenseTower(32, 22, 2, 2);
-    createDefenseTower(34, 10, 2, 2);
+    createDefenseTower(22, 6, 2, 2);
+    createDefenseTower(22, 22, 2, 2);
+    createDefenseTower(30, 6, 2, 2);
+    createDefenseTower(30, 22, 2, 2);
+    createDefenseTower(14, 14, 2, 2);
+    createDefenseTower(34, 14, 2, 2);
+    createDefenseTower(18, 14, 2, 2);
 }
 
 // ===================================================
@@ -427,24 +430,24 @@ void BattleScene::createLevel9() {
 // ===================================================
 
 void BattleScene::createLevel10() {
-    createEnemyBase(20, 10, 2);
+    createEnemyBase(26, 12, 2);
 
-    createDefenseTower(8, 6, 1, 2);
-    createDefenseTower(8, 22, 1, 2);
-    createDefenseTower(30, 6, 1, 2);
-    createDefenseTower(30, 22, 1, 2);
-    createDefenseTower(36, 10, 1, 2);
-    createDefenseTower(36, 18, 1, 2);
-    createDefenseTower(22, 6, 1, 2);
-    createDefenseTower(22, 22, 1, 2);
-    createDefenseTower(14, 14, 1, 2);
+    createDefenseTower(14, 6, 1, 2);
+    createDefenseTower(14, 22, 1, 2);
+    createDefenseTower(18, 10, 1, 2);
+    createDefenseTower(18, 18, 1, 2);
+    createDefenseTower(34, 6, 1, 2);
+    createDefenseTower(34, 22, 1, 2);
+    createDefenseTower(30, 10, 1, 2);
+    createDefenseTower(30, 18, 1, 2);
+    createDefenseTower(22, 14, 1, 2);
 
-    createDefenseTower(12, 4, 2, 2);
-    createDefenseTower(12, 24, 2, 2);
-    createDefenseTower(26, 4, 2, 2);
-    createDefenseTower(26, 24, 2, 2);
-    createDefenseTower(32, 8, 2, 2);
-    createDefenseTower(32, 20, 2, 2);
+    createDefenseTower(18, 6, 2, 2);
+    createDefenseTower(18, 22, 2, 2);
+    createDefenseTower(22, 6, 2, 2);
+    createDefenseTower(22, 22, 2, 2);
+    createDefenseTower(30, 6, 2, 2);
+    createDefenseTower(30, 22, 2, 2);
     createDefenseTower(34, 14, 2, 2);
 }
 
@@ -453,27 +456,27 @@ void BattleScene::createLevel10() {
 // ===================================================
 
 void BattleScene::createLevel11() {
-    createEnemyBase(19, 9, 2);
+    createEnemyBase(26, 12, 2);
 
-    createDefenseTower(6, 6, 1, 2);
-    createDefenseTower(6, 22, 1, 2);
-    createDefenseTower(30, 6, 1, 2);
-    createDefenseTower(30, 22, 1, 2);
-    createDefenseTower(36, 10, 1, 2);
-    createDefenseTower(36, 18, 1, 2);
-    createDefenseTower(22, 6, 1, 2);
-    createDefenseTower(22, 22, 1, 2);
-    createDefenseTower(14, 14, 1, 2);
-    createDefenseTower(28, 14, 1, 2);
+    createDefenseTower(14, 6, 1, 2);
+    createDefenseTower(14, 22, 1, 2);
+    createDefenseTower(18, 10, 1, 2);
+    createDefenseTower(18, 18, 1, 2);
+    createDefenseTower(34, 6, 1, 2);
+    createDefenseTower(34, 22, 1, 2);
+    createDefenseTower(30, 10, 1, 2);
+    createDefenseTower(30, 18, 1, 2);
+    createDefenseTower(22, 14, 1, 2);
+    createDefenseTower(30, 14, 1, 2);
 
-    createDefenseTower(10, 4, 2, 2);
-    createDefenseTower(10, 24, 2, 2);
-    createDefenseTower(26, 4, 2, 2);
-    createDefenseTower(26, 24, 2, 2);
-    createDefenseTower(32, 8, 2, 2);
-    createDefenseTower(32, 20, 2, 2);
+    createDefenseTower(18, 6, 2, 2);
+    createDefenseTower(18, 22, 2, 2);
+    createDefenseTower(22, 6, 2, 2);
+    createDefenseTower(22, 22, 2, 2);
+    createDefenseTower(30, 6, 2, 2);
+    createDefenseTower(30, 22, 2, 2);
+    createDefenseTower(14, 14, 2, 2);
     createDefenseTower(34, 14, 2, 2);
-    createDefenseTower(16, 10, 2, 2);
 }
 
 // ===================================================
@@ -481,30 +484,30 @@ void BattleScene::createLevel11() {
 // ===================================================
 
 void BattleScene::createLevel12() {
-    createEnemyBase(19, 9, 2);
+    createEnemyBase(26, 12, 2);
 
-    createDefenseTower(6, 6, 1, 2);
-    createDefenseTower(6, 22, 1, 2);
-    createDefenseTower(30, 6, 1, 2);
-    createDefenseTower(30, 22, 1, 2);
-    createDefenseTower(36, 10, 1, 2);
-    createDefenseTower(36, 18, 1, 2);
-    createDefenseTower(22, 6, 1, 2);
-    createDefenseTower(22, 22, 1, 2);
-    createDefenseTower(14, 14, 1, 2);
-    createDefenseTower(28, 14, 1, 2);
-    createDefenseTower(18, 6, 1, 2);
-    createDefenseTower(18, 22, 1, 2);
+    createDefenseTower(14, 6, 1, 2);
+    createDefenseTower(14, 22, 1, 2);
+    createDefenseTower(18, 10, 1, 2);
+    createDefenseTower(18, 18, 1, 2);
+    createDefenseTower(22, 10, 1, 2);
+    createDefenseTower(22, 18, 1, 2);
+    createDefenseTower(30, 10, 1, 2);
+    createDefenseTower(30, 18, 1, 2);
+    createDefenseTower(34, 6, 1, 2);
+    createDefenseTower(34, 22, 1, 2);
+    createDefenseTower(30, 14, 1, 2);
+    createDefenseTower(22, 14, 1, 2);
 
-    createDefenseTower(10, 4, 2, 2);
-    createDefenseTower(10, 24, 2, 2);
-    createDefenseTower(26, 4, 2, 2);
-    createDefenseTower(26, 24, 2, 2);
-    createDefenseTower(32, 8, 2, 2);
-    createDefenseTower(32, 20, 2, 2);
+    createDefenseTower(18, 6, 2, 2);
+    createDefenseTower(18, 22, 2, 2);
+    createDefenseTower(22, 6, 2, 2);
+    createDefenseTower(22, 22, 2, 2);
+    createDefenseTower(30, 6, 2, 2);
+    createDefenseTower(30, 22, 2, 2);
+    createDefenseTower(14, 14, 2, 2);
     createDefenseTower(34, 14, 2, 2);
-    createDefenseTower(16, 10, 2, 2);
-    createDefenseTower(16, 18, 2, 2);
+    createDefenseTower(18, 14, 2, 2);
 }
 
 // ===================================================
@@ -759,6 +762,36 @@ void BattleScene::initUI() {
     setupDeployArea();
 }
 
+
+// ===================================================
+// 部署范围提示
+// ===================================================
+
+void BattleScene::setupDeployRangeHint() {
+    if (!_gridMap) {
+        return;
+    }
+
+    int deployWidth = BattleConfig::DEPLOY_MAX_X - BattleConfig::DEPLOY_MIN_X + 1;
+    int deployHeight = BattleConfig::DEPLOY_MAX_Y - BattleConfig::DEPLOY_MIN_Y + 1;
+    if (deployWidth <= 0 || deployHeight <= 0) {
+        return;
+    }
+
+    float cellSize = _gridMap->getCellSize();
+    auto hintLayer = LayerColor::create(
+        Color4B(80, 130, 90, 70),
+        deployWidth * cellSize,
+        deployHeight * cellSize
+    );
+    hintLayer->setAnchorPoint(Vec2(0.0f, 0.0f));
+    hintLayer->setIgnoreAnchorPointForPosition(false);
+    hintLayer->setPosition(Vec2(
+        BattleConfig::DEPLOY_MIN_X * cellSize,
+        BattleConfig::DEPLOY_MIN_Y * cellSize
+    ));
+    _gridMap->addChild(hintLayer, -1);
+}
 
 // ===================================================
 // 设置部署区域
@@ -1085,10 +1118,45 @@ void BattleScene::refreshDeployButton(int unitId) {
 }
 
 // ===================================================
+// 部署范围检查
+// ===================================================
+
+bool BattleScene::isDeployGridAllowed(int gridX, int gridY) const {
+    if (!_gridMap) {
+        return false;
+    }
+
+    int gridWidth = _gridMap->getGridWidth();
+    int gridHeight = _gridMap->getGridHeight();
+    if (gridX < 0 || gridY < 0 || gridX >= gridWidth || gridY >= gridHeight) {
+        return false;
+    }
+
+    if (gridX < BattleConfig::DEPLOY_MIN_X || gridX > BattleConfig::DEPLOY_MAX_X) {
+        return false;
+    }
+    if (gridY < BattleConfig::DEPLOY_MIN_Y || gridY > BattleConfig::DEPLOY_MAX_Y) {
+        return false;
+    }
+
+    return true;
+}
+
+// ===================================================
 // 部署士兵
 // ===================================================
 
 void BattleScene::deploySoldier(int unitId, const Vec2& position) {
+    // 兜底检查，避免非法位置部署
+    if (_gridMap) {
+        Vec2 gridPos = _gridMap->worldToGrid(position);
+        int gridX = static_cast<int>(gridPos.x);
+        int gridY = static_cast<int>(gridPos.y);
+        if (!isDeployGridAllowed(gridX, gridY)) {
+            return;
+        }
+    }
+
     // 检查是否有可部署的该类型单位
     auto it = _remainingUnits.find(unitId);
     if (it == _remainingUnits.end() || it->second <= 0) {
@@ -1190,6 +1258,20 @@ bool BattleScene::onTouchBegan(Touch* touch, Event* event) {
         return false;
     }
 
+    if (!_gridMap) {
+        return false;
+    }
+
+    Vec2 localPos = _gridMap->convertToNodeSpace(touchPos);
+    Vec2 gridPos = _gridMap->worldToGrid(localPos);
+    int gridX = static_cast<int>(gridPos.x);
+    int gridY = static_cast<int>(gridPos.y);
+
+    // 限制在允许部署的格子范围内
+    if (!isDeployGridAllowed(gridX, gridY)) {
+        return false;
+    }
+
     // 在地图上部署士兵（使用当前选中的单位）
     int unitId = _selectedUnitId;
     if (unitId == -1) {
@@ -1199,7 +1281,6 @@ bool BattleScene::onTouchBegan(Touch* touch, Event* event) {
         }
     }
     if (unitId != -1) {
-        Vec2 localPos = _gridMap->convertToNodeSpace(touchPos);
         deploySoldier(unitId, localPos);
     }
 
