@@ -55,15 +55,7 @@ private:
 	Node* mainMenuLayer = nullptr;
 	Node* settingsLayer = nullptr;
 	Node* ruleLayer = nullptr;
-	Sprite* background = nullptr;
-	Sprite* otherThings = nullptr;
 	Label* headLogo = nullptr;
-	Menu* _menu = nullptr;
-	const float buttonWidth = 150;
-	const float buttonHeight = 30;
-	const float buttonSpacing = 50;
-	const float paddingX = 40;
-	const float paddingY = 10;
 	Vector<Sprite*> backgroundList;
 	int currentBgIndex = 0;
 };

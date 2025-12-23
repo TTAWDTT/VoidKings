@@ -177,8 +177,6 @@ void MainMenuScene::createOtherThings()
     // 播放循环动画
     dinosaur->runAction(RepeatForever::create(Animate::create(anim)));
 
-    // 存储精灵指针便于后续控制（如需要）
-    otherThings = dinosaur;
 }
 
 Button* MainMenuScene::createIconButton(

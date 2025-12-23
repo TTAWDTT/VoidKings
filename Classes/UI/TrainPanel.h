@@ -17,16 +17,6 @@ USING_NS_CC;
 using namespace cocos2d::ui;
 
 // ===================================================
-// 训练队列中的兵种信息
-// ===================================================
-struct TrainQueueItem {
-    int unitId;                 // 兵种ID
-    std::string unitName;       // 兵种名称
-    float remainingTime;        // 剩余训练时间（秒）
-    float totalTime;            // 总训练时间（秒）
-};
-
-// ===================================================
 // 兵种等级信息
 // ===================================================
 struct UnitLevelInfo {
@@ -92,12 +82,6 @@ public:
     void hide();
     bool isShowing() const { return _isShowing; }
 
-    // 更新训练队列（每帧调用）
-    void update(float dt) override;
-
-    // 获取当前训练队列
-    const std::vector<TrainQueueItem>& getTrainQueue() const { return _trainQueue; }
-
     // 获取已训练完成的兵种数量
     const std::map<int, int>& getTrainedUnits() const { return UnitManager::getInstance()->getTrainedUnits(); }
 
@@ -112,9 +96,6 @@ private:
     Node* _contentRoot = nullptr;           // 内容容器
     ScrollView* _unitCardArea = nullptr;          // 兵种卡片区域
     Label* _resourceLabel = nullptr;        // 资源显示
-
-    // 训练队列
-    std::vector<TrainQueueItem> _trainQueue;
 
     // 兵种等级信息 <兵种ID, 等级信息>
     std::map<int, UnitLevelInfo> _unitLevels;
@@ -156,12 +137,6 @@ private:
 
     // 刷新兵种卡片显示
     void refreshUnitCards();
-
-    // 检查是否有足够的金币招募
-    bool canAffordRecruit(int unitId);
-
-    // 检查是否有足够的钻石升级
-    bool canAffordUpgrade(int unitId);
 
     // 检查兵种是否已满级
     bool isMaxLevel(int unitId);
