@@ -23,6 +23,11 @@ std::string resolveSpriteBaseName(const UnitConfig* config) {
         return config->spriteFrameName;
     }
 }
+
+// 攻击判定的容差，避免贴近目标却卡在移动动画
+constexpr float kAttackRangeTolerance = 6.0f;
+// 最小移动步长，低于此值不切换为移动动画
+constexpr float kMinMoveStep = 0.05f;
 } // namespace
 
 const std::vector<cocos2d::Node*>* Soldier::s_enemyBuildings = nullptr;
@@ -181,7 +186,7 @@ void Soldier::update(float dt) {
     if (_target) {
         float dist = this->getPosition().distance(_target->getPosition());
         float attackDistance = getAttackDistance(_target);
-        if (dist <= attackDistance) {
+        if (dist <= attackDistance + kAttackRangeTolerance) {
             attackTarget();
             tryPlayIdleAnimation();
         }
@@ -271,30 +276,35 @@ void Soldier::moveToTarget(float dt) {
 
     cocos2d::Vec2 diff = _target->getPosition() - this->getPosition();
     float dist = diff.length();
-    float stopDistance = getAttackDistance(_target);
+    float stopDistance = getAttackDistance(_target) + kAttackRangeTolerance;
     if (dist <= stopDistance) {
-        return;
-    }
-    
-    // 计算方向(只有左右)
-    Direction newDir = calcDirection(this->getPosition(), _target->getPosition());
-    
-    // 更新精灵朝向并播放移动动画
-    updateSpriteDirection(newDir);
-    playAnimation(_config->anim_walk, _config->anim_walk_frames, _config->anim_walk_delay, true);
-
-    // 使用setPosition实现移动 - 每帧更新位置,动画同时播放
-    if (dist <= 0.0001f) {
+        tryPlayIdleAnimation();
         return;
     }
 
     cocos2d::Vec2 direction = diff.getNormalized();
     float step = getCurrentSpeed() * dt;
+    if (step <= 0.0f) {
+        // 速度为0或dt异常时不切换为移动动画
+        tryPlayIdleAnimation();
+        return;
+    }
     float remaining = dist - stopDistance;
     if (remaining < 0.0f) {
         remaining = 0.0f;
     }
     float move = std::min(step, remaining);
+    if (move <= kMinMoveStep) {
+        tryPlayIdleAnimation();
+        return;
+    }
+
+    // 计算方向(只有左右)
+    Direction newDir = calcDirection(this->getPosition(), _target->getPosition());
+    // 更新精灵朝向并播放移动动画
+    updateSpriteDirection(newDir);
+    playAnimation(_config->anim_walk, _config->anim_walk_frames, _config->anim_walk_delay, true);
+
     cocos2d::Vec2 newPos = this->getPosition() + (direction * move);
     this->setPosition(newPos);
 }
@@ -320,7 +330,7 @@ void Soldier::attackTarget() {
 
     float dist = this->getPosition().distance(_target->getPosition());
     float attackDistance = getAttackDistance(_target);
-    if (dist > attackDistance) {
+    if (dist > attackDistance + kAttackRangeTolerance) {
         return;
     }
 
