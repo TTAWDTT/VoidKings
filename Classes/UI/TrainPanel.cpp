@@ -5,6 +5,7 @@
 #include "TrainPanel.h"
 #include "Core/Core.h"
 #include "Utils/AnimationUtils.h"
+#include "Utils/AudioManager.h"
 #include <algorithm>
 #include <unordered_map>
 
@@ -874,9 +875,11 @@ void TrainPanel::recruitUnit(int unitId) {
     int coin = Core::getInstance()->getResource(ResourceType::COIN);
     if (coin < cost) {
         CCLOG("[训练面板] 金币不足，无法招募: %s", config->name.c_str());
+        AudioManager::playButtonCancel();
         return;
     }
 
+    AudioManager::playButtonClick();
     // 扣除金币
     Core::getInstance()->consumeResource(ResourceType::COIN, cost);
 
@@ -906,6 +909,7 @@ void TrainPanel::upgradeUnit(int unitId) {
     // 检查是否已满级
     if (isMaxLevel(unitId)) {
         CCLOG("[训练面板] 兵种已满级，无法升级: %s", config->name.c_str());
+        AudioManager::playButtonCancel();
         return;
     }
 
@@ -916,9 +920,11 @@ void TrainPanel::upgradeUnit(int unitId) {
     int diamond = Core::getInstance()->getResource(ResourceType::DIAMOND);
     if (diamond < cost) {
         CCLOG("[训练面板] 钻石不足，无法升级: %s", config->name.c_str());
+        AudioManager::playButtonCancel();
         return;
     }
 
+    AudioManager::playButtonClick();
     // 扣除钻石
     Core::getInstance()->consumeResource(ResourceType::DIAMOND, cost);
 
@@ -978,6 +984,7 @@ void TrainPanel::setupCloseButton() {
     closeBtn->setScale9Enabled(true);
     closeBtn->setContentSize(Size(btnWidth, btnHeight));
     bindPressScale(closeBtn, closeNode, [this]() {
+        AudioManager::playButtonCancel();
         this->hide();
         if (_onClose) {
             _onClose();

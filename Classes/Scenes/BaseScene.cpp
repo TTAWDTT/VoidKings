@@ -18,6 +18,7 @@
 #include "UI/TrainPanel.h"
 #include "Core/Core.h"
 #include "Soldier/UnitManager.h"
+#include "Utils/AudioManager.h"
 #include <algorithm>
 #include <cmath>
 
@@ -115,6 +116,7 @@ bool BaseScene::init() {
     createTrainPanel();
     initTouchListener();
     initHoverInfo();
+    AudioManager::playMainBgm();
 
     CCLOG("[基地场景] 初始化完成（模块化版本）");
 
@@ -208,6 +210,7 @@ void BaseScene::initBuildingSystem() {
         // 放置取消回调
         [this]() {
             CCLOG("[基地场景] 建筑放置取消");
+            AudioManager::playButtonCancel();
             if (_uiPanel) {
                 _uiPanel->setButtonsEnabled(true);
             }
@@ -252,6 +255,7 @@ void BaseScene::showTrainPanel() {
         if (_uiPanel) {
             _uiPanel->setButtonsEnabled(false);
         }
+        AudioManager::playButtonClick();
         _trainPanel->show();
         CCLOG("[基地场景] 打开训练面板");
     }
@@ -471,6 +475,7 @@ void BaseScene::onPlacementConfirmed(const BuildingOption& option, int gridX, in
     int cost = option.cost;
     if (!Core::getInstance()->consumeResource(ResourceType::COIN, cost)) {
         CCLOG("[基地场景] 金币不足，无法建造: %s", option.name.c_str());
+        AudioManager::playButtonCancel();
         if (_uiPanel) {
             _uiPanel->updateResourceDisplay(
                 Core::getInstance()->getResource(ResourceType::COIN),
@@ -505,6 +510,7 @@ void BaseScene::onPlacementConfirmed(const BuildingOption& option, int gridX, in
             nullptr));
 
         savePlacedBuilding(option, gridX, gridY);
+        AudioManager::playButtonClick();
 
         CCLOG("[基地场景] 建筑创建成功，剩余金币: %d",
             Core::getInstance()->getResource(ResourceType::COIN));

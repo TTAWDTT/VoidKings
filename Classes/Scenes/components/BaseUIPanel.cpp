@@ -5,6 +5,7 @@
 
 #include "BaseUIPanel.h"
 #include "UI/IDCardPanel.h"
+#include "Utils/AudioManager.h"
 #include <memory>
 
  // ===================================================
@@ -74,6 +75,7 @@ void BaseUIPanel::setupButtons() {
         _attackButton->setPosition(Vec2(buttonX, startY));
         applyPressStyle(_attackButton);
         _attackButton->addClickEventListener([this](Ref* sender) {
+            AudioManager::playButtonClick();
             if (_callbacks.onAttack) _callbacks.onAttack();
             });
         this->addChild(_attackButton);
@@ -89,6 +91,7 @@ void BaseUIPanel::setupButtons() {
         _buildButton->setPosition(Vec2(buttonX, startY - (btnHeight + spacing)));
         applyPressStyle(_buildButton);
         _buildButton->addClickEventListener([this](Ref* sender) {
+            AudioManager::playButtonClick();
             if (_callbacks.onBuild) _callbacks.onBuild();
             });
         this->addChild(_buildButton);
@@ -104,6 +107,7 @@ void BaseUIPanel::setupButtons() {
         _exitButton->setPosition(Vec2(buttonX, startY - 2 * (btnHeight + spacing)));
         applyPressStyle(_exitButton);
         _exitButton->addClickEventListener([this](Ref* sender) {
+            AudioManager::playButtonCancel();
             if (_callbacks.onExit) _callbacks.onExit();
             });
         this->addChild(_exitButton);

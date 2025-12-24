@@ -5,6 +5,7 @@
 #include "Buildings/StorageBuilding.h"
 #include "Utils/AnimationUtils.h"
 #include "Utils/EffectUtils.h"
+#include "Utils/AudioManager.h"
 #include <algorithm>
 #include <cmath>
 #include <string>
@@ -24,6 +25,13 @@ std::string resolveSpriteBaseName(const UnitConfig* config) {
     default:
         return config->spriteFrameName;
     }
+}
+
+bool isMageUnit(const UnitConfig* config) {
+    if (!config) {
+        return false;
+    }
+    return config->name.find("Mage") != std::string::npos;
 }
 
 // 攻击判定的容差，避免贴近目标却卡在移动动画
@@ -316,6 +324,7 @@ void Soldier::takeDamage(float damage) {
     if (_currentHP < 0) _currentHP = 0;
 
     EffectUtils::playHitFlash(_bodySprite);
+    AudioManager::playRandomHit();
     updateHealthBar(true);
 
     if (_currentHP <= 0) {
@@ -358,6 +367,20 @@ void Soldier::attackTarget() {
 
     // 播放攻击动画
     playAnimation(_config->anim_attack, _config->anim_attack_frames, _config->anim_attack_delay, false);
+
+    if (_config) {
+        if (_config->ISREMOTE) {
+            if (isMageUnit(_config)) {
+                AudioManager::playMagicAttack();
+            }
+            else {
+                AudioManager::playArrowShoot();
+            }
+        }
+        else {
+            AudioManager::playMeleeHit();
+        }
+    }
 
     float attackPower = getCurrentATK();
     if (auto defence = dynamic_cast<DefenceBuilding*>(_target)) {

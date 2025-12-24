@@ -16,6 +16,7 @@
 #include "Buildings/StorageBuilding.h"
 #include "Soldier/UnitManager.h"
 #include "Utils/AnimationUtils.h"
+#include "Utils/AudioManager.h"
 #include <algorithm>
 #include <cmath>
 
@@ -138,6 +139,7 @@ bool BattleScene::init() {
     initUI();
     initTouchListener();
     initHoverInfo();
+    AudioManager::playBattleBgm(_levelId);
 
     // 设置更新
     this->scheduleUpdate();
@@ -764,6 +766,7 @@ void BattleScene::initUI() {
         }
 
         exitNode->setScale(originScale);
+        AudioManager::playButtonCancel();
         CCLOG("[BattleScene] Exit battle");
         this->onExitButton(sender);
     });
@@ -961,6 +964,7 @@ Node* BattleScene::createDeployButton(int unitId, int count, float x) {
         }
 
         node->setScale(originScale);
+        AudioManager::playButtonClick();
         setSelectedUnit(unitId);
     });
     selectButton->setName("selectButton");
@@ -1672,6 +1676,8 @@ void BattleScene::checkBattleEnd() {
 void BattleScene::onBattleWin() {
     _battleEnded = true;
     CCLOG("[战斗场景] 战斗胜利！");
+    AudioManager::stopBgm();
+    AudioManager::playVictory();
 
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
@@ -1740,6 +1746,8 @@ void BattleScene::onBattleWin() {
 void BattleScene::onBattleLose() {
     _battleEnded = true;
     CCLOG("[战斗场景] 战斗失败！");
+    AudioManager::stopBgm();
+    AudioManager::playLose();
 
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
