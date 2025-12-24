@@ -177,8 +177,22 @@ void BattleScene::initGridMap() {
     _gridMap->setScale(scale);
     this->addChild(_gridMap, 0);
 
-    auto bgColor = LayerColor::create(Color4B(60, 100, 60, 255), mapWidth, mapHeight);
-    _gridMap->addChild(bgColor, -2);
+    auto bgColor = LayerColor::create(Color4B(50, 80, 50, 255), mapWidth, mapHeight);
+    _gridMap->addChild(bgColor, -3);
+
+    auto tileBg = Sprite::create("grass/grass_0000.png");
+    if (tileBg) {
+        auto texture = tileBg->getTexture();
+        if (texture) {
+            Texture2D::TexParams params = { GL_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT };
+            texture->setTexParameters(params);
+        }
+        tileBg->setAnchorPoint(Vec2::ZERO);
+        tileBg->setPosition(Vec2::ZERO);
+        tileBg->setTextureRect(Rect(0, 0, mapWidth, mapHeight));
+        tileBg->setOpacity(200);
+        _gridMap->addChild(tileBg, -2);
+    }
 
     // 部署范围提示
     setupDeployRangeHint();
@@ -1168,6 +1182,8 @@ void BattleScene::deploySoldier(int unitId, const Vec2& position) {
         _soldiers.push_back(soldier);
         soldier->retain();
 
+        spawnDeployEffect(position);
+
         // 更新剩余数量
         it->second--;
         // 训练兵种仅作为出战上限，战斗中不消耗库存
@@ -1181,6 +1197,21 @@ void BattleScene::deploySoldier(int unitId, const Vec2& position) {
             setSelectedUnit(getFirstAvailableUnitId());
         }
     }
+}
+
+void BattleScene::spawnDeployEffect(const Vec2& position) {
+    if (!_gridMap) {
+        return;
+    }
+
+    auto ring = DrawNode::create();
+    ring->drawCircle(Vec2::ZERO, 14.0f, 0.0f, 20, false, Color4F(0.8f, 1.0f, 0.8f, 0.8f));
+    ring->setPosition(position);
+    _gridMap->addChild(ring, 30);
+
+    auto scale = ScaleTo::create(0.25f, 1.6f);
+    auto fade = FadeTo::create(0.25f, 0);
+    ring->runAction(Sequence::create(Spawn::create(scale, fade, nullptr), RemoveSelf::create(), nullptr));
 }
 
 // ===================================================

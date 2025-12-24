@@ -41,6 +41,7 @@ bool MainMenuScene::init()
 	createBackground();
 	createHeadLogo();
 	createOtherThings();
+	createModalOverlay();
 	
 	// 创建各个界面层
 	createMainMenuLayer();
@@ -51,6 +52,7 @@ bool MainMenuScene::init()
 	mainMenuLayer->setVisible(true);
 	settingsLayer->setVisible(false);
 	ruleLayer->setVisible(false);
+	animateMenuButtons();
 
 	return true;
 }
@@ -133,6 +135,11 @@ void MainMenuScene::createHeadLogo()
     headLogo->setPosition(Vec2(origin.x + visibleSize.width / 2,
         origin.y + visibleSize.height - 24.0f));
     this->addChild(headLogo, 1);
+
+    // 标题轻微浮动，增强视觉动感
+    auto floatUp = EaseSineInOut::create(MoveBy::create(1.8f, Vec2(0.0f, 6.0f)));
+    auto floatDown = EaseSineInOut::create(MoveBy::create(1.8f, Vec2(0.0f, -6.0f)));
+    headLogo->runAction(RepeatForever::create(Sequence::create(floatUp, floatDown, nullptr)));
 }
 
 void MainMenuScene::createOtherThings()
@@ -177,6 +184,24 @@ void MainMenuScene::createOtherThings()
     // 播放循环动画
     dinosaur->runAction(RepeatForever::create(Animate::create(anim)));
 
+    // 轻微上下浮动，增加呼吸感
+    auto bobUp = EaseSineInOut::create(MoveBy::create(1.4f, Vec2(0.0f, 5.0f)));
+    auto bobDown = EaseSineInOut::create(MoveBy::create(1.4f, Vec2(0.0f, -5.0f)));
+    dinosaur->runAction(RepeatForever::create(Sequence::create(bobUp, bobDown, nullptr)));
+
+}
+
+void MainMenuScene::createModalOverlay()
+{
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+
+    modalOverlay = LayerColor::create(Color4B(0, 0, 0, 120),
+        visibleSize.width,
+        visibleSize.height);
+    modalOverlay->setPosition(origin);
+    modalOverlay->setVisible(false);
+    this->addChild(modalOverlay, 15);
 }
 
 Button* MainMenuScene::createIconButton(
@@ -205,6 +230,15 @@ Button* MainMenuScene::createIconButton(
 
     // 图标
     auto icon = Sprite::create(iconPath);
+    if (!icon) {
+        float buttonWidth = 200;
+        float buttonHeight = titleSize.height + padding + 10;
+        button->setContentSize(Size(buttonWidth, buttonHeight));
+        titleRenderer->setAnchorPoint(Vec2(0.5f, 0.5f));
+        titleRenderer->setPosition(Vec2(buttonWidth / 2, buttonHeight / 2));
+        button->addTouchEventListener(callback);
+        return button;
+    }
 
     // 先用文字高度估一个按钮高度
     float tmpHeight = std::max(icon->getContentSize().height, titleSize.height) + padding;
@@ -276,6 +310,7 @@ void MainMenuScene::createMainMenuLayer() {
     float startY = origin.y + visibleSize.height / 2 + totalHeight / 2 - btnHeight / 2;
     startBtn->setPosition(Vec2(centerX, startY));
     mainMenuLayer->addChild(startBtn);
+    menuButtons.push_back(startBtn);
 
     // Settings
     auto settingsBtn = createIconButton(
@@ -285,6 +320,7 @@ void MainMenuScene::createMainMenuLayer() {
     );
     settingsBtn->setPosition(Vec2(centerX, startY - (btnHeight + spacingY)));
     mainMenuLayer->addChild(settingsBtn);
+    menuButtons.push_back(settingsBtn);
 
     // Rules
     auto rulesBtn = createIconButton(
@@ -294,6 +330,7 @@ void MainMenuScene::createMainMenuLayer() {
     );
     rulesBtn->setPosition(Vec2(centerX, startY - 2 * (btnHeight + spacingY)));
     mainMenuLayer->addChild(rulesBtn);
+    menuButtons.push_back(rulesBtn);
 
     // Exit
     auto exitBtn = createIconButton(
@@ -303,6 +340,7 @@ void MainMenuScene::createMainMenuLayer() {
     );
     exitBtn->setPosition(Vec2(centerX, startY - 3 * (btnHeight + spacingY)));
     mainMenuLayer->addChild(exitBtn);
+    menuButtons.push_back(exitBtn);
 }
 
 void MainMenuScene::onStart(Ref* sender) {
@@ -315,14 +353,49 @@ void MainMenuScene::switchToLayer(Node* targetLayer)
     mainMenuLayer->setVisible(targetLayer == mainMenuLayer);
     settingsLayer->setVisible(targetLayer == settingsLayer);
     ruleLayer->setVisible(targetLayer == ruleLayer);
+
+    const bool showModal = targetLayer != mainMenuLayer;
+    if (modalOverlay) {
+        modalOverlay->stopAllActions();
+        modalOverlay->setVisible(showModal);
+        if (showModal) {
+            modalOverlay->setOpacity(0);
+            modalOverlay->runAction(FadeTo::create(0.18f, 160));
+        }
+        else {
+            modalOverlay->runAction(Sequence::create(
+                FadeTo::create(0.12f, 0),
+                CallFunc::create([this]() {
+                    if (modalOverlay) {
+                        modalOverlay->setVisible(false);
+                    }
+                }),
+                nullptr));
+        }
+    }
+
+    if (targetLayer == settingsLayer) {
+        animatePanel(settingsPanel);
+    }
+    else if (targetLayer == ruleLayer) {
+        animatePanel(rulePanel);
+    }
 }
 
 void MainMenuScene::createSettingsLayer()
 {
     auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
 
     settingsLayer = Node::create();
     this->addChild(settingsLayer, 20);
+
+    // 半透明遮罩
+    auto dimBg = LayerColor::create(Color4B(0, 0, 0, 80),
+        visibleSize.width,
+        visibleSize.height);
+    dimBg->setPosition(origin);
+    settingsLayer->addChild(dimBg, 0);
 
 	// 面板背景
     float panelWidth = visibleSize.width * 0.6f;   // 面板宽度
@@ -338,6 +411,7 @@ void MainMenuScene::createSettingsLayer()
     panel->setPosition(Vec2(visibleSize.width / 2,
         visibleSize.height / 2-20));
     settingsLayer->addChild(panel, 1);
+    settingsPanel = panel;
 
     //标题
     auto label = Label::createWithTTF("Settings", "fonts/ScienceGothic.ttf", 32);
@@ -359,9 +433,17 @@ void MainMenuScene::createSettingsLayer()
 void MainMenuScene::createRuleLayer()
 {
     auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
 
     ruleLayer = Node::create();
     this->addChild(ruleLayer, 20);
+
+    // 半透明遮罩
+    auto dimBg = LayerColor::create(Color4B(0, 0, 0, 80),
+        visibleSize.width,
+        visibleSize.height);
+    dimBg->setPosition(origin);
+    ruleLayer->addChild(dimBg, 0);
 
     // 面板背景
     float panelWidth = visibleSize.width * 0.6f;   // 面板宽度
@@ -377,6 +459,7 @@ void MainMenuScene::createRuleLayer()
     panel->setPosition(Vec2(visibleSize.width / 2,
         visibleSize.height / 2 - 20));
     ruleLayer->addChild(panel, 1);
+    rulePanel = panel;
 
     //标题
     auto label = Label::createWithTTF("Rule", "fonts/ScienceGothic.ttf", 32);
@@ -452,4 +535,40 @@ void MainMenuScene::onReturn(Ref* sender)
 void MainMenuScene::onExit(Ref* sender) 
 {
     Director::getInstance()->end();
+}
+
+void MainMenuScene::animateMenuButtons()
+{
+    if (menuButtons.empty()) {
+        return;
+    }
+
+    float delayStep = 0.06f;
+    float moveOffset = 18.0f;
+
+    for (size_t i = 0; i < menuButtons.size(); ++i) {
+        auto* button = menuButtons[i];
+        if (!button) {
+            continue;
+        }
+        button->stopAllActions();
+        Vec2 originPos = button->getPosition();
+        button->setOpacity(0);
+        button->setPosition(originPos - Vec2(0.0f, moveOffset));
+        auto move = EaseBackOut::create(MoveTo::create(0.25f, originPos));
+        auto fade = FadeTo::create(0.2f, 255);
+        auto spawn = Spawn::create(move, fade, nullptr);
+        button->runAction(Sequence::create(DelayTime::create(delayStep * i), spawn, nullptr));
+    }
+}
+
+void MainMenuScene::animatePanel(Node* panel)
+{
+    if (!panel) {
+        return;
+    }
+
+    panel->stopAllActions();
+    panel->setScale(0.94f);
+    panel->runAction(EaseBackOut::create(ScaleTo::create(0.22f, 1.0f)));
 }

@@ -18,7 +18,6 @@
 #include "UI/TrainPanel.h"
 #include "Core/Core.h"
 #include "Soldier/UnitManager.h"
-#include "UI/IDCardPanel.h"
 #include <algorithm>
 #include <cmath>
 
@@ -498,6 +497,12 @@ void BaseScene::onPlacementConfirmed(const BuildingOption& option, int gridX, in
 
         // 标记网格为已占用
         _gridMap->occupyCell(gridX, gridY, option.gridWidth, option.gridHeight, newBuilding);
+
+        // 放置完成反馈
+        newBuilding->runAction(Sequence::create(
+            EaseBackOut::create(ScaleTo::create(0.12f, 1.05f)),
+            EaseBackOut::create(ScaleTo::create(0.12f, 1.0f)),
+            nullptr));
 
         savePlacedBuilding(option, gridX, gridY);
 

@@ -149,6 +149,7 @@ private:
     // ==================== 部署系统 ====================
     void setupDeployArea();
     void deploySoldier(int unitId, const Vec2& position);
+    void spawnDeployEffect(const Vec2& position);
     Node* createDeployButton(int unitId, int count, float x);
     Sprite* createUnitIdleIcon(int unitId, float targetSize, bool forceAnimate = false);
     int getFirstAvailableUnitId() const;

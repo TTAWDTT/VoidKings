@@ -5,6 +5,7 @@
 
 #include "BaseUIPanel.h"
 #include "UI/IDCardPanel.h"
+#include <memory>
 
  // ===================================================
  // 创建与初始化
@@ -79,6 +80,7 @@ void BaseUIPanel::setupButtons() {
 
         auto attackTip = createTooltip("Attack", Size(80, 30));
         bindTooltip(_attackButton, attackTip);
+        bindHoverEffect(_attackButton);
     }
 
     _buildButton = Button::create("UI/build.png");
@@ -93,6 +95,7 @@ void BaseUIPanel::setupButtons() {
 
         auto buildTip = createTooltip("Build", Size(60, 30));
         bindTooltip(_buildButton, buildTip);
+        bindHoverEffect(_buildButton);
     }
 
     _exitButton = Button::create("UI/exit.png");
@@ -107,6 +110,7 @@ void BaseUIPanel::setupButtons() {
 
         auto exitTip = createTooltip("Exit", Size(60, 30));
         bindTooltip(_exitButton, exitTip);
+        bindHoverEffect(_exitButton);
     }
 }
 
@@ -192,6 +196,53 @@ void BaseUIPanel::bindTooltip(Node* targetBtn, Node* tooltip, float offsetX) {
         };
 
     _eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, this);
+}
+
+// ===================================================
+// 按钮悬停效果
+// ===================================================
+void BaseUIPanel::bindHoverEffect(Button* button) {
+    if (!button) {
+        return;
+    }
+
+    const float baseScale = button->getScale();
+    const Color3B baseColor = button->getColor();
+    auto hoverState = std::make_shared<bool>(false);
+
+    auto mouseListener = EventListenerMouse::create();
+    mouseListener->onMouseMove = [this, button, baseScale, baseColor, hoverState](EventMouse* event) {
+        if (!button->isVisible()) {
+            return;
+        }
+        auto widget = dynamic_cast<Widget*>(button);
+        if (widget && !widget->isEnabled()) {
+            if (*hoverState) {
+                button->setScale(baseScale);
+                button->setColor(baseColor);
+                *hoverState = false;
+            }
+            return;
+        }
+
+        Vec2 mouseWorldPos(event->getCursorX(), event->getCursorY());
+        Node* parent = button->getParent();
+        Vec2 localPos = parent ? parent->convertToNodeSpace(mouseWorldPos) : mouseWorldPos;
+        bool inside = button->getBoundingBox().containsPoint(localPos);
+
+        if (inside && !*hoverState) {
+            button->setScale(baseScale * 1.03f);
+            button->setColor(Color3B::WHITE);
+            *hoverState = true;
+        }
+        else if (!inside && *hoverState) {
+            button->setScale(baseScale);
+            button->setColor(baseColor);
+            *hoverState = false;
+        }
+    };
+
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, button);
 }
 
 // ===================================================

@@ -11,6 +11,7 @@
 
 #include "BuildShopPanel.h"
 #include <algorithm>
+#include <memory>
 
  // ===================================================
  // 创建和初始化
@@ -269,18 +270,39 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
     nameLabel->setColor(option.canBuild ? Color3B::WHITE : Color3B::GRAY);
     nameLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
     itemNode->addChild(nameLabel, 2);
-
-    // 费用和尺寸信息（缩小字体）
-    char infoText[64];
-    snprintf(infoText, sizeof(infoText), "%dG %dx%d", option.cost, option.gridWidth, option.gridHeight);
-    auto infoLabel = Label::createWithTTF(infoText, "fonts/arial.ttf", 8);
-    if (!infoLabel) {
-        infoLabel = Label::createWithSystemFont(infoText, "Arial", 8);
+    // 费用显示
+    char costText[32];
+    snprintf(costText, sizeof(costText), "%d", option.cost);
+    auto costLabel = Label::createWithTTF(costText, "fonts/arial.ttf", 8);
+    if (!costLabel) {
+        costLabel = Label::createWithSystemFont(costText, "Arial", 8);
     }
-    infoLabel->setPosition(Vec2(0, -30));
-    infoLabel->setColor(option.canBuild ? Color3B::YELLOW : Color3B::GRAY);
-    infoLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
-    itemNode->addChild(infoLabel, 2);
+    costLabel->setPosition(Vec2(8, -28));
+    costLabel->setColor(option.canBuild ? Color3B::YELLOW : Color3B::GRAY);
+    costLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
+    itemNode->addChild(costLabel, 2);
+
+    auto coinIcon = Sprite::create("source/coin/coin_0001.png");
+    if (coinIcon) {
+        float targetSize = 10.0f;
+        float scale = targetSize / std::max(coinIcon->getContentSize().width, coinIcon->getContentSize().height);
+        coinIcon->setScale(scale);
+        coinIcon->setPosition(Vec2(-10, -28));
+        coinIcon->setColor(option.canBuild ? Color3B::WHITE : Color3B::GRAY);
+        itemNode->addChild(coinIcon, 2);
+    }
+
+    // 尺寸信息
+    char sizeText[32];
+    snprintf(sizeText, sizeof(sizeText), "%dx%d", option.gridWidth, option.gridHeight);
+    auto sizeLabel = Label::createWithTTF(sizeText, "fonts/arial.ttf", 8);
+    if (!sizeLabel) {
+        sizeLabel = Label::createWithSystemFont(sizeText, "Arial", 8);
+    }
+    sizeLabel->setPosition(Vec2(0, -40));
+    sizeLabel->setColor(option.canBuild ? Color3B(210, 210, 210) : Color3B::GRAY);
+    sizeLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
+    itemNode->addChild(sizeLabel, 2);
 
     // 如果不可建造，添加"已有"标签
     if (!option.canBuild) {
@@ -336,6 +358,40 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
 
     itemNode->addChild(touchBtn, 10);
 
+    // 悬停高亮
+    bool canBuild = option.canBuild;
+    auto hoverState = std::make_shared<bool>(false);
+    auto hoverListener = EventListenerMouse::create();
+    hoverListener->onMouseMove = [this, itemNode, bg, border, itemWidth, itemHeight, borderColor, bgColor, hoverState, canBuild](EventMouse* event) {
+        if (!canBuild) {
+            return;
+        }
+        Node* parent = itemNode->getParent();
+        if (!parent) {
+            return;
+        }
+        Vec2 localPos = parent->convertToNodeSpace(Vec2(event->getCursorX(), event->getCursorY()));
+        bool inside = itemNode->getBoundingBox().containsPoint(localPos);
+
+        if (inside && !*hoverState) {
+            bg->setColor(Color3B(75, 75, 75));
+            border->clear();
+            border->drawRect(Vec2(-itemWidth / 2, -itemHeight / 2),
+                Vec2(itemWidth / 2, itemHeight / 2),
+                Color4F(0.9f, 0.9f, 0.9f, 1.0f));
+            *hoverState = true;
+        }
+        else if (!inside && *hoverState) {
+            bg->setColor(Color3B(bgColor.r, bgColor.g, bgColor.b));
+            border->clear();
+            border->drawRect(Vec2(-itemWidth / 2, -itemHeight / 2),
+                Vec2(itemWidth / 2, itemHeight / 2),
+                borderColor);
+            *hoverState = false;
+        }
+    };
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(hoverListener, itemNode);
+
     return itemNode;
 }
 
@@ -378,6 +434,18 @@ void BuildShopPanel::setupCloseButton() {
 void BuildShopPanel::show() {
     this->setVisible(true);
     _isShowing = true;
+
+    if (_background) {
+        _background->stopAllActions();
+        _background->setOpacity(0);
+        _background->runAction(FadeTo::create(0.18f, 200));
+    }
+    if (_panel) {
+        _panel->stopAllActions();
+        _panel->setScale(0.94f);
+        _panel->runAction(EaseBackOut::create(ScaleTo::create(0.22f, 1.0f)));
+    }
+
     CCLOG("[建筑商店] 显示面板");
 }
 
@@ -385,7 +453,23 @@ void BuildShopPanel::show() {
 // 隐藏面板
 // ===================================================
 void BuildShopPanel::hide() {
-    this->setVisible(false);
     _isShowing = false;
+
+    if (_background) {
+        _background->stopAllActions();
+        _background->runAction(FadeTo::create(0.12f, 0));
+    }
+    if (_panel) {
+        _panel->stopAllActions();
+        _panel->runAction(EaseBackIn::create(ScaleTo::create(0.12f, 0.94f)));
+    }
+
+    this->runAction(Sequence::create(
+        DelayTime::create(0.14f),
+        CallFunc::create([this]() {
+            this->setVisible(false);
+        }),
+        nullptr));
+
     CCLOG("[建筑商店] 隐藏面板");
 }

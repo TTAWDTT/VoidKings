@@ -82,5 +82,18 @@ void Bullet::onExit() {
 }
 
 void Bullet::onReachTarget() {
-    // Override in subclasses for specific effects
+    // 命中反馈：轻微冲击环
+    auto* parent = this->getParent();
+    if (!parent) {
+        return;
+    }
+
+    auto ring = DrawNode::create();
+    ring->drawCircle(Vec2::ZERO, 10.0f, 0.0f, 16, false, Color4F(1.0f, 1.0f, 1.0f, 0.8f));
+    ring->setPosition(this->getPosition());
+    parent->addChild(ring, this->getLocalZOrder());
+
+    auto scale = ScaleTo::create(0.22f, 1.6f);
+    auto fade = FadeTo::create(0.22f, 0);
+    ring->runAction(Sequence::create(Spawn::create(scale, fade, nullptr), RemoveSelf::create(), nullptr));
 }

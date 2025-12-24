@@ -123,6 +123,8 @@ private:
     Sprite* _previewSprite = nullptr;       // 建筑预览精灵
     DrawNode* _gridDisplayNode = nullptr;   // 全地图格子显示节点
     DrawNode* _placementGridNode = nullptr; // 当前放置位置格子显示节点
+    Node* _previewInfoPanel = nullptr;      // 预览信息面板
+    Label* _previewInfoLabel = nullptr;     // 预览信息文本
 
     // 放置状态
     PlacementState _state;
@@ -151,6 +153,21 @@ private:
      * @param canPlace 是否可以放置
      */
     void updatePlacementGridDisplay(int gridX, int gridY, bool canPlace);
+
+    /**
+     * @brief 创建预览信息面板
+     */
+    void setupPreviewInfo();
+
+    /**
+     * @brief 更新预览信息显示
+     */
+    void updatePreviewInfo(bool canPlace);
+
+    /**
+     * @brief 更新预览信息位置
+     */
+    void updatePreviewInfoPosition(const Vec2& centerPos);
 
     /**
      * @brief 清理预览资源

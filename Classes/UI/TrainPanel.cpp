@@ -270,6 +270,7 @@ void TrainPanel::setupPanel() {
             maxHeight / TrainPanelConfig::PANEL_SIZE.height);
     }
     _panel->setScale(scale);
+    _panelBaseScale = scale;
 
     // 根据实际包围盒重新校准中心，避免缩放/锚点导致偏移
     Rect panelBounds = _panel->getBoundingBox();
@@ -574,29 +575,39 @@ Node* TrainPanel::createUnitCard(int unitId) {
     auto recruitNode = Node::create();
     recruitNode->setPosition(Vec2(-btnWidth / 2 - btnSpacing / 2, btnY));
 
-    auto recruitBg = LayerColor::create(Color4B(40, 80, 40, 255), btnWidth, btnHeight);
+    int recruitCost = config->COST_COIN > 0 ? config->COST_COIN : TrainPanelConfig::DEFAULT_RECRUIT_COST;
+    int coin = Core::getInstance()->getResource(ResourceType::COIN);
+    bool canRecruit = coin >= recruitCost;
+
+    Color4B recruitBgColor = canRecruit ? Color4B(40, 80, 40, 255) : Color4B(60, 60, 60, 255);
+    auto recruitBg = LayerColor::create(recruitBgColor, btnWidth, btnHeight);
     recruitBg->setAnchorPoint(Vec2(0.5f, 0.5f));
     recruitBg->setIgnoreAnchorPointForPosition(false);
     recruitNode->addChild(recruitBg);
 
     auto recruitBorder = DrawNode::create();
-    recruitBorder->drawRect(Vec2(-btnWidth / 2, -btnHeight / 2), Vec2(btnWidth / 2, btnHeight / 2), Color4F::WHITE);
+    Color4F recruitBorderColor = canRecruit ? Color4F::WHITE : Color4F(0.4f, 0.4f, 0.4f, 1.0f);
+    recruitBorder->drawRect(Vec2(-btnWidth / 2, -btnHeight / 2), Vec2(btnWidth / 2, btnHeight / 2), recruitBorderColor);
     recruitNode->addChild(recruitBorder, 1);
 
     // 使用配置常量替代魔法数字（缩小字体）
-    int recruitCost = config->COST_COIN > 0 ? config->COST_COIN : TrainPanelConfig::DEFAULT_RECRUIT_COST;
     char recruitText[32];
     snprintf(recruitText, sizeof(recruitText), "%dG", recruitCost);
     auto recruitLabel = createTrainLabel(recruitText, TrainPanelConfig::BUTTON_FONT_SIZE);
-    recruitLabel->setColor(Color3B::WHITE);
+    recruitLabel->setColor(canRecruit ? Color3B::WHITE : Color3B(170, 170, 170));
     recruitNode->addChild(recruitLabel, 2);
 
     auto recruitBtn = Button::create();
     recruitBtn->setScale9Enabled(true);
     recruitBtn->setContentSize(Size(btnWidth, btnHeight));
-    bindPressScale(recruitBtn, recruitNode, [this, unitId]() {
-        this->recruitUnit(unitId);
-    });
+    if (canRecruit) {
+        bindPressScale(recruitBtn, recruitNode, [this, unitId]() {
+            this->recruitUnit(unitId);
+        });
+    }
+    else {
+        recruitBtn->setEnabled(false);
+    }
     recruitNode->addChild(recruitBtn, 10);
 
     cardRoot->addChild(recruitNode, 3);
@@ -605,14 +616,21 @@ Node* TrainPanel::createUnitCard(int unitId) {
     auto upgradeNode = Node::create();
     upgradeNode->setPosition(Vec2(btnWidth / 2 + btnSpacing / 2, btnY));
 
-    Color4B upgradeBgColor = maxLevel ? Color4B(60, 60, 60, 255) : Color4B(80, 40, 80, 255);
+    int diamond = Core::getInstance()->getResource(ResourceType::DIAMOND);
+    int upgradeCost = 10 * (levelInfo.currentLevel + 1);
+    bool canUpgrade = (!maxLevel && diamond >= upgradeCost);
+
+    Color4B upgradeBgColor = Color4B(60, 60, 60, 255);
+    if (!maxLevel && canUpgrade) {
+        upgradeBgColor = Color4B(80, 40, 80, 255);
+    }
     auto upgradeBg = LayerColor::create(upgradeBgColor, btnWidth, btnHeight);
     upgradeBg->setAnchorPoint(Vec2(0.5f, 0.5f));
     upgradeBg->setIgnoreAnchorPointForPosition(false);
     upgradeNode->addChild(upgradeBg);
 
     auto upgradeBorder = DrawNode::create();
-    Color4F upgradeBorderColor = maxLevel ? Color4F(0.4f, 0.4f, 0.4f, 1.0f) : Color4F::WHITE;
+    Color4F upgradeBorderColor = maxLevel || !canUpgrade ? Color4F(0.4f, 0.4f, 0.4f, 1.0f) : Color4F::WHITE;
     upgradeBorder->drawRect(Vec2(-btnWidth / 2, -btnHeight / 2), Vec2(btnWidth / 2, btnHeight / 2), upgradeBorderColor);
     upgradeNode->addChild(upgradeBorder, 1);
 
@@ -623,14 +641,14 @@ Node* TrainPanel::createUnitCard(int unitId) {
     }
     else {
         char buf[32];
-        snprintf(buf, sizeof(buf), "%dD", 10 * (levelInfo.currentLevel + 1));
+        snprintf(buf, sizeof(buf), "%dD", upgradeCost);
         upgradeText = buf;
     }
     auto upgradeLabel = createTrainLabel(upgradeText, TrainPanelConfig::BUTTON_FONT_SIZE);
-    upgradeLabel->setColor(maxLevel ? Color3B::GRAY : Color3B::WHITE);
+    upgradeLabel->setColor(maxLevel || !canUpgrade ? Color3B::GRAY : Color3B::WHITE);
     upgradeNode->addChild(upgradeLabel, 2);
 
-    if (!maxLevel) {
+    if (!maxLevel && canUpgrade) {
         auto upgradeBtn = Button::create();
         upgradeBtn->setScale9Enabled(true);
         upgradeBtn->setContentSize(Size(btnWidth, btnHeight));
@@ -997,6 +1015,18 @@ void TrainPanel::setupResourceDisplay() {
 void TrainPanel::show() {
     this->setVisible(true);
     _isShowing = true;
+
+    if (_background) {
+        _background->stopAllActions();
+        _background->setOpacity(0);
+        _background->runAction(FadeTo::create(0.15f, 200));
+    }
+    if (_panel) {
+        _panel->stopAllActions();
+        _panel->setScale(_panelBaseScale * 0.94f);
+        _panel->runAction(EaseBackOut::create(ScaleTo::create(0.22f, _panelBaseScale)));
+    }
+
     updateResourceDisplay();
     refreshUnitCards();
     if (_unitCardArea) {
@@ -1009,8 +1039,24 @@ void TrainPanel::show() {
 // 隐藏面板
 // ===================================================
 void TrainPanel::hide() {
-    this->setVisible(false);
     _isShowing = false;
+
+    if (_background) {
+        _background->stopAllActions();
+        _background->runAction(FadeTo::create(0.12f, 0));
+    }
+    if (_panel) {
+        _panel->stopAllActions();
+        _panel->runAction(EaseBackIn::create(ScaleTo::create(0.12f, _panelBaseScale * 0.94f)));
+    }
+
+    this->runAction(Sequence::create(
+        DelayTime::create(0.14f),
+        CallFunc::create([this]() {
+            this->setVisible(false);
+        }),
+        nullptr));
+
     CCLOG("[训练面板] 隐藏面板");
 }
 

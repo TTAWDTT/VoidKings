@@ -104,6 +104,12 @@ private:
      * @param offsetX X方向偏移量
      */
     void bindTooltip(Node* targetBtn, Node* tooltip, float offsetX = BaseUIConfig::TOOLTIP_OFFSET_X);
+
+    /**
+     * @brief 按钮悬停效果
+     * @param button 目标按钮
+     */
+    void bindHoverEffect(Button* button);
 };
 
 #endif // __BASE_UI_PANEL_H__

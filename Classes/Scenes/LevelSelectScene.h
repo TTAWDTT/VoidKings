@@ -79,6 +79,7 @@ private:
     Node* _levelButtonArea = nullptr;           // 关卡按钮区域
     Node* _unitPreviewArea = nullptr;           // 兵种预览区域
     Button* _exitButton = nullptr;              // 退出按钮
+    std::vector<Node*> _levelButtonNodes;       // 关卡按钮节点
 
     // 关卡数据
     std::vector<LevelInfo> _levels;
@@ -95,6 +96,7 @@ private:
     void setupLevelButtons();
     void setupUnitPreview();
     void setupExitButton();
+    void animateLevelButtons();
 
     // 初始化关卡数据
     void initLevelData();

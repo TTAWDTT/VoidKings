@@ -2,6 +2,7 @@
 #include "Soldier/Soldier.h"
 #include "Bullet/Bullet.h"
 #include "Utils/AnimationUtils.h"
+#include "Utils/EffectUtils.h"
 
 USING_NS_CC;
 
@@ -45,6 +46,7 @@ protected:
                     soldier->takeDamage(damage);
                 }
             }
+            Bullet::onReachTarget();
             return;
         }
 
@@ -53,6 +55,7 @@ protected:
                 soldier->takeDamage(damage);
             }
         }
+        Bullet::onReachTarget();
     }
 
 private:
@@ -434,6 +437,7 @@ void DefenceBuilding::takeDamage(float damage) {
     _currentHP -= damage;
     if (_currentHP < 0) _currentHP = 0;
 
+    EffectUtils::playHitFlash(_bodySprite);
     updateHealthBar(true);
 
     if (_currentHP <= 0) {

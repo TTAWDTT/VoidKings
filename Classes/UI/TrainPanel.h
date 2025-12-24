@@ -101,6 +101,7 @@ private:
     // UI组件
     LayerColor* _background = nullptr;      // 半透明背景
     LayerColor* _panel = nullptr;           // 面板主体
+    float _panelBaseScale = 1.0f;           // 面板缩放基准
     Label* _titleLabel = nullptr;           // 标题
     Node* _contentRoot = nullptr;           // 内容容器
     ScrollView* _unitCardArea = nullptr;          // 兵种卡片区域

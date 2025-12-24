@@ -76,7 +76,7 @@ bool Core::consumeResource(ResourceType type, int amount)
 Sprite* Core::createResourceSprite(ResourceType type)
 {
     std::string frameName = getDefaultFrameName(type);
-    auto sprite = Sprite::createWithSpriteFrameName(frameName);
+    auto sprite = Sprite::create(frameName);
     if (sprite)
     {
         playResourceAnimation(sprite, type);
@@ -108,7 +108,7 @@ std::string Core::getDefaultFrameName(ResourceType type) const
     switch (type)
     {
         case ResourceType::COIN:
-            return "coin_0001.png";
+            return "source/coin/coin_0001.png";
         case ResourceType::DIAMOND:
         default:
             return "source/diamond/sprite_0000.png";
@@ -123,9 +123,13 @@ Animation* Core::buildResourceAnimation(ResourceType type, float delay) const
         for (int i = 1; i <= 5; ++i)
         {
             char buffer[32];
-            sprintf(buffer, "coin_%04d.png", i);
-            auto frame = SpriteFrameCache::getInstance()->getSpriteFrameByName(buffer);
-            if (frame) frames.pushBack(frame);
+            sprintf(buffer, "source/coin/coin_%04d.png", i);
+            auto texture = Director::getInstance()->getTextureCache()->addImage(buffer);
+            if (texture) {
+                Size size = texture->getContentSize();
+                auto frame = SpriteFrame::createWithTexture(texture, Rect(0, 0, size.width, size.height));
+                if (frame) frames.pushBack(frame);
+            }
         }
         if (delay <= 0.0f)
         {
@@ -138,8 +142,12 @@ Animation* Core::buildResourceAnimation(ResourceType type, float delay) const
         {
             char buffer[32];
             sprintf(buffer, "source/diamond/sprite_%04d.png", i);
-            auto frame = SpriteFrameCache::getInstance()->getSpriteFrameByName(buffer);
-            if (frame) frames.pushBack(frame);
+            auto texture = Director::getInstance()->getTextureCache()->addImage(buffer);
+            if (texture) {
+                Size size = texture->getContentSize();
+                auto frame = SpriteFrame::createWithTexture(texture, Rect(0, 0, size.width, size.height));
+                if (frame) frames.pushBack(frame);
+            }
         }
         if (delay <= 0.0f)
         {

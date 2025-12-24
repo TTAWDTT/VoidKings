@@ -4,6 +4,7 @@
  */
 
 #include "PlacementManager.h"
+#include <algorithm>
 
  // ===================================================
  // 创建与初始化
@@ -73,6 +74,28 @@ void PlacementManager::startPlacement(const BuildingOption& option) {
         _previewSprite->setOpacity(PlacementConfig::PREVIEW_OPACITY);
         this->addChild(_previewSprite, 10);
     }
+
+    if (_previewSprite && _gridMap) {
+        float cellSize = _gridMap->getCellSize();
+        Size spriteSize = _previewSprite->getContentSize();
+        if (spriteSize.width > 0 && spriteSize.height > 0) {
+            float targetWidth = _state.gridWidth * cellSize * 0.85f;
+            float targetHeight = _state.gridHeight * cellSize * 0.85f;
+            float scaleX = targetWidth / spriteSize.width;
+            float scaleY = targetHeight / spriteSize.height;
+            float scale = std::min(scaleX, scaleY);
+            if (scale > 0.1f) {
+                _previewSprite->setScale(scale);
+            }
+        }
+        float baseScale = _previewSprite->getScale();
+        _previewSprite->runAction(RepeatForever::create(Sequence::create(
+            ScaleTo::create(0.6f, baseScale * 1.02f),
+            ScaleTo::create(0.6f, baseScale),
+            nullptr)));
+    }
+
+    setupPreviewInfo();
 
     // 绘制全地图格子状态
     drawAllGridCells();
@@ -165,6 +188,8 @@ void PlacementManager::updatePreviewPosition(const Vec2& worldPos) {
 
     // 更新当前放置位置的格子颜色显示
     updatePlacementGridDisplay(gridX, gridY, canPlace);
+    updatePreviewInfo(canPlace);
+    updatePreviewInfoPosition(centerPos);
 
     // 更新预览精灵颜色
     if (canPlace) {
@@ -218,6 +243,93 @@ void PlacementManager::updatePlacementGridDisplay(int gridX, int gridY, bool can
         }
     }
 }
+
+// ===================================================
+// 预览信息面板
+// ===================================================
+void PlacementManager::setupPreviewInfo() {
+    if (_previewInfoPanel) {
+        _previewInfoPanel->removeFromParent();
+        _previewInfoPanel = nullptr;
+        _previewInfoLabel = nullptr;
+    }
+
+    _previewInfoPanel = Node::create();
+    _previewInfoPanel->setAnchorPoint(Vec2(0.5f, 0.5f));
+    _previewInfoPanel->setIgnoreAnchorPointForPosition(false);
+    _previewInfoPanel->setVisible(false);
+    this->addChild(_previewInfoPanel, 12);
+
+    auto bg = LayerColor::create(Color4B(20, 20, 20, 200), 170.0f, 52.0f);
+    bg->setAnchorPoint(Vec2(0.5f, 0.5f));
+    bg->setIgnoreAnchorPointForPosition(false);
+    bg->setName("previewInfoBg");
+    _previewInfoPanel->addChild(bg);
+
+    _previewInfoLabel = Label::createWithTTF("", "fonts/ScienceGothic.ttf", 14);
+    if (!_previewInfoLabel) {
+        _previewInfoLabel = Label::createWithSystemFont("", "Arial", 14);
+    }
+    _previewInfoLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
+    _previewInfoLabel->setAlignment(TextHAlignment::CENTER);
+    _previewInfoLabel->setTextColor(Color4B::WHITE);
+    _previewInfoPanel->addChild(_previewInfoLabel, 1);
+}
+
+void PlacementManager::updatePreviewInfo(bool canPlace) {
+    if (!_previewInfoPanel || !_previewInfoLabel) {
+        return;
+    }
+
+    const char* stateText = canPlace ? "Place" : "Blocked";
+    char buffer[128];
+    snprintf(buffer, sizeof(buffer), "%s  %dG\n%dx%d  %s",
+        _currentOption.name.c_str(),
+        _currentOption.cost,
+        _currentOption.gridWidth,
+        _currentOption.gridHeight,
+        stateText);
+    _previewInfoLabel->setString(buffer);
+
+    auto bg = dynamic_cast<LayerColor*>(_previewInfoPanel->getChildByName("previewInfoBg"));
+    if (bg) {
+        Color4B bgColor = canPlace ? Color4B(30, 60, 30, 200) : Color4B(70, 30, 30, 200);
+        bg->setColor(Color3B(bgColor.r, bgColor.g, bgColor.b));
+        bg->setOpacity(bgColor.a);
+
+        Size textSize = _previewInfoLabel->getContentSize();
+        float width = std::max(170.0f, textSize.width + 20.0f);
+        float height = std::max(52.0f, textSize.height + 14.0f);
+        bg->setContentSize(Size(width, height));
+    }
+
+    _previewInfoPanel->setVisible(true);
+}
+
+
+void PlacementManager::updatePreviewInfoPosition(const Vec2& centerPos) {
+    if (!_previewInfoPanel || !_gridMap) {
+        return;
+    }
+
+    auto bg = dynamic_cast<LayerColor*>(_previewInfoPanel->getChildByName("previewInfoBg"));
+    Size panelSize = bg ? bg->getContentSize() : Size(170.0f, 52.0f);
+
+    float cellSize = _gridMap->getCellSize();
+    float offsetY = _state.gridHeight * cellSize * 0.5f + 26.0f;
+    Vec2 desired = centerPos + Vec2(0.0f, offsetY);
+
+    float maxX = _gridMap->getGridWidth() * cellSize - panelSize.width * 0.5f - 6.0f;
+    float minX = panelSize.width * 0.5f + 6.0f;
+    float maxY = _gridMap->getGridHeight() * cellSize - panelSize.height * 0.5f - 6.0f;
+    float minY = panelSize.height * 0.5f + 6.0f;
+
+    float clampedX = std::max(minX, std::min(maxX, desired.x));
+    float clampedY = std::max(minY, std::min(maxY, desired.y));
+
+    _previewInfoPanel->setPosition(Vec2(clampedX, clampedY));
+}
+
 
 // ===================================================
 // 尝试确认放置
@@ -302,5 +414,10 @@ void PlacementManager::cleanupPreview() {
     if (_previewSprite) {
         _previewSprite->removeFromParent();
         _previewSprite = nullptr;
+    }
+    if (_previewInfoPanel) {
+        _previewInfoPanel->removeFromParent();
+        _previewInfoPanel = nullptr;
+        _previewInfoLabel = nullptr;
     }
 }

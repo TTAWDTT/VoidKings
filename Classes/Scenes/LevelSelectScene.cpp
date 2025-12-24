@@ -192,8 +192,11 @@ void LevelSelectScene::setupLevelButtons() {
         if (levelNode) {
             levelNode->setPosition(Vec2(buttonX, buttonY));
             _levelButtonArea->addChild(levelNode);
+            _levelButtonNodes.push_back(levelNode);
         }
     }
+
+    animateLevelButtons();
 }
 
 // ===================================================
@@ -531,6 +534,33 @@ void LevelSelectScene::setupExitButton() {
         this->onExitButton(nullptr);
     });
     this->addChild(touchBtn, 21);
+}
+
+// ===================================================
+// 关卡按钮进入动画
+// ===================================================
+void LevelSelectScene::animateLevelButtons() {
+    if (_levelButtonNodes.empty()) {
+        return;
+    }
+
+    const float delayStep = 0.04f;
+    const float moveOffset = 14.0f;
+
+    for (size_t i = 0; i < _levelButtonNodes.size(); ++i) {
+        auto node = _levelButtonNodes[i];
+        if (!node) {
+            continue;
+        }
+        node->stopAllActions();
+        Vec2 originPos = node->getPosition();
+        node->setPosition(originPos - Vec2(0.0f, moveOffset));
+        node->setScale(0.92f);
+        auto move = EaseBackOut::create(MoveTo::create(0.25f, originPos));
+        auto scale = EaseBackOut::create(ScaleTo::create(0.25f, 1.0f));
+        auto spawn = Spawn::create(move, scale, nullptr);
+        node->runAction(Sequence::create(DelayTime::create(delayStep * i), spawn, nullptr));
+    }
 }
 
 // ===================================================

@@ -38,6 +38,7 @@ Node* IDCardPanel::createResourceLabel(
             icon->setScale(scale);
             iconWidth = icon->getContentSize().width * scale;
             icon->setAnchorPoint(Vec2(0, 0.5f));
+            icon->setName("iconSprite");
         }
     }
     float height = minHeight;
@@ -170,6 +171,11 @@ Node* IDCardPanel::createPanel(Node* backgroundLayer)
     ));
     bg->addChild(goldLabel, 2);
 
+    auto goldIcon = dynamic_cast<Sprite*>(goldLabel->getChildByName("iconSprite"));
+    if (goldIcon) {
+        Core::getInstance()->playResourceAnimation(goldIcon, ResourceType::COIN, 0.12f, true);
+    }
+
     char diamondText[64];
     snprintf(diamondText, sizeof(diamondText), "Diamonds: %d", diamond);
     auto diamondLabel = createResourceLabel(
@@ -185,6 +191,11 @@ Node* IDCardPanel::createPanel(Node* backgroundLayer)
         contentTopY - 15
     ));
     bg->addChild(diamondLabel, 2);
+
+    auto diamondIcon = dynamic_cast<Sprite*>(diamondLabel->getChildByName("iconSprite"));
+    if (diamondIcon) {
+        Core::getInstance()->playResourceAnimation(diamondIcon, ResourceType::DIAMOND, 0.15f, true);
+    }
 
     return panel;
 }

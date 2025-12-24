@@ -293,7 +293,7 @@
       "anim_attack": "attack",
       "anim_attack_frames": 6,
       "anim_attack_delay": 0.1,
-      "anim_idle": "idle",
+      "anim_idle": "idla",
       "anim_idle_frames": 1,
       "anim_idle_delay": 0.15,
       "anim_dead": "dead",

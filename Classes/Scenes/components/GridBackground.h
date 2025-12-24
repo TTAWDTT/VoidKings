@@ -18,12 +18,12 @@ USING_NS_CC;
 // ===================================================
 namespace GridBackgroundConfig {
     // 背景颜色
-    const Color4B BG_COLOR = Color4B(30, 30, 30, 255);
+    const Color4B BG_COLOR = Color4B(36, 58, 36, 255);
 
     // 虚线参数
     constexpr float DASH_LENGTH = 4.0f;
     constexpr float GAP_LENGTH = 4.0f;
-    const Color4F LINE_COLOR = Color4F(0.5f, 0.5f, 0.5f, 0.6f);
+    const Color4F LINE_COLOR = Color4F(0.2f, 0.35f, 0.2f, 0.45f);
 }
 
 // ===================================================
@@ -55,6 +55,7 @@ private:
     float _cellSize = 0.0f;
 
     LayerColor* _bgColor = nullptr;
+    Sprite* _tileBackground = nullptr;
     DrawNode* _gridLines = nullptr;
 
     /**

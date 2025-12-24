@@ -68,6 +68,7 @@ list(APPEND GAME_SOURCE
      Classes/UI/IDCardPanel.cpp
      Classes/UI/TrainPanel.cpp
      Classes/Utils/AnimationUtils.cpp
+     Classes/Utils/EffectUtils.cpp
      )
 list(APPEND GAME_HEADER
      Classes/AppDelegate.h
@@ -95,6 +96,7 @@ list(APPEND GAME_HEADER
      Classes/UI/IDCardPanel.h
      Classes/UI/TrainPanel.h
      Classes/Utils/AnimationUtils.h
+     Classes/Utils/EffectUtils.h
      )
 
 if(ANDROID)

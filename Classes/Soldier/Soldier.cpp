@@ -3,6 +3,8 @@
 #include "Buildings/DefenceBuilding.h"
 #include "Buildings/ProductionBuilding.h"
 #include "Buildings/StorageBuilding.h"
+#include "Utils/AnimationUtils.h"
+#include "Utils/EffectUtils.h"
 #include <algorithm>
 #include <cmath>
 #include <string>
@@ -313,6 +315,7 @@ void Soldier::takeDamage(float damage) {
     _currentHP -= damage;
     if (_currentHP < 0) _currentHP = 0;
 
+    EffectUtils::playHitFlash(_bodySprite);
     updateHealthBar(true);
 
     if (_currentHP <= 0) {
@@ -430,9 +433,6 @@ void Soldier::tryPlayIdleAnimation() {
     }
 }
 
-// buildAnimationFromFrames 已迁移到公共工具
-#include "Utils/AnimationUtils.h"
-
 // 计算方向: 简化为左右两个方向
 // 向正上/正下时保持当前方向不变
 Direction Soldier::calcDirection(const cocos2d::Vec2& from, const cocos2d::Vec2& to) {
@@ -510,11 +510,15 @@ void Soldier::updateSpriteDirection(Direction dir) {
     _direction = dir;
     
     // 素材默认朝右,左向通过scaleX=-1实现翻转
+    float baseScaleX = std::abs(_bodySprite->getScaleX());
+    if (baseScaleX <= 0.0f) {
+        baseScaleX = 1.0f;
+    }
     if (dir == Direction::LEFT) {
-        _bodySprite->setScaleX(-1.0f);
+        _bodySprite->setScaleX(-baseScaleX);
     }
     else {
-        _bodySprite->setScaleX(1.0f);
+        _bodySprite->setScaleX(baseScaleX);
     }
 }
 

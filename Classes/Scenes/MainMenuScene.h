@@ -15,6 +15,7 @@ Exit -> 退出
 
 #include "cocos2d.h"
 #include "ui/CocosGUI.h"
+#include <vector>
 
 USING_NS_CC;
 using namespace cocos2d::ui;
@@ -43,10 +44,13 @@ protected:
 	void switchBackground(float dt);
 	void createHeadLogo();
 	void createOtherThings();
+	void createModalOverlay();
 	void createMainMenuLayer();
 	void createSettingsLayer();
 	void createRuleLayer();
 	void switchToLayer(Node* targetLayer);
+	void animateMenuButtons();
+	void animatePanel(Node* panel);
 	Button* createIconButton(
 		const std::string& title,
 		const std::string& iconPath,
@@ -55,7 +59,11 @@ private:
 	Node* mainMenuLayer = nullptr;
 	Node* settingsLayer = nullptr;
 	Node* ruleLayer = nullptr;
+	LayerColor* modalOverlay = nullptr;
+	Node* settingsPanel = nullptr;
+	Node* rulePanel = nullptr;
 	Label* headLogo = nullptr;
+	std::vector<Button*> menuButtons;
 	Vector<Sprite*> backgroundList;
 	int currentBgIndex = 0;
 };

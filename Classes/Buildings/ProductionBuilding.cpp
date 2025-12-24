@@ -1,5 +1,6 @@
 #include "ProductionBuilding.h"
 #include "Utils/AnimationUtils.h"
+#include "Utils/EffectUtils.h"
 
 USING_NS_CC;
 
@@ -133,6 +134,7 @@ void ProductionBuilding::takeDamage(float damage) {
     _currentHP -= damage;
     if (_currentHP < 0) _currentHP = 0;
     
+    EffectUtils::playHitFlash(_bodySprite);
     updateHealthBar(true);
     
     if (_currentHP <= 0) {
