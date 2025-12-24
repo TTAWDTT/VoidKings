@@ -1,12 +1,12 @@
 /**
  * @file BuildShopPanel.cpp
- * @brief ½¨ÖþÉÌµêÃæ°åÊµÏÖ
+ * @brief ï¿½ï¿½ï¿½ï¿½ï¿½Ìµï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½
  *
- * ²ÉÓÃÍø¸ñ²¼¾ÖÏÔÊ¾½¨ÖþÍ¼±ê£¬Ã¿¸ö½¨ÖþÏî°üº¬£º
- * - ½¨ÖþÍ¼±ê£¨logo£©
- * - ½¨ÖþÃû³Æ
- * - ½¨Öþ·ÑÓÃ
- * - ¸ñ×Ó³ß´çÐÅÏ¢
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ñ²¼¾ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ê£¬Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ * - ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ê£¨logoï¿½ï¿½
+ * - ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ * - ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ * - ï¿½ï¿½ï¿½Ó³ß´ï¿½ï¿½ï¿½Ï¢
  */
 
 #include "BuildShopPanel.h"
@@ -15,7 +15,7 @@
 #include <memory>
 
  // ===================================================
- // ´´½¨ºÍ³õÊ¼»¯
+ // ï¿½ï¿½ï¿½ï¿½ï¿½Í³ï¿½Ê¼ï¿½ï¿½
  // ===================================================
 
 BuildShopPanel* BuildShopPanel::create(
@@ -43,48 +43,50 @@ bool BuildShopPanel::init(
     _onClose = onClose;
     _isShowing = false;
 
-    // ³õÊ¼»¯½¨ÖþÑ¡Ïî£¨²¿Âä³åÍ»Éè¶¨£©
+    // ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½î£¨ï¿½ï¿½ï¿½ï¿½ï¿½Í»ï¿½è¶¨ï¿½ï¿½
     initBuildingOptions();
 
-    // ³õÊ¼»¯¸÷¸öUI×é¼þ
+    // ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½UIï¿½ï¿½ï¿½
     setupBackground();
     setupPanel();
     setupTitle();
     setupBuildingGrid();
     setupCloseButton();
 
-    // ³õÊ¼Òþ²Ø
+    // ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½
     this->setVisible(false);
 
-    CCLOG("[½¨ÖþÉÌµê] Ãæ°å³õÊ¼»¯Íê³É");
+    CCLOG("[ï¿½ï¿½ï¿½ï¿½ï¿½Ìµï¿½] ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½");
 
     return true;
 }
 
 // ===================================================
-// ³õÊ¼»¯½¨ÖþÑ¡Ïî£¨²¿Âä³åÍ»Éè¶¨£©
+// ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½î£¨ï¿½ï¿½ï¿½ï¿½ï¿½Í»ï¿½è¶¨ï¿½ï¿½
 // ===================================================
 void BuildShopPanel::initBuildingOptions() {
-    // ¸ù¾Ý²¿Âä³åÍ»µÄ½¨Öþ³ß´çÉè¶¨£º
-    // - ·ÀÓùËþÀà£¨¼ýËþ¡¢ÅÚËþµÈ£©£º3x3¸ñ×Ó
-    // - ×ÊÔ´½¨Öþ£¨²Ö¿âµÈ£©£º3x3¸ñ×Ó
-    // - ±øÓª£º5x5¸ñ×Ó£¨²»¿É½¨Ôì£¬ÒÑÓÐÄ¬ÈÏ±øÓª£©
-    // - ´ó±¾Óª£º4x4¸ñ×Ó£¨²»¿É½¨Ôì£¬ÒÑÓÐÄ¬ÈÏ»ùµØ£©
-    // - ×°ÊÎÎï£¨Ê÷µÈ£©£º2x2¸ñ×Ó
+    // ï¿½ï¿½ï¿½Ý²ï¿½ï¿½ï¿½ï¿½Í»ï¿½Ä½ï¿½ï¿½ï¿½ï¿½ß´ï¿½ï¿½è¶¨ï¿½ï¿½
+    // - ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½à£¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È£ï¿½ï¿½ï¿½3x3ï¿½ï¿½ï¿½ï¿½
+    // - ï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¿ï¿½È£ï¿½ï¿½ï¿½3x3ï¿½ï¿½ï¿½ï¿½
+    // - ï¿½ï¿½Óªï¿½ï¿½5x5ï¿½ï¿½ï¿½Ó£ï¿½ï¿½ï¿½ï¿½É½ï¿½ï¿½ì£¬ï¿½ï¿½ï¿½ï¿½Ä¬ï¿½Ï±ï¿½Óªï¿½ï¿½
+    // - ï¿½ï¿½Óªï¿½ï¿½4x4ï¿½ï¿½ï¿½Ó£ï¿½ï¿½ï¿½ï¿½É½ï¿½ï¿½ì£¬ï¿½ï¿½ï¿½ï¿½Ä¬ï¿½Ï»ï¿½ï¿½Ø£ï¿½
+    // - ×°ï¿½ï¿½ï¿½ï£¨ï¿½ï¿½ï¿½È£ï¿½ï¿½ï¿½2x2ï¿½ï¿½ï¿½ï¿½
 
     _buildingOptions = {
-        {1, "Arrow Tower", 100, 3, 3, "buildings/ArrowTower.png", true},      // ¼ýËþ 3x3
-        {2, "Boom Tower", 150, 3, 3, "buildings/BoomTower.png", true},        // ÅÚËþ 3x3
-        {3, "Tree", 80, 2, 2, "buildings/Tree/sprite_0000.png", true},        // ×°ÊÎÊ÷ 2x2
-        {4, "Storage", 200, 3, 3, "buildings/snowman.png", true},             // ²Ö¿â 3x3
-        {5, "Barracks", 300, 5, 5, "buildings/soldierbuilder.png", false}     // ±øÓª 5x5£¨²»¿É½¨Ôì£©
+        {1, "Arrow Tower", 100, 3, 3, "buildings/ArrowTower.png", true},      // ï¿½ï¿½ï¿½ï¿½ 3x3
+        {2, "Boom Tower", 150, 3, 3, "buildings/BoomTower.png", true},        // ï¿½ï¿½ï¿½ï¿½ 3x3
+        {3, "Tree", 80, 2, 2, "buildings/Tree/sprite_0000.png", true},        // ×°ï¿½ï¿½ï¿½ï¿½ 2x2
+        {4, "Storage", 200, 3, 3, "buildings/snowman.png", true},             // ï¿½Ö¿ï¿½ 3x3
+        {5, "Barracks", 300, 5, 5, "buildings/soldierbuilder.png", false}     // ï¿½ï¿½Óª 5x5ï¿½ï¿½ï¿½ï¿½ï¿½É½ï¿½ï¿½ì£©
+        {6, "GoldMaker", 250, 3, 3, "buildings/GoldMaker.png", true},         // é‡‘å¸å·¥åŽ‚ 3x3
+        {7, "DiamondMaker", 400, 3, 3, "buildings/DiamondMaker.png", true}    // é’»çŸ³å·¥åŽ‚ 3x3
     };
 
-    CCLOG("[½¨ÖþÉÌµê] ³õÊ¼»¯ %zu ¸ö½¨ÖþÑ¡Ïî", _buildingOptions.size());
+    CCLOG("[ï¿½ï¿½ï¿½ï¿½ï¿½Ìµï¿½] ï¿½ï¿½Ê¼ï¿½ï¿½ %zu ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½", _buildingOptions.size());
 }
 
 // ===================================================
-// ÉèÖÃ½¨ÖþÊÇ·ñ¿É½¨Ôì
+// ï¿½ï¿½ï¿½Ã½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½É½ï¿½ï¿½ï¿½
 // ===================================================
 void BuildShopPanel::setBuildingCanBuild(int type, bool canBuild) {
     for (auto& option : _buildingOptions) {
@@ -96,7 +98,7 @@ void BuildShopPanel::setBuildingCanBuild(int type, bool canBuild) {
 }
 
 // ===================================================
-// ÉèÖÃ±³¾° - °ëÍ¸Ã÷ÕÚÕÖ¸²¸ÇÈ«ÆÁ
+// ï¿½ï¿½ï¿½Ã±ï¿½ï¿½ï¿½ - ï¿½ï¿½Í¸ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½È«ï¿½ï¿½
 // ===================================================
 void BuildShopPanel::setupBackground() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
@@ -112,25 +114,25 @@ void BuildShopPanel::setupBackground() {
 }
 
 // ===================================================
-// ÉèÖÃÃæ°åÖ÷Ìå - ºÚ°×¼òÔ¼·ç¸ñ
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ - ï¿½Ú°×¼ï¿½Ô¼ï¿½ï¿½ï¿½
 // ===================================================
 void BuildShopPanel::setupPanel() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
-    // Ö÷Ãæ°å - Éî»ÒÉ«±³¾°
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ - ï¿½ï¿½ï¿½É«ï¿½ï¿½ï¿½ï¿½
     _panel = LayerColor::create(
         Color4B(40, 40, 40, 255),
         BuildShopConfig::PANEL_SIZE.width,
         BuildShopConfig::PANEL_SIZE.height
     );
 
-    // ¾ÓÖÐ¶¨Î»
+    // ï¿½ï¿½ï¿½Ð¶ï¿½Î»
     float panelX = origin.x + (visibleSize.width - BuildShopConfig::PANEL_SIZE.width) / 2;
     float panelY = origin.y + (visibleSize.height - BuildShopConfig::PANEL_SIZE.height) / 2;
     _panel->setPosition(panelX, panelY);
 
-    // Ìí¼Ó±ß¿òÐ§¹û
+    // ï¿½ï¿½ï¿½Ó±ß¿ï¿½Ð§ï¿½ï¿½
     auto border = DrawNode::create();
     border->drawRect(
         Vec2(0, 0),
@@ -143,10 +145,10 @@ void BuildShopPanel::setupPanel() {
 }
 
 // ===================================================
-// ±êÌâÉèÖÃ£¨ËõÐ¡°æ±¾£©
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã£ï¿½ï¿½ï¿½Ð¡ï¿½æ±¾ï¿½ï¿½
 // ===================================================
 void BuildShopPanel::setupTitle() {
-    // ±êÌâ±³¾°Ìõ£¨ËõÐ¡¸ß¶È£©
+    // ï¿½ï¿½ï¿½â±³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡ï¿½ß¶È£ï¿½
     auto titleBg = LayerColor::create(
         Color4B(60, 60, 60, 255),
         BuildShopConfig::PANEL_SIZE.width,
@@ -155,7 +157,7 @@ void BuildShopPanel::setupTitle() {
     titleBg->setPosition(Vec2(0, BuildShopConfig::PANEL_SIZE.height - 35));
     _panel->addChild(titleBg);
 
-    // ±êÌâÎÄ×Ö
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     _titleLabel = Label::createWithTTF(
         "Building Shop",
         "fonts/arial.ttf",
@@ -174,7 +176,7 @@ void BuildShopPanel::setupTitle() {
 }
 
 // ===================================================
-// ÉèÖÃ½¨ÖþÍø¸ñ²¼¾Ö
+// ï¿½ï¿½ï¿½Ã½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ñ²¼¾ï¿½
 // ===================================================
 void BuildShopPanel::setupBuildingGrid() {
     _gridContainer = Node::create();
@@ -198,21 +200,21 @@ void BuildShopPanel::setupBuildingGrid() {
 }
 
 // ===================================================
-// ´´½¨½¨ÖþÍø¸ñÏî£¨°üº¬Ð¡Í¼±ê£©- ËõÐ¡°æ±¾
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½î£¨ï¿½ï¿½ï¿½ï¿½Ð¡Í¼ï¿½ê£©- ï¿½ï¿½Ð¡ï¿½æ±¾
 // ===================================================
 Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int row, int col) {
     auto itemNode = Node::create();
 
-    // ¼ÆËãÎ»ÖÃ
+    // ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
     float itemWidth = BuildShopConfig::GRID_ITEM_SIZE;
     float itemHeight = BuildShopConfig::GRID_ITEM_SIZE;
     float spacing = BuildShopConfig::GRID_SPACING;
 
-    // ¼ÆËãÆðÊ¼Î»ÖÃÊ¹Íø¸ñ¾ÓÖÐ
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼Î»ï¿½ï¿½Ê¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     float totalWidth = BuildShopConfig::GRID_COLS * itemWidth + (BuildShopConfig::GRID_COLS - 1) * spacing;
     float startX = (BuildShopConfig::PANEL_SIZE.width - totalWidth) / 2 + itemWidth / 2;
 
-    // Íø¸ñÇøÓò×ÝÏò¾ÓÖÐ£¬±ÜÃâ¼·µ½±êÌâ/°´Å¥
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½ï¿½â¼·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½Å¥
     int totalItems = static_cast<int>(_buildingOptions.size());
     int totalRows = (totalItems + BuildShopConfig::GRID_COLS - 1) / BuildShopConfig::GRID_COLS;
     float gridHeight = totalRows * itemHeight + (totalRows - 1) * spacing;
@@ -226,14 +228,14 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
 
     itemNode->setPosition(Vec2(x, y));
 
-    // ±³¾°·½¿é - ºÚ°×·ç¸ñ
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ - ï¿½Ú°×·ï¿½ï¿½
     Color4B bgColor = option.canBuild ? Color4B(60, 60, 60, 255) : Color4B(40, 40, 40, 255);
     auto bg = LayerColor::create(bgColor, itemWidth, itemHeight);
     bg->setAnchorPoint(Vec2(0.5f, 0.5f));
     bg->setIgnoreAnchorPointForPosition(false);
     itemNode->addChild(bg);
 
-    // ±ß¿ò
+    // ï¿½ß¿ï¿½
     auto border = DrawNode::create();
     Color4F borderColor = option.canBuild ? Color4F::WHITE : Color4F(0.5f, 0.5f, 0.5f, 1.0f);
     border->drawRect(
@@ -243,10 +245,10 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
     );
     itemNode->addChild(border, 1);
 
-    // ½¨ÖþÍ¼±ê£¨ËõÐ¡°æ±¾£©
+    // ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ê£¨ï¿½ï¿½Ð¡ï¿½æ±¾ï¿½ï¿½
     auto icon = Sprite::create(option.spritePath);
     if (icon) {
-        // Ëõ·Å½¨ÖþÍ¼±êÒÔÊÊÓ¦Í¼±êÇøÓò
+        // ï¿½ï¿½ï¿½Å½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         float iconTargetSize = BuildShopConfig::ICON_SIZE;
         float scaleX = iconTargetSize / icon->getContentSize().width;
         float scaleY = iconTargetSize / icon->getContentSize().height;
@@ -254,7 +256,7 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
         icon->setScale(scale);
         icon->setPosition(Vec2(0, 8));
 
-        // Èç¹û²»¿É½¨Ôì£¬ÉèÖÃ»ÒÉ«
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É½ï¿½ï¿½ì£¬ï¿½ï¿½ï¿½Ã»ï¿½É«
         if (!option.canBuild) {
             icon->setColor(Color3B(100, 100, 100));
         }
@@ -262,7 +264,7 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
         itemNode->addChild(icon, 2);
     }
 
-    // ½¨ÖþÃû³Æ£¨ËõÐ¡×ÖÌå£©
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ£ï¿½ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½å£©
     auto nameLabel = Label::createWithTTF(option.name, "fonts/arial.ttf", 9);
     if (!nameLabel) {
         nameLabel = Label::createWithSystemFont(option.name, "Arial", 9);
@@ -271,7 +273,7 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
     nameLabel->setColor(option.canBuild ? Color3B::WHITE : Color3B::GRAY);
     nameLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
     itemNode->addChild(nameLabel, 2);
-    // ·ÑÓÃÏÔÊ¾
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾
     char costText[32];
     snprintf(costText, sizeof(costText), "%d", option.cost);
     auto costLabel = Label::createWithTTF(costText, "fonts/arial.ttf", 8);
@@ -293,7 +295,7 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
         itemNode->addChild(coinIcon, 2);
     }
 
-    // ³ß´çÐÅÏ¢
+    // ï¿½ß´ï¿½ï¿½ï¿½Ï¢
     char sizeText[32];
     snprintf(sizeText, sizeof(sizeText), "%dx%d", option.gridWidth, option.gridHeight);
     auto sizeLabel = Label::createWithTTF(sizeText, "fonts/arial.ttf", 8);
@@ -305,7 +307,7 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
     sizeLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
     itemNode->addChild(sizeLabel, 2);
 
-    // Èç¹û²»¿É½¨Ôì£¬Ìí¼Ó"ÒÑÓÐ"±êÇ©
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É½ï¿½ï¿½ì£¬ï¿½ï¿½ï¿½ï¿½"ï¿½ï¿½ï¿½ï¿½"ï¿½ï¿½Ç©
     if (!option.canBuild) {
         auto lockedLabel = Label::createWithTTF("Owned", "fonts/arial.ttf", 8);
         if (!lockedLabel) {
@@ -316,13 +318,13 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
         itemNode->addChild(lockedLabel, 3);
     }
 
-    // ´´½¨Í¸Ã÷µã»÷°´Å¥
+    // ï¿½ï¿½ï¿½ï¿½Í¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¥
     auto touchBtn = Button::create();
     touchBtn->setContentSize(Size(itemWidth, itemHeight));
     touchBtn->setScale9Enabled(true);
     touchBtn->setPosition(Vec2(0, 0));
 
-    // °ó¶¨µã»÷ÊÂ¼þ
+    // ï¿½ó¶¨µï¿½ï¿½ï¿½Â¼ï¿½
     BuildingOption optionCopy = option;
     touchBtn->setSwallowTouches(true);
     const float originScale = itemNode->getScale();
@@ -345,7 +347,7 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
 
         if (!optionCopy.canBuild) {
             AudioManager::playButtonCancel();
-            CCLOG("[???????] ?y???????§µ?????????: %s", optionCopy.name.c_str());
+            CCLOG("[???????] ?y???????ï¿½ï¿½?????????: %s", optionCopy.name.c_str());
             return;
         }
 
@@ -361,7 +363,7 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
 
     itemNode->addChild(touchBtn, 10);
 
-    // ÐüÍ£¸ßÁÁ
+    // ï¿½ï¿½Í£ï¿½ï¿½ï¿½ï¿½
     bool canBuild = option.canBuild;
     auto hoverState = std::make_shared<bool>(false);
     auto hoverListener = EventListenerMouse::create();
@@ -399,7 +401,7 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
 }
 
 // ===================================================
-// ¹Ø±Õ°´Å¥ÉèÖÃ£¨ËõÐ¡°æ±¾£©
+// ï¿½Ø±Õ°ï¿½Å¥ï¿½ï¿½ï¿½Ã£ï¿½ï¿½ï¿½Ð¡ï¿½æ±¾ï¿½ï¿½
 // ===================================================
 void BuildShopPanel::setupCloseButton() {
     auto closeBtn = Button::create("btn_normal.png", "btn_pressed.png");
@@ -433,7 +435,7 @@ void BuildShopPanel::setupCloseButton() {
 }
 
 // ===================================================
-// ÏÔÊ¾Ãæ°å
+// ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½
 // ===================================================
 void BuildShopPanel::show() {
     this->setVisible(true);
@@ -450,11 +452,11 @@ void BuildShopPanel::show() {
         _panel->runAction(EaseBackOut::create(ScaleTo::create(0.22f, 1.0f)));
     }
 
-    CCLOG("[½¨ÖþÉÌµê] ÏÔÊ¾Ãæ°å");
+    CCLOG("[ï¿½ï¿½ï¿½ï¿½ï¿½Ìµï¿½] ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½");
 }
 
 // ===================================================
-// Òþ²ØÃæ°å
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 // ===================================================
 void BuildShopPanel::hide() {
     _isShowing = false;
@@ -475,5 +477,5 @@ void BuildShopPanel::hide() {
         }),
         nullptr));
 
-    CCLOG("[½¨ÖþÉÌµê] Òþ²ØÃæ°å");
+    CCLOG("[ï¿½ï¿½ï¿½ï¿½ï¿½Ìµï¿½] ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
 }

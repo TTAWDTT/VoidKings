@@ -4,6 +4,8 @@
 #include "cocos2d.h"
 #include "ProductionBuildingData.h"
 
+enum class ResourceType;
+
 class ProductionBuilding : public cocos2d::Node {
 public:
     static ProductionBuilding* create(const ProductionBuildingConfig* config, int level = 0);
@@ -46,6 +48,9 @@ private:
     void updateHealthBar(bool animate = true);
     void playAnimation(const std::string& animType, int frameCount, float delay, bool loop);
     void stopCurrentAnimation();
+    float getProduceInterval() const;
+    void spawnProduceEffect(ResourceType type);
+    void playProducePulse();
 };
 
 #endif // __PRODUCTION_BUILDING_H__

@@ -1,4 +1,5 @@
 #include "ProductionBuilding.h"
+#include "Core/Core.h"
 #include "Utils/AnimationUtils.h"
 #include "Utils/EffectUtils.h"
 #include "Utils/AudioManager.h"
@@ -128,7 +129,41 @@ void ProductionBuilding::update(float dt) {
 }
 
 void ProductionBuilding::produce(float dt) {
-    // TODO: Implement resource production
+    if (!_config) {
+        return;
+    }
+
+    float gold = getCurrentPRODUCE_GOLD();
+    float diamond = getCurrentPRODUCE_ELIXIR();
+    if (gold <= 0.0f && diamond <= 0.0f) {
+        return;
+    }
+
+    float currentTime = Director::getInstance()->getTotalFrames() / 60.0f;
+    if (_lastProduceTime <= 0.0f) {
+        _lastProduceTime = currentTime;
+        return;
+    }
+
+    float interval = getProduceInterval();
+    if (interval < 0.1f) {
+        interval = 0.1f;
+    }
+
+    if (currentTime - _lastProduceTime >= interval) {
+        _lastProduceTime = currentTime;
+
+        // 自动收集资源并播放产出动画
+        if (gold > 0.0f) {
+            Core::getInstance()->addResource(ResourceType::COIN, static_cast<int>(gold));
+            spawnProduceEffect(ResourceType::COIN);
+        }
+        if (diamond > 0.0f) {
+            Core::getInstance()->addResource(ResourceType::DIAMOND, static_cast<int>(diamond));
+            spawnProduceEffect(ResourceType::DIAMOND);
+        }
+        playProducePulse();
+    }
 }
 
 void ProductionBuilding::takeDamage(float damage) {
@@ -212,4 +247,46 @@ void ProductionBuilding::stopCurrentAnimation() {
     if (!_bodySprite) return;
     _bodySprite->stopAllActions();
     _currentActionKey.clear();
+}
+
+float ProductionBuilding::getProduceInterval() const {
+    // 默认产出间隔（后续由基地等级影响）
+    return 4.0f;
+}
+
+void ProductionBuilding::spawnProduceEffect(ResourceType type) {
+    if (!_bodySprite) {
+        return;
+    }
+
+    auto sprite = Core::getInstance()->createResourceSprite(type);
+    if (!sprite) {
+        return;
+    }
+
+    float offsetY = _bodySprite->getContentSize().height * 0.5f + 12.0f;
+    sprite->setPosition(Vec2(0.0f, offsetY));
+    sprite->setScale(0.75f);
+    this->addChild(sprite, 20);
+
+    auto move = MoveBy::create(0.6f, Vec2(0.0f, 26.0f));
+    auto fade = FadeTo::create(0.6f, 0);
+    sprite->runAction(Sequence::create(Spawn::create(move, fade, nullptr), RemoveSelf::create(), nullptr));
+}
+
+void ProductionBuilding::playProducePulse() {
+    if (!_bodySprite) {
+        return;
+    }
+
+    constexpr int kProducePulseTag = 31001;
+    _bodySprite->stopActionByTag(kProducePulseTag);
+
+    float baseScaleX = _bodySprite->getScaleX();
+    float baseScaleY = _bodySprite->getScaleY();
+    auto scaleUp = ScaleTo::create(0.08f, baseScaleX * 1.04f, baseScaleY * 1.04f);
+    auto scaleDown = ScaleTo::create(0.12f, baseScaleX, baseScaleY);
+    auto seq = Sequence::create(scaleUp, scaleDown, nullptr);
+    seq->setTag(kProducePulseTag);
+    _bodySprite->runAction(seq);
 }

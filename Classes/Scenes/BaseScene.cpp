@@ -118,6 +118,16 @@ bool BaseScene::init() {
     initHoverInfo();
     AudioManager::playMainBgm();
 
+    // 定时刷新资源显示，确保生产资源同步到UI
+    this->schedule([this](float) {
+        if (_uiPanel) {
+            _uiPanel->updateResourceDisplay(
+                Core::getInstance()->getResource(ResourceType::COIN),
+                Core::getInstance()->getResource(ResourceType::DIAMOND)
+            );
+        }
+    }, 0.5f, "resource_tick");
+
     CCLOG("[基地场景] 初始化完成（模块化版本）");
 
     return true;
@@ -626,6 +636,40 @@ Node* BaseScene::createBuildingFromOption(const BuildingOption& option) {
         config.STORAGE_ELIXIR_CAPACITY = { 0, 0, 0 };
         config.PRODUCE_GOLD = { 0, 0, 0 };
         config.STORAGE_GOLD_CAPACITY = { 0, 0, 0 };
+        newBuilding = ProductionBuilding::create(&config, 0);
+        break;
+    }
+    case 6: { // 金币工厂 (3x3格子)
+        static ProductionBuildingConfig config;
+        config.id = 3003;
+        config.name = "GoldMaker";
+        config.spriteFrameName = option.spritePath;
+        config.HP = { 500, 650, 820 };
+        config.DP = { 0, 0.05f, 0.1f };
+        config.length = 3;
+        config.width = 3;
+        config.MAXLEVEL = 2;
+        config.PRODUCE_GOLD = { 40, 55, 75 };
+        config.PRODUCE_ELIXIR = { 0, 0, 0 };
+        config.STORAGE_GOLD_CAPACITY = { 0, 0, 0 };
+        config.STORAGE_ELIXIR_CAPACITY = { 0, 0, 0 };
+        newBuilding = ProductionBuilding::create(&config, 0);
+        break;
+    }
+    case 7: { // 钻石工厂 (3x3格子)
+        static ProductionBuildingConfig config;
+        config.id = 3004;
+        config.name = "DiamondMaker";
+        config.spriteFrameName = option.spritePath;
+        config.HP = { 520, 680, 860 };
+        config.DP = { 0, 0.05f, 0.1f };
+        config.length = 3;
+        config.width = 3;
+        config.MAXLEVEL = 2;
+        config.PRODUCE_GOLD = { 0, 0, 0 };
+        config.PRODUCE_ELIXIR = { 2, 3, 4 };
+        config.STORAGE_GOLD_CAPACITY = { 0, 0, 0 };
+        config.STORAGE_ELIXIR_CAPACITY = { 0, 0, 0 };
         newBuilding = ProductionBuilding::create(&config, 0);
         break;
     }
