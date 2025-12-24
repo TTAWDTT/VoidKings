@@ -23,6 +23,11 @@ public:
     cocos2d::Sprite* createResourceSprite(ResourceType type);
     void playResourceAnimation(cocos2d::Sprite* sprite, ResourceType type, float delay = 0.1f, bool loop = true);
 
+    // 关卡星级记录
+    int getLevelStars(int levelId) const;
+    void setLevelStars(int levelId, int stars);
+    bool isLevelCompleted(int levelId) const;
+
 protected:
     Core();
     virtual ~Core();
@@ -41,6 +46,7 @@ private:
 
     static Core* s_instance;
     std::unordered_map<ResourceType, int, ResourceTypeHash> _resourceMap;
+    std::unordered_map<int, int> _levelStars;
 };
 
 #endif // __CORE_H__

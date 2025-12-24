@@ -40,6 +40,7 @@ bool Core::init()
     _resourceMap.clear();
     _resourceMap[ResourceType::COIN] = 1000;
     _resourceMap[ResourceType::DIAMOND] = 50;
+    _levelStars.clear();
     return true;
 }
 
@@ -161,4 +162,37 @@ Animation* Core::buildResourceAnimation(ResourceType type, float delay) const
     }
 
     return Animation::createWithSpriteFrames(frames, delay);
+}
+
+int Core::getLevelStars(int levelId) const
+{
+    auto it = _levelStars.find(levelId);
+    return it == _levelStars.end() ? 0 : it->second;
+}
+
+void Core::setLevelStars(int levelId, int stars)
+{
+    if (levelId <= 0) {
+        return;
+    }
+    if (stars < 0) {
+        stars = 0;
+    }
+    if (stars > 3) {
+        stars = 3;
+    }
+
+    auto it = _levelStars.find(levelId);
+    if (it == _levelStars.end()) {
+        _levelStars[levelId] = stars;
+        return;
+    }
+    if (stars > it->second) {
+        it->second = stars;
+    }
+}
+
+bool Core::isLevelCompleted(int levelId) const
+{
+    return getLevelStars(levelId) > 0;
 }

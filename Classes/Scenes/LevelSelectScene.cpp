@@ -8,6 +8,7 @@
 #include "Soldier/UnitManager.h"
 #include "Soldier/UnitData.h"
 #include "Utils/AudioManager.h"
+#include "Core/Core.h"
 
 // ===================================================
 // 场景创建
@@ -70,7 +71,7 @@ void LevelSelectScene::initLevelData() {
         level.levelId = i;
         level.name = "Level " + std::to_string(i);
         level.isUnlocked = true;  // 全部关卡开放
-        level.starCount = 0;
+        level.starCount = Core::getInstance()->getLevelStars(i);
         level.description = "Challenge Level " + std::to_string(i);
 
         _levels.push_back(level);
@@ -264,6 +265,22 @@ Node* LevelSelectScene::createLevelButton(const LevelInfo& level, int index) {
         starLabel->setPosition(Vec2(0, -22));
         starLabel->setColor(Color3B::YELLOW);
         node->addChild(starLabel, 2);
+    }
+
+    // 完成关卡标识
+    if (level.starCount > 0) {
+        auto tagSprite = Sprite::create("UI/tag.png");
+        if (tagSprite) {
+            tagSprite->setAnchorPoint(Vec2(0.0f, 1.0f));
+            float targetSize = size * 0.35f;
+            Size tagSize = tagSprite->getContentSize();
+            if (tagSize.width > 0 && tagSize.height > 0) {
+                float scale = targetSize / std::max(tagSize.width, tagSize.height);
+                tagSprite->setScale(scale);
+            }
+            tagSprite->setPosition(Vec2(-size / 2 + 4.0f, size / 2 - 4.0f));
+            node->addChild(tagSprite, 3);
+        }
     }
 
     // 锁定标识（缩小字体）

@@ -27,6 +27,7 @@ constexpr float kHoverPanelPaddingX = 16.0f;
 constexpr float kHoverPanelPaddingY = 14.0f;
 constexpr float kHoverPanelMinWidth = 260.0f;
 constexpr float kHoverPanelMinHeight = 140.0f;
+constexpr int kMaxLevelId = 12;
 
 Sprite* findBodySprite(Node* building) {
     if (!building) {
@@ -108,6 +109,9 @@ bool BattleScene::init() {
     }
 
     CCLOG("[战斗场景] 初始化关卡 %d", _levelId);
+    _totalDeployedCount = 0;
+    _deadSoldierCount = 0;
+    _resultLayer = nullptr;
 
     // 确保兵种配置已加载（避免直接进入战斗时配置缺失）
     if (UnitManager::getInstance()->getAllUnitIds().empty()) {
@@ -1185,6 +1189,7 @@ void BattleScene::deploySoldier(int unitId, const Vec2& position) {
         _soldierLayer->addChild(soldier);
         _soldiers.push_back(soldier);
         soldier->retain();
+        _totalDeployedCount++;
 
         spawnDeployEffect(position);
 
@@ -1592,6 +1597,7 @@ void BattleScene::updateBattle(float dt) {
     // 清理已移除的士兵，避免悬空指针
     for (auto& soldier : _soldiers) {
         if (soldier && !soldier->getParent()) {
+            _deadSoldierCount++;
             soldier->release();
             soldier = nullptr;
         }
@@ -1679,9 +1685,6 @@ void BattleScene::onBattleWin() {
     AudioManager::stopBgm();
     AudioManager::playVictory();
 
-    auto visibleSize = Director::getInstance()->getVisibleSize();
-    auto origin = Director::getInstance()->getVisibleOrigin();
-
     // 计算并发放奖励
     float destroyedRatio = _totalBuildingCount > 0
         ? static_cast<float>(_destroyedBuildingCount) / _totalBuildingCount
@@ -1706,37 +1709,9 @@ void BattleScene::onBattleWin() {
     Core::getInstance()->addResource(ResourceType::COIN, rewardCoin);
     Core::getInstance()->addResource(ResourceType::DIAMOND, rewardDiamond);
 
-    // 显示胜利消息
-    auto winLabel = Label::createWithTTF("VICTORY!", "fonts/arial.ttf", 36);
-    if (!winLabel) {
-        winLabel = Label::createWithSystemFont("VICTORY!", "Arial", 36);
-    }
-    winLabel->setPosition(Vec2(
-        origin.x + visibleSize.width / 2,
-        origin.y + visibleSize.height / 2
-    ));
-    winLabel->setColor(Color3B::YELLOW);
-    _uiLayer->addChild(winLabel, 100);
-
-    // 奖励提示
-    char rewardText[128];
-    snprintf(rewardText, sizeof(rewardText), "+%d Gold   +%d Diamonds", rewardCoin, rewardDiamond);
-    auto rewardLabel = Label::createWithTTF(rewardText, "fonts/ScienceGothic.ttf", 18);
-    if (!rewardLabel) {
-        rewardLabel = Label::createWithSystemFont(rewardText, "Arial", 18);
-    }
-    rewardLabel->setPosition(Vec2(
-        origin.x + visibleSize.width / 2,
-        origin.y + visibleSize.height / 2 - 36
-    ));
-    rewardLabel->setColor(Color3B(220, 220, 220));
-    _uiLayer->addChild(rewardLabel, 100);
-
-    // 3秒后返回
-    this->scheduleOnce([](float dt) {
-        auto scene = BaseScene::createScene();
-        Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
-        }, 3.0f, "return_to_base");
+    int stars = calculateStarCount();
+    Core::getInstance()->setLevelStars(_levelId, stars);
+    showBattleResult(true, stars);
 }
 
 // ===================================================
@@ -1749,26 +1724,162 @@ void BattleScene::onBattleLose() {
     AudioManager::stopBgm();
     AudioManager::playLose();
 
+    int stars = calculateStarCount();
+    showBattleResult(false, stars);
+}
+
+int BattleScene::calculateStarCount() const {
+    // 以“死亡兵种数量 / 总兵种数量”的比例评星
+    int total = _totalDeployedCount;
+    if (total <= 0) {
+        return 1;
+    }
+    float ratio = static_cast<float>(_deadSoldierCount) / static_cast<float>(total);
+    if (ratio <= 0.34f) {
+        return 3;
+    }
+    if (ratio <= 0.67f) {
+        return 2;
+    }
+    return 1;
+}
+
+void BattleScene::showBattleResult(bool isWin, int stars) {
+    if (_resultLayer) {
+        _resultLayer->removeFromParent();
+        _resultLayer = nullptr;
+    }
+
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
-    // 显示失败消息
-    auto loseLabel = Label::createWithTTF("DEFEAT", "fonts/arial.ttf", 36);
-    if (!loseLabel) {
-        loseLabel = Label::createWithSystemFont("DEFEAT", "Arial", 36);
-    }
-    loseLabel->setPosition(Vec2(
-        origin.x + visibleSize.width / 2,
-        origin.y + visibleSize.height / 2
-    ));
-    loseLabel->setColor(Color3B::RED);
-    _uiLayer->addChild(loseLabel, 100);
+    _resultLayer = Node::create();
+    this->addChild(_resultLayer, 1000);
 
-    // 3秒后返回
-    this->scheduleOnce([](float dt) {
-        auto scene = BaseScene::createScene();
-        Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
-        }, 3.0f, "return_to_base");
+    auto mask = LayerColor::create(Color4B(0, 0, 0, 180), visibleSize.width, visibleSize.height);
+    mask->setPosition(origin);
+    _resultLayer->addChild(mask, 0);
+
+    // 吞掉触摸，避免底层UI误触
+    auto swallow = EventListenerTouchOneByOne::create();
+    swallow->setSwallowTouches(true);
+    swallow->onTouchBegan = [](Touch*, Event*) { return true; };
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(swallow, mask);
+
+    const char* resultPath = isWin ? "UI/Victory.png" : "UI/Defeat.png";
+    auto resultSprite = Sprite::create(resultPath);
+    if (resultSprite) {
+        float maxWidth = visibleSize.width * 0.6f;
+        float maxHeight = visibleSize.height * 0.25f;
+        Size size = resultSprite->getContentSize();
+        if (size.width > 0 && size.height > 0) {
+            float scale = std::min(maxWidth / size.width, maxHeight / size.height);
+            resultSprite->setScale(scale);
+        }
+        resultSprite->setPosition(Vec2(
+            origin.x + visibleSize.width * 0.5f,
+            origin.y + visibleSize.height * 0.72f
+        ));
+        _resultLayer->addChild(resultSprite, 1);
+    }
+
+    const char* starPath = "UI/Star_1.png";
+    if (stars >= 3) {
+        starPath = "UI/Star_3.png";
+    }
+    else if (stars == 2) {
+        starPath = "UI/Star_2.png";
+    }
+    auto starSprite = Sprite::create(starPath);
+    if (starSprite) {
+        float maxWidth = visibleSize.width * 0.45f;
+        float maxHeight = visibleSize.height * 0.18f;
+        Size size = starSprite->getContentSize();
+        if (size.width > 0 && size.height > 0) {
+            float scale = std::min(maxWidth / size.width, maxHeight / size.height);
+            starSprite->setScale(scale);
+        }
+        starSprite->setPosition(Vec2(
+            origin.x + visibleSize.width * 0.5f,
+            origin.y + visibleSize.height * 0.53f
+        ));
+        _resultLayer->addChild(starSprite, 1);
+    }
+
+    createResultButtons(_resultLayer, isWin);
+}
+
+void BattleScene::createResultButtons(Node* parent, bool isWin) {
+    if (!parent) {
+        return;
+    }
+
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+
+    auto applyStyle = [](Button* button) {
+        if (!button) return;
+        button->setPressedActionEnabled(true);
+        button->setZoomScale(0.06f);
+        button->setSwallowTouches(true);
+    };
+
+    auto exitBtn = Button::create("UI/exit.png", "UI/exit.png");
+    auto retryBtn = Button::create("UI/retry.png", "UI/retry.png");
+    auto nextBtn = Button::create("UI/next.png", "UI/next.png");
+
+    float centerX = origin.x + visibleSize.width * 0.5f;
+    float baseY = origin.y + visibleSize.height * 0.22f;
+    float spacing = 120.0f;
+    float buttonScale = 1.35f;
+
+    if (exitBtn) {
+        exitBtn->setScale(buttonScale);
+        exitBtn->setPosition(Vec2(centerX - spacing, baseY));
+        applyStyle(exitBtn);
+        exitBtn->addClickEventListener([this](Ref*) {
+            AudioManager::playButtonCancel();
+            auto scene = BaseScene::createScene();
+            Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
+        });
+        parent->addChild(exitBtn, 2);
+    }
+
+    if (retryBtn) {
+        retryBtn->setScale(buttonScale);
+        retryBtn->setPosition(Vec2(centerX, baseY));
+        applyStyle(retryBtn);
+        retryBtn->addClickEventListener([this](Ref*) {
+            AudioManager::playButtonClick();
+            auto scene = BattleScene::createScene(_levelId, _deployableUnits, _allowDefaultUnits);
+            Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
+        });
+        parent->addChild(retryBtn, 2);
+    }
+
+    if (nextBtn) {
+        nextBtn->setScale(buttonScale);
+        nextBtn->setPosition(Vec2(centerX + spacing, baseY));
+        applyStyle(nextBtn);
+        bool canNext = isWin && _levelId < kMaxLevelId;
+        if (!canNext) {
+            nextBtn->setEnabled(false);
+            nextBtn->setBright(false);
+            nextBtn->setOpacity(130);
+        }
+        nextBtn->addClickEventListener([this](Ref*) {
+            AudioManager::playButtonClick();
+            int nextLevel = _levelId + 1;
+            if (nextLevel > kMaxLevelId) {
+                auto scene = BaseScene::createScene();
+                Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
+                return;
+            }
+            auto scene = BattleScene::createScene(nextLevel, _deployableUnits, _allowDefaultUnits);
+            Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
+        });
+        parent->addChild(nextBtn, 2);
+    }
 }
 
 // ===================================================

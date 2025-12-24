@@ -97,6 +97,8 @@ private:
     bool _battleEnded = false;                      // 战斗是否结束
     int _destroyedBuildingCount = 0;                // 已摧毁的建筑数量
     int _totalBuildingCount = 0;                    // 总建筑数量
+    int _totalDeployedCount = 0;                    // 已部署的总兵种数
+    int _deadSoldierCount = 0;                      // 已死亡的兵种数
 
     // ==================== UI组件 ====================
     Label* _timerLabel = nullptr;                   // 计时器
@@ -112,6 +114,7 @@ private:
     DrawNode* _hoverRangeNode = nullptr;            // 攻击范围虚线
     DrawNode* _hoverFootprintNode = nullptr;        // 占地实线框
     Node* _hoveredBuilding = nullptr;               // 当前悬浮建筑
+    Node* _resultLayer = nullptr;                   // 结算展示层
 
     // ==================== 初始化方法 ====================
     void initGridMap();
@@ -173,6 +176,9 @@ private:
     void checkBattleEnd();
     void onBattleWin();
     void onBattleLose();
+    int calculateStarCount() const;
+    void showBattleResult(bool isWin, int stars);
+    void createResultButtons(Node* parent, bool isWin);
 
     // ==================== 回调 ====================
     void onExitButton(Ref* sender);
