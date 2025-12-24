@@ -7,6 +7,7 @@
 #include "BattleScene.h"
 #include "Soldier/UnitManager.h"
 #include "Soldier/UnitData.h"
+#include "Utils/AudioManager.h"
 
 // ===================================================
 // 场景创建
@@ -44,6 +45,7 @@ bool LevelSelectScene::init() {
     setupLevelButtons();
     setupUnitPreview();
     setupExitButton();
+    AudioManager::playMainBgm();
 
     return true;
 }
@@ -303,10 +305,12 @@ Node* LevelSelectScene::createLevelButton(const LevelInfo& level, int index) {
         node->setScale(originScale);
 
         if (unlocked) {
+            AudioManager::playButtonClick();
             this->onLevelSelected(levelId);
         }
         else {
             CCLOG("[关卡选择] 关卡 %d 尚未解锁", levelId);
+            AudioManager::playButtonCancel();
         }
     });
 
@@ -530,6 +534,7 @@ void LevelSelectScene::setupExitButton() {
         }
 
         exitNode->setScale(originScale);
+        AudioManager::playButtonCancel();
         CCLOG("[关卡选择] 点击返回按钮");
         this->onExitButton(nullptr);
     });

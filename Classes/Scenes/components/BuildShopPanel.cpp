@@ -10,6 +10,7 @@
  */
 
 #include "BuildShopPanel.h"
+#include "Utils/AudioManager.h"
 #include <algorithm>
 #include <memory>
 
@@ -343,10 +344,12 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
         itemNode->setScale(originScale);
 
         if (!optionCopy.canBuild) {
+            AudioManager::playButtonCancel();
             CCLOG("[???????] ?y???????§µ?????????: %s", optionCopy.name.c_str());
             return;
         }
 
+        AudioManager::playButtonClick();
         CCLOG("[???????] ?????: %s (???: %dx%d)",
             optionCopy.name.c_str(), optionCopy.gridWidth, optionCopy.gridHeight);
 
@@ -419,6 +422,7 @@ void BuildShopPanel::setupCloseButton() {
     closeBtn->setSwallowTouches(true);
 
     closeBtn->addClickEventListener([this](Ref* sender) {
+        AudioManager::playButtonCancel();
         this->hide();
         if (_onClose) {
             _onClose();

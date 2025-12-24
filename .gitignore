@@ -147,3 +147,5 @@ proj.win32/Release.win32/
 *.opensdf
 *.db
 *.opendb
+
+Resources/music

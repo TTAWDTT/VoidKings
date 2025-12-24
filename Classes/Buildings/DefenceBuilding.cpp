@@ -3,12 +3,19 @@
 #include "Bullet/Bullet.h"
 #include "Utils/AnimationUtils.h"
 #include "Utils/EffectUtils.h"
+#include "Utils/AudioManager.h"
 
 USING_NS_CC;
 
 const std::vector<Soldier*>* DefenceBuilding::s_enemySoldiers = nullptr;
 
 namespace {
+enum class ImpactSound {
+    None,
+    ArrowHit,
+    Boom
+};
+
 class DefenceBullet : public Bullet {
 public:
     static DefenceBullet* create(const std::string& spriteFrame,
@@ -18,7 +25,8 @@ public:
                                  float aoeRange,
                                  bool allowSky,
                                  bool allowGround,
-                                 const std::vector<Soldier*>* enemySoldiers) {
+                                 const std::vector<Soldier*>* enemySoldiers,
+                                 ImpactSound impactSound) {
         auto* bullet = new(std::nothrow) DefenceBullet();
         if (bullet && bullet->init(spriteFrame, damage, speed)) {
             bullet->_isAOE = isAOE;
@@ -26,6 +34,7 @@ public:
             bullet->_allowSky = allowSky;
             bullet->_allowGround = allowGround;
             bullet->_enemySoldiers = enemySoldiers;
+            bullet->_impactSound = impactSound;
             bullet->autorelease();
             return bullet;
         }
@@ -46,19 +55,30 @@ protected:
                     soldier->takeDamage(damage);
                 }
             }
-            Bullet::onReachTarget();
-            return;
         }
-
-        if (auto* soldier = dynamic_cast<Soldier*>(_target)) {
+        else if (auto* soldier = dynamic_cast<Soldier*>(_target)) {
             if (canHitSoldier(soldier)) {
                 soldier->takeDamage(damage);
             }
         }
+        playImpactSound();
         Bullet::onReachTarget();
     }
 
 private:
+    void playImpactSound() const {
+        switch (_impactSound) {
+        case ImpactSound::ArrowHit:
+            AudioManager::playArrowHit();
+            break;
+        case ImpactSound::Boom:
+            AudioManager::playBoom();
+            break;
+        default:
+            break;
+        }
+    }
+
     // 目标过滤：死亡/空地可攻击判断
     bool canHitSoldier(const Soldier* soldier) const {
         if (!soldier || !soldier->getParent()) {
@@ -78,6 +98,7 @@ private:
     bool _allowSky = false;
     bool _allowGround = false;
     const std::vector<Soldier*>* _enemySoldiers = nullptr;
+    ImpactSound _impactSound = ImpactSound::None;
 };
 } // namespace
 
@@ -441,6 +462,7 @@ void DefenceBuilding::takeDamage(float damage) {
     updateHealthBar(true);
 
     if (_currentHP <= 0) {
+        AudioManager::playBuildingCollapse();
         this->removeFromParent();
     }
 }
@@ -464,6 +486,17 @@ void DefenceBuilding::attackTarget() {
 
         float damage = getCurrentATK();
 
+        ImpactSound impactSound = ImpactSound::None;
+        if (!_config->bulletSpriteFrameName.empty()) {
+            if (_config->bulletSpriteFrameName.find("arrow") != std::string::npos) {
+                AudioManager::playArrowShoot();
+                impactSound = ImpactSound::ArrowHit;
+            }
+            else if (_config->bulletSpriteFrameName.find("bomb") != std::string::npos) {
+                impactSound = ImpactSound::Boom;
+            }
+        }
+
         if (!_config->bulletSpriteFrameName.empty() && _config->bulletSpeed > 0.0f) {
             auto* bullet = DefenceBullet::create(
                 _config->bulletSpriteFrameName,
@@ -473,7 +506,8 @@ void DefenceBuilding::attackTarget() {
                 _config->bulletAOERange,
                 _config->SKY_ABLE,
                 _config->GROUND_ABLE,
-                s_enemySoldiers
+                s_enemySoldiers,
+                impactSound
             );
             if (bullet) {
                 auto* parent = this->getParent();

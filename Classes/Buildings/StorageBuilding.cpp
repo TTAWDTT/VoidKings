@@ -1,6 +1,7 @@
 #include "StorageBuilding.h"
 #include "Utils/AnimationUtils.h"
 #include "Utils/EffectUtils.h"
+#include "Utils/AudioManager.h"
 
 USING_NS_CC;
 
@@ -119,6 +120,7 @@ void StorageBuilding::takeDamage(float damage) {
     updateHealthBar(true);
     
     if (_currentHP <= 0) {
+        AudioManager::playBuildingCollapse();
         this->removeFromParent();
     }
 }

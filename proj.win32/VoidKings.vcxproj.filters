@@ -90,6 +90,9 @@
     <ClCompile Include="..\Classes\Utils\AnimationUtils.cpp">
       <Filter>src\Utils</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Utils\AudioManager.cpp">
+      <Filter>src\Utils</Filter>
+    </ClCompile>
     <ClCompile Include="..\Classes\Utils\EffectUtils.cpp">
       <Filter>src\Utils</Filter>
     </ClCompile>
@@ -174,6 +177,9 @@
       <Filter>src\Map</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Utils\AnimationUtils.h">
+      <Filter>src\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Utils\AudioManager.h">
       <Filter>src\Utils</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Utils\EffectUtils.h">

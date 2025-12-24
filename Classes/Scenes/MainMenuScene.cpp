@@ -25,6 +25,7 @@
 
 #include "MainMenuScene.h"
 #include "BaseScene.h"
+#include "Utils/AudioManager.h"
 
 Scene* MainMenuScene::createScene()
 {
@@ -53,6 +54,7 @@ bool MainMenuScene::init()
 	settingsLayer->setVisible(false);
 	ruleLayer->setVisible(false);
 	animateMenuButtons();
+	AudioManager::playMainBgm();
 
 	return true;
 }
@@ -481,6 +483,7 @@ void MainMenuScene::onReturnTouch(Ref* sender, ui::Widget::TouchEventType type)
 {
     if (type == Widget::TouchEventType::ENDED)
     {
+        AudioManager::playButtonCancel();
         onReturn(sender);
     }
 }
@@ -489,6 +492,7 @@ void MainMenuScene::onStartTouch(Ref* sender, ui::Widget::TouchEventType type)
 {
     if (type == Widget::TouchEventType::ENDED)
     {
+        AudioManager::playButtonClick();
         onStart(sender);
     }
 }
@@ -497,6 +501,7 @@ void MainMenuScene::onSettingsTouch(Ref* sender, ui::Widget::TouchEventType type
 {
     if (type == Widget::TouchEventType::ENDED)
     {
+        AudioManager::playButtonClick();
         onSettings(sender);
     }
 }
@@ -505,6 +510,7 @@ void MainMenuScene::onRuleTouch(Ref* sender, ui::Widget::TouchEventType type)
 {
     if (type == Widget::TouchEventType::ENDED)
     {
+        AudioManager::playButtonClick();
         onRule(sender);
     }
 }
@@ -513,6 +519,7 @@ void MainMenuScene::onExitTouch(Ref* sender, ui::Widget::TouchEventType type)
 {
     if (type == Widget::TouchEventType::ENDED)
     {
+        AudioManager::playButtonCancel();
         onExit(sender);
     }
 }
