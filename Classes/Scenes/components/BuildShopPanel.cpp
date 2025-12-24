@@ -73,11 +73,11 @@ void BuildShopPanel::initBuildingOptions() {
     // - װ������ȣ���2x2����
 
     _buildingOptions = {
-        {1, "Arrow Tower", 100, 3, 3, "buildings/ArrowTower.png", true},      // ���� 3x3
-        {2, "Boom Tower", 150, 3, 3, "buildings/BoomTower.png", true},        // ���� 3x3
-        {3, "Tree", 80, 2, 2, "buildings/Tree/sprite_0000.png", true},        // װ���� 2x2
-        {4, "Storage", 200, 3, 3, "buildings/snowman.png", true},             // �ֿ� 3x3
-        {5, "Barracks", 300, 5, 5, "buildings/soldierbuilder.png", false}     // ��Ӫ 5x5�����ɽ��죩
+        {1, "Arrow Tower", 100, 3, 3, "buildings/ArrowTower.png", true},      // 箭塔 3x3
+        {2, "Boom Tower", 150, 3, 3, "buildings/BoomTower.png", true},        // 炮塔 3x3
+        {3, "Tree", 80, 2, 2, "buildings/Tree/sprite_0000.png", true},        // 树 2x2
+        {4, "Storage", 200, 3, 3, "buildings/snowman.png", true},             // 仓库 3x3
+        {5, "Barracks", 300, 5, 5, "buildings/soldierbuilder.png", false},    // 兵营 5x5不可重复
         {6, "GoldMaker", 250, 3, 3, "buildings/GoldMaker.png", true},         // 金币工厂 3x3
         {7, "DiamondMaker", 400, 3, 3, "buildings/DiamondMaker.png", true}    // 钻石工厂 3x3
     };
@@ -479,3 +479,4 @@ void BuildShopPanel::hide() {
 
     CCLOG("[�����̵�] �������");
 }
+
