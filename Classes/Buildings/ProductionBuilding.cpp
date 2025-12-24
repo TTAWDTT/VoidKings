@@ -250,8 +250,23 @@ void ProductionBuilding::stopCurrentAnimation() {
 }
 
 float ProductionBuilding::getProduceInterval() const {
-    // 默认产出间隔（后续由基地等级影响）
-    return 4.0f;
+    // 默认产出间隔（GoldMaker/DiamondMaker 受基地等级影响）
+    constexpr float kBaseInterval = 4.0f;
+    if (!_config) {
+        return kBaseInterval;
+    }
+
+    bool isGoldMaker = (_config->id == 3003) || (_config->name == "GoldMaker");
+    bool isDiamondMaker = (_config->id == 3004) || (_config->name == "DiamondMaker");
+    if (!isGoldMaker && !isDiamondMaker) {
+        return kBaseInterval;
+    }
+
+    float speedMul = Core::getInstance()->getBaseProduceSpeedMultiplier();
+    if (speedMul < 0.2f) {
+        speedMul = 0.2f;
+    }
+    return kBaseInterval / speedMul;
 }
 
 void ProductionBuilding::spawnProduceEffect(ResourceType type) {

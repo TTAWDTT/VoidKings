@@ -1,4 +1,5 @@
 #include "Core.h"
+#include <algorithm>
 #include <cstdio>
 
 USING_NS_CC;
@@ -41,6 +42,8 @@ bool Core::init()
     _resourceMap[ResourceType::COIN] = 1000;
     _resourceMap[ResourceType::DIAMOND] = 50;
     _levelStars.clear();
+    _totalEarnedGold = 0;
+    _totalEarnedDiamond = 0;
     return true;
 }
 
@@ -60,6 +63,16 @@ void Core::addResource(ResourceType type, int delta)
 {
     int current = getResource(type);
     setResource(type, current + delta);
+
+    // 只记录正向获得的历史总量
+    if (delta > 0) {
+        if (type == ResourceType::COIN) {
+            _totalEarnedGold += delta;
+        }
+        else if (type == ResourceType::DIAMOND) {
+            _totalEarnedDiamond += delta;
+        }
+    }
 }
 
 bool Core::consumeResource(ResourceType type, int amount)
@@ -162,6 +175,49 @@ Animation* Core::buildResourceAnimation(ResourceType type, float delay) const
     }
 
     return Animation::createWithSpriteFrames(frames, delay);
+}
+
+long long Core::getTotalEarned(ResourceType type) const
+{
+    if (type == ResourceType::COIN) {
+        return _totalEarnedGold;
+    }
+    if (type == ResourceType::DIAMOND) {
+        return _totalEarnedDiamond;
+    }
+    return 0;
+}
+
+int Core::getBaseLevel() const
+{
+    // 基地等级阈值（金币/钻石同时满足）
+    static const int kGoldThresholds[] = { 0, 1000, 3000, 8000, 15000, 30000 };
+    static const int kDiamondThresholds[] = { 0, 50, 150, 350, 700, 1200 };
+    const int goldSize = static_cast<int>(sizeof(kGoldThresholds) / sizeof(kGoldThresholds[0]));
+    const int diamondSize = static_cast<int>(sizeof(kDiamondThresholds) / sizeof(kDiamondThresholds[0]));
+
+    int goldLevel = 0;
+    for (int i = 0; i < goldSize; ++i) {
+        if (_totalEarnedGold >= kGoldThresholds[i]) {
+            goldLevel = i;
+        }
+    }
+
+    int diamondLevel = 0;
+    for (int i = 0; i < diamondSize; ++i) {
+        if (_totalEarnedDiamond >= kDiamondThresholds[i]) {
+            diamondLevel = i;
+        }
+    }
+
+    return std::min(goldLevel, diamondLevel);
+}
+
+float Core::getBaseProduceSpeedMultiplier() const
+{
+    int level = getBaseLevel();
+    // 每级提升产出速度
+    return 1.0f + static_cast<float>(level) * 0.15f;
 }
 
 int Core::getLevelStars(int levelId) const
