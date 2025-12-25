@@ -19,6 +19,17 @@ UnitManager* UnitManager::getInstance() {
 3.该部分，包括加载配置和解析配置，均需要使用rapidjson库，注意在头文件中include，关于该库的细节我（@TTAWDTT）会在wiki中说明
 */
 
+namespace {
+void stripUtf8Bom(std::string& text) {
+    if (text.size() >= 3 &&
+        static_cast<unsigned char>(text[0]) == 0xEF &&
+        static_cast<unsigned char>(text[1]) == 0xBB &&
+        static_cast<unsigned char>(text[2]) == 0xBF) {
+        text.erase(0, 3);
+    }
+}
+} // namespace
+
 // 从json文件中加载配置，输入为文件路径，返回是否成功
 bool UnitManager::loadConfig(const std::string& jsonFile) {
     // 1. 读取JSON文件
@@ -29,6 +40,7 @@ bool UnitManager::loadConfig(const std::string& jsonFile) {
         cocos2d::log("UnitManager: Failed to load config file: %s", jsonFile.c_str());
         return false;
     }
+    stripUtf8Bom(jsonData);
 
     // 2. 解析JSON -> 树结构
     rapidjson::Document doc;

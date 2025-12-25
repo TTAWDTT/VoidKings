@@ -27,6 +27,8 @@ public:
     
     int getLength() const;
     int getWidth() const;
+
+    void refreshHealthBarPosition();
     
     // 获取建筑ID和名称
     int getId() const { return _config ? _config->id : 0; }

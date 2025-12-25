@@ -1,4 +1,4 @@
-// BuildingManager.cpp
+﻿// BuildingManager.cpp
 #include "BuildingManager.h"
 
 USING_NS_CC;

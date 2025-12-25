@@ -1,4 +1,4 @@
-import org.gradle.internal.os.OperatingSystem
+﻿import org.gradle.internal.os.OperatingSystem
 
 apply plugin: 'com.android.application'
 

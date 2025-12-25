@@ -1,13 +1,13 @@
-/**
+ï»¿/**
  * @file PlacementManager.cpp
- * @brief ½¨Öş·ÅÖÃ¹ÜÀíÆ÷ÊµÏÖ
+ * @brief å»ºç­‘æ”¾ç½®ç®¡ç†å™¨å®ç°
  */
 
 #include "PlacementManager.h"
 #include <algorithm>
 
  // ===================================================
- // ´´½¨Óë³õÊ¼»¯
+ // åˆ›å»ºä¸åˆå§‹åŒ–
  // ===================================================
 
 PlacementManager* PlacementManager::create(
@@ -37,29 +37,29 @@ bool PlacementManager::init(
     _onPlacementConfirmed = onPlacementConfirmed;
     _onPlacementCancelled = onPlacementCancelled;
 
-    // ´´½¨È«µØÍ¼¸ñ×ÓÏÔÊ¾½Úµã
+    // åˆ›å»ºå…¨åœ°å›¾æ ¼å­æ˜¾ç¤ºèŠ‚ç‚¹
     _gridDisplayNode = DrawNode::create();
     this->addChild(_gridDisplayNode, 0);
     _gridDisplayNode->setVisible(false);
 
-    // ´´½¨·ÅÖÃÎ»ÖÃ¸ñ×ÓÏÔÊ¾½Úµã
+    // åˆ›å»ºæ”¾ç½®ä½ç½®æ ¼å­æ˜¾ç¤ºèŠ‚ç‚¹
     _placementGridNode = DrawNode::create();
     this->addChild(_placementGridNode, 1);
     _placementGridNode->setVisible(false);
 
-    CCLOG("[·ÅÖÃ¹ÜÀíÆ÷] ³õÊ¼»¯Íê³É");
+    CCLOG("[æ”¾ç½®ç®¡ç†å™¨] åˆå§‹åŒ–å®Œæˆ");
 
     return true;
 }
 
 // ===================================================
-// ¿ªÊ¼·ÅÖÃ½¨Öş
+// å¼€å§‹æ”¾ç½®å»ºç­‘
 // ===================================================
 void PlacementManager::startPlacement(const BuildingOption& option) {
-    // ÇåÀíÖ®Ç°µÄÔ¤ÀÀ
+    // æ¸…ç†ä¹‹å‰çš„é¢„è§ˆ
     cleanupPreview();
 
-    // ¸üĞÂ×´Ì¬
+    // æ›´æ–°çŠ¶æ€
     _state.isPlacing = true;
     _state.buildingType = option.type;
     _state.gridWidth = option.gridWidth;
@@ -68,7 +68,7 @@ void PlacementManager::startPlacement(const BuildingOption& option) {
     _state.cost = option.cost;
     _currentOption = option;
 
-    // ´´½¨Ô¤ÀÀ¾«Áé
+    // åˆ›å»ºé¢„è§ˆç²¾çµ
     _previewSprite = Sprite::create(option.spritePath);
     if (_previewSprite) {
         _previewSprite->setOpacity(PlacementConfig::PREVIEW_OPACITY);
@@ -97,20 +97,20 @@ void PlacementManager::startPlacement(const BuildingOption& option) {
 
     setupPreviewInfo();
 
-    // »æÖÆÈ«µØÍ¼¸ñ×Ó×´Ì¬
+    // ç»˜åˆ¶å…¨åœ°å›¾æ ¼å­çŠ¶æ€
     drawAllGridCells();
 
-    // ÏÔÊ¾Íø¸ñ¸¨ÖúÏß
+    // æ˜¾ç¤ºç½‘æ ¼è¾…åŠ©çº¿
     if (_gridMap) {
         _gridMap->showGrid(true);
     }
 
-    CCLOG("[·ÅÖÃ¹ÜÀíÆ÷] ¿ªÊ¼·ÅÖÃ½¨Öş: %s (³ß´ç: %dx%d)",
+    CCLOG("[æ”¾ç½®ç®¡ç†å™¨] å¼€å§‹æ”¾ç½®å»ºç­‘: %s (å°ºå¯¸: %dx%d)",
         option.name.c_str(), option.gridWidth, option.gridHeight);
 }
 
 // ===================================================
-// »æÖÆÈ«µØÍ¼¸ñ×Ó×´Ì¬£¨½¨ÔìÄ£Ê½Ê±ÏÔÊ¾£©
+// ç»˜åˆ¶å…¨åœ°å›¾æ ¼å­çŠ¶æ€ï¼ˆå»ºé€ æ¨¡å¼æ—¶æ˜¾ç¤ºï¼‰
 // ===================================================
 void PlacementManager::drawAllGridCells() {
     if (!_gridMap || !_gridDisplayNode) return;
@@ -122,39 +122,39 @@ void PlacementManager::drawAllGridCells() {
     int gridWidth = _gridMap->getGridWidth();
     int gridHeight = _gridMap->getGridHeight();
 
-    // ±éÀúËùÓĞ¸ñ×Ó£¬¸ù¾İ×´Ì¬»æÖÆ²»Í¬ÑÕÉ«
+    // éå†æ‰€æœ‰æ ¼å­ï¼Œæ ¹æ®çŠ¶æ€ç»˜åˆ¶ä¸åŒé¢œè‰²
     for (int y = 0; y < gridHeight; ++y) {
         for (int x = 0; x < gridWidth; ++x) {
             Vec2 bottomLeft(x * cellSize, y * cellSize);
             Vec2 topRight((x + 1) * cellSize, (y + 1) * cellSize);
 
-            // ¼ì²é¸ñ×ÓÊÇ·ñ¿ÉÒÔ·ÅÖÃ½¨Öş£¨µ¥¸ñ¼ì²â£©
+            // æ£€æŸ¥æ ¼å­æ˜¯å¦å¯ä»¥æ”¾ç½®å»ºç­‘ï¼ˆå•æ ¼æ£€æµ‹ï¼‰
             bool canPlace = _gridMap->canPlaceBuilding(x, y, 1, 1);
 
             Color4F fillColor;
             if (canPlace) {
-                fillColor = PlacementConfig::GRID_COLOR_EMPTY;  // ¿ÕÏĞ£ºµ­ÂÌÉ«
+                fillColor = PlacementConfig::GRID_COLOR_EMPTY;  // ç©ºé—²ï¼šæ·¡ç»¿è‰²
             }
             else {
-                // ¼ì²éÊÇ·ñÊÇ±ß½ç½ûÖ¹ÇøÓò
+                // æ£€æŸ¥æ˜¯å¦æ˜¯è¾¹ç•Œç¦æ­¢åŒºåŸŸ
                 if (x < 2 || x >= gridWidth - 2 || y < 2 || y >= gridHeight - 2) {
-                    fillColor = PlacementConfig::GRID_COLOR_FORBIDDEN;  // ½ûÖ¹ÇøÓò£ºÉî»ÒÉ«
+                    fillColor = PlacementConfig::GRID_COLOR_FORBIDDEN;  // ç¦æ­¢åŒºåŸŸï¼šæ·±ç°è‰²
                 }
                 else {
-                    fillColor = PlacementConfig::GRID_COLOR_OCCUPIED;   // ÒÑÕ¼ÓÃ£º»ÒÉ«
+                    fillColor = PlacementConfig::GRID_COLOR_OCCUPIED;   // å·²å ç”¨ï¼šç°è‰²
                 }
             }
 
-            // »æÖÆÌî³ä¾ØĞÎ
+            // ç»˜åˆ¶å¡«å……çŸ©å½¢
             _gridDisplayNode->drawSolidRect(bottomLeft, topRight, fillColor);
         }
     }
 
-    CCLOG("[·ÅÖÃ¹ÜÀíÆ÷] »æÖÆÈ«µØÍ¼¸ñ×Ó×´Ì¬Íê³É");
+    CCLOG("[æ”¾ç½®ç®¡ç†å™¨] ç»˜åˆ¶å…¨åœ°å›¾æ ¼å­çŠ¶æ€å®Œæˆ");
 }
 
 // ===================================================
-// Òş²Ø¸ñ×Ó×´Ì¬ÏÔÊ¾
+// éšè—æ ¼å­çŠ¶æ€æ˜¾ç¤º
 // ===================================================
 void PlacementManager::hideGridDisplay() {
     if (_gridDisplayNode) {
@@ -166,12 +166,12 @@ void PlacementManager::hideGridDisplay() {
 }
 
 // ===================================================
-// ¸üĞÂÔ¤ÀÀÎ»ÖÃ
+// æ›´æ–°é¢„è§ˆä½ç½®
 // ===================================================
 void PlacementManager::updatePreviewPosition(const Vec2& worldPos) {
     if (!_state.isPlacing || !_previewSprite || !_gridMap) return;
 
-    // ×ª»»ÎªÍø¸ñ×ø±ê
+    // è½¬æ¢ä¸ºç½‘æ ¼åæ ‡
     Vec2 gridPos = _gridMap->worldToGrid(worldPos);
     int gridX = (int)gridPos.x;
     int gridY = (int)gridPos.y;
@@ -179,19 +179,19 @@ void PlacementManager::updatePreviewPosition(const Vec2& worldPos) {
     _currentGridX = gridX;
     _currentGridY = gridY;
 
-    // ¼ÆËã½¨ÖşÖĞĞÄÎ»ÖÃ
+    // è®¡ç®—å»ºç­‘ä¸­å¿ƒä½ç½®
     Vec2 centerPos = calculateBuildingCenterPosition(gridX, gridY, _state.gridWidth, _state.gridHeight);
     _previewSprite->setPosition(centerPos);
 
-    // ¼ì²éÊÇ·ñ¿ÉÒÔ·ÅÖÃ
+    // æ£€æŸ¥æ˜¯å¦å¯ä»¥æ”¾ç½®
     bool canPlace = _gridMap->canPlaceBuilding(gridX, gridY, _state.gridWidth, _state.gridHeight);
 
-    // ¸üĞÂµ±Ç°·ÅÖÃÎ»ÖÃµÄ¸ñ×ÓÑÕÉ«ÏÔÊ¾
+    // æ›´æ–°å½“å‰æ”¾ç½®ä½ç½®çš„æ ¼å­é¢œè‰²æ˜¾ç¤º
     updatePlacementGridDisplay(gridX, gridY, canPlace);
     updatePreviewInfo(canPlace);
     updatePreviewInfoPosition(centerPos);
 
-    // ¸üĞÂÔ¤ÀÀ¾«ÁéÑÕÉ«
+    // æ›´æ–°é¢„è§ˆç²¾çµé¢œè‰²
     if (canPlace) {
         _previewSprite->setColor(Color3B::WHITE);
     }
@@ -201,7 +201,7 @@ void PlacementManager::updatePreviewPosition(const Vec2& worldPos) {
 }
 
 // ===================================================
-// ¸üĞÂµ±Ç°·ÅÖÃÎ»ÖÃµÄ¸ñ×ÓÑÕÉ«ÏÔÊ¾
+// æ›´æ–°å½“å‰æ”¾ç½®ä½ç½®çš„æ ¼å­é¢œè‰²æ˜¾ç¤º
 // ===================================================
 void PlacementManager::updatePlacementGridDisplay(int gridX, int gridY, bool canPlace) {
     if (!_placementGridNode || !_gridMap) return;
@@ -211,7 +211,7 @@ void PlacementManager::updatePlacementGridDisplay(int gridX, int gridY, bool can
 
     float cellSize = _gridMap->getCellSize();
 
-    // ¸ù¾İ¿É·ÅÖÃ×´Ì¬Ñ¡ÔñÑÕÉ«
+    // æ ¹æ®å¯æ”¾ç½®çŠ¶æ€é€‰æ‹©é¢œè‰²
     Color4F fillColor = canPlace ?
         PlacementConfig::GRID_COLOR_CAN_PLACE :
         PlacementConfig::GRID_COLOR_CANNOT_PLACE;
@@ -220,7 +220,7 @@ void PlacementManager::updatePlacementGridDisplay(int gridX, int gridY, bool can
         PlacementConfig::GRID_BORDER_CAN_PLACE :
         PlacementConfig::GRID_BORDER_CANNOT_PLACE;
 
-    // »æÖÆ½¨ÖşÕ¼ÓÃµÄÃ¿¸ö¸ñ×Ó
+    // ç»˜åˆ¶å»ºç­‘å ç”¨çš„æ¯ä¸ªæ ¼å­
     for (int dy = 0; dy < _state.gridHeight; ++dy) {
         for (int dx = 0; dx < _state.gridWidth; ++dx) {
             int cellX = gridX + dx;
@@ -229,10 +229,10 @@ void PlacementManager::updatePlacementGridDisplay(int gridX, int gridY, bool can
             Vec2 bottomLeft(cellX * cellSize, cellY * cellSize);
             Vec2 topRight((cellX + 1) * cellSize, (cellY + 1) * cellSize);
 
-            // »æÖÆÌî³ä¾ØĞÎ
+            // ç»˜åˆ¶å¡«å……çŸ©å½¢
             _placementGridNode->drawSolidRect(bottomLeft, topRight, fillColor);
 
-            // »æÖÆ±ß¿ò
+            // ç»˜åˆ¶è¾¹æ¡†
             Vec2 vertices[] = {
                 bottomLeft,
                 Vec2(topRight.x, bottomLeft.y),
@@ -245,7 +245,7 @@ void PlacementManager::updatePlacementGridDisplay(int gridX, int gridY, bool can
 }
 
 // ===================================================
-// Ô¤ÀÀĞÅÏ¢Ãæ°å
+// é¢„è§ˆä¿¡æ¯é¢æ¿
 // ===================================================
 void PlacementManager::setupPreviewInfo() {
     if (_previewInfoPanel) {
@@ -332,33 +332,33 @@ void PlacementManager::updatePreviewInfoPosition(const Vec2& centerPos) {
 
 
 // ===================================================
-// ³¢ÊÔÈ·ÈÏ·ÅÖÃ
+// å°è¯•ç¡®è®¤æ”¾ç½®
 // ===================================================
 bool PlacementManager::tryConfirmPlacement(const Vec2& worldPos) {
     if (!_state.isPlacing || !_gridMap) {
         return false;
     }
 
-    // ×ª»»ÎªÍø¸ñ×ø±ê
+    // è½¬æ¢ä¸ºç½‘æ ¼åæ ‡
     Vec2 gridPos = _gridMap->worldToGrid(worldPos);
     int gridX = (int)gridPos.x;
     int gridY = (int)gridPos.y;
 
-    // ¼ì²éÊÇ·ñ¿ÉÒÔ·ÅÖÃ
+    // æ£€æŸ¥æ˜¯å¦å¯ä»¥æ”¾ç½®
     if (_gridMap->canPlaceBuilding(gridX, gridY, _state.gridWidth, _state.gridHeight)) {
-        CCLOG("[·ÅÖÃ¹ÜÀíÆ÷] È·ÈÏ·ÅÖÃ½¨Öş: %s ÔÚÎ»ÖÃ (%d, %d)",
+        CCLOG("[æ”¾ç½®ç®¡ç†å™¨] ç¡®è®¤æ”¾ç½®å»ºç­‘: %s åœ¨ä½ç½® (%d, %d)",
             _currentOption.name.c_str(), gridX, gridY);
 
-        // ´¥·¢»Øµ÷
+        // è§¦å‘å›è°ƒ
         if (_onPlacementConfirmed) {
             _onPlacementConfirmed(_currentOption, gridX, gridY);
         }
 
-        // ÇåÀí·ÅÖÃ×´Ì¬
+        // æ¸…ç†æ”¾ç½®çŠ¶æ€
         cleanupPreview();
         _state.isPlacing = false;
 
-        // Òş²ØÍø¸ñ¸¨ÖúÏßºÍ¸ñ×ÓÏÔÊ¾
+        // éšè—ç½‘æ ¼è¾…åŠ©çº¿å’Œæ ¼å­æ˜¾ç¤º
         if (_gridMap) {
             _gridMap->showGrid(false);
         }
@@ -367,36 +367,36 @@ bool PlacementManager::tryConfirmPlacement(const Vec2& worldPos) {
         return true;
     }
     else {
-        CCLOG("[·ÅÖÃ¹ÜÀíÆ÷] ÎŞ·¨·ÅÖÃ½¨Öş£¬Î»ÖÃ²»¿ÉÓÃ");
+        CCLOG("[æ”¾ç½®ç®¡ç†å™¨] æ— æ³•æ”¾ç½®å»ºç­‘ï¼Œä½ç½®ä¸å¯ç”¨");
         return false;
     }
 }
 
 // ===================================================
-// È¡Ïû·ÅÖÃ
+// å–æ¶ˆæ”¾ç½®
 // ===================================================
 void PlacementManager::cancelPlacement() {
     if (!_state.isPlacing) return;
 
-    CCLOG("[·ÅÖÃ¹ÜÀíÆ÷] È¡Ïû·ÅÖÃ½¨Öş");
+    CCLOG("[æ”¾ç½®ç®¡ç†å™¨] å–æ¶ˆæ”¾ç½®å»ºç­‘");
 
     cleanupPreview();
     _state.isPlacing = false;
 
-    // Òş²ØÍø¸ñ¸¨ÖúÏßºÍ¸ñ×ÓÏÔÊ¾
+    // éšè—ç½‘æ ¼è¾…åŠ©çº¿å’Œæ ¼å­æ˜¾ç¤º
     if (_gridMap) {
         _gridMap->showGrid(false);
     }
     hideGridDisplay();
 
-    // ´¥·¢»Øµ÷
+    // è§¦å‘å›è°ƒ
     if (_onPlacementCancelled) {
         _onPlacementCancelled();
     }
 }
 
 // ===================================================
-// ¼ÆËã½¨ÖşÖĞĞÄÎ»ÖÃ
+// è®¡ç®—å»ºç­‘ä¸­å¿ƒä½ç½®
 // ===================================================
 Vec2 PlacementManager::calculateBuildingCenterPosition(int gridX, int gridY, int width, int height) {
     if (!_gridMap) return Vec2::ZERO;
@@ -408,7 +408,7 @@ Vec2 PlacementManager::calculateBuildingCenterPosition(int gridX, int gridY, int
 }
 
 // ===================================================
-// ÇåÀíÔ¤ÀÀ×ÊÔ´
+// æ¸…ç†é¢„è§ˆèµ„æº
 // ===================================================
 void PlacementManager::cleanupPreview() {
     if (_previewSprite) {

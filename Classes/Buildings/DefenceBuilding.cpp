@@ -155,21 +155,31 @@ bool DefenceBuilding::init(const DefenceBuildingConfig* config, int level) {
     }
     if (_healthBar) {
         _healthBar->setAnchorPoint(Vec2(0.0f, 0.5f));
-        float offsetY = 30.0f;
-        if (_bodySprite) {
-            float y = _bodySprite->getContentSize().height * 0.5f + offsetY;
-            float x = -_healthBar->getContentSize().width * 0.5f;
-            _healthBar->setPosition(Vec2(x, y));
-        }
         this->addChild(_healthBar);
         _healthBar->setScaleX(1.0f);
         _healthBar->setColor(Color3B::GREEN);
+        refreshHealthBarPosition();
     }
 
     updateHealthBar(false);
     this->scheduleUpdate();
 
     return true;
+}
+
+void DefenceBuilding::refreshHealthBarPosition() {
+    if (!_healthBar || !_bodySprite) {
+        return;
+    }
+
+    float offsetY = 30.0f;
+    float spriteHeight = _bodySprite->getContentSize().height * _bodySprite->getScaleY();
+    if (spriteHeight <= 0.0f) {
+        spriteHeight = _bodySprite->getBoundingBox().size.height;
+    }
+    float y = spriteHeight * 0.5f + offsetY;
+    float x = -_healthBar->getContentSize().width * 0.5f;
+    _healthBar->setPosition(Vec2(x, y));
 }
 
 void DefenceBuilding::setLevel(int level) {

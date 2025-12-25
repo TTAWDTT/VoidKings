@@ -32,6 +32,8 @@ public:
     int getLength() const;
     int getWidth() const;
 
+    void refreshHealthBarPosition();
+
     int getId() const { return _config ? _config->id : 0; }
     const std::string& getName() const {
         static std::string empty = "";

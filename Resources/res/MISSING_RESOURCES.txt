@@ -1,4 +1,4 @@
-Missing Resources - Optional Improvements
+﻿Missing Resources - Optional Improvements
 ==========================================
 
 The following resources are optional but recommended for better visuals:

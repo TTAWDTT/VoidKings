@@ -1,4 +1,4 @@
-#include "IDCardPanel.h"
+﻿#include "IDCardPanel.h"
 #include "Core/Core.h"
 
 Node* IDCardPanel::createResourceLabel(

@@ -1,7 +1,7 @@
-#ifndef __AUDIO_MANAGER_H__
+ï»¿#ifndef __AUDIO_MANAGER_H__
 #define __AUDIO_MANAGER_H__
 
-// ÒôÆµ¹ÜÀí£ºÍ³Ò»¿ØÖÆBGMÓëÒôĞ§
+// éŸ³é¢‘ç®¡ç†ï¼šç»Ÿä¸€æ§åˆ¶BGMä¸éŸ³æ•ˆ
 namespace AudioManager {
     void preload();
 

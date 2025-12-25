@@ -375,6 +375,15 @@ void BaseScene::scaleBuildingToFit(Node* building, int gridWidth, int gridHeight
     // 应用缩放（最小缩放0.1，确保小图能放大）
     if (scale > 0.1f) {
         sprite->setScale(scale);
+        if (auto* defence = dynamic_cast<DefenceBuilding*>(building)) {
+            defence->refreshHealthBarPosition();
+        }
+        else if (auto* production = dynamic_cast<ProductionBuilding*>(building)) {
+            production->refreshHealthBarPosition();
+        }
+        else if (auto* storage = dynamic_cast<StorageBuilding*>(building)) {
+            storage->refreshHealthBarPosition();
+        }
         CCLOG("[基地场景] 建筑缩放调整: 原尺寸(%.1f, %.1f) -> 目标(%.1f, %.1f), scale=%.2f",
             originalSize.width, originalSize.height, targetWidth, targetHeight, scale);
     }

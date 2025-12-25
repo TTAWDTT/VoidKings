@@ -1,13 +1,13 @@
-/**
+ï»¿/**
  * @file GridBackground.cpp
- * @brief Íø¸ñ±³¾°»æÖÆÊµÏÖ
+ * @brief ç½‘æ ¼èƒŒæ™¯ç»˜åˆ¶å®ç°
  */
 
 #include "GridBackground.h"
 #include <algorithm>
 
 // ===================================================
-// ´´½¨Óë³õÊ¼»¯
+// åˆ›å»ºä¸åˆå§‹åŒ–
 // ===================================================
 GridBackground* GridBackground::create(int gridWidth, int gridHeight, float cellSize) {
     GridBackground* ret = new (std::nothrow) GridBackground();
@@ -31,11 +31,11 @@ bool GridBackground::init(int gridWidth, int gridHeight, float cellSize) {
     float totalWidth = _gridWidth * _cellSize;
     float totalHeight = _gridHeight * _cellSize;
 
-    // ´´½¨µ×É«±³¾°
+    // åˆ›å»ºåº•è‰²èƒŒæ™¯
     _bgColor = LayerColor::create(GridBackgroundConfig::BG_COLOR, totalWidth, totalHeight);
     this->addChild(_bgColor, -3);
 
-    // ²İµØÌùÍ¼×÷Îªµ×²ãÎÆÀí
+    // è‰åœ°è´´å›¾ä½œä¸ºåº•å±‚çº¹ç†
     _tileBackground = Sprite::create("grass/grass_0000.png");
     if (_tileBackground) {
         auto texture = _tileBackground->getTexture();
@@ -50,20 +50,20 @@ bool GridBackground::init(int gridWidth, int gridHeight, float cellSize) {
         this->addChild(_tileBackground, -2);
     }
 
-    // ´´½¨Íø¸ñÏß»æÖÆ½Úµã
+    // åˆ›å»ºç½‘æ ¼çº¿ç»˜åˆ¶èŠ‚ç‚¹
     _gridLines = DrawNode::create();
     this->addChild(_gridLines, -1);
 
-    // »æÖÆÍø¸ñ
+    // ç»˜åˆ¶ç½‘æ ¼
     drawDashedGrid();
 
-    CCLOG("[Íø¸ñ±³¾°] ³õÊ¼»¯Íê³É: %dx%d, ¸ñ×Ó³ß´ç: %.1f", gridWidth, gridHeight, cellSize);
+    CCLOG("[ç½‘æ ¼èƒŒæ™¯] åˆå§‹åŒ–å®Œæˆ: %dx%d, æ ¼å­å°ºå¯¸: %.1f", gridWidth, gridHeight, cellSize);
 
     return true;
 }
 
 // ===================================================
-// »æÖÆĞéÏßÍø¸ñ
+// ç»˜åˆ¶è™šçº¿ç½‘æ ¼
 // ===================================================
 void GridBackground::drawDashedGrid() {
     if (!_gridLines) {
@@ -79,7 +79,7 @@ void GridBackground::drawDashedGrid() {
     float totalWidth = _gridWidth * _cellSize;
     float totalHeight = _gridHeight * _cellSize;
 
-    // »æÖÆÊúÏß
+    // ç»˜åˆ¶ç«–çº¿
     for (int x = 0; x <= _gridWidth; ++x) {
         float xPos = x * _cellSize;
         float y = 0;
@@ -94,7 +94,7 @@ void GridBackground::drawDashedGrid() {
         }
     }
 
-    // »æÖÆºáÏß
+    // ç»˜åˆ¶æ¨ªçº¿
     for (int y = 0; y <= _gridHeight; ++y) {
         float yPos = y * _cellSize;
         float x = 0;
@@ -111,7 +111,7 @@ void GridBackground::drawDashedGrid() {
 }
 
 // ===================================================
-// ÖØĞÂ»æÖÆ
+// é‡æ–°ç»˜åˆ¶
 // ===================================================
 void GridBackground::redraw() {
     drawDashedGrid();

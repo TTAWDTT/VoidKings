@@ -1,9 +1,9 @@
-/**
+ï»¿/**
  * @file PlacementManager.h
- * @brief ½¨Öş·ÅÖÃ¹ÜÀíÆ÷
+ * @brief å»ºç­‘æ”¾ç½®ç®¡ç†å™¨
  *
- * ½«½¨Öş·ÅÖÃÂß¼­´ÓBaseSceneÖĞÌáÈ¡³öÀ´£¬ÊµÏÖ¸ß¶ÈÄ£¿é»¯¡£
- * ¸ºÔğ¹ÜÀí½¨Öş·ÅÖÃÔ¤ÀÀ¡¢¸ñ×ÓÕ¼ÓÃ¼ì²â¡¢·ÅÖÃÈ·ÈÏµÈ¹¦ÄÜ¡£
+ * å°†å»ºç­‘æ”¾ç½®é€»è¾‘ä»BaseSceneä¸­æå–å‡ºæ¥ï¼Œå®ç°é«˜åº¦æ¨¡å—åŒ–ã€‚
+ * è´Ÿè´£ç®¡ç†å»ºç­‘æ”¾ç½®é¢„è§ˆã€æ ¼å­å ç”¨æ£€æµ‹ã€æ”¾ç½®ç¡®è®¤ç­‰åŠŸèƒ½ã€‚
  */
 
 #ifndef __PLACEMENT_MANAGER_H__
@@ -17,44 +17,44 @@
 USING_NS_CC;
 
 // ===================================================
-// ·ÅÖÃ¹ÜÀíÆ÷ÅäÖÃ³£Á¿
+// æ”¾ç½®ç®¡ç†å™¨é…ç½®å¸¸é‡
 // ===================================================
 namespace PlacementConfig {
-    // Ô¤ÀÀÍ¸Ã÷¶È
+    // é¢„è§ˆé€æ˜åº¦
     constexpr int PREVIEW_OPACITY = 180;
 
-    // ¸ñ×ÓÑÕÉ«ÅäÖÃ
-    const Color4F GRID_COLOR_CAN_PLACE = Color4F(0.0f, 0.8f, 0.0f, 0.4f);      // ¿É·ÅÖÃ£ºÂÌÉ«
+    // æ ¼å­é¢œè‰²é…ç½®
+    const Color4F GRID_COLOR_CAN_PLACE = Color4F(0.0f, 0.8f, 0.0f, 0.4f);      // å¯æ”¾ç½®ï¼šç»¿è‰²
     const Color4F GRID_BORDER_CAN_PLACE = Color4F(0.0f, 1.0f, 0.0f, 0.8f);
-    const Color4F GRID_COLOR_CANNOT_PLACE = Color4F(0.8f, 0.0f, 0.0f, 0.4f);   // ²»¿É·ÅÖÃ£ººìÉ«
+    const Color4F GRID_COLOR_CANNOT_PLACE = Color4F(0.8f, 0.0f, 0.0f, 0.4f);   // ä¸å¯æ”¾ç½®ï¼šçº¢è‰²
     const Color4F GRID_BORDER_CANNOT_PLACE = Color4F(1.0f, 0.0f, 0.0f, 0.8f);
-    const Color4F GRID_COLOR_OCCUPIED = Color4F(0.5f, 0.5f, 0.5f, 0.3f);       // ÒÑÕ¼ÓÃ£º»ÒÉ«
-    const Color4F GRID_COLOR_EMPTY = Color4F(0.0f, 0.5f, 0.0f, 0.2f);          // ¿ÕÏĞ£ºµ­ÂÌÉ«
-    const Color4F GRID_COLOR_FORBIDDEN = Color4F(0.3f, 0.3f, 0.3f, 0.3f);      // ½ûÖ¹ÇøÓò£ºÉî»ÒÉ«
+    const Color4F GRID_COLOR_OCCUPIED = Color4F(0.5f, 0.5f, 0.5f, 0.3f);       // å·²å ç”¨ï¼šç°è‰²
+    const Color4F GRID_COLOR_EMPTY = Color4F(0.0f, 0.5f, 0.0f, 0.2f);          // ç©ºé—²ï¼šæ·¡ç»¿è‰²
+    const Color4F GRID_COLOR_FORBIDDEN = Color4F(0.3f, 0.3f, 0.3f, 0.3f);      // ç¦æ­¢åŒºåŸŸï¼šæ·±ç°è‰²
 }
 
 // ===================================================
-// ·ÅÖÃ×´Ì¬½á¹¹
+// æ”¾ç½®çŠ¶æ€ç»“æ„
 // ===================================================
 struct PlacementState {
-    bool isPlacing = false;         // ÊÇ·ñ´¦ÓÚ·ÅÖÃÄ£Ê½
-    int buildingType = 0;           // µ±Ç°½¨ÖşÀàĞÍ
-    int gridWidth = 0;              // ½¨ÖşÕ¼ÓÃ¿í¶È
-    int gridHeight = 0;             // ½¨ÖşÕ¼ÓÃ¸ß¶È
-    std::string spritePath;         // ½¨ÖşÍ¼Æ¬Â·¾¶
-    int cost = 0;                   // ½¨Ôì·ÑÓÃ
+    bool isPlacing = false;         // æ˜¯å¦å¤„äºæ”¾ç½®æ¨¡å¼
+    int buildingType = 0;           // å½“å‰å»ºç­‘ç±»å‹
+    int gridWidth = 0;              // å»ºç­‘å ç”¨å®½åº¦
+    int gridHeight = 0;             // å»ºç­‘å ç”¨é«˜åº¦
+    std::string spritePath;         // å»ºç­‘å›¾ç‰‡è·¯å¾„
+    int cost = 0;                   // å»ºé€ è´¹ç”¨
 };
 
 // ===================================================
-// ½¨Öş·ÅÖÃ¹ÜÀíÆ÷Àà
+// å»ºç­‘æ”¾ç½®ç®¡ç†å™¨ç±»
 // ===================================================
 class PlacementManager : public Node {
 public:
     /**
-     * @brief ´´½¨·ÅÖÃ¹ÜÀíÆ÷
-     * @param gridMap Íø¸ñµØÍ¼ÒıÓÃ
-     * @param onPlacementConfirmed ·ÅÖÃÈ·ÈÏ»Øµ÷
-     * @param onPlacementCancelled ·ÅÖÃÈ¡Ïû»Øµ÷
+     * @brief åˆ›å»ºæ”¾ç½®ç®¡ç†å™¨
+     * @param gridMap ç½‘æ ¼åœ°å›¾å¼•ç”¨
+     * @param onPlacementConfirmed æ”¾ç½®ç¡®è®¤å›è°ƒ
+     * @param onPlacementCancelled æ”¾ç½®å–æ¶ˆå›è°ƒ
      */
     static PlacementManager* create(
         GridMap* gridMap,
@@ -63,7 +63,7 @@ public:
     );
 
     /**
-     * @brief ³õÊ¼»¯
+     * @brief åˆå§‹åŒ–
      */
     virtual bool init(
         GridMap* gridMap,
@@ -72,105 +72,105 @@ public:
     );
 
     /**
-     * @brief ¿ªÊ¼·ÅÖÃ½¨Öş
-     * @param option ½¨ÖşÑ¡Ïî
+     * @brief å¼€å§‹æ”¾ç½®å»ºç­‘
+     * @param option å»ºç­‘é€‰é¡¹
      */
     void startPlacement(const BuildingOption& option);
 
     /**
-     * @brief ¸üĞÂÔ¤ÀÀÎ»ÖÃ£¨´¥ÃşÒÆ¶¯Ê±µ÷ÓÃ£©
-     * @param worldPos ÊÀ½ç×ø±êÎ»ÖÃ
+     * @brief æ›´æ–°é¢„è§ˆä½ç½®ï¼ˆè§¦æ‘¸ç§»åŠ¨æ—¶è°ƒç”¨ï¼‰
+     * @param worldPos ä¸–ç•Œåæ ‡ä½ç½®
      */
     void updatePreviewPosition(const Vec2& worldPos);
 
     /**
-     * @brief ³¢ÊÔÈ·ÈÏ·ÅÖÃ£¨´¥Ãş½áÊøÊ±µ÷ÓÃ£©
-     * @param worldPos ÊÀ½ç×ø±êÎ»ÖÃ
-     * @return ÊÇ·ñ³É¹¦·ÅÖÃ
+     * @brief å°è¯•ç¡®è®¤æ”¾ç½®ï¼ˆè§¦æ‘¸ç»“æŸæ—¶è°ƒç”¨ï¼‰
+     * @param worldPos ä¸–ç•Œåæ ‡ä½ç½®
+     * @return æ˜¯å¦æˆåŠŸæ”¾ç½®
      */
     bool tryConfirmPlacement(const Vec2& worldPos);
 
     /**
-     * @brief È¡Ïû·ÅÖÃ
+     * @brief å–æ¶ˆæ”¾ç½®
      */
     void cancelPlacement();
 
     /**
-     * @brief ¼ì²éÊÇ·ñ´¦ÓÚ·ÅÖÃÄ£Ê½
+     * @brief æ£€æŸ¥æ˜¯å¦å¤„äºæ”¾ç½®æ¨¡å¼
      */
     bool isPlacing() const { return _state.isPlacing; }
 
     /**
-     * @brief »ñÈ¡µ±Ç°·ÅÖÃ×´Ì¬
+     * @brief è·å–å½“å‰æ”¾ç½®çŠ¶æ€
      */
     const PlacementState& getState() const { return _state; }
 
     /**
-     * @brief »æÖÆÈ«µØÍ¼¸ñ×Ó×´Ì¬£¨½¨ÔìÄ£Ê½Ê±ÏÔÊ¾£©
+     * @brief ç»˜åˆ¶å…¨åœ°å›¾æ ¼å­çŠ¶æ€ï¼ˆå»ºé€ æ¨¡å¼æ—¶æ˜¾ç¤ºï¼‰
      */
     void drawAllGridCells();
 
     /**
-     * @brief Òş²Ø¸ñ×Ó×´Ì¬ÏÔÊ¾
+     * @brief éšè—æ ¼å­çŠ¶æ€æ˜¾ç¤º
      */
     void hideGridDisplay();
 
 private:
-    // ÒıÓÃ
+    // å¼•ç”¨
     GridMap* _gridMap = nullptr;
 
-    // UI×é¼ş
-    Sprite* _previewSprite = nullptr;       // ½¨ÖşÔ¤ÀÀ¾«Áé
-    DrawNode* _gridDisplayNode = nullptr;   // È«µØÍ¼¸ñ×ÓÏÔÊ¾½Úµã
-    DrawNode* _placementGridNode = nullptr; // µ±Ç°·ÅÖÃÎ»ÖÃ¸ñ×ÓÏÔÊ¾½Úµã
-    Node* _previewInfoPanel = nullptr;      // Ô¤ÀÀĞÅÏ¢Ãæ°å
-    Label* _previewInfoLabel = nullptr;     // Ô¤ÀÀĞÅÏ¢ÎÄ±¾
+    // UIç»„ä»¶
+    Sprite* _previewSprite = nullptr;       // å»ºç­‘é¢„è§ˆç²¾çµ
+    DrawNode* _gridDisplayNode = nullptr;   // å…¨åœ°å›¾æ ¼å­æ˜¾ç¤ºèŠ‚ç‚¹
+    DrawNode* _placementGridNode = nullptr; // å½“å‰æ”¾ç½®ä½ç½®æ ¼å­æ˜¾ç¤ºèŠ‚ç‚¹
+    Node* _previewInfoPanel = nullptr;      // é¢„è§ˆä¿¡æ¯é¢æ¿
+    Label* _previewInfoLabel = nullptr;     // é¢„è§ˆä¿¡æ¯æ–‡æœ¬
 
-    // ·ÅÖÃ×´Ì¬
+    // æ”¾ç½®çŠ¶æ€
     PlacementState _state;
     BuildingOption _currentOption;
     int _currentGridX = 0;
     int _currentGridY = 0;
 
-    // »Øµ÷º¯Êı
+    // å›è°ƒå‡½æ•°
     std::function<void(const BuildingOption&, int, int)> _onPlacementConfirmed;
     std::function<void()> _onPlacementCancelled;
 
     /**
-     * @brief ¼ÆËã½¨ÖşÔÚÊÀ½ç×ø±êÏµÖĞµÄÖĞĞÄÎ»ÖÃ
-     * @param gridX Íø¸ñX×ø±ê£¨×óÏÂ½Ç£©
-     * @param gridY Íø¸ñY×ø±ê£¨×óÏÂ½Ç£©
-     * @param width ½¨Öş¿í¶È£¨¸ñ×ÓÊı£©
-     * @param height ½¨Öş¸ß¶È£¨¸ñ×ÓÊı£©
-     * @return ½¨ÖşÖĞĞÄµÄÊÀ½ç×ø±ê
+     * @brief è®¡ç®—å»ºç­‘åœ¨ä¸–ç•Œåæ ‡ç³»ä¸­çš„ä¸­å¿ƒä½ç½®
+     * @param gridX ç½‘æ ¼Xåæ ‡ï¼ˆå·¦ä¸‹è§’ï¼‰
+     * @param gridY ç½‘æ ¼Yåæ ‡ï¼ˆå·¦ä¸‹è§’ï¼‰
+     * @param width å»ºç­‘å®½åº¦ï¼ˆæ ¼å­æ•°ï¼‰
+     * @param height å»ºç­‘é«˜åº¦ï¼ˆæ ¼å­æ•°ï¼‰
+     * @return å»ºç­‘ä¸­å¿ƒçš„ä¸–ç•Œåæ ‡
      */
     Vec2 calculateBuildingCenterPosition(int gridX, int gridY, int width, int height);
 
     /**
-     * @brief ¸üĞÂµ±Ç°·ÅÖÃÎ»ÖÃµÄ¸ñ×ÓÑÕÉ«ÏÔÊ¾
-     * @param gridX Íø¸ñX×ø±ê
-     * @param gridY Íø¸ñY×ø±ê
-     * @param canPlace ÊÇ·ñ¿ÉÒÔ·ÅÖÃ
+     * @brief æ›´æ–°å½“å‰æ”¾ç½®ä½ç½®çš„æ ¼å­é¢œè‰²æ˜¾ç¤º
+     * @param gridX ç½‘æ ¼Xåæ ‡
+     * @param gridY ç½‘æ ¼Yåæ ‡
+     * @param canPlace æ˜¯å¦å¯ä»¥æ”¾ç½®
      */
     void updatePlacementGridDisplay(int gridX, int gridY, bool canPlace);
 
     /**
-     * @brief ´´½¨Ô¤ÀÀĞÅÏ¢Ãæ°å
+     * @brief åˆ›å»ºé¢„è§ˆä¿¡æ¯é¢æ¿
      */
     void setupPreviewInfo();
 
     /**
-     * @brief ¸üĞÂÔ¤ÀÀĞÅÏ¢ÏÔÊ¾
+     * @brief æ›´æ–°é¢„è§ˆä¿¡æ¯æ˜¾ç¤º
      */
     void updatePreviewInfo(bool canPlace);
 
     /**
-     * @brief ¸üĞÂÔ¤ÀÀĞÅÏ¢Î»ÖÃ
+     * @brief æ›´æ–°é¢„è§ˆä¿¡æ¯ä½ç½®
      */
     void updatePreviewInfoPosition(const Vec2& centerPos);
 
     /**
-     * @brief ÇåÀíÔ¤ÀÀ×ÊÔ´
+     * @brief æ¸…ç†é¢„è§ˆèµ„æº
      */
     void cleanupPreview();
 };

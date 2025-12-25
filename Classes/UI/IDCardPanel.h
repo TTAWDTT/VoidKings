@@ -1,4 +1,4 @@
-#ifndef __ID_CARD_PANEL_H__
+﻿#ifndef __ID_CARD_PANEL_H__
 #define __ID_CARD_PANEL_H__
 
 #include "cocos2d.h"

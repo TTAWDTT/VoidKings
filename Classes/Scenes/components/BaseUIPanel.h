@@ -1,9 +1,9 @@
-/**
+ï»¿/**
  * @file BaseUIPanel.h
- * @brief »ùµØ³¡¾°UIÃæ°å×é¼ş
+ * @brief åŸºåœ°åœºæ™¯UIé¢æ¿ç»„ä»¶
  * 
- * ½«»ùµØ³¡¾°µÄUI²¼¾ÖÂß¼­ÌáÈ¡³öÀ´£¬ÊµÏÖ¸ß¶ÈÄ£¿é»¯¡£
- * °üº¬½ø¹¥¡¢½¨Ôì¡¢ÍË³öµÈ°´Å¥ÒÔ¼°×ÊÔ´ÏÔÊ¾¡£
+ * å°†åŸºåœ°åœºæ™¯çš„UIå¸ƒå±€é€»è¾‘æå–å‡ºæ¥ï¼Œå®ç°é«˜åº¦æ¨¡å—åŒ–ã€‚
+ * åŒ…å«è¿›æ”»ã€å»ºé€ ã€é€€å‡ºç­‰æŒ‰é’®ä»¥åŠèµ„æºæ˜¾ç¤ºã€‚
  */
 
 #ifndef __BASE_UI_PANEL_H__
@@ -17,58 +17,58 @@ USING_NS_CC;
 using namespace cocos2d::ui;
 
 // ===================================================
-// »ùµØUIÅäÖÃ³£Á¿
+// åŸºåœ°UIé…ç½®å¸¸é‡
 // ===================================================
 namespace BaseUIConfig {
-    // °´Å¥²¼¾ÖÅäÖÃ
+    // æŒ‰é’®å¸ƒå±€é…ç½®
     constexpr float EDGE_MARGIN = 24.0f;
     constexpr float BUTTON_SPACING = 18.0f;
     constexpr float BUTTON_SCALE = 3.0f;
     
-    // ÌáÊ¾¿òÅäÖÃ
+    // æç¤ºæ¡†é…ç½®
     constexpr float TOOLTIP_OFFSET_X = 10.0f;
     constexpr int TOOLTIP_FONT_SIZE = 18;
 }
 
 // ===================================================
-// °´Å¥»Øµ÷ÀàĞÍ¶¨Òå
+// æŒ‰é’®å›è°ƒç±»å‹å®šä¹‰
 // ===================================================
 struct BaseUICallbacks {
-    std::function<void()> onAttack;     // ½ø¹¥°´Å¥»Øµ÷
-    std::function<void()> onBuild;      // ½¨Ôì°´Å¥»Øµ÷
-    std::function<void()> onExit;       // ÍË³ö°´Å¥»Øµ÷
+    std::function<void()> onAttack;     // è¿›æ”»æŒ‰é’®å›è°ƒ
+    std::function<void()> onBuild;      // å»ºé€ æŒ‰é’®å›è°ƒ
+    std::function<void()> onExit;       // é€€å‡ºæŒ‰é’®å›è°ƒ
 };
 
 // ===================================================
-// »ùµØUIÃæ°åÀà
+// åŸºåœ°UIé¢æ¿ç±»
 // ===================================================
 class BaseUIPanel : public Node {
 public:
     /**
-     * @brief ´´½¨UIÃæ°å
-     * @param callbacks °´Å¥»Øµ÷º¯Êı¼¯
+     * @brief åˆ›å»ºUIé¢æ¿
+     * @param callbacks æŒ‰é’®å›è°ƒå‡½æ•°é›†
      */
     static BaseUIPanel* create(const BaseUICallbacks& callbacks);
     
     /**
-     * @brief ³õÊ¼»¯
+     * @brief åˆå§‹åŒ–
      */
     virtual bool init(const BaseUICallbacks& callbacks);
     
     /**
-     * @brief ¸üĞÂ×ÊÔ´ÏÔÊ¾
-     * @param gold ½ğ±ÒÊıÁ¿
-     * @param diamond ×êÊ¯ÊıÁ¿
+     * @brief æ›´æ–°èµ„æºæ˜¾ç¤º
+     * @param gold é‡‘å¸æ•°é‡
+     * @param diamond é’»çŸ³æ•°é‡
      */
     void updateResourceDisplay(int gold, int diamond);
 
     /**
-     * @brief ÉèÖÃÖ÷°´Å¥¿ÉÓÃ×´Ì¬
+     * @brief è®¾ç½®ä¸»æŒ‰é’®å¯ç”¨çŠ¶æ€
      */
     void setButtonsEnabled(bool enabled);
     
 private:
-    // UI×é¼ş
+    // UIç»„ä»¶
     Button* _attackButton = nullptr;
     Button* _buildButton = nullptr;
     Button* _exitButton = nullptr;
@@ -76,38 +76,38 @@ private:
     Label* _diamondLabel = nullptr;
     Node* _idCardPanel = nullptr;
     
-    // »Øµ÷
+    // å›è°ƒ
     BaseUICallbacks _callbacks;
     
     /**
-     * @brief ´´½¨°´Å¥Ãæ°å
+     * @brief åˆ›å»ºæŒ‰é’®é¢æ¿
      */
     void setupButtons();
     
     /**
-     * @brief ´´½¨×ÊÔ´ÏÔÊ¾Ãæ°å
+     * @brief åˆ›å»ºèµ„æºæ˜¾ç¤ºé¢æ¿
      */
     void setupResourcePanel();
     
     /**
-     * @brief ´´½¨ÌáÊ¾¿ò
-     * @param text ÌáÊ¾ÎÄ×Ö
-     * @param size ÌáÊ¾¿ò³ß´ç
-     * @return ´´½¨µÄÌáÊ¾½Úµã
+     * @brief åˆ›å»ºæç¤ºæ¡†
+     * @param text æç¤ºæ–‡å­—
+     * @param size æç¤ºæ¡†å°ºå¯¸
+     * @return åˆ›å»ºçš„æç¤ºèŠ‚ç‚¹
      */
     Node* createTooltip(const std::string& text, const Size& size);
     
     /**
-     * @brief °ó¶¨ÌáÊ¾¿òµ½°´Å¥
-     * @param targetBtn Ä¿±ê°´Å¥
-     * @param tooltip ÌáÊ¾½Úµã
-     * @param offsetX X·½ÏòÆ«ÒÆÁ¿
+     * @brief ç»‘å®šæç¤ºæ¡†åˆ°æŒ‰é’®
+     * @param targetBtn ç›®æ ‡æŒ‰é’®
+     * @param tooltip æç¤ºèŠ‚ç‚¹
+     * @param offsetX Xæ–¹å‘åç§»é‡
      */
     void bindTooltip(Node* targetBtn, Node* tooltip, float offsetX = BaseUIConfig::TOOLTIP_OFFSET_X);
 
     /**
-     * @brief °´Å¥ĞüÍ£Ğ§¹û
-     * @param button Ä¿±ê°´Å¥
+     * @brief æŒ‰é’®æ‚¬åœæ•ˆæœ
+     * @param button ç›®æ ‡æŒ‰é’®
      */
     void bindHoverEffect(Button* button);
 };

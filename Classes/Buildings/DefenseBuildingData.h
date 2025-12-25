@@ -1,4 +1,4 @@
-#ifndef __DEFENSE_BUILDING_DATA_H__
+﻿#ifndef __DEFENSE_BUILDING_DATA_H__
 #define __DEFENSE_BUILDING_DATA_H__
 
 #include "cocos2d.h"

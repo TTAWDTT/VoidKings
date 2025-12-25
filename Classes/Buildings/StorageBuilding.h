@@ -1,4 +1,4 @@
-#ifndef __STORAGE_BUILDING_H__
+﻿#ifndef __STORAGE_BUILDING_H__
 #define __STORAGE_BUILDING_H__
 
 #include "cocos2d.h"
@@ -23,6 +23,8 @@ public:
     
     int getLength() const;
     int getWidth() const;
+
+    void refreshHealthBarPosition();
 
     int getId() const { return _config ? _config->id : 0; }
     const std::string& getName() const {

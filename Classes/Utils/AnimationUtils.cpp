@@ -1,4 +1,4 @@
-#include "Utils/AnimationUtils.h"
+﻿#include "Utils/AnimationUtils.h"
 
 namespace AnimationUtils {
 

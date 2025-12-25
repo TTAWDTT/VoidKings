@@ -1,6 +1,6 @@
-/**
+ï»¿/**
  * @file BaseUIPanel.cpp
- * @brief »ùµØ³¡¾°UIÃæ°åÊµÏÖ
+ * @brief åŸºåœ°åœºæ™¯UIé¢æ¿å®ç°
  */
 
 #include "BaseUIPanel.h"
@@ -9,7 +9,7 @@
 #include <memory>
 
  // ===================================================
- // ´´½¨Óë³õÊ¼»¯
+ // åˆ›å»ºä¸åˆå§‹åŒ–
  // ===================================================
 
 BaseUIPanel* BaseUIPanel::create(const BaseUICallbacks& callbacks) {
@@ -29,17 +29,17 @@ bool BaseUIPanel::init(const BaseUICallbacks& callbacks) {
 
     _callbacks = callbacks;
 
-    // ³õÊ¼»¯UI×é¼ş
+    // åˆå§‹åŒ–UIç»„ä»¶
     setupButtons();
     setupResourcePanel();
 
-    CCLOG("[»ùµØUIÃæ°å] ³õÊ¼»¯Íê³É");
+    CCLOG("[åŸºåœ°UIé¢æ¿] åˆå§‹åŒ–å®Œæˆ");
 
     return true;
 }
 
 // ===================================================
-// ´´½¨°´Å¥Ãæ°å
+// åˆ›å»ºæŒ‰é’®é¢æ¿
 // ===================================================
 void BaseUIPanel::setupButtons() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
@@ -55,7 +55,7 @@ void BaseUIPanel::setupButtons() {
         button->setSwallowTouches(true);
     };
 
-    // °´Å¥×éÕûÌå¾ÓÖĞ£¬×ó²àÁô±ß¾à
+    // æŒ‰é’®ç»„æ•´ä½“å±…ä¸­ï¼Œå·¦ä¾§ç•™è¾¹è·
     float buttonX = origin.x + BaseUIConfig::EDGE_MARGIN;
     float startY = origin.y + visibleSize.height / 2;
     float btnHeight = 0.0f;
@@ -66,7 +66,7 @@ void BaseUIPanel::setupButtons() {
         float btnWidth = btnSize.width * scale;
         btnHeight = btnSize.height * scale;
 
-        // ¼ÆËãÈı°´Å¥ÕûÌå¸ß¶È£¬±£³ÖµÈ¾à
+        // è®¡ç®—ä¸‰æŒ‰é’®æ•´ä½“é«˜åº¦ï¼Œä¿æŒç­‰è·
         float totalHeight = btnHeight * 3 + spacing * 2;
         startY = origin.y + visibleSize.height / 2 + totalHeight / 2 - btnHeight / 2;
         buttonX = origin.x + BaseUIConfig::EDGE_MARGIN + btnWidth / 2;
@@ -121,9 +121,9 @@ void BaseUIPanel::setupButtons() {
 
 
 // ===================================================
-// ´´½¨×ÊÔ´ÏÔÊ¾Ãæ°å
+// åˆ›å»ºèµ„æºæ˜¾ç¤ºé¢æ¿
 // ===================================================
-// Í³Ò»¿ØÖÆÖ÷°´Å¥¿ÉÓÃ×´Ì¬
+// ç»Ÿä¸€æ§åˆ¶ä¸»æŒ‰é’®å¯ç”¨çŠ¶æ€
 void BaseUIPanel::setButtonsEnabled(bool enabled) {
     auto applyState = [enabled](Button* button) {
         if (!button) return;
@@ -143,19 +143,19 @@ void BaseUIPanel::setupResourcePanel() {
 
 
 // ===================================================
-// ´´½¨ÌáÊ¾¿ò
+// åˆ›å»ºæç¤ºæ¡†
 // ===================================================
 Node* BaseUIPanel::createTooltip(const std::string& text, const Size& size) {
     auto panel = Node::create();
     panel->setContentSize(size);
     panel->setAnchorPoint(Vec2(0, 0.5f));
 
-    // ±³¾°
+    // èƒŒæ™¯
     auto bg = LayerColor::create(Color4B(0, 0, 0, 180), size.width, size.height);
     bg->setPosition(Vec2::ZERO);
     panel->addChild(bg);
 
-    // ÎÄ×Ö
+    // æ–‡å­—
     auto label = Label::createWithTTF(text, "fonts/ScienceGothic.ttf", BaseUIConfig::TOOLTIP_FONT_SIZE);
     label->setWidth(size.width - 10);
     label->setAlignment(TextHAlignment::LEFT);
@@ -166,7 +166,7 @@ Node* BaseUIPanel::createTooltip(const std::string& text, const Size& size) {
 }
 
 // ===================================================
-// °ó¶¨ÌáÊ¾¿òµ½°´Å¥
+// ç»‘å®šæç¤ºæ¡†åˆ°æŒ‰é’®
 // ===================================================
 void BaseUIPanel::bindTooltip(Node* targetBtn, Node* tooltip, float offsetX) {
     if (!targetBtn || !tooltip) return;
@@ -174,12 +174,12 @@ void BaseUIPanel::bindTooltip(Node* targetBtn, Node* tooltip, float offsetX) {
     tooltip->setVisible(false);
     this->addChild(tooltip, 999);
 
-    // ´´½¨Êó±êÊÂ¼ş¼àÌıÆ÷
+    // åˆ›å»ºé¼ æ ‡äº‹ä»¶ç›‘å¬å™¨
     auto mouseListener = EventListenerMouse::create();
     mouseListener->onMouseMove = [=](EventMouse* event) {
         Vec2 mouseWorldPos(event->getCursorX(), event->getCursorY());
 
-        // °´Å¥½ûÓÃÊ±²»ÏÔÊ¾ÌáÊ¾
+        // æŒ‰é’®ç¦ç”¨æ—¶ä¸æ˜¾ç¤ºæç¤º
         auto widget = dynamic_cast<Widget*>(targetBtn);
         if (widget && !widget->isEnabled()) {
             tooltip->setVisible(false);
@@ -187,7 +187,7 @@ void BaseUIPanel::bindTooltip(Node* targetBtn, Node* tooltip, float offsetX) {
         }
 
 
-        // ¼ì²éÊó±êÊÇ·ñÔÚ°´Å¥·¶Î§ÄÚ
+        // æ£€æŸ¥é¼ æ ‡æ˜¯å¦åœ¨æŒ‰é’®èŒƒå›´å†…
         if (targetBtn->getBoundingBox().containsPoint(mouseWorldPos)) {
             float btnRight = targetBtn->getPositionX() +
                 targetBtn->getContentSize().width * targetBtn->getScale() / 2;
@@ -203,7 +203,7 @@ void BaseUIPanel::bindTooltip(Node* targetBtn, Node* tooltip, float offsetX) {
 }
 
 // ===================================================
-// °´Å¥ĞüÍ£Ğ§¹û
+// æŒ‰é’®æ‚¬åœæ•ˆæœ
 // ===================================================
 void BaseUIPanel::bindHoverEffect(Button* button) {
     if (!button) {
@@ -250,7 +250,7 @@ void BaseUIPanel::bindHoverEffect(Button* button) {
 }
 
 // ===================================================
-// ¸üĞÂ×ÊÔ´ÏÔÊ¾
+// æ›´æ–°èµ„æºæ˜¾ç¤º
 // ===================================================
 void BaseUIPanel::updateResourceDisplay(int gold, int diamond) {
     if (!_idCardPanel) {

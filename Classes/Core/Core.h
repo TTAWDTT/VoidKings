@@ -1,4 +1,4 @@
-// Core.h
+﻿// Core.h
 #ifndef __CORE_H__
 #define __CORE_H__
 

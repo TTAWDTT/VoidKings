@@ -1,4 +1,4 @@
-#include "Utils/AudioManager.h"
+ï»¿#include "Utils/AudioManager.h"
 #include "audio/include/SimpleAudioEngine.h"
 #include "cocos2d.h"
 #include <array>
@@ -7,11 +7,11 @@
 using namespace CocosDenshion;
 
 namespace {
-// ÒôÁ¿Í³Ò»ÔÚ´Ë´¦µ÷½Ú
+// éŸ³é‡ç»Ÿä¸€åœ¨æ­¤å¤„è°ƒèŠ‚
 constexpr float kBgmVolume = 0.55f;
 constexpr float kSfxVolume = 0.9f;
 
-// ÒôÆµ×ÊÔ´Ó³Éä
+// éŸ³é¢‘èµ„æºæ˜ å°„
 #if defined(__cpp_char8_t)
 #define VK_UTF8_LITERAL(text) reinterpret_cast<const char*>(u8##text)
 #else
@@ -77,7 +77,7 @@ void playEffectInternal(const char* file) {
 
 namespace AudioManager {
 void preload() {
-    // Ö»Ô¤¼ÓÔØ¶ÌÒôĞ§£¬±ÜÃâÕ¼ÓÃ¹ı¶àÄÚ´æ
+    // åªé¢„åŠ è½½çŸ­éŸ³æ•ˆï¼Œé¿å…å ç”¨è¿‡å¤šå†…å­˜
     auto* engine = getEngine();
     if (!engine) {
         return;

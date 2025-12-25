@@ -1,4 +1,4 @@
-proj.ios_mac
+﻿proj.ios_mac
 proj.linux
 proj.ohos
 .vs
@@ -149,3 +149,4 @@ proj.win32/Release.win32/
 *.opendb
 
 Resources/music
+docs/

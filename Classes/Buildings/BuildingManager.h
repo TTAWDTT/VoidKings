@@ -1,4 +1,4 @@
-// BuildingManager.h
+﻿// BuildingManager.h
 #ifndef __BUILDING_MANAGER_H__
 #define __BUILDING_MANAGER_H__
 

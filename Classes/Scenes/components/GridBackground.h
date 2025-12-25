@@ -1,9 +1,9 @@
-/**
+ï»¿/**
  * @file GridBackground.h
- * @brief Íø¸ñ±³¾°×é¼ş
+ * @brief ç½‘æ ¼èƒŒæ™¯ç»„ä»¶
  *
- * ½«Íø¸ñ±³¾°»æÖÆÂß¼­´ÓBaseSceneÖĞÌáÈ¡³öÀ´£¬ÊµÏÖ¸ß¶ÈÄ£¿é»¯¡£
- * ¸ºÔğ»æÖÆºÚ°×ĞéÏßÍø¸ñ×÷Îª½¨Ôì²Î¿¼¡£
+ * å°†ç½‘æ ¼èƒŒæ™¯ç»˜åˆ¶é€»è¾‘ä»BaseSceneä¸­æå–å‡ºæ¥ï¼Œå®ç°é«˜åº¦æ¨¡å—åŒ–ã€‚
+ * è´Ÿè´£ç»˜åˆ¶é»‘ç™½è™šçº¿ç½‘æ ¼ä½œä¸ºå»ºé€ å‚è€ƒã€‚
  */
 
 #ifndef __GRID_BACKGROUND_H__
@@ -14,38 +14,38 @@
 USING_NS_CC;
 
 // ===================================================
-// Íø¸ñ±³¾°ÅäÖÃ³£Á¿
+// ç½‘æ ¼èƒŒæ™¯é…ç½®å¸¸é‡
 // ===================================================
 namespace GridBackgroundConfig {
-    // ±³¾°ÑÕÉ«
+    // èƒŒæ™¯é¢œè‰²
     const Color4B BG_COLOR = Color4B(36, 58, 36, 255);
 
-    // ĞéÏß²ÎÊı
+    // è™šçº¿å‚æ•°
     constexpr float DASH_LENGTH = 4.0f;
     constexpr float GAP_LENGTH = 4.0f;
     const Color4F LINE_COLOR = Color4F(0.2f, 0.35f, 0.2f, 0.45f);
 }
 
 // ===================================================
-// Íø¸ñ±³¾°Àà
+// ç½‘æ ¼èƒŒæ™¯ç±»
 // ===================================================
 class GridBackground : public Node {
 public:
     /**
-     * @brief ´´½¨Íø¸ñ±³¾°
-     * @param gridWidth Íø¸ñ¿í¶È£¨¸ñ×ÓÊı£©
-     * @param gridHeight Íø¸ñ¸ß¶È£¨¸ñ×ÓÊı£©
-     * @param cellSize Ã¿¸ñÏñËØ´óĞ¡
+     * @brief åˆ›å»ºç½‘æ ¼èƒŒæ™¯
+     * @param gridWidth ç½‘æ ¼å®½åº¦ï¼ˆæ ¼å­æ•°ï¼‰
+     * @param gridHeight ç½‘æ ¼é«˜åº¦ï¼ˆæ ¼å­æ•°ï¼‰
+     * @param cellSize æ¯æ ¼åƒç´ å¤§å°
      */
     static GridBackground* create(int gridWidth, int gridHeight, float cellSize);
 
     /**
-     * @brief ³õÊ¼»¯
+     * @brief åˆå§‹åŒ–
      */
     virtual bool init(int gridWidth, int gridHeight, float cellSize);
 
     /**
-     * @brief ÖØĞÂ»æÖÆÍø¸ñ
+     * @brief é‡æ–°ç»˜åˆ¶ç½‘æ ¼
      */
     void redraw();
 
@@ -59,7 +59,7 @@ private:
     DrawNode* _gridLines = nullptr;
 
     /**
-     * @brief »æÖÆĞéÏßÍø¸ñ
+     * @brief ç»˜åˆ¶è™šçº¿ç½‘æ ¼
      */
     void drawDashedGrid();
 };

@@ -1,4 +1,4 @@
-#ifndef __PRODUCTION_BUILDING_DATA_H__
+﻿#ifndef __PRODUCTION_BUILDING_DATA_H__
 #define __PRODUCTION_BUILDING_DATA_H__
 
 #include "cocos2d.h"

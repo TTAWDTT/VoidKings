@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file EffectUtils.cpp
  * @brief 轻量级视觉效果工具实现
  */

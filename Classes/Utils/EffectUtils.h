@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file EffectUtils.h
  * @brief 轻量级视觉效果工具
  */

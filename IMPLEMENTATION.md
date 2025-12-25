@@ -1,4 +1,4 @@
-# VoidKings - Building System Implementation
+﻿# VoidKings - Building System Implementation
 
 ## 项目概述 / Project Overview
 
