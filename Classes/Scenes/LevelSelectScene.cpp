@@ -8,7 +8,128 @@
 #include "Soldier/UnitManager.h"
 #include "Soldier/UnitData.h"
 #include "Utils/AudioManager.h"
+#include "Utils/AnimationUtils.h"
 #include "Core/Core.h"
+#include <algorithm>
+
+namespace {
+Node* createLevelNumberNode(int levelId, float targetWidth, float targetHeight) {
+    std::string levelText = std::to_string(levelId);
+    if (levelText.empty()) {
+        return nullptr;
+    }
+
+    std::vector<Sprite*> digits;
+    digits.reserve(levelText.size());
+
+    float totalWidth = 0.0f;
+    float maxHeight = 0.0f;
+    constexpr float spacing = 2.0f;
+
+    for (size_t i = 0; i < levelText.size(); ++i) {
+        char c = levelText[i];
+        if (c < '0' || c > '9') {
+            return nullptr;
+        }
+        std::string path = StringUtils::format("UI/LevelSelect/number/%c.png", c);
+        auto digit = Sprite::create(path);
+        if (!digit) {
+            return nullptr;
+        }
+        Size size = digit->getContentSize();
+        totalWidth += size.width;
+        if (i > 0) {
+            totalWidth += spacing;
+        }
+        maxHeight = std::max(maxHeight, size.height);
+        digits.push_back(digit);
+    }
+
+    if (totalWidth <= 0.0f || maxHeight <= 0.0f) {
+        return nullptr;
+    }
+
+    float scale = 1.0f;
+    if (targetWidth > 0.0f && targetHeight > 0.0f) {
+        scale = std::min(targetWidth / totalWidth, targetHeight / maxHeight);
+    }
+
+    auto container = Node::create();
+    float scaledWidth = totalWidth * scale;
+    float scaledHeight = maxHeight * scale;
+    container->setContentSize(Size(scaledWidth, scaledHeight));
+    container->setAnchorPoint(Vec2(0.5f, 0.5f));
+    container->setIgnoreAnchorPointForPosition(false);
+
+    float x = 0.0f;
+    for (auto* digit : digits) {
+        digit->setAnchorPoint(Vec2(0.0f, 0.5f));
+        digit->setScale(scale);
+        digit->setPosition(Vec2(x, scaledHeight * 0.5f));
+        container->addChild(digit);
+        x += (digit->getContentSize().width + spacing) * scale;
+    }
+
+    return container;
+}
+
+Sprite* createUnitIdleSprite(int unitId, float targetSize, bool forceAnimate) {
+    const UnitConfig* config = UnitManager::getInstance()->getConfig(unitId);
+    if (!config) {
+        return nullptr;
+    }
+
+    std::string baseName = config->spriteFrameName;
+    if (baseName.size() > 4) {
+        std::string suffix = baseName.substr(baseName.size() - 4);
+        if (suffix == ".png" || suffix == ".PNG") {
+            baseName = baseName.substr(0, baseName.size() - 4);
+        }
+    }
+
+    auto sprite = Sprite::create(baseName + ".png");
+    if (!sprite) {
+        sprite = Sprite::create(baseName + "_" + config->anim_idle + "_1.png");
+    }
+    if (!sprite) {
+        sprite = Sprite::create();
+        auto marker = DrawNode::create();
+        marker->drawSolidRect(Vec2(-12.0f, -12.0f), Vec2(12.0f, 12.0f), Color4F(0.3f, 0.3f, 0.3f, 1.0f));
+        sprite->addChild(marker);
+        return sprite;
+    }
+
+    Size contentSize = sprite->getContentSize();
+    if (contentSize.width > 0 && contentSize.height > 0) {
+        float scale = targetSize / std::max(contentSize.width, contentSize.height);
+        sprite->setScale(scale);
+    }
+
+    auto anim = AnimationUtils::buildAnimationFromFrames(
+        baseName,
+        config->anim_idle,
+        config->anim_idle_frames,
+        config->anim_idle_delay,
+        false
+    );
+    if ((!anim || anim->getFrames().size() <= 1) && forceAnimate) {
+        anim = AnimationUtils::buildAnimationFromFrames(
+            baseName,
+            config->anim_walk,
+            config->anim_walk_frames,
+            config->anim_walk_delay,
+            false
+        );
+    }
+
+    if (anim && anim->getFrames().size() > 1) {
+        auto animate = Animate::create(anim);
+        sprite->runAction(RepeatForever::create(animate));
+    }
+
+    return sprite;
+}
+} // namespace
 
 // ===================================================
 // 场景创建
@@ -36,6 +157,10 @@ bool LevelSelectScene::init() {
     }
 
     CCLOG("[关卡选择] 初始化关卡选择场景");
+
+    if (UnitManager::getInstance()->getAllUnitIds().empty()) {
+        UnitManager::getInstance()->loadConfig("res/units_config.json");
+    }
 
     // 初始化关卡数据
     initLevelData();
@@ -65,13 +190,27 @@ void LevelSelectScene::setSelectedUnits(const std::map<int, int>& units) {
 // ===================================================
 
 void LevelSelectScene::initLevelData() {
+    _levels.clear();
+
+    int highestCompleted = 0;
+    for (int i = 1; i <= LevelSelectConfig::MAX_LEVELS; ++i) {
+        if (Core::getInstance()->isLevelCompleted(i) && i > highestCompleted) {
+            highestCompleted = i;
+        }
+    }
+
+    int unlockLimit = std::max(3, highestCompleted + 3);
+    if (unlockLimit > LevelSelectConfig::MAX_LEVELS) {
+        unlockLimit = LevelSelectConfig::MAX_LEVELS;
+    }
+
     // 初始化12个关卡
     for (int i = 1; i <= LevelSelectConfig::MAX_LEVELS; ++i) {
         LevelInfo level;
         level.levelId = i;
         level.name = "Level " + std::to_string(i);
-        level.isUnlocked = true;  // 全部关卡开放
         level.starCount = Core::getInstance()->getLevelStars(i);
+        level.isUnlocked = (i <= unlockLimit);
         level.description = "Challenge Level " + std::to_string(i);
 
         _levels.push_back(level);
@@ -86,39 +225,25 @@ void LevelSelectScene::setupBackground() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
-    // 深色渐变背景
-    auto bgLayer = LayerGradient::create(
-        Color4B(18, 18, 18, 255),
-        Color4B(32, 32, 32, 255)
-    );
-    bgLayer->setContentSize(visibleSize);
+    _background = Sprite::create("UI/LevelSelect/background/select_level_background.png");
+    if (_background) {
+        _background->setAnchorPoint(Vec2(0.5f, 0.5f));
+        _background->setPosition(origin.x + visibleSize.width / 2,
+            origin.y + visibleSize.height / 2);
+        Size bgSize = _background->getContentSize();
+        if (bgSize.width > 0 && bgSize.height > 0) {
+            float scaleX = visibleSize.width / bgSize.width;
+            float scaleY = visibleSize.height / bgSize.height;
+            float scale = std::max(scaleX, scaleY);
+            _background->setScale(scale);
+        }
+        this->addChild(_background, 0);
+        return;
+    }
+
+    auto bgLayer = LayerColor::create(Color4B(18, 18, 18, 255), visibleSize.width, visibleSize.height);
     bgLayer->setPosition(origin);
     this->addChild(bgLayer, 0);
-
-    // 绘制网格线
-    auto gridNode = DrawNode::create();
-    float gridSpacing = 50.0f;
-
-    // 绘制垂直线
-    for (float x = 0; x <= visibleSize.width; x += gridSpacing) {
-        gridNode->drawLine(
-            Vec2(x, 0),
-            Vec2(x, visibleSize.height),
-            Color4F(0.12f, 0.12f, 0.12f, 1.0f)
-        );
-    }
-
-    // 绘制水平线
-    for (float y = 0; y <= visibleSize.height; y += gridSpacing) {
-        gridNode->drawLine(
-            Vec2(0, y),
-            Vec2(visibleSize.width, y),
-            Color4F(0.12f, 0.12f, 0.12f, 1.0f)
-        );
-    }
-
-    gridNode->setPosition(origin);
-    this->addChild(gridNode, 1);
 }
 
 // ===================================================
@@ -210,48 +335,62 @@ Node* LevelSelectScene::createLevelButton(const LevelInfo& level, int index) {
     auto node = Node::create();
     float size = LevelSelectConfig::LEVEL_BUTTON_SIZE;
 
-    // 背景方块 - 黑白风格
-    Color4B bgColor = level.isUnlocked ? Color4B(60, 60, 60, 255) : Color4B(30, 30, 30, 255);
-    auto bg = LayerColor::create(bgColor, size, size);
-    bg->setAnchorPoint(Vec2(0.5f, 0.5f));
-    bg->setIgnoreAnchorPointForPosition(false);
-    node->addChild(bg);
+    node->setContentSize(Size(size, size));
+    node->setAnchorPoint(Vec2(0.5f, 0.5f));
+    node->setIgnoreAnchorPointForPosition(false);
 
-    // 边框
-    auto border = DrawNode::create();
-    Color4F borderColor = level.isUnlocked ? Color4F::WHITE : Color4F(0.4f, 0.4f, 0.4f, 1.0f);
-    border->drawRect(
-        Vec2(-size / 2, -size / 2),
-        Vec2(size / 2, size / 2),
-        borderColor
-    );
-    node->addChild(border, 1);
-
-    // 关卡编号
-    auto numLabel = Label::createWithTTF(
-        std::to_string(level.levelId),
-        "fonts/ScienceGothic.ttf",
-        26
-    );
-    if (!numLabel) {
-        numLabel = Label::createWithSystemFont(std::to_string(level.levelId), "Arial", 24);
+    auto bg = Sprite::create("UI/LevelSelect/background/level_background.png");
+    if (bg) {
+        bg->setAnchorPoint(Vec2(0.5f, 0.5f));
+        bg->setPosition(Vec2(size / 2, size / 2));
+        Size bgSize = bg->getContentSize();
+        if (bgSize.width > 0 && bgSize.height > 0) {
+            float scale = std::min(size / bgSize.width, size / bgSize.height);
+            bg->setScale(scale);
+        }
+        if (!level.isUnlocked) {
+            bg->setColor(Color3B(140, 140, 140));
+            bg->setOpacity(200);
+        }
+        node->addChild(bg);
     }
-    numLabel->setPosition(Vec2(0, 8));
-    numLabel->setColor(level.isUnlocked ? Color3B::WHITE : Color3B::GRAY);
-    node->addChild(numLabel, 2);
+    else {
+        Color4B bgColor = level.isUnlocked ? Color4B(60, 60, 60, 255) : Color4B(30, 30, 30, 255);
+        auto fallbackBg = LayerColor::create(bgColor, size, size);
+        fallbackBg->setAnchorPoint(Vec2(0.5f, 0.5f));
+        fallbackBg->setIgnoreAnchorPointForPosition(false);
+        fallbackBg->setPosition(Vec2(size / 2, size / 2));
+        node->addChild(fallbackBg);
 
-    // 关卡名称
-    auto nameLabel = Label::createWithTTF(level.name, "fonts/arial.ttf", 10);
-    if (!nameLabel) {
-        nameLabel = Label::createWithSystemFont(level.name, "Arial", 10);
+        auto border = DrawNode::create();
+        Color4F borderColor = level.isUnlocked ? Color4F::WHITE : Color4F(0.4f, 0.4f, 0.4f, 1.0f);
+        border->drawRect(Vec2(0, 0), Vec2(size, size), borderColor);
+        node->addChild(border, 1);
     }
-    nameLabel->setPosition(Vec2(0, -8));
-    nameLabel->setColor(level.isUnlocked ? Color3B(210, 210, 210) : Color3B::GRAY);
-    node->addChild(nameLabel, 2);
 
-    // 星星显示（已完成的关卡）
-    if (level.starCount > 0) {
-        std::string starStr = "";
+    if (level.isUnlocked) {
+        auto numberNode = createLevelNumberNode(level.levelId, size * 0.55f, size * 0.4f);
+        if (numberNode) {
+            numberNode->setPosition(Vec2(size / 2, size / 2 + 6.0f));
+            node->addChild(numberNode, 2);
+        }
+        else {
+            auto numLabel = Label::createWithTTF(
+                std::to_string(level.levelId),
+                "fonts/ScienceGothic.ttf",
+                26
+            );
+            if (!numLabel) {
+                numLabel = Label::createWithSystemFont(std::to_string(level.levelId), "Arial", 24);
+            }
+            numLabel->setPosition(Vec2(size / 2, size / 2 + 6.0f));
+            numLabel->setColor(Color3B::WHITE);
+            node->addChild(numLabel, 2);
+        }
+    }
+
+    if (level.isUnlocked && level.starCount > 0) {
+        std::string starStr;
         for (int s = 0; s < level.starCount; ++s) {
             starStr += "*";
         }
@@ -262,47 +401,52 @@ Node* LevelSelectScene::createLevelButton(const LevelInfo& level, int index) {
         if (!starLabel) {
             starLabel = Label::createWithSystemFont(starStr, "Arial", 10);
         }
-        starLabel->setPosition(Vec2(0, -22));
+        starLabel->setPosition(Vec2(size / 2, size * 0.22f));
         starLabel->setColor(Color3B::YELLOW);
         node->addChild(starLabel, 2);
     }
 
-    // 完成关卡标识
-    if (level.starCount > 0) {
-        auto tagSprite = Sprite::create("UI/tag.png");
-        if (tagSprite) {
-            tagSprite->setAnchorPoint(Vec2(0.0f, 1.0f));
+    if (level.isUnlocked && level.starCount > 0) {
+        auto passedSprite = Sprite::create("UI/LevelSelect/passed.png");
+        if (passedSprite) {
+            passedSprite->setAnchorPoint(Vec2(0.0f, 1.0f));
             float targetSize = size * 0.35f;
-            Size tagSize = tagSprite->getContentSize();
+            Size tagSize = passedSprite->getContentSize();
             if (tagSize.width > 0 && tagSize.height > 0) {
                 float scale = targetSize / std::max(tagSize.width, tagSize.height);
-                tagSprite->setScale(scale);
+                passedSprite->setScale(scale);
             }
-            tagSprite->setPosition(Vec2(-size / 2 + 4.0f, size / 2 - 4.0f));
-            node->addChild(tagSprite, 3);
+            passedSprite->setPosition(Vec2(4.0f, size - 4.0f));
+            node->addChild(passedSprite, 3);
         }
     }
 
-    // 锁定标识（缩小字体）
     if (!level.isUnlocked) {
-        auto lockLabel = Label::createWithTTF("LOCKED", "fonts/arial.ttf", 7);
-        if (!lockLabel) {
-            lockLabel = Label::createWithSystemFont("LOCKED", "Arial", 7);
+        auto lockedSprite = Sprite::create("UI/LevelSelect/locked.png");
+        if (lockedSprite) {
+            Size lockSize = lockedSprite->getContentSize();
+            float targetSize = size * 0.45f;
+            if (lockSize.width > 0 && lockSize.height > 0) {
+                float scale = targetSize / std::max(lockSize.width, lockSize.height);
+                lockedSprite->setScale(scale);
+            }
+            lockedSprite->setPosition(Vec2(size / 2, size / 2));
+            node->addChild(lockedSprite, 3);
         }
-        lockLabel->setPosition(Vec2(0, -15));
-        lockLabel->setColor(Color3B::GRAY);
-        node->addChild(lockLabel, 2);
     }
 
     // 创建透明点击区域
     auto touchBtn = Button::create();
     touchBtn->setContentSize(Size(size, size));
     touchBtn->setScale9Enabled(true);
+    touchBtn->setPosition(Vec2(size / 2, size / 2));
 
     // 绑定点击事件
     int levelId = level.levelId;
     bool unlocked = level.isUnlocked;
     touchBtn->setSwallowTouches(true);
+    touchBtn->setEnabled(level.isUnlocked);
+    touchBtn->setBright(level.isUnlocked);
     const float originScale = node->getScale();
     touchBtn->addTouchEventListener([this, levelId, unlocked, node, originScale](Ref*, Widget::TouchEventType type) {
         if (type == Widget::TouchEventType::BEGAN) {
@@ -344,23 +488,29 @@ void LevelSelectScene::setupUnitPreview() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
-    // 创建预览区域背景 - 深灰色
-    auto previewBg = LayerColor::create(
-        Color4B(26, 26, 26, 255),
-        visibleSize.width,
-        LevelSelectConfig::UNIT_PREVIEW_HEIGHT
-    );
-    previewBg->setPosition(origin.x, origin.y + LevelSelectConfig::UNIT_PREVIEW_BOTTOM);
-    this->addChild(previewBg, 5);
-
-    // 边框线
-    auto borderLine = DrawNode::create();
-    borderLine->drawLine(
-        Vec2(origin.x, origin.y + LevelSelectConfig::UNIT_PREVIEW_BOTTOM + LevelSelectConfig::UNIT_PREVIEW_HEIGHT),
-        Vec2(origin.x + visibleSize.width, origin.y + LevelSelectConfig::UNIT_PREVIEW_BOTTOM + LevelSelectConfig::UNIT_PREVIEW_HEIGHT),
-        Color4F::WHITE
-    );
-    this->addChild(borderLine, 6);
+    auto previewBg = Sprite::create("UI/LevelSelect/background/unit_show_background.png");
+    if (previewBg) {
+        float centerX = origin.x + visibleSize.width / 2;
+        float centerY = origin.y + LevelSelectConfig::UNIT_PREVIEW_BOTTOM + LevelSelectConfig::UNIT_PREVIEW_HEIGHT / 2;
+        previewBg->setAnchorPoint(Vec2(0.5f, 0.5f));
+        previewBg->setPosition(Vec2(centerX, centerY));
+        Size bgSize = previewBg->getContentSize();
+        if (bgSize.width > 0 && bgSize.height > 0) {
+            float scaleX = visibleSize.width / bgSize.width;
+            float scaleY = LevelSelectConfig::UNIT_PREVIEW_HEIGHT / bgSize.height;
+            previewBg->setScale(scaleX, scaleY);
+        }
+        this->addChild(previewBg, 5);
+    }
+    else {
+        auto fallback = LayerColor::create(
+            Color4B(26, 26, 26, 255),
+            visibleSize.width,
+            LevelSelectConfig::UNIT_PREVIEW_HEIGHT
+        );
+        fallback->setPosition(origin.x, origin.y + LevelSelectConfig::UNIT_PREVIEW_BOTTOM);
+        this->addChild(fallback, 5);
+    }
 
     // 预览区域标题
     auto previewTitle = Label::createWithTTF(
@@ -442,35 +592,38 @@ Node* LevelSelectScene::createUnitPreviewIcon(int unitId, int count) {
     auto node = Node::create();
     float size = LevelSelectConfig::UNIT_ICON_SIZE;
 
-    // 获取兵种配置
-    const UnitConfig* config = UnitManager::getInstance()->getConfig(unitId);
-    std::string unitName = config ? config->name : "???";
+    node->setContentSize(Size(size, size));
+    node->setAnchorPoint(Vec2(0.0f, 0.0f));
+    node->setIgnoreAnchorPointForPosition(false);
 
-    // 图标背景
-    auto bg = LayerColor::create(
-        Color4B(45, 45, 45, 255),
-        size,
-        size
-    );
-    node->addChild(bg);
-
-    // 边框
-    auto border = DrawNode::create();
-    border->drawRect(Vec2(0, 0), Vec2(size, size), Color4F::WHITE);
-    node->addChild(border, 1);
-
-    // 兵种名称（简写）
-    auto nameLabel = Label::createWithTTF(
-        unitName.substr(0, 3),
-        "fonts/ScienceGothic.ttf",
-        10
-    );
-    if (!nameLabel) {
-        nameLabel = Label::createWithSystemFont(unitName.substr(0, 3), "Arial", 9);
+    auto bg = Sprite::create("UI/LevelSelect/background/unit_background.png");
+    if (bg) {
+        bg->setAnchorPoint(Vec2(0.5f, 0.5f));
+        bg->setPosition(Vec2(size / 2, size / 2));
+        Size bgSize = bg->getContentSize();
+        if (bgSize.width > 0 && bgSize.height > 0) {
+            float scale = std::min(size / bgSize.width, size / bgSize.height);
+            bg->setScale(scale);
+        }
+        node->addChild(bg, 0);
     }
-    nameLabel->setPosition(Vec2(size / 2, size / 2 + 6));
-    nameLabel->setColor(Color3B(230, 230, 230));
-    node->addChild(nameLabel, 2);
+    else {
+        auto fallbackBg = LayerColor::create(Color4B(45, 45, 45, 255), size, size);
+        fallbackBg->setAnchorPoint(Vec2(0.5f, 0.5f));
+        fallbackBg->setIgnoreAnchorPointForPosition(false);
+        fallbackBg->setPosition(Vec2(size / 2, size / 2));
+        node->addChild(fallbackBg, 0);
+
+        auto border = DrawNode::create();
+        border->drawRect(Vec2(0, 0), Vec2(size, size), Color4F::WHITE);
+        node->addChild(border, 1);
+    }
+
+    auto idleSprite = createUnitIdleSprite(unitId, size * 0.62f, true);
+    if (idleSprite) {
+        idleSprite->setPosition(Vec2(size / 2, size / 2 + 4));
+        node->addChild(idleSprite, 2);
+    }
 
     // 数量
     auto countLabel = Label::createWithTTF(
@@ -481,7 +634,7 @@ Node* LevelSelectScene::createUnitPreviewIcon(int unitId, int count) {
     if (!countLabel) {
         countLabel = Label::createWithSystemFont("x" + std::to_string(count), "Arial", 10);
     }
-    countLabel->setPosition(Vec2(size / 2, size / 2 - 8));
+    countLabel->setPosition(Vec2(size / 2, 10));
     countLabel->setColor(Color3B::YELLOW);
     node->addChild(countLabel, 2);
 
