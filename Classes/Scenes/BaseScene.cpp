@@ -19,6 +19,7 @@
 #include "Core/Core.h"
 #include "Soldier/UnitManager.h"
 #include "Utils/AudioManager.h"
+#include "Utils/NodeUtils.h"
 #include <algorithm>
 #include <cmath>
 
@@ -39,69 +40,6 @@ struct SavedBuilding {
 
 std::vector<SavedBuilding> s_savedBuildings;
 
-Sprite* findBodySprite(Node* building) {
-    if (!building) {
-        return nullptr;
-    }
-    if (auto* named = dynamic_cast<Sprite*>(building->getChildByName("bodySprite"))) {
-        return named;
-    }
-    Sprite* largest = nullptr;
-    float largestArea = 0.0f;
-    for (auto* child : building->getChildren()) {
-        auto* sprite = dynamic_cast<Sprite*>(child);
-        if (!sprite) {
-            continue;
-        }
-        if (sprite->getName() == "healthBar") {
-            continue;
-        }
-        Size size = sprite->getContentSize();
-        float area = size.width * size.height;
-        if (!largest || area > largestArea) {
-            largest = sprite;
-            largestArea = area;
-        }
-    }
-    return largest;
-}
-
-bool hitTestBuilding(Node* building, const Vec2& worldPos) {
-    if (!building) {
-        return false;
-    }
-    auto* bodySprite = findBodySprite(building);
-    if (bodySprite) {
-        Vec2 localPos = building->convertToNodeSpace(worldPos);
-        return bodySprite->getBoundingBox().containsPoint(localPos);
-    }
-    auto* parent = building->getParent();
-    if (parent) {
-        Vec2 localPos = parent->convertToNodeSpace(worldPos);
-        return building->getBoundingBox().containsPoint(localPos);
-    }
-    return false;
-}
-
-void drawDashedCircle(DrawNode* node, const Vec2& center, float radius, const Color4F& color) {
-    if (!node || radius <= 0.0f) {
-        return;
-    }
-    node->clear();
-    const int segments = 48;
-    constexpr float kPi = 3.1415926f;
-    const float step = 2.0f * kPi / segments;
-    for (int i = 0; i < segments; ++i) {
-        if (i % 2 != 0) {
-            continue;
-        }
-        float angle1 = step * i;
-        float angle2 = step * (i + 1);
-        Vec2 p1(center.x + radius * std::cos(angle1), center.y + radius * std::sin(angle1));
-        Vec2 p2(center.x + radius * std::cos(angle2), center.y + radius * std::sin(angle2));
-        node->drawLine(p1, p2, color);
-    }
-}
 } // namespace
 
 // ==================== 场景创建与初始化 ====================
@@ -370,7 +308,7 @@ namespace BuildingScaleConfig {
 void BaseScene::scaleBuildingToFit(Node* building, int gridWidth, int gridHeight, float cellSize) {
     if (!building) return;
 
-    auto sprite = findBodySprite(building);
+    auto sprite = NodeUtils::findBodySprite(building);
     if (!sprite) return;
 
     // 计算目标尺寸（占据的格子空间，留一点边距）
@@ -947,7 +885,7 @@ Node* BaseScene::pickBuildingAt(const Vec2& worldPos) const {
         if (dynamic_cast<DefenceBuilding*>(child)
             || dynamic_cast<ProductionBuilding*>(child)
             || dynamic_cast<StorageBuilding*>(child)) {
-            if (hitTestBuilding(child, worldPos)) {
+            if (NodeUtils::hitTestBuilding(child, worldPos)) {
                 return child;
             }
         }
@@ -1077,7 +1015,7 @@ void BaseScene::updateHoverOverlays(Node* building) {
     _hoverFootprintNode->setVisible(true);
 
     if (range > 0.0f) {
-        drawDashedCircle(_hoverRangeNode, center, range, Color4F(0.85f, 0.85f, 0.85f, 0.8f));
+        NodeUtils::drawDashedCircle(_hoverRangeNode, center, range, Color4F(0.85f, 0.85f, 0.85f, 0.8f));
         _hoverRangeNode->setVisible(true);
     }
     else {

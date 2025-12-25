@@ -6,8 +6,10 @@
 #include "Utils/AnimationUtils.h"
 #include "Utils/EffectUtils.h"
 #include "Utils/AudioManager.h"
+#include "Utils/NodeUtils.h"
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <string>
 
 namespace {
@@ -38,6 +40,77 @@ bool isMageUnit(const UnitConfig* config) {
 constexpr float kAttackRangeTolerance = 6.0f;
 // 最小移动步长，低于此值不切换为移动动画
 constexpr float kMinMoveStep = 0.05f;
+// 目标刷新间隔，避免每帧全量扫描
+constexpr float kTargetRefreshInterval = 0.25f;
+// 目标切换门槛，差距不大时保持当前目标
+constexpr float kTargetSwitchThreshold = 15.0f;
+// 评分比较的微小容差
+constexpr float kTargetScoreEpsilon = 0.01f;
+
+cocos2d::Rect rectInParentSpace(const cocos2d::Node* node,
+                               const cocos2d::Sprite* sprite,
+                               const cocos2d::Node* parent) {
+    const cocos2d::Node* ref = sprite ? static_cast<const cocos2d::Node*>(sprite) : node;
+    if (!ref) {
+        return cocos2d::Rect::ZERO;
+    }
+
+    cocos2d::Rect localRect = ref->getBoundingBox();
+    const cocos2d::Node* refParent = ref->getParent();
+    if (!refParent) {
+        if (!parent) {
+            return localRect;
+        }
+        cocos2d::Vec2 parentBL = parent->convertToNodeSpace(localRect.origin);
+        cocos2d::Vec2 parentTR = parent->convertToNodeSpace(localRect.origin +
+            cocos2d::Vec2(localRect.size.width, localRect.size.height));
+        float minX = std::min(parentBL.x, parentTR.x);
+        float minY = std::min(parentBL.y, parentTR.y);
+        float maxX = std::max(parentBL.x, parentTR.x);
+        float maxY = std::max(parentBL.y, parentTR.y);
+        return cocos2d::Rect(minX, minY, maxX - minX, maxY - minY);
+    }
+
+    cocos2d::Vec2 worldBL = refParent->convertToWorldSpace(localRect.origin);
+    cocos2d::Vec2 worldTR = refParent->convertToWorldSpace(localRect.origin +
+        cocos2d::Vec2(localRect.size.width, localRect.size.height));
+
+    if (!parent) {
+        float minX = std::min(worldBL.x, worldTR.x);
+        float minY = std::min(worldBL.y, worldTR.y);
+        float maxX = std::max(worldBL.x, worldTR.x);
+        float maxY = std::max(worldBL.y, worldTR.y);
+        return cocos2d::Rect(minX, minY, maxX - minX, maxY - minY);
+    }
+
+    cocos2d::Vec2 parentBL = parent->convertToNodeSpace(worldBL);
+    cocos2d::Vec2 parentTR = parent->convertToNodeSpace(worldTR);
+    float minX = std::min(parentBL.x, parentTR.x);
+    float minY = std::min(parentBL.y, parentTR.y);
+    float maxX = std::max(parentBL.x, parentTR.x);
+    float maxY = std::max(parentBL.y, parentTR.y);
+    return cocos2d::Rect(minX, minY, maxX - minX, maxY - minY);
+}
+
+float rectDistance(const cocos2d::Rect& a, const cocos2d::Rect& b) {
+    float dx = 0.0f;
+    if (a.getMaxX() < b.getMinX()) {
+        dx = b.getMinX() - a.getMaxX();
+    }
+    else if (b.getMaxX() < a.getMinX()) {
+        dx = a.getMinX() - b.getMaxX();
+    }
+
+    float dy = 0.0f;
+    if (a.getMaxY() < b.getMinY()) {
+        dy = b.getMinY() - a.getMaxY();
+    }
+    else if (b.getMaxY() < a.getMinY()) {
+        dy = a.getMinY() - b.getMaxY();
+    }
+
+    return std::sqrt(dx * dx + dy * dy);
+}
 } // namespace
 
 const std::vector<cocos2d::Node*>* Soldier::s_enemyBuildings = nullptr;
@@ -71,6 +144,7 @@ bool Soldier::init(const UnitConfig* config, int level) {
    // 3. 初始化运行时状态
    _currentHP = getCurrentMaxHP();
    _lastAttackTime = 0.0f;
+   _targetRefreshTimer = 0.0f;
    _direction = Direction::RIGHT;  // 默认朝右
    _currentActionKey.clear();
    _target = nullptr;
@@ -187,16 +261,19 @@ void Soldier::update(float dt) {
 
     if (_target && !_target->getParent()) {
         setTarget(nullptr);
+        _targetRefreshTimer = 0.0f;
     }
 
-    if (!_target) {
+    _targetRefreshTimer -= dt;
+    if (_targetRefreshTimer <= 0.0f) {
         findTarget();
+        _targetRefreshTimer = kTargetRefreshInterval;
     }
 
     if (_target) {
-        float dist = this->getPosition().distance(_target->getPosition());
-        float attackDistance = getAttackDistance(_target);
-        if (dist <= attackDistance + kAttackRangeTolerance) {
+        float dist = getDistanceToTarget(_target);
+        float attackRange = getCurrentRange();
+        if (dist <= attackRange + kAttackRangeTolerance) {
             attackTarget();
             tryPlayIdleAnimation();
         }
@@ -232,21 +309,63 @@ void Soldier::findTarget() {
         return;
     }
 
-    // 简化的寻敌：先按AI偏好找，找不到再选最近目标
-    auto pickNearest = [&](bool onlyDefense, bool onlyResource) -> cocos2d::Node* {
-        cocos2d::Node* nearest = nullptr;
-        float nearestDist = 999999.0f;
-        const auto selfPos = this->getPosition();
+    const bool wantDefense = _config && _config->aiType == TargetPriority::DEFENSE;
+    const bool wantResource = _config && _config->aiType == TargetPriority::RESOURCE;
+
+    // 过滤无效目标并标记类型
+    auto classifyBuilding = [&](cocos2d::Node* building, bool& isDefense, bool& isResource) -> bool {
+        if (!building || !building->getParent()) {
+            return false;
+        }
+
+        isDefense = false;
+        isResource = false;
+
+        if (auto* defence = dynamic_cast<DefenceBuilding*>(building)) {
+            if (defence->getCurrentHP() <= 0.0f) {
+                return false;
+            }
+            isDefense = true;
+        }
+        else if (auto* production = dynamic_cast<ProductionBuilding*>(building)) {
+            if (production->getCurrentHP() <= 0.0f) {
+                return false;
+            }
+            isResource = true;
+        }
+        else if (auto* storage = dynamic_cast<StorageBuilding*>(building)) {
+            if (storage->getCurrentHP() <= 0.0f) {
+                return false;
+            }
+            isResource = true;
+        }
+
+        return true;
+    };
+
+    // 评分：距离扣除攻击范围，越小越接近可攻击
+    auto calcScore = [&](cocos2d::Node* building, float& outDist) -> float {
+        outDist = getDistanceToTarget(building);
+        float attackRange = getCurrentRange();
+        float score = outDist - attackRange;
+        if (score < 0.0f) {
+            score = 0.0f;
+        }
+        return score;
+    };
+
+    // 按偏好挑选最佳目标（若分数接近则选更近的）
+    auto pickBest = [&](bool onlyDefense, bool onlyResource, float& outScore) -> cocos2d::Node* {
+        cocos2d::Node* best = nullptr;
+        float bestScore = std::numeric_limits<float>::max();
+        float bestDist = std::numeric_limits<float>::max();
 
         for (auto* building : *s_enemyBuildings) {
-            if (!building || !building->getParent()) {
+            bool isDefense = false;
+            bool isResource = false;
+            if (!classifyBuilding(building, isDefense, isResource)) {
                 continue;
             }
-
-            bool isDefense = dynamic_cast<DefenceBuilding*>(building) != nullptr;
-            bool isResource = dynamic_cast<ProductionBuilding*>(building) != nullptr
-                || dynamic_cast<StorageBuilding*>(building) != nullptr;
-
             if (onlyDefense && !isDefense) {
                 continue;
             }
@@ -254,39 +373,78 @@ void Soldier::findTarget() {
                 continue;
             }
 
-            float dist = selfPos.distance(building->getPosition());
-            if (dist < nearestDist) {
-                nearestDist = dist;
-                nearest = building;
+            float dist = 0.0f;
+            float score = calcScore(building, dist);
+            if (score < bestScore - kTargetScoreEpsilon
+                || (std::abs(score - bestScore) <= kTargetScoreEpsilon && dist < bestDist)) {
+                bestScore = score;
+                bestDist = dist;
+                best = building;
             }
         }
 
-        return nearest;
+        outScore = bestScore;
+        return best;
     };
 
-    cocos2d::Node* target = nullptr;
-    if (_config) {
-        if (_config->aiType == TargetPriority::DEFENSE) {
-            target = pickNearest(true, false);
-        }
-        else if (_config->aiType == TargetPriority::RESOURCE) {
-            target = pickNearest(false, true);
+    cocos2d::Node* bestTarget = nullptr;
+    float bestScore = std::numeric_limits<float>::max();
+    bool hasPriorityTarget = false;
+
+    if (wantDefense || wantResource) {
+        bestTarget = pickBest(wantDefense, wantResource, bestScore);
+        hasPriorityTarget = (bestTarget != nullptr);
+    }
+
+    if (!bestTarget) {
+        bestTarget = pickBest(false, false, bestScore);
+    }
+
+    if (!bestTarget) {
+        return;
+    }
+
+    if (_target && _target->getParent()) {
+        bool currentDefense = false;
+        bool currentResource = false;
+        if (classifyBuilding(_target, currentDefense, currentResource)) {
+            float currentDist = 0.0f;
+            float currentScore = calcScore(_target, currentDist);
+            float attackRange = getCurrentRange();
+            bool inRange = currentDist <= attackRange + kAttackRangeTolerance;
+
+            // 已进入攻击距离时保持目标，避免来回切换
+            if (inRange) {
+                return;
+            }
+
+            // 有优先级目标且当前目标不匹配时直接切换
+            if (hasPriorityTarget && ((wantDefense && !currentDefense) || (wantResource && !currentResource))) {
+                setTarget(bestTarget);
+                return;
+            }
+
+            if (bestTarget == _target) {
+                return;
+            }
+
+            // 目标差距不明显时不切换，减少抖动
+            if (currentScore <= bestScore + kTargetSwitchThreshold) {
+                return;
+            }
         }
     }
 
-    if (!target) {
-        target = pickNearest(false, false);
-    }
-
-    setTarget(target);
+    setTarget(bestTarget);
 }
 
 void Soldier::moveToTarget(float dt) {
     if (!_target) return;
 
-    cocos2d::Vec2 diff = _target->getPosition() - this->getPosition();
-    float dist = diff.length();
-    float stopDistance = getAttackDistance(_target) + kAttackRangeTolerance;
+    cocos2d::Vec2 targetPos = getTargetPositionInParent(_target);
+    cocos2d::Vec2 diff = targetPos - this->getPosition();
+    float dist = getDistanceToTarget(_target);
+    float stopDistance = getCurrentRange() + kAttackRangeTolerance;
     if (dist <= stopDistance) {
         tryPlayIdleAnimation();
         return;
@@ -304,13 +462,23 @@ void Soldier::moveToTarget(float dt) {
         remaining = 0.0f;
     }
     float move = std::min(step, remaining);
+    if (remaining <= kMinMoveStep) {
+        // 剩余距离很小也要补齐，否则会卡在攻击距离外
+        if (remaining > 0.0f) {
+            this->setPosition(this->getPosition() + direction * remaining);
+        }
+        tryPlayIdleAnimation();
+        return;
+    }
     if (move <= kMinMoveStep) {
+        // 步长过小，先推进但不切换移动动画，避免抖动
+        this->setPosition(this->getPosition() + direction * move);
         tryPlayIdleAnimation();
         return;
     }
 
     // 计算方向(只有左右)
-    Direction newDir = calcDirection(this->getPosition(), _target->getPosition());
+    Direction newDir = calcDirection(this->getPosition(), targetPos);
     // 更新精灵朝向并播放移动动画
     updateSpriteDirection(newDir);
     playAnimation(_config->anim_walk, _config->anim_walk_frames, _config->anim_walk_delay, true);
@@ -340,9 +508,9 @@ void Soldier::attackTarget() {
         return;
     }
 
-    float dist = this->getPosition().distance(_target->getPosition());
-    float attackDistance = getAttackDistance(_target);
-    if (dist > attackDistance + kAttackRangeTolerance) {
+    float dist = getDistanceToTarget(_target);
+    float attackRange = getCurrentRange();
+    if (dist > attackRange + kAttackRangeTolerance) {
         return;
     }
 
@@ -362,7 +530,8 @@ void Soldier::attackTarget() {
     _lastAttackTime = currentTime;
 
     // 计算攻击方向
-    Direction attackDir = calcDirection(this->getPosition(), _target->getPosition());
+    cocos2d::Vec2 targetPos = getTargetPositionInParent(_target);
+    Direction attackDir = calcDirection(this->getPosition(), targetPos);
     updateSpriteDirection(attackDir);
 
     // 播放攻击动画
@@ -470,58 +639,41 @@ Direction Soldier::calcDirection(const cocos2d::Vec2& from, const cocos2d::Vec2&
     return (diff.x >= 0) ? Direction::RIGHT : Direction::LEFT;
 }
 
-float Soldier::getBodyRadius() const {
-    if (!_bodySprite) {
-        return 0.0f;
-    }
-
-    cocos2d::Size size = _bodySprite->getContentSize();
-    float scaleX = std::abs(_bodySprite->getScaleX());
-    float scaleY = std::abs(_bodySprite->getScaleY());
-    return 0.5f * std::max(size.width * scaleX, size.height * scaleY);
-}
-
-float Soldier::getTargetRadius(const cocos2d::Node* target) const {
+cocos2d::Vec2 Soldier::getTargetPositionInParent(const cocos2d::Node* target) const {
     if (!target) {
-        return 0.0f;
+        return cocos2d::Vec2::ZERO;
     }
 
-    float maxRadius = 0.0f;
-    for (const auto& child : target->getChildren()) {
-        auto sprite = dynamic_cast<cocos2d::Sprite*>(child);
-        if (sprite) {
-            cocos2d::Size size = sprite->getContentSize();
-            float scaleX = std::abs(sprite->getScaleX());
-            float scaleY = std::abs(sprite->getScaleY());
-            float radius = 0.5f * std::max(size.width * scaleX, size.height * scaleY);
-            if (radius > maxRadius) {
-                maxRadius = radius;
-            }
-        }
-    }
-    if (maxRadius > 0.0f) {
-        return maxRadius;
+    auto* parent = this->getParent();
+    if (!parent || target->getParent() == parent) {
+        return target->getPosition();
     }
 
-    cocos2d::Size size = target->getContentSize();
-    if (size.width > 0.0f && size.height > 0.0f) {
-        float scaleX = std::abs(target->getScaleX());
-        float scaleY = std::abs(target->getScaleY());
-        return 0.5f * std::max(size.width * scaleX, size.height * scaleY);
-    }
-
-    return 0.0f;
+    cocos2d::Vec2 worldPos = target->convertToWorldSpace(cocos2d::Vec2::ZERO);
+    return parent->convertToNodeSpace(worldPos);
 }
 
-float Soldier::getAttackDistance(const cocos2d::Node* target) const {
-    float range = getCurrentRange();
-    if (_config && _config->ISREMOTE) {
-        // Ranged units already use center-to-center ranges in config.
-        return range;
+float Soldier::getDistanceToTarget(const cocos2d::Node* target) const {
+    if (!target) {
+        return std::numeric_limits<float>::max();
     }
-    float targetRadius = getTargetRadius(target);
-    float selfRadius = getBodyRadius();
-    return range + targetRadius + selfRadius;
+
+    cocos2d::Vec2 selfPos = this->getPosition();
+    cocos2d::Vec2 targetPos = getTargetPositionInParent(target);
+    if (_config && _config->ISREMOTE) {
+        return selfPos.distance(targetPos);
+    }
+
+    const cocos2d::Node* parent = this->getParent();
+    cocos2d::Rect selfRect = rectInParentSpace(this, _bodySprite, parent);
+    cocos2d::Rect targetRect = rectInParentSpace(target, NodeUtils::findBodySprite(target), parent);
+    if (selfRect.size.width <= 0.0f || selfRect.size.height <= 0.0f
+        || targetRect.size.width <= 0.0f || targetRect.size.height <= 0.0f) {
+        return selfPos.distance(targetPos);
+    }
+
+    // 近战单位使用边缘距离，避免贴近目标却一直走动。
+    return rectDistance(selfRect, targetRect);
 }
 
 // 更新精灵朝向 - 通过水平翻转实现左向

@@ -53,6 +53,7 @@ private:
     int _level;                   // 当前等级
     float _currentHP;
     float _lastAttackTime;
+    float _targetRefreshTimer;    // 目标刷新计时
     cocos2d::Sprite* _bodySprite; // 以后会定义这个为动画,暂时应该渲染成图片
     cocos2d::Sprite* _healthBar;  // 血条精灵
     cocos2d::Node* _target;       // 当前锁定的攻击目标（也是一个Node）
@@ -71,9 +72,8 @@ private:
     // 方向转换辅助函数
     Direction calcDirection(const cocos2d::Vec2& from, const cocos2d::Vec2& to);
 
-    float getBodyRadius() const;
-    float getTargetRadius(const cocos2d::Node* target) const;
-    float getAttackDistance(const cocos2d::Node* target) const;
+    cocos2d::Vec2 getTargetPositionInParent(const cocos2d::Node* target) const;
+    float getDistanceToTarget(const cocos2d::Node* target) const;
 
     // 内部行为逻辑
     void setTarget(cocos2d::Node* target);
