@@ -27,9 +27,12 @@ bool ProductionBuilding::init(const ProductionBuildingConfig* config, int level)
     _currentHP = getCurrentMaxHP();
     _lastProduceTime = 0.0f;
     _currentActionKey.clear();
+    _pendingCollectAmount = 0;
+    _collectType = ResourceType::COIN;
 
     _bodySprite = Sprite::create(_config->spriteFrameName);
     if (_bodySprite) {
+        _bodySprite->setName("bodySprite");
         this->addChild(_bodySprite);
     }
 
@@ -50,6 +53,7 @@ bool ProductionBuilding::init(const ProductionBuildingConfig* config, int level)
         }
     }
     if (_healthBar) {
+        _healthBar->setName("healthBar");
         _healthBar->setAnchorPoint(Vec2(0.0f, 0.5f));
         this->addChild(_healthBar);
         _healthBar->setScaleX(1.0f);
@@ -61,6 +65,10 @@ bool ProductionBuilding::init(const ProductionBuildingConfig* config, int level)
     this->scheduleUpdate();
 
     return true;
+}
+
+void ProductionBuilding::setCollectCallback(const std::function<void(ProductionBuilding*, ResourceType, int, const cocos2d::Vec2&)>& callback) {
+    _collectCallback = callback;
 }
 
 void ProductionBuilding::refreshHealthBarPosition() {
@@ -76,6 +84,18 @@ void ProductionBuilding::refreshHealthBarPosition() {
     float y = spriteHeight * 0.5f + offsetY;
     float x = -_healthBar->getContentSize().width * 0.5f;
     _healthBar->setPosition(Vec2(x, y));
+}
+
+void ProductionBuilding::refreshCollectIconPosition() {
+    if (!_collectSprite || !_bodySprite) {
+        return;
+    }
+    float spriteHeight = _bodySprite->getContentSize().height * _bodySprite->getScaleY();
+    if (spriteHeight <= 0.0f) {
+        spriteHeight = _bodySprite->getBoundingBox().size.height;
+    }
+    float y = spriteHeight * 0.5f + 22.0f;
+    _collectSprite->setPosition(Vec2(0.0f, y));
 }
 
 void ProductionBuilding::setLevel(int level) {
@@ -162,6 +182,18 @@ void ProductionBuilding::produce(float dt) {
 
     if (currentTime - _lastProduceTime >= interval) {
         _lastProduceTime = currentTime;
+
+        bool useCollect = isCollectorBuilding() && _collectCallback;
+        if (useCollect) {
+            if (gold > 0.0f) {
+                addPendingCollect(ResourceType::COIN, static_cast<int>(gold));
+            }
+            if (diamond > 0.0f) {
+                addPendingCollect(ResourceType::DIAMOND, static_cast<int>(diamond));
+            }
+            playProducePulse();
+            return;
+        }
 
         // 自动收集资源并播放产出动画
         if (gold > 0.0f) {
@@ -314,4 +346,107 @@ void ProductionBuilding::playProducePulse() {
     auto seq = Sequence::create(scaleUp, scaleDown, nullptr);
     seq->setTag(kProducePulseTag);
     _bodySprite->runAction(seq);
+}
+
+bool ProductionBuilding::isCollectorBuilding() const {
+    if (!_config) {
+        return false;
+    }
+    return _config->id == 3003 || _config->id == 3004
+        || _config->name == "GoldMaker" || _config->name == "DiamondMaker";
+}
+
+ResourceType ProductionBuilding::getCollectType() const {
+    if (_config && (_config->id == 3004 || _config->name == "DiamondMaker")) {
+        return ResourceType::DIAMOND;
+    }
+    return ResourceType::COIN;
+}
+
+void ProductionBuilding::addPendingCollect(ResourceType type, int amount) {
+    if (amount <= 0) {
+        return;
+    }
+    _collectType = type;
+    _pendingCollectAmount += amount;
+    updateCollectIcon();
+}
+
+void ProductionBuilding::updateCollectIcon() {
+    if (_pendingCollectAmount <= 0) {
+        clearCollectIcon();
+        return;
+    }
+    if (!_collectSprite) {
+        _collectSprite = Core::getInstance()->createResourceSprite(_collectType);
+        if (!_collectSprite) {
+            return;
+        }
+        _collectSprite->setName("collectIcon");
+        float targetHeight = 18.0f;
+        float scale = targetHeight / _collectSprite->getContentSize().height;
+        _collectSprite->setScale(scale);
+        this->addChild(_collectSprite, 5);
+        refreshCollectIconPosition();
+
+        _collectListener = EventListenerTouchOneByOne::create();
+        _collectListener->setSwallowTouches(true);
+        float baseScale = _collectSprite->getScale();
+        _collectListener->onTouchBegan = [this, baseScale](Touch* touch, Event*) {
+            if (!_collectSprite || _pendingCollectAmount <= 0) {
+                return false;
+            }
+            Vec2 local = this->convertToNodeSpace(touch->getLocation());
+            if (_collectSprite->getBoundingBox().containsPoint(local)) {
+                _collectSprite->setScale(baseScale * 0.92f);
+                return true;
+            }
+            return false;
+        };
+        _collectListener->onTouchCancelled = [this, baseScale](Touch*, Event*) {
+            if (_collectSprite) {
+                _collectSprite->setScale(baseScale);
+            }
+        };
+        _collectListener->onTouchEnded = [this, baseScale](Touch*, Event*) {
+            if (_collectSprite) {
+                _collectSprite->setScale(baseScale);
+            }
+            collectPending();
+        };
+        _eventDispatcher->addEventListenerWithSceneGraphPriority(_collectListener, _collectSprite);
+    }
+}
+
+void ProductionBuilding::clearCollectIcon() {
+    if (_collectListener && _collectSprite) {
+        _eventDispatcher->removeEventListener(_collectListener);
+        _collectListener = nullptr;
+    }
+    if (_collectSprite) {
+        _collectSprite->removeFromParent();
+        _collectSprite = nullptr;
+    }
+}
+
+void ProductionBuilding::collectPending() {
+    if (_pendingCollectAmount <= 0) {
+        return;
+    }
+    int amount = _pendingCollectAmount;
+    _pendingCollectAmount = 0;
+
+    Vec2 worldPos = this->convertToWorldSpace(Vec2::ZERO);
+    if (_collectSprite) {
+        worldPos = this->convertToWorldSpace(_collectSprite->getPosition());
+    }
+
+    clearCollectIcon();
+
+    if (_collectCallback) {
+        _collectCallback(this, _collectType, amount, worldPos);
+    }
+    else {
+        Core::getInstance()->addResource(_collectType, amount);
+    }
 }

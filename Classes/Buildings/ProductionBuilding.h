@@ -3,6 +3,7 @@
 
 #include "cocos2d.h"
 #include "ProductionBuildingData.h"
+#include <functional>
 
 enum class ResourceType;
 
@@ -27,6 +28,9 @@ public:
     
     int getLength() const;
     int getWidth() const;
+
+    void setCollectCallback(const std::function<void(ProductionBuilding*, ResourceType, int, const cocos2d::Vec2&)>& callback);
+    void refreshCollectIconPosition();
 
     void refreshHealthBarPosition();
     
@@ -53,6 +57,19 @@ private:
     float getProduceInterval() const;
     void spawnProduceEffect(ResourceType type);
     void playProducePulse();
+
+    bool isCollectorBuilding() const;
+    ResourceType getCollectType() const;
+    void addPendingCollect(ResourceType type, int amount);
+    void updateCollectIcon();
+    void clearCollectIcon();
+    void collectPending();
+
+    std::function<void(ProductionBuilding*, ResourceType, int, const cocos2d::Vec2&)> _collectCallback;
+    cocos2d::Sprite* _collectSprite = nullptr;
+    cocos2d::EventListenerTouchOneByOne* _collectListener = nullptr;
+    int _pendingCollectAmount = 0;
+    ResourceType _collectType;
 };
 
 #endif // __PRODUCTION_BUILDING_H__

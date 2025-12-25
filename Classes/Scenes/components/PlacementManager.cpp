@@ -84,7 +84,7 @@ void PlacementManager::startPlacement(const BuildingOption& option) {
             float scaleX = targetWidth / spriteSize.width;
             float scaleY = targetHeight / spriteSize.height;
             float scale = std::min(scaleX, scaleY);
-            if (scale > 0.1f) {
+            if (scale > 0.0f) {
                 _previewSprite->setScale(scale);
             }
         }

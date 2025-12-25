@@ -43,13 +43,27 @@ Sprite* findBodySprite(Node* building) {
     if (!building) {
         return nullptr;
     }
+    if (auto* named = dynamic_cast<Sprite*>(building->getChildByName("bodySprite"))) {
+        return named;
+    }
+    Sprite* largest = nullptr;
+    float largestArea = 0.0f;
     for (auto* child : building->getChildren()) {
         auto* sprite = dynamic_cast<Sprite*>(child);
-        if (sprite) {
-            return sprite;
+        if (!sprite) {
+            continue;
+        }
+        if (sprite->getName() == "healthBar") {
+            continue;
+        }
+        Size size = sprite->getContentSize();
+        float area = size.width * size.height;
+        if (!largest || area > largestArea) {
+            largest = sprite;
+            largestArea = area;
         }
     }
-    return nullptr;
+    return largest;
 }
 
 bool hitTestBuilding(Node* building, const Vec2& worldPos) {
@@ -109,6 +123,8 @@ bool BaseScene::init() {
     initBaseBuilding();
     initUIComponents();
     initBuildingSystem();
+    _effectLayer = Node::create();
+    this->addChild(_effectLayer, 150);
 
     // 加载兵种配置
     UnitManager::getInstance()->loadConfig("res/units_config.json");
@@ -309,6 +325,7 @@ void BaseScene::initBaseBuilding() {
 
         // 调整建筑缩放以适应格子大小
         scaleBuildingToFit(base, 4, 4, cellSize);
+        setupProductionCollect(base);
 
         CCLOG("[基地场景] 基地建筑放置完成 (4x4格子，位置36,36)");
     }
@@ -335,6 +352,7 @@ void BaseScene::initBaseBuilding() {
 
         // 调整建筑缩放以适应格子大小
         scaleBuildingToFit(barracks, 5, 5, cellSize);
+        setupProductionCollect(barracks);
 
         CCLOG("[基地场景] 兵营建筑放置完成 (5x5格子，位置30,36)");
     }
@@ -352,11 +370,7 @@ namespace BuildingScaleConfig {
 void BaseScene::scaleBuildingToFit(Node* building, int gridWidth, int gridHeight, float cellSize) {
     if (!building) return;
 
-    // 检查是否有子节点
-    if (building->getChildrenCount() == 0) return;
-
-    // 获取建筑的精灵
-    auto sprite = dynamic_cast<Sprite*>(building->getChildren().at(0));
+    auto sprite = findBodySprite(building);
     if (!sprite) return;
 
     // 计算目标尺寸（占据的格子空间，留一点边距）
@@ -372,21 +386,23 @@ void BaseScene::scaleBuildingToFit(Node* building, int gridWidth, int gridHeight
     float scaleY = targetHeight / originalSize.height;
     float scale = std::min(scaleX, scaleY);
 
-    // 应用缩放（最小缩放0.1，确保小图能放大）
-    if (scale > 0.1f) {
-        sprite->setScale(scale);
-        if (auto* defence = dynamic_cast<DefenceBuilding*>(building)) {
-            defence->refreshHealthBarPosition();
-        }
-        else if (auto* production = dynamic_cast<ProductionBuilding*>(building)) {
-            production->refreshHealthBarPosition();
-        }
-        else if (auto* storage = dynamic_cast<StorageBuilding*>(building)) {
-            storage->refreshHealthBarPosition();
-        }
-        CCLOG("[基地场景] 建筑缩放调整: 原尺寸(%.1f, %.1f) -> 目标(%.1f, %.1f), scale=%.2f",
-            originalSize.width, originalSize.height, targetWidth, targetHeight, scale);
+    if (scale <= 0.0f) {
+        return;
     }
+
+    sprite->setScale(scale);
+    if (auto* defence = dynamic_cast<DefenceBuilding*>(building)) {
+        defence->refreshHealthBarPosition();
+    }
+    else if (auto* production = dynamic_cast<ProductionBuilding*>(building)) {
+        production->refreshHealthBarPosition();
+        production->refreshCollectIconPosition();
+    }
+    else if (auto* storage = dynamic_cast<StorageBuilding*>(building)) {
+        storage->refreshHealthBarPosition();
+    }
+    CCLOG("[基地场景] 建筑缩放调整: 原尺寸(%.1f, %.1f) -> 目标(%.1f, %.1f), scale=%.2f",
+        originalSize.width, originalSize.height, targetWidth, targetHeight, scale);
 }
 
 // ==================== 触摸事件初始化 ====================
@@ -646,6 +662,7 @@ Node* BaseScene::createBuildingFromOption(const BuildingOption& option) {
         config.PRODUCE_GOLD = { 0, 0, 0 };
         config.STORAGE_GOLD_CAPACITY = { 0, 0, 0 };
         newBuilding = ProductionBuilding::create(&config, 0);
+        setupProductionCollect(static_cast<ProductionBuilding*>(newBuilding));
         break;
     }
     case 6: { // 金币工厂 (3x3格子)
@@ -663,6 +680,7 @@ Node* BaseScene::createBuildingFromOption(const BuildingOption& option) {
         config.STORAGE_GOLD_CAPACITY = { 0, 0, 0 };
         config.STORAGE_ELIXIR_CAPACITY = { 0, 0, 0 };
         newBuilding = ProductionBuilding::create(&config, 0);
+        setupProductionCollect(static_cast<ProductionBuilding*>(newBuilding));
         break;
     }
     case 7: { // 钻石工厂 (3x3格子)
@@ -680,6 +698,7 @@ Node* BaseScene::createBuildingFromOption(const BuildingOption& option) {
         config.STORAGE_GOLD_CAPACITY = { 0, 0, 0 };
         config.STORAGE_ELIXIR_CAPACITY = { 0, 0, 0 };
         newBuilding = ProductionBuilding::create(&config, 0);
+        setupProductionCollect(static_cast<ProductionBuilding*>(newBuilding));
         break;
     }
     }
@@ -738,6 +757,66 @@ void BaseScene::restoreSavedBuildings() {
         scaleBuildingToFit(building, option.gridWidth, option.gridHeight, cellSize);
         _gridMap->occupyCell(saved.gridX, saved.gridY, option.gridWidth, option.gridHeight, building);
     }
+}
+
+void BaseScene::setupProductionCollect(ProductionBuilding* building) {
+    if (!building) {
+        return;
+    }
+    int id = building->getId();
+    const std::string& name = building->getName();
+    bool isCollector = (id == 3003 || id == 3004 || name == "GoldMaker" || name == "DiamondMaker");
+    if (!isCollector) {
+        return;
+    }
+
+    building->setCollectCallback([this](ProductionBuilding*, ResourceType type, int amount, const Vec2& worldPos) {
+        Core::getInstance()->addResource(type, amount);
+        if (_uiPanel) {
+            _uiPanel->updateResourceDisplay(
+                Core::getInstance()->getResource(ResourceType::COIN),
+                Core::getInstance()->getResource(ResourceType::DIAMOND)
+            );
+        }
+        playCollectEffect(type, amount, worldPos);
+    });
+}
+
+void BaseScene::playCollectEffect(ResourceType type, int amount, const Vec2& worldPos) {
+    if (!_effectLayer) {
+        return;
+    }
+
+    auto sprite = Core::getInstance()->createResourceSprite(type);
+    if (sprite) {
+        sprite->setPosition(worldPos);
+        sprite->setScale(0.75f);
+        _effectLayer->addChild(sprite, 5);
+
+        Vec2 targetPos = _uiPanel ? _uiPanel->getResourceIconWorldPosition(type) : Vec2::ZERO;
+        if (targetPos == Vec2::ZERO) {
+            targetPos = worldPos + Vec2(0.0f, 120.0f);
+        }
+        auto move = EaseSineIn::create(MoveTo::create(0.6f, targetPos));
+        auto fade = FadeOut::create(0.6f);
+        sprite->runAction(Sequence::create(Spawn::create(move, fade, nullptr), RemoveSelf::create(), nullptr));
+    }
+
+    std::string text = (type == ResourceType::COIN)
+        ? StringUtils::format("Gold +%d", amount)
+        : StringUtils::format("Diamond +%d", amount);
+
+    auto label = Label::createWithTTF(text, "fonts/ScienceGothic.ttf", 16);
+    if (!label) {
+        label = Label::createWithSystemFont(text, "Arial", 16);
+    }
+    label->setPosition(worldPos + Vec2(0.0f, 12.0f));
+    label->setColor(type == ResourceType::COIN ? Color3B(255, 220, 90) : Color3B(130, 210, 255));
+    _effectLayer->addChild(label, 6);
+
+    auto rise = MoveBy::create(0.7f, Vec2(0.0f, 26.0f));
+    auto fade = FadeOut::create(0.7f);
+    label->runAction(Sequence::create(Spawn::create(rise, fade, nullptr), RemoveSelf::create(), nullptr));
 }
 
 // ==================== 触摸事件处理 ====================

@@ -5,9 +5,26 @@
 
 #include "BaseUIPanel.h"
 #include "UI/IDCardPanel.h"
+#include "Core/Core.h"
 #include "Utils/AudioManager.h"
 #include <memory>
 
+namespace {
+Node* findChildRecursive(Node* root, const std::string& name) {
+    if (!root) {
+        return nullptr;
+    }
+    if (root->getName() == name) {
+        return root;
+    }
+    for (auto* child : root->getChildren()) {
+        if (auto* found = findChildRecursive(child, name)) {
+            return found;
+        }
+    }
+    return nullptr;
+}
+} // namespace
  // ===================================================
  // 创建与初始化
  // ===================================================
@@ -257,10 +274,10 @@ void BaseUIPanel::updateResourceDisplay(int gold, int diamond) {
         return;
     }
 
-    auto goldPanel = _idCardPanel->getChildByName("goldPanel");
-    auto diamondPanel = _idCardPanel->getChildByName("diamondPanel");
-    auto goldLabel = goldPanel ? dynamic_cast<Label*>(goldPanel->getChildByName("valueLabel")) : nullptr;
-    auto diamondLabel = diamondPanel ? dynamic_cast<Label*>(diamondPanel->getChildByName("valueLabel")) : nullptr;
+    auto goldPanel = findChildRecursive(_idCardPanel, "goldPanel");
+    auto diamondPanel = findChildRecursive(_idCardPanel, "diamondPanel");
+    auto goldLabel = goldPanel ? dynamic_cast<Label*>(findChildRecursive(goldPanel, "valueLabel")) : nullptr;
+    auto diamondLabel = diamondPanel ? dynamic_cast<Label*>(findChildRecursive(diamondPanel, "valueLabel")) : nullptr;
 
     if (goldLabel) {
         char buffer[64];
@@ -272,4 +289,21 @@ void BaseUIPanel::updateResourceDisplay(int gold, int diamond) {
         snprintf(buffer, sizeof(buffer), "Diamonds: %d", diamond);
         diamondLabel->setString(buffer);
     }
+}
+
+Vec2 BaseUIPanel::getResourceIconWorldPosition(ResourceType type) const {
+    if (!_idCardPanel) {
+        return Vec2::ZERO;
+    }
+
+    const char* panelName = (type == ResourceType::COIN) ? "goldPanel" : "diamondPanel";
+    auto panel = findChildRecursive(_idCardPanel, panelName);
+    if (!panel) {
+        return Vec2::ZERO;
+    }
+
+    auto icon = panel->getChildByName("iconSprite");
+    Node* target = icon ? icon : panel;
+    auto* parent = target->getParent();
+    return parent ? parent->convertToWorldSpace(target->getPosition()) : target->getPosition();
 }

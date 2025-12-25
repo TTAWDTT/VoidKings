@@ -37,6 +37,7 @@ class BuildShopPanel;
 class PlacementManager;
 class BaseUIPanel;
 class GridBackground;
+enum class ResourceType;
 
 /**
  * @class BaseScene
@@ -76,6 +77,7 @@ private:
     BuildShopPanel* _buildShopPanel = nullptr;     // 建筑商店面板组件
     PlacementManager* _placementManager = nullptr; // 建筑放置管理器组件
     TrainPanel* _trainPanel = nullptr;             // 训练面板    
+    Node* _effectLayer = nullptr;                  // 特效层
 
     // ==================== 悬浮信息 ====================
     Node* _hoverInfoPanel = nullptr;               // 悬浮信息面板
@@ -205,6 +207,8 @@ private:
      * @param cellSize 单个格子的像素尺寸
      */
     void scaleBuildingToFit(Node* building, int gridWidth, int gridHeight, float cellSize);
+    void setupProductionCollect(ProductionBuilding* building);
+    void playCollectEffect(ResourceType type, int amount, const Vec2& worldPos);
 
     // ==================== 触摸事件处理 ====================
 

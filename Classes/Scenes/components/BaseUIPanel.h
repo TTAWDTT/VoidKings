@@ -16,6 +16,8 @@
 USING_NS_CC;
 using namespace cocos2d::ui;
 
+enum class ResourceType;
+
 // ===================================================
 // 基地UI配置常量
 // ===================================================
@@ -61,6 +63,11 @@ public:
      * @param diamond 钻石数量
      */
     void updateResourceDisplay(int gold, int diamond);
+
+    /**
+     * @brief 获取资源图标的世界坐标
+     */
+    Vec2 getResourceIconWorldPosition(ResourceType type) const;
 
     /**
      * @brief 设置主按钮可用状态

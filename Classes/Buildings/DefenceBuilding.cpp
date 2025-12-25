@@ -133,6 +133,7 @@ bool DefenceBuilding::init(const DefenceBuildingConfig* config, int level) {
 
     _bodySprite = Sprite::create(_config->spriteFrameName);
     if (_bodySprite) {
+        _bodySprite->setName("bodySprite");
         this->addChild(_bodySprite);
 
         // 检查是否是有动画的建筑（如Tree），如果是则播放帧动画
@@ -154,6 +155,7 @@ bool DefenceBuilding::init(const DefenceBuildingConfig* config, int level) {
         }
     }
     if (_healthBar) {
+        _healthBar->setName("healthBar");
         _healthBar->setAnchorPoint(Vec2(0.0f, 0.5f));
         this->addChild(_healthBar);
         _healthBar->setScaleX(1.0f);

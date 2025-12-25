@@ -33,13 +33,27 @@ Sprite* findBodySprite(Node* building) {
     if (!building) {
         return nullptr;
     }
+    if (auto* named = dynamic_cast<Sprite*>(building->getChildByName("bodySprite"))) {
+        return named;
+    }
+    Sprite* largest = nullptr;
+    float largestArea = 0.0f;
     for (auto* child : building->getChildren()) {
         auto* sprite = dynamic_cast<Sprite*>(child);
-        if (sprite) {
-            return sprite;
+        if (!sprite) {
+            continue;
+        }
+        if (sprite->getName() == "healthBar") {
+            continue;
+        }
+        Size size = sprite->getContentSize();
+        float area = size.width * size.height;
+        if (!largest || area > largestArea) {
+            largest = sprite;
+            largestArea = area;
         }
     }
-    return nullptr;
+    return largest;
 }
 
 bool hitTestBuilding(Node* building, const Vec2& worldPos) {
@@ -661,11 +675,7 @@ void BattleScene::createDefenseTower(int gridX, int gridY, int type, int level) 
 void BattleScene::scaleBuildingToFit(Node* building, int gridWidth, int gridHeight, float cellSize) {
     if (!building) return;
 
-    // 检查是否有子节点
-    if (building->getChildrenCount() == 0) return;
-
-    // 获取建筑的精灵
-    auto sprite = dynamic_cast<Sprite*>(building->getChildren().at(0));
+    auto sprite = findBodySprite(building);
     if (!sprite) return;
 
     // 计算目标尺寸（占据的格子空间，留一点边距）
@@ -682,18 +692,20 @@ void BattleScene::scaleBuildingToFit(Node* building, int gridWidth, int gridHeig
     float scaleY = targetHeight / originalSize.height;
     float scale = std::min(scaleX, scaleY);
 
-    // 应用缩放（最小缩放0.1，确保小图能放大）
-    if (scale > 0.1f) {
-        sprite->setScale(scale);
-        if (auto* defence = dynamic_cast<DefenceBuilding*>(building)) {
-            defence->refreshHealthBarPosition();
-        }
-        else if (auto* production = dynamic_cast<ProductionBuilding*>(building)) {
-            production->refreshHealthBarPosition();
-        }
-        else if (auto* storage = dynamic_cast<StorageBuilding*>(building)) {
-            storage->refreshHealthBarPosition();
-        }
+    if (scale <= 0.0f) {
+        return;
+    }
+
+    sprite->setScale(scale);
+    if (auto* defence = dynamic_cast<DefenceBuilding*>(building)) {
+        defence->refreshHealthBarPosition();
+    }
+    else if (auto* production = dynamic_cast<ProductionBuilding*>(building)) {
+        production->refreshHealthBarPosition();
+        production->refreshCollectIconPosition();
+    }
+    else if (auto* storage = dynamic_cast<StorageBuilding*>(building)) {
+        storage->refreshHealthBarPosition();
     }
 }
 

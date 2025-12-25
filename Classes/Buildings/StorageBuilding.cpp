@@ -28,6 +28,7 @@ bool StorageBuilding::init(const StorageBuildingConfig* config, int level) {
 
     _bodySprite = Sprite::create(_config->spriteFrameName);
     if (_bodySprite) {
+        _bodySprite->setName("bodySprite");
         this->addChild(_bodySprite);
     }
 
@@ -48,6 +49,7 @@ bool StorageBuilding::init(const StorageBuildingConfig* config, int level) {
         }
     }
     if (_healthBar) {
+        _healthBar->setName("healthBar");
         _healthBar->setAnchorPoint(Vec2(0.0f, 0.5f));
         this->addChild(_healthBar);
         _healthBar->setScaleX(1.0f);
