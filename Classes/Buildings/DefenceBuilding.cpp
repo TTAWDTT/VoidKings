@@ -524,6 +524,8 @@ void DefenceBuilding::attackTarget() {
             if (bullet) {
                 auto* parent = this->getParent();
                 if (parent) {
+                    bool rotateBullet = (impactSound == ImpactSound::ArrowHit);
+                    bullet->setRotateToTarget(rotateBullet, 0.0f);
                     parent->addChild(bullet, 20);
                     bullet->setPosition(this->getPosition());
                     bullet->setTarget(soldier);

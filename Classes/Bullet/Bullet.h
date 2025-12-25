@@ -12,6 +12,7 @@ public:
     void onExit() override;
 
     void setTarget(cocos2d::Node* target);
+    void setRotateToTarget(bool rotate, float rotationOffsetDegrees = 0.0f);
     float getDamage() const { return _damage; }
     
 protected:
@@ -19,6 +20,8 @@ protected:
     cocos2d::Node* _target;
     float _damage;
     float _speed;
+    bool _rotateToTarget = true;
+    float _rotationOffsetDegrees = 0.0f;
     
     virtual void onReachTarget();
 };

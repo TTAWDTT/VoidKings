@@ -19,6 +19,8 @@ bool Bullet::init(const std::string& spriteFrame, float damage, float speed) {
     _damage = damage;
     _speed = speed;
     _target = nullptr;
+    _rotateToTarget = true;
+    _rotationOffsetDegrees = 0.0f;
 
     // Create sprite
     _sprite = Sprite::create(spriteFrame);
@@ -41,6 +43,11 @@ void Bullet::setTarget(cocos2d::Node* target) {
     if (_target) {
         _target->retain();
     }
+}
+
+void Bullet::setRotateToTarget(bool rotate, float rotationOffsetDegrees) {
+    _rotateToTarget = rotate;
+    _rotationOffsetDegrees = rotationOffsetDegrees;
 }
 
 void Bullet::update(float dt) {
@@ -67,9 +74,9 @@ void Bullet::update(float dt) {
     this->setPosition(newPos);
 
     // Rotate bullet to face target
-    float angle = CC_RADIANS_TO_DEGREES(atan2(diff.y, diff.x));
-    if (_sprite) {
-        _sprite->setRotation(-angle);
+    if (_rotateToTarget && _sprite) {
+        float angle = CC_RADIANS_TO_DEGREES(atan2(diff.y, diff.x));
+        _sprite->setRotation(-angle + _rotationOffsetDegrees);
     }
 }
 

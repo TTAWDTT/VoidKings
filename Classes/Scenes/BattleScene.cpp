@@ -532,57 +532,61 @@ void BattleScene::createEnemyBase(int gridX, int gridY, int level) {
 // ===================================================
 
 void BattleScene::createDefenseTower(int gridX, int gridY, int type, int level) {
-    // 创建防御塔建筑配置
-    static DefenceBuildingConfig towerConfig;
+    // 创建防御塔建筑配置（分类型缓存，避免互相覆盖）
+    static DefenceBuildingConfig arrowConfig;
+    static DefenceBuildingConfig boomConfig;
 
+    DefenceBuildingConfig* towerConfig = nullptr;
     if (type == 1) {
         // 箭塔
-        towerConfig.id = 9101;
-        towerConfig.name = "EnemyArrowTower";
-        towerConfig.spriteFrameName = "buildings/ArrowTower.png";
-        towerConfig.HP = { 320, 420, 520 };
-        towerConfig.DP = { 0, 0.05f, 0.1f };
-        towerConfig.ATK = { 25, 35, 50 };
-        towerConfig.ATK_RANGE = { 170, 200, 230 };
-        towerConfig.ATK_SPEED = { 0.95f, 0.85f, 0.75f };
-        towerConfig.SKY_ABLE = true;
-        towerConfig.GROUND_ABLE = true;
-        towerConfig.bulletSpriteFrameName = "bullet/arrow.png";
-        towerConfig.bulletSpeed = 400.0f;
-        towerConfig.bulletIsAOE = false;
-        towerConfig.bulletAOERange = 0.0f;
+        towerConfig = &arrowConfig;
+        towerConfig->id = 9101;
+        towerConfig->name = "EnemyArrowTower";
+        towerConfig->spriteFrameName = "buildings/ArrowTower.png";
+        towerConfig->HP = { 320, 420, 520 };
+        towerConfig->DP = { 0, 0.05f, 0.1f };
+        towerConfig->ATK = { 25, 35, 50 };
+        towerConfig->ATK_RANGE = { 170, 200, 230 };
+        towerConfig->ATK_SPEED = { 0.95f, 0.85f, 0.75f };
+        towerConfig->SKY_ABLE = true;
+        towerConfig->GROUND_ABLE = true;
+        towerConfig->bulletSpriteFrameName = "bullet/arrow.png";
+        towerConfig->bulletSpeed = 400.0f;
+        towerConfig->bulletIsAOE = false;
+        towerConfig->bulletAOERange = 0.0f;
     }
     else {
         // 炮塔
-        towerConfig.id = 9102;
-        towerConfig.name = "EnemyBoomTower";
-        towerConfig.spriteFrameName = "buildings/BoomTower.png";
-        towerConfig.HP = { 450, 600, 760 };
-        towerConfig.DP = { 0.05f, 0.1f, 0.15f };
-        towerConfig.ATK = { 55, 75, 95 };
-        towerConfig.ATK_RANGE = { 140, 170, 200 };
-        towerConfig.ATK_SPEED = { 1.3f, 1.2f, 1.1f };
-        towerConfig.SKY_ABLE = false;
-        towerConfig.GROUND_ABLE = true;
-        towerConfig.bulletSpriteFrameName = "bullet/bomb.png";
-        towerConfig.bulletSpeed = 200.0f;
-        towerConfig.bulletIsAOE = true;
-        towerConfig.bulletAOERange = 40.0f;
+        towerConfig = &boomConfig;
+        towerConfig->id = 9102;
+        towerConfig->name = "EnemyBoomTower";
+        towerConfig->spriteFrameName = "buildings/BoomTower.png";
+        towerConfig->HP = { 450, 600, 760 };
+        towerConfig->DP = { 0.05f, 0.1f, 0.15f };
+        towerConfig->ATK = { 55, 75, 95 };
+        towerConfig->ATK_RANGE = { 140, 170, 200 };
+        towerConfig->ATK_SPEED = { 1.3f, 1.2f, 1.1f };
+        towerConfig->SKY_ABLE = false;
+        towerConfig->GROUND_ABLE = true;
+        towerConfig->bulletSpriteFrameName = "bullet/bomb.png";
+        towerConfig->bulletSpeed = 200.0f;
+        towerConfig->bulletIsAOE = true;
+        towerConfig->bulletAOERange = 40.0f;
     }
 
-    towerConfig.length = 3;
-    towerConfig.width = 3;
-    towerConfig.MAXLEVEL = 2;
+    towerConfig->length = 3;
+    towerConfig->width = 3;
+    towerConfig->MAXLEVEL = 2;
 
     int resolvedLevel = level;
     if (resolvedLevel < 0) {
         resolvedLevel = 0;
     }
-    if (resolvedLevel > towerConfig.MAXLEVEL) {
-        resolvedLevel = towerConfig.MAXLEVEL;
+    if (resolvedLevel > towerConfig->MAXLEVEL) {
+        resolvedLevel = towerConfig->MAXLEVEL;
     }
 
-    auto tower = DefenceBuilding::create(&towerConfig, resolvedLevel);
+    auto tower = DefenceBuilding::create(towerConfig, resolvedLevel);
     if (tower) {
         _buildingLayer->addChild(tower);
 
