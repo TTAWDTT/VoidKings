@@ -15,6 +15,7 @@
 #include "Buildings/DefenceBuilding.h"
 #include "Buildings/ProductionBuilding.h"
 #include "Buildings/StorageBuilding.h"
+#include "Buildings/Trap.h"
 #include "UI/TrainPanel.h"
 #include "Core/Core.h"
 #include "Soldier/UnitManager.h"
@@ -30,15 +31,14 @@ constexpr float kHoverPanelPaddingX = 16.0f;
 constexpr float kHoverPanelPaddingY = 14.0f;
 constexpr float kHoverPanelMinWidth = 260.0f;
 constexpr float kHoverPanelMinHeight = 140.0f;
+constexpr int kBaseAnchorX = 36;
+constexpr int kBaseAnchorY = 36;
+constexpr int kBarracksAnchorX = 30;
+constexpr int kBarracksAnchorY = 36;
 
-struct SavedBuilding {
-    BuildingOption option;
-    int gridX = 0;
-    int gridY = 0;
-    int level = 0;
-};
-
-std::vector<SavedBuilding> s_savedBuildings;
+Vec2 s_baseAnchor(static_cast<float>(kBaseAnchorX), static_cast<float>(kBaseAnchorY));
+Vec2 s_barracksAnchor(static_cast<float>(kBarracksAnchorX), static_cast<float>(kBarracksAnchorY));
+std::vector<BaseSavedBuilding> s_savedBuildings;
 
 } // namespace
 
@@ -55,6 +55,7 @@ bool BaseScene::init() {
 
     // 清理战斗场景的静态引用，避免野指针
     DefenceBuilding::setEnemySoldiers(nullptr);
+    TrapBase::setEnemySoldiers(nullptr);
 
     // 按模块化方式初始化各个组件
     initGridMap();
@@ -85,6 +86,18 @@ bool BaseScene::init() {
     CCLOG("[基地场景] 初始化完成（模块化版本）");
 
     return true;
+}
+
+const std::vector<BaseSavedBuilding>& BaseScene::getSavedBuildings() {
+    return s_savedBuildings;
+}
+
+Vec2 BaseScene::getBaseAnchorGrid() {
+    return s_baseAnchor;
+}
+
+Vec2 BaseScene::getBarracksAnchorGrid() {
+    return s_barracksAnchor;
 }
 
 // ==================== 网格地图初始化 ====================
@@ -255,11 +268,14 @@ void BaseScene::initBaseBuilding() {
     _baseConfig.STORAGE_GOLD_CAPACITY = { 1000, 2000, 4000 };
     _baseConfig.STORAGE_ELIXIR_CAPACITY = { 500, 1000, 2000 };
 
+    const int baseGridX = kBaseAnchorX;
+    const int baseGridY = kBaseAnchorY;
     auto base = ProductionBuilding::create(&_baseConfig, 0);
     if (base) {
         _buildingLayer->addChild(base);
         // 将基地放置在地图中心位置（80x80网格的中心为36,36附近，确保4x4建筑在网格内）
-        BuildingManager::getInstance()->placeBuilding(base, 36, 36, 4, 4);
+        BuildingManager::getInstance()->placeBuilding(base, baseGridX, baseGridY, 4, 4);
+        s_baseAnchor = Vec2(static_cast<float>(baseGridX), static_cast<float>(baseGridY));
 
         // 调整建筑缩放以适应格子大小
         scaleBuildingToFit(base, 4, 4, cellSize);
@@ -282,11 +298,14 @@ void BaseScene::initBaseBuilding() {
     _barracksConfig.STORAGE_GOLD_CAPACITY = { 0, 0, 0 };
     _barracksConfig.STORAGE_ELIXIR_CAPACITY = { 0, 0, 0 };
 
+    const int barracksGridX = kBarracksAnchorX;
+    const int barracksGridY = kBarracksAnchorY;
     auto barracks = ProductionBuilding::create(&_barracksConfig, 0);
     if (barracks) {
         _buildingLayer->addChild(barracks);
         // 将兵营放置在基地旁边（5x5格子，确保在网格内）
-        BuildingManager::getInstance()->placeBuilding(barracks, 30, 36, 5, 5);
+        BuildingManager::getInstance()->placeBuilding(barracks, barracksGridX, barracksGridY, 5, 5);
+        s_barracksAnchor = Vec2(static_cast<float>(barracksGridX), static_cast<float>(barracksGridY));
 
         // 调整建筑缩放以适应格子大小
         scaleBuildingToFit(barracks, 5, 5, cellSize);
@@ -475,6 +494,9 @@ void BaseScene::onPlacementConfirmed(const BuildingOption& option, int gridX, in
 
         // 标记网格为已占用
         _gridMap->occupyCell(gridX, gridY, option.gridWidth, option.gridHeight, newBuilding);
+        if (auto* trap = dynamic_cast<TrapBase*>(newBuilding)) {
+            trap->setGridContext(_gridMap, gridX, gridY, option.gridWidth, option.gridHeight);
+        }
 
         // 放置完成反馈
         newBuilding->runAction(Sequence::create(
@@ -505,6 +527,14 @@ void BaseScene::onPlacementConfirmed(const BuildingOption& option, int gridX, in
 // ==================== 建筑创建 ====================
 
 Node* BaseScene::createBuildingFromOption(const BuildingOption& option) {
+    return buildBuildingFromOption(option, this);
+}
+
+Node* BaseScene::createBuildingFromOptionForDefense(const BuildingOption& option) {
+    return buildBuildingFromOption(option, nullptr);
+}
+
+Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene* owner) {
     Node* newBuilding = nullptr;
 
     switch (option.type) {
@@ -547,6 +577,72 @@ Node* BaseScene::createBuildingFromOption(const BuildingOption& option) {
         config.bulletIsAOE = true;
         config.bulletAOERange = 40.0f;
         config.length = 3;  // 3x3格子
+        config.width = 3;
+        config.MAXLEVEL = 2;
+        newBuilding = DefenceBuilding::create(&config, 0);
+        break;
+    }
+    case 8: { // 双倍攻速炮塔 (3x3格子)
+        static DefenceBuildingConfig config;
+        config.id = 2008;
+        config.name = "DoubleBoomTower";
+        config.spriteFrameName = option.spritePath;
+        config.HP = { 620, 880, 1160 };
+        config.DP = { 0.05f, 0.1f, 0.15f };
+        config.ATK = { 50, 75, 100 };
+        config.ATK_RANGE = { 180, 220, 260 };
+        config.ATK_SPEED = { 0.75f, 0.7f, 0.65f };
+        config.SKY_ABLE = false;
+        config.GROUND_ABLE = true;
+        config.bulletSpriteFrameName = "bullet/bomb.png";
+        config.bulletSpeed = 200.0f;
+        config.bulletIsAOE = true;
+        config.bulletAOERange = 40.0f;
+        config.length = 3;
+        config.width = 3;
+        config.MAXLEVEL = 2;
+        newBuilding = DefenceBuilding::create(&config, 0);
+        break;
+    }
+    case 9: { // 魔法塔 (3x3格子)
+        static DefenceBuildingConfig config;
+        config.id = 2009;
+        config.name = "MagicTower";
+        config.spriteFrameName = option.spritePath;
+        config.HP = { 520, 760, 980 };
+        config.DP = { 0.0f, 0.05f, 0.1f };
+        config.ATK = { 40, 60, 80 };
+        config.ATK_RANGE = { 200, 240, 280 };
+        config.ATK_SPEED = { 1.2f, 1.1f, 1.0f };
+        config.SKY_ABLE = true;
+        config.GROUND_ABLE = true;
+        config.bulletSpriteFrameName.clear();
+        config.bulletSpeed = 0.0f;
+        config.bulletIsAOE = false;
+        config.bulletAOERange = 0.0f;
+        config.length = 3;
+        config.width = 3;
+        config.MAXLEVEL = 2;
+        newBuilding = DefenceBuilding::create(&config, 0);
+        break;
+    }
+    case 10: { // 火焰塔 (3x3格子)
+        static DefenceBuildingConfig config;
+        config.id = 2010;
+        config.name = "FireTower";
+        config.spriteFrameName = option.spritePath;
+        config.HP = { 650, 900, 1150 };
+        config.DP = { 0.05f, 0.1f, 0.15f };
+        config.ATK = { 20, 30, 40 };
+        config.ATK_RANGE = { 160, 190, 220 };
+        config.ATK_SPEED = { 0.6f, 0.55f, 0.5f };
+        config.SKY_ABLE = false;
+        config.GROUND_ABLE = true;
+        config.bulletSpriteFrameName.clear();
+        config.bulletSpeed = 0.0f;
+        config.bulletIsAOE = true;
+        config.bulletAOERange = 80.0f;
+        config.length = 3;
         config.width = 3;
         config.MAXLEVEL = 2;
         newBuilding = DefenceBuilding::create(&config, 0);
@@ -600,7 +696,6 @@ Node* BaseScene::createBuildingFromOption(const BuildingOption& option) {
         config.PRODUCE_GOLD = { 0, 0, 0 };
         config.STORAGE_GOLD_CAPACITY = { 0, 0, 0 };
         newBuilding = ProductionBuilding::create(&config, 0);
-        setupProductionCollect(static_cast<ProductionBuilding*>(newBuilding));
         break;
     }
     case 6: { // 金币工厂 (3x3格子)
@@ -618,7 +713,6 @@ Node* BaseScene::createBuildingFromOption(const BuildingOption& option) {
         config.STORAGE_GOLD_CAPACITY = { 0, 0, 0 };
         config.STORAGE_ELIXIR_CAPACITY = { 0, 0, 0 };
         newBuilding = ProductionBuilding::create(&config, 0);
-        setupProductionCollect(static_cast<ProductionBuilding*>(newBuilding));
         break;
     }
     case 7: { // 钻石工厂 (3x3格子)
@@ -636,9 +730,22 @@ Node* BaseScene::createBuildingFromOption(const BuildingOption& option) {
         config.STORAGE_GOLD_CAPACITY = { 0, 0, 0 };
         config.STORAGE_ELIXIR_CAPACITY = { 0, 0, 0 };
         newBuilding = ProductionBuilding::create(&config, 0);
-        setupProductionCollect(static_cast<ProductionBuilding*>(newBuilding));
         break;
     }
+    case 11: { // 地刺 (1x1格子)
+        newBuilding = SpikeTrap::create();
+        break;
+    }
+    case 12: { // 捕兽夹 (1x1格子)
+        newBuilding = SnapTrap::create();
+        break;
+    }
+    }
+
+    if (owner) {
+        if (auto* production = dynamic_cast<ProductionBuilding*>(newBuilding)) {
+            owner->setupProductionCollect(production);
+        }
     }
 
     return newBuilding;
@@ -663,7 +770,7 @@ void BaseScene::savePlacedBuilding(const BuildingOption& option, int gridX, int 
         }
     }
 
-    SavedBuilding saved;
+    BaseSavedBuilding saved;
     saved.option = option;
     saved.option.canBuild = true;
     saved.gridX = gridX;
@@ -694,6 +801,9 @@ void BaseScene::restoreSavedBuildings() {
         building->setPosition(buildingPos);
         scaleBuildingToFit(building, option.gridWidth, option.gridHeight, cellSize);
         _gridMap->occupyCell(saved.gridX, saved.gridY, option.gridWidth, option.gridHeight, building);
+        if (auto* trap = dynamic_cast<TrapBase*>(building)) {
+            trap->setGridContext(_gridMap, saved.gridX, saved.gridY, option.gridWidth, option.gridHeight);
+        }
     }
 }
 

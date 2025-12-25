@@ -26,9 +26,13 @@ public:
     // 资源历史累计
     long long getTotalEarned(ResourceType type) const;
 
-    // 基地等级（由历史资源总量决定）
+    // 基地等级（钻石升级）
     int getBaseLevel() const;
+    int getBaseMaxLevel() const;
+    int getBaseUpgradeCost() const;
+    bool upgradeBase();
     float getBaseProduceSpeedMultiplier() const;
+    float getTrainingCostMultiplier() const;
 
     // 关卡星级记录
     int getLevelStars(int levelId) const;
@@ -55,6 +59,7 @@ private:
     std::unordered_map<ResourceType, int, ResourceTypeHash> _resourceMap;
     long long _totalEarnedGold = 0;
     long long _totalEarnedDiamond = 0;
+    int _baseLevel = 1;
     std::unordered_map<int, int> _levelStars;
 };
 

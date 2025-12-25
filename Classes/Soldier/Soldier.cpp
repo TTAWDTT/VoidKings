@@ -143,6 +143,10 @@ bool Soldier::init(const UnitConfig* config, int level) {
     
    // 3. 初始化运行时状态
    _currentHP = getCurrentMaxHP();
+   if (_currentHP <= 0.0f) {
+       // 兜底：避免配置缺失导致单位无法更新
+       _currentHP = 1.0f;
+   }
    _lastAttackTime = 0.0f;
    _targetRefreshTimer = 0.0f;
    _direction = Direction::RIGHT;  // 默认朝右
@@ -231,9 +235,18 @@ float Soldier::getCurrentMaxHP() const {
 
 float Soldier::getCurrentSpeed() const {
     if (_level >= 0 && static_cast<size_t>(_level) < _config->SPEED.size()) {
-        return _config->SPEED[_level];
+        float speed = _config->SPEED[_level];
+        if (speed > 0.0f) {
+            return speed;
+        }
     }
-    return _config->SPEED.empty() ? 0.0f : _config->SPEED[0];
+    if (!_config->SPEED.empty()) {
+        float speed = _config->SPEED[0];
+        if (speed > 0.0f) {
+            return speed;
+        }
+    }
+    return 60.0f;
 }
 
 float Soldier::getCurrentATK() const {

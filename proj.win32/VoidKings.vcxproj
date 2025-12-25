@@ -166,6 +166,7 @@
     <ClCompile Include="..\Classes\Soldier\Soldier.cpp" />
     <ClCompile Include="..\Classes\Soldier\UnitManager.cpp" />
     <ClCompile Include="..\Classes\Buildings\DefenceBuilding.cpp" />
+    <ClCompile Include="..\Classes\Buildings\Trap.cpp" />
     <ClCompile Include="..\Classes\Buildings\ProductionBuilding.cpp" />
     <ClCompile Include="..\Classes\Buildings\StorageBuilding.cpp" />
     <ClCompile Include="..\Classes\Buildings\BuildingManager.cpp" />
@@ -194,6 +195,7 @@
     <ClInclude Include="..\Classes\Soldier\UnitData.h" />
     <ClInclude Include="..\Classes\Soldier\UnitManager.h" />
     <ClInclude Include="..\Classes\Buildings\DefenceBuilding.h" />
+    <ClInclude Include="..\Classes\Buildings\Trap.h" />
     <ClInclude Include="..\Classes\Buildings\DefenseBuildingData.h" />
     <ClInclude Include="..\Classes\Buildings\ProductionBuilding.h" />
     <ClInclude Include="..\Classes\Buildings\ProductionBuildingData.h" />

@@ -7,6 +7,7 @@
 #include "Utils/AnimationUtils.h"
 #include "Utils/AudioManager.h"
 #include <algorithm>
+#include <cmath>
 #include <unordered_map>
 
 namespace {
@@ -38,6 +39,18 @@ void bindPressScale(Button* button, Node* target, const std::function<void()>& o
     });
 }
 
+int resolveRecruitCost(const UnitConfig* config) {
+    if (!config) {
+        return TrainPanelConfig::DEFAULT_RECRUIT_COST;
+    }
+    int baseCost = config->COST_COIN > 0 ? config->COST_COIN : TrainPanelConfig::DEFAULT_RECRUIT_COST;
+    float multiplier = Core::getInstance()->getTrainingCostMultiplier();
+    int cost = static_cast<int>(std::round(static_cast<float>(baseCost) * multiplier));
+    if (cost < 1) {
+        cost = 1;
+    }
+    return cost;
+}
 struct ContentCenterInfo {
     bool valid = false;
     Vec2 center = Vec2::ZERO;
@@ -576,7 +589,7 @@ Node* TrainPanel::createUnitCard(int unitId) {
     auto recruitNode = Node::create();
     recruitNode->setPosition(Vec2(-btnWidth / 2 - btnSpacing / 2, btnY));
 
-    int recruitCost = config->COST_COIN > 0 ? config->COST_COIN : TrainPanelConfig::DEFAULT_RECRUIT_COST;
+    int recruitCost = resolveRecruitCost(config);
     int coin = Core::getInstance()->getResource(ResourceType::COIN);
     bool canRecruit = coin >= recruitCost;
 
@@ -870,7 +883,7 @@ void TrainPanel::recruitUnit(int unitId) {
     if (!config) return;
 
     // 使用金币招募（如果COST_COIN为0，使用默认值）
-    int cost = config->COST_COIN > 0 ? config->COST_COIN : TrainPanelConfig::DEFAULT_RECRUIT_COST;
+    int cost = resolveRecruitCost(config);
 
     int coin = Core::getInstance()->getResource(ResourceType::COIN);
     if (coin < cost) {

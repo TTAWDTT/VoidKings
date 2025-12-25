@@ -66,6 +66,9 @@
     <ClCompile Include="..\Classes\Buildings\DefenceBuilding.cpp">
       <Filter>src\Buildings</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Buildings\Trap.cpp">
+      <Filter>src\Buildings</Filter>
+    </ClCompile>
     <ClCompile Include="..\Classes\Buildings\ProductionBuilding.cpp">
       <Filter>src\Buildings</Filter>
     </ClCompile>
@@ -141,6 +144,9 @@
       <Filter>src\Scenes\Components</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Buildings\DefenceBuilding.h">
+      <Filter>src\Buildings</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Buildings\Trap.h">
       <Filter>src\Buildings</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Buildings\DefenseBuildingData.h">

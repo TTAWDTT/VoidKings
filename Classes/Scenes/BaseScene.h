@@ -39,6 +39,13 @@ class BaseUIPanel;
 class GridBackground;
 enum class ResourceType;
 
+struct BaseSavedBuilding {
+    BuildingOption option;
+    int gridX = 0;
+    int gridY = 0;
+    int level = 0;
+};
+
 /**
  * @class BaseScene
  * @brief 基地场景类
@@ -67,6 +74,10 @@ public:
 
     CREATE_FUNC(BaseScene);
 
+    static const std::vector<BaseSavedBuilding>& getSavedBuildings();
+    static Vec2 getBaseAnchorGrid();
+    static Vec2 getBarracksAnchorGrid();
+    static Node* createBuildingFromOptionForDefense(const BuildingOption& option);
 
 private:
     // ==================== 核心组件 ====================
@@ -209,6 +220,7 @@ private:
     void scaleBuildingToFit(Node* building, int gridWidth, int gridHeight, float cellSize);
     void setupProductionCollect(ProductionBuilding* building);
     void playCollectEffect(ResourceType type, int amount, const Vec2& worldPos);
+    static Node* buildBuildingFromOption(const BuildingOption& option, BaseScene* owner);
 
     // ==================== 触摸事件处理 ====================
 

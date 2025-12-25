@@ -56,7 +56,13 @@ void Bullet::update(float dt) {
         return;
     }
 
-    Vec2 targetPos = _target->getPosition();
+    auto* parent = this->getParent();
+    auto* targetParent = _target->getParent();
+    Vec2 targetWorld = targetParent
+        ? targetParent->convertToWorldSpace(_target->getPosition())
+        : _target->getPosition();
+    Vec2 targetPos = parent ? parent->convertToNodeSpace(targetWorld) : targetWorld;
+
     Vec2 currentPos = this->getPosition();
     Vec2 diff = targetPos - currentPos;
     float distance = diff.length();

@@ -17,7 +17,11 @@ namespace AudioManager {
     void playArrowHit();
     void playMeleeHit();
     void playMagicAttack();
+    void playMagicHit();
     void playBoom();
+    void playSpikeAppear();
+    void playSnapTrap();
+    void playFireSpray();
     void playBuildingCollapse();
     void playRandomHit();
     void playVictory();

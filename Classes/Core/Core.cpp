@@ -44,6 +44,7 @@ bool Core::init()
     _levelStars.clear();
     _totalEarnedGold = 0;
     _totalEarnedDiamond = 0;
+    _baseLevel = 1;
     return true;
 }
 
@@ -190,34 +191,65 @@ long long Core::getTotalEarned(ResourceType type) const
 
 int Core::getBaseLevel() const
 {
-    // 基地等级阈值（金币/钻石同时满足）
-    static const int kGoldThresholds[] = { 0, 1000, 3000, 8000, 15000, 30000 };
-    static const int kDiamondThresholds[] = { 0, 50, 150, 350, 700, 1200 };
-    const int goldSize = static_cast<int>(sizeof(kGoldThresholds) / sizeof(kGoldThresholds[0]));
-    const int diamondSize = static_cast<int>(sizeof(kDiamondThresholds) / sizeof(kDiamondThresholds[0]));
+    return _baseLevel;
+}
 
-    int goldLevel = 0;
-    for (int i = 0; i < goldSize; ++i) {
-        if (_totalEarnedGold >= kGoldThresholds[i]) {
-            goldLevel = i;
-        }
+int Core::getBaseMaxLevel() const
+{
+    return 5;
+}
+
+int Core::getBaseUpgradeCost() const
+{
+    static const int kUpgradeCosts[] = { 0, 0, 200, 500, 900, 1400 };
+    int maxLevel = getBaseMaxLevel();
+    if (_baseLevel >= maxLevel) {
+        return 0;
     }
-
-    int diamondLevel = 0;
-    for (int i = 0; i < diamondSize; ++i) {
-        if (_totalEarnedDiamond >= kDiamondThresholds[i]) {
-            diamondLevel = i;
-        }
+    int nextLevel = _baseLevel + 1;
+    if (nextLevel < 0 || nextLevel >= static_cast<int>(sizeof(kUpgradeCosts) / sizeof(kUpgradeCosts[0]))) {
+        return 0;
     }
+    return kUpgradeCosts[nextLevel];
+}
 
-    return std::min(goldLevel, diamondLevel);
+bool Core::upgradeBase()
+{
+    int maxLevel = getBaseMaxLevel();
+    if (_baseLevel >= maxLevel) {
+        return false;
+    }
+    int cost = getBaseUpgradeCost();
+    if (cost <= 0) {
+        return false;
+    }
+    if (!consumeResource(ResourceType::DIAMOND, cost)) {
+        return false;
+    }
+    _baseLevel += 1;
+    return true;
 }
 
 float Core::getBaseProduceSpeedMultiplier() const
 {
     int level = getBaseLevel();
-    // 每级提升产出速度
-    return 1.0f + static_cast<float>(level) * 0.15f;
+    if (level < 1) {
+        level = 1;
+    }
+    return 1.0f + static_cast<float>(level - 1) * 0.15f;
+}
+
+float Core::getTrainingCostMultiplier() const
+{
+    int level = getBaseLevel();
+    if (level < 1) {
+        level = 1;
+    }
+    float mul = 1.0f - static_cast<float>(level - 1) * 0.05f;
+    if (mul < 0.7f) {
+        mul = 0.7f;
+    }
+    return mul;
 }
 
 int Core::getLevelStars(int levelId) const

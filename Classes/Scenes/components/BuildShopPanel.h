@@ -22,7 +22,7 @@ using namespace cocos2d::ui;
 // ===================================================
 namespace BuildShopConfig {
     // 面板尺寸（缩小以适应更小的建筑图标）
-    const Size PANEL_SIZE = Size(450.0f, 350.0f);
+    const Size PANEL_SIZE = Size(450.0f, 450.0f);
 
     // 标题配置
     constexpr int TITLE_FONT_SIZE = 22;

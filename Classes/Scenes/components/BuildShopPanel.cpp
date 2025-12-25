@@ -75,6 +75,11 @@ void BuildShopPanel::initBuildingOptions() {
     _buildingOptions = {
         {1, "Arrow Tower", 100, 3, 3, "buildings/ArrowTower.png", true},      // 箭塔 3x3
         {2, "Boom Tower", 150, 3, 3, "buildings/BoomTower.png", true},        // 炮塔 3x3
+        {8, "Double Boom", 220, 3, 3, "buildings/DoubleBoomTower.png", true}, // 双倍攻速炮塔 3x3
+        {9, "Magic Tower", 240, 3, 3, "buildings/MagicTower.png", true},      // 魔法塔 3x3
+        {10, "Fire Tower", 800, 3, 3, "buildings/FireTower.png", true},       // 火焰塔 3x3
+        {11, "Spike Trap", 10, 1, 1, "buildings/spike/spike_1.png", true},    // 地刺 1x1
+        {12, "Snap Trap", 100, 1, 1, "buildings/trap/trap_1.png", true},      // 捕兽夹 1x1
         {3, "Tree", 80, 2, 2, "buildings/Tree/sprite_0000.png", true},        // 树 2x2
         {4, "Storage", 200, 3, 3, "buildings/snowman.png", true},             // 仓库 3x3
         {5, "Barracks", 300, 5, 5, "buildings/soldierbuilder.png", false},    // 兵营 5x5不可重复
@@ -158,14 +163,7 @@ void BuildShopPanel::setupTitle() {
     _panel->addChild(titleBg);
 
     // ��������
-    _titleLabel = Label::createWithTTF(
-        "Building Shop",
-        "fonts/arial.ttf",
-        BuildShopConfig::TITLE_FONT_SIZE
-    );
-    if (!_titleLabel) {
-        _titleLabel = Label::createWithSystemFont("Building Shop", "Arial", BuildShopConfig::TITLE_FONT_SIZE);
-    }
+    _titleLabel = Label::createWithSystemFont("Building Shop", "Arial", BuildShopConfig::TITLE_FONT_SIZE);
     _titleLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
     _titleLabel->setPosition(
         BuildShopConfig::PANEL_SIZE.width / 2,
@@ -265,10 +263,7 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
     }
 
     // �������ƣ���С���壩
-    auto nameLabel = Label::createWithTTF(option.name, "fonts/arial.ttf", 9);
-    if (!nameLabel) {
-        nameLabel = Label::createWithSystemFont(option.name, "Arial", 9);
-    }
+    auto nameLabel = Label::createWithSystemFont(option.name, "Arial", 10);
     nameLabel->setPosition(Vec2(0, -20));
     nameLabel->setColor(option.canBuild ? Color3B::WHITE : Color3B::GRAY);
     nameLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
@@ -276,10 +271,7 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
     // ������ʾ
     char costText[32];
     snprintf(costText, sizeof(costText), "%d", option.cost);
-    auto costLabel = Label::createWithTTF(costText, "fonts/arial.ttf", 8);
-    if (!costLabel) {
-        costLabel = Label::createWithSystemFont(costText, "Arial", 8);
-    }
+    auto costLabel = Label::createWithSystemFont(costText, "Arial", 9);
     costLabel->setPosition(Vec2(8, -28));
     costLabel->setColor(option.canBuild ? Color3B::YELLOW : Color3B::GRAY);
     costLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
@@ -298,10 +290,7 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
     // �ߴ���Ϣ
     char sizeText[32];
     snprintf(sizeText, sizeof(sizeText), "%dx%d", option.gridWidth, option.gridHeight);
-    auto sizeLabel = Label::createWithTTF(sizeText, "fonts/arial.ttf", 8);
-    if (!sizeLabel) {
-        sizeLabel = Label::createWithSystemFont(sizeText, "Arial", 8);
-    }
+    auto sizeLabel = Label::createWithSystemFont(sizeText, "Arial", 9);
     sizeLabel->setPosition(Vec2(0, -40));
     sizeLabel->setColor(option.canBuild ? Color3B(210, 210, 210) : Color3B::GRAY);
     sizeLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
@@ -309,10 +298,7 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
 
     // ������ɽ��죬����"����"��ǩ
     if (!option.canBuild) {
-        auto lockedLabel = Label::createWithTTF("Owned", "fonts/arial.ttf", 8);
-        if (!lockedLabel) {
-            lockedLabel = Label::createWithSystemFont("Owned", "Arial", 8);
-        }
+        auto lockedLabel = Label::createWithSystemFont("Owned", "Arial", 9);
         lockedLabel->setPosition(Vec2(0, 25));
         lockedLabel->setColor(Color3B::RED);
         itemNode->addChild(lockedLabel, 3);

@@ -48,6 +48,11 @@ namespace BattleConfig {
     constexpr float BATTLE_TIME_LIMIT = 160.0f;  // 战斗时间限制（秒）
 }
 
+enum class BattleMode {
+    Attack,
+    Defense
+};
+
 // ===================================================
 // 战斗场景类
 // ===================================================
@@ -59,7 +64,7 @@ public:
      * @param units 可部署的单位 <单位ID, 数量>
      * @param useDefaultUnits 是否允许使用默认兵种
      */
-    static Scene* createScene(int levelId = 1, const std::map<int, int>& units = {}, bool useDefaultUnits = true);
+    static Scene* createScene(int levelId = 1, const std::map<int, int>& units = {}, bool useDefaultUnits = true, bool defenseMode = false);
 
     virtual bool init() override;
     virtual void update(float dt) override;
@@ -69,6 +74,7 @@ public:
 
     // 设置关卡ID
     void setLevelId(int levelId) { _levelId = levelId; }
+    void setBattleMode(BattleMode mode) { _battleMode = mode; }
 
     // 设置可部署的单位
     void setDeployableUnits(const std::map<int, int>& units) {
@@ -87,6 +93,16 @@ private:
     std::map<int, int> _deployableUnits;            // 可部署的单位 <ID, 数量>
     std::map<int, int> _remainingUnits;             // 剩余可部署的单位
     bool _allowDefaultUnits = true;                 // 是否允许使用默认兵种（未传入训练兵种时）
+    BattleMode _battleMode = BattleMode::Attack;    // 战斗模式
+
+    struct DefenseSpawn {
+        float time = 0.0f;
+        int unitId = 0;
+    };
+    std::vector<DefenseSpawn> _defenseSpawns;
+    size_t _nextDefenseSpawnIndex = 0;
+    float _defenseSpawnCursor = 0.0f;
+    int _defenseTotalUnits = 0;
 
     // ==================== 战斗状态 ====================
     std::vector<Soldier*> _soldiers;                // 场上的士兵
@@ -136,8 +152,17 @@ private:
     void createLevel10();
     void createLevel11();
     void createLevel12();
+    void createDefenseLevel1();
+    void createDefenseLevel2();
+    void createDefenseLevel3();
+    void createDefenseLevel4();
+    void createDefenseLevel5();
+    void createDefenseLevel6();
+    void createDefenseBaseLayout(int towerLevel);
     void createEnemyBase(int gridX, int gridY, int level = 0);
     void createDefenseTower(int gridX, int gridY, int type, int level = 0);
+    void createSpikeTrap(int gridX, int gridY);
+    void createSnapTrap(int gridX, int gridY);
 
     // ==================== 辅助方法 ====================
     /**
@@ -152,6 +177,7 @@ private:
     // ==================== 部署系统 ====================
     void setupDeployArea();
     void deploySoldier(int unitId, const Vec2& position);
+    void spawnEnemySoldier(int unitId, const Vec2& position, int level);
     void spawnDeployEffect(const Vec2& position);
     Node* createDeployButton(int unitId, int count, float x);
     Sprite* createUnitIdleIcon(int unitId, float targetSize, bool forceAnimate = false);
@@ -173,12 +199,20 @@ private:
 
     // ==================== 战斗逻辑 ====================
     void updateBattle(float dt);
+    void updateDefenseSpawns();
     void checkBattleEnd();
     void onBattleWin();
     void onBattleLose();
     int calculateStarCount() const;
     void showBattleResult(bool isWin, int stars);
     void createResultButtons(Node* parent, bool isWin);
+
+    int getDefenseLevelIndex() const;
+    int getRewardLevel() const;
+    int getRecordLevelId() const;
+    void resetDefenseSpawns();
+    void addDefenseWave(int unitId, int count, float interval, float delay);
+    Vec2 getDefenseSpawnPosition(int index) const;
 
     // ==================== 回调 ====================
     void onExitButton(Ref* sender);

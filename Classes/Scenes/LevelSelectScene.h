@@ -18,7 +18,9 @@ using namespace cocos2d::ui;
 // ===================================================
 namespace LevelSelectConfig {
     // 关卡按钮配置 - 适应1280x720分辨率
-    constexpr int MAX_LEVELS = 12;                   // 最大关卡数
+    constexpr int MAX_ATTACK_LEVELS = 12;            // 进攻关卡数
+    constexpr int MAX_DEFENSE_LEVELS = 6;            // 防守关卡数
+    constexpr int DEFENSE_LEVEL_OFFSET = 100;        // 防守关卡ID偏移
     constexpr int LEVEL_GRID_COLS = 4;               // 关卡网格列数
     constexpr float LEVEL_BUTTON_SIZE = 115.0f;      // 关卡按钮尺寸
     constexpr float LEVEL_BUTTON_SPACING = 26.0f;    // 关卡按钮间距
@@ -39,11 +41,17 @@ namespace LevelSelectConfig {
     constexpr float EXIT_BUTTON_MARGIN = 26.0f;      // 退出按钮边距
 }
 
+enum class LevelTab {
+    Attack,
+    Defense
+};
+
 // ===================================================
 // 关卡信息结构
 // ===================================================
 struct LevelInfo {
     int levelId;                    // 关卡ID
+    int displayId;                  // 显示编号
     std::string name;               // 关卡名称
     bool isUnlocked;                // 是否解锁
     int starCount;                  // 已获得星星数（0-3）
@@ -76,8 +84,14 @@ private:
     // UI组件
     Sprite* _background = nullptr;              // 背景图
     Label* _titleLabel = nullptr;               // 标题
+    Node* _modeButtonNode = nullptr;            // 模式切换按钮节点
+    LayerColor* _modeButtonBg = nullptr;        // 模式按钮背景
+    DrawNode* _modeButtonBorder = nullptr;      // 模式按钮边框
+    Label* _modeButtonLabel = nullptr;          // 模式按钮文字
+    Button* _modeButton = nullptr;              // 模式切换按钮
     Node* _levelButtonArea = nullptr;           // 关卡按钮区域
     Node* _unitPreviewArea = nullptr;           // 兵种预览区域
+    Label* _unitPreviewTitle = nullptr;         // 兵种预览标题
     Button* _exitButton = nullptr;              // 退出按钮
     std::vector<Node*> _levelButtonNodes;       // 关卡按钮节点
 
@@ -89,17 +103,22 @@ private:
 
     // 当前选中的关卡
     int _selectedLevel = 0;
+    LevelTab _currentTab = LevelTab::Attack;
 
     // 初始化方法
     void setupBackground();
     void setupTitle();
+    void setupModeButton();
     void setupLevelButtons();
     void setupUnitPreview();
     void setupExitButton();
     void animateLevelButtons();
 
     // 初始化关卡数据
-    void initLevelData();
+    void initLevelData(LevelTab tab);
+    void rebuildLevelButtons();
+    void switchTab(LevelTab tab);
+    void updateModeButton();
 
     // 创建单个关卡按钮
     Node* createLevelButton(const LevelInfo& level, int index);

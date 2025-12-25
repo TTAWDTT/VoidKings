@@ -163,11 +163,12 @@ bool LevelSelectScene::init() {
     }
 
     // 初始化关卡数据
-    initLevelData();
+    initLevelData(_currentTab);
 
     // 设置各个UI组件（黑白网格风格）
     setupBackground();
     setupTitle();
+    setupModeButton();
     setupLevelButtons();
     setupUnitPreview();
     setupExitButton();
@@ -189,27 +190,37 @@ void LevelSelectScene::setSelectedUnits(const std::map<int, int>& units) {
 // 初始化关卡数据
 // ===================================================
 
-void LevelSelectScene::initLevelData() {
+void LevelSelectScene::initLevelData(LevelTab tab) {
     _levels.clear();
 
     int highestCompleted = 0;
-    for (int i = 1; i <= LevelSelectConfig::MAX_LEVELS; ++i) {
-        if (Core::getInstance()->isLevelCompleted(i) && i > highestCompleted) {
+    int maxLevels = (tab == LevelTab::Defense)
+        ? LevelSelectConfig::MAX_DEFENSE_LEVELS
+        : LevelSelectConfig::MAX_ATTACK_LEVELS;
+
+    int levelOffset = (tab == LevelTab::Defense)
+        ? LevelSelectConfig::DEFENSE_LEVEL_OFFSET
+        : 0;
+
+    for (int i = 1; i <= maxLevels; ++i) {
+        int levelId = i + levelOffset;
+        if (Core::getInstance()->isLevelCompleted(levelId) && i > highestCompleted) {
             highestCompleted = i;
         }
     }
 
     int unlockLimit = std::max(3, highestCompleted + 3);
-    if (unlockLimit > LevelSelectConfig::MAX_LEVELS) {
-        unlockLimit = LevelSelectConfig::MAX_LEVELS;
+    if (unlockLimit > maxLevels) {
+        unlockLimit = maxLevels;
     }
 
-    // 初始化12个关卡
-    for (int i = 1; i <= LevelSelectConfig::MAX_LEVELS; ++i) {
+    // 初始化关卡列表
+    for (int i = 1; i <= maxLevels; ++i) {
         LevelInfo level;
-        level.levelId = i;
+        level.levelId = i + levelOffset;
+        level.displayId = i;
         level.name = "Level " + std::to_string(i);
-        level.starCount = Core::getInstance()->getLevelStars(i);
+        level.starCount = Core::getInstance()->getLevelStars(level.levelId);
         level.isUnlocked = (i <= unlockLimit);
         level.description = "Challenge Level " + std::to_string(i);
 
@@ -271,18 +282,77 @@ void LevelSelectScene::setupTitle() {
     );
     _titleLabel->setColor(Color3B::WHITE);
 
-    this->addChild(_titleLabel, 10);
+    auto titleBg = Sprite::create("UI/LevelSelect/background/label_background.png");
+    if (titleBg) {
+        titleBg->setAnchorPoint(Vec2(0.5f, 1.0f));
+        titleBg->setPosition(_titleLabel->getPosition());
+        Size bgSize = titleBg->getContentSize();
+        Size labelSize = _titleLabel->getContentSize();
+        if (bgSize.width > 0.0f && bgSize.height > 0.0f) {
+            float targetWidth = labelSize.width + 26.0f;
+            float targetHeight = labelSize.height + 14.0f;
+            float scaleX = targetWidth / bgSize.width;
+            float scaleY = targetHeight / bgSize.height;
+            titleBg->setScale(scaleX, scaleY);
+        }
+        this->addChild(titleBg, 9);
+    }
 
-    // 标题下方的装饰线
-    auto decorLine = DrawNode::create();
-    float lineY = origin.y + visibleSize.height - LevelSelectConfig::TITLE_TOP_OFFSET - 25;
-    float lineHalfWidth = 110.0f;
-    decorLine->drawLine(
-        Vec2(origin.x + visibleSize.width / 2 - lineHalfWidth, lineY),
-        Vec2(origin.x + visibleSize.width / 2 + lineHalfWidth, lineY),
-        Color4F::WHITE
-    );
-    this->addChild(decorLine, 10);
+    this->addChild(_titleLabel, 10);
+}
+
+// ===================================================
+// 模式切换按钮
+// ===================================================
+
+void LevelSelectScene::setupModeButton() {
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+
+    if (_modeButtonNode) {
+        _modeButtonNode->removeFromParent();
+        _modeButtonNode = nullptr;
+    }
+
+    const float btnWidth = 180.0f;
+    const float btnHeight = 30.0f;
+    float btnX = origin.x + visibleSize.width - LevelSelectConfig::EXIT_BUTTON_MARGIN - btnWidth / 2;
+    float btnY = origin.y + visibleSize.height - LevelSelectConfig::EXIT_BUTTON_MARGIN - btnHeight / 2;
+
+    _modeButtonNode = Node::create();
+    _modeButtonNode->setPosition(Vec2(btnX, btnY));
+    this->addChild(_modeButtonNode, 11);
+
+    _modeButtonBg = LayerColor::create(Color4B(50, 50, 50, 255), btnWidth, btnHeight);
+    _modeButtonBg->setAnchorPoint(Vec2(0.5f, 0.5f));
+    _modeButtonBg->setIgnoreAnchorPointForPosition(false);
+    _modeButtonNode->addChild(_modeButtonBg, 0);
+
+    _modeButtonBorder = DrawNode::create();
+    _modeButtonBorder->drawRect(Vec2(-btnWidth / 2, -btnHeight / 2), Vec2(btnWidth / 2, btnHeight / 2), Color4F::WHITE);
+    _modeButtonNode->addChild(_modeButtonBorder, 1);
+
+    _modeButtonLabel = Label::createWithTTF("", "fonts/ScienceGothic.ttf", 16);
+    if (!_modeButtonLabel) {
+        _modeButtonLabel = Label::createWithSystemFont("", "Arial", 16);
+    }
+    _modeButtonLabel->setPosition(Vec2::ZERO);
+    _modeButtonLabel->setColor(Color3B::WHITE);
+    _modeButtonNode->addChild(_modeButtonLabel, 2);
+
+    _modeButton = Button::create();
+    _modeButton->setScale9Enabled(true);
+    _modeButton->setContentSize(Size(btnWidth, btnHeight));
+    _modeButton->setPosition(Vec2::ZERO);
+    _modeButton->setSwallowTouches(true);
+    _modeButton->addClickEventListener([this](Ref*) {
+        AudioManager::playButtonClick();
+        LevelTab nextTab = (_currentTab == LevelTab::Attack) ? LevelTab::Defense : LevelTab::Attack;
+        this->switchTab(nextTab);
+    });
+    _modeButtonNode->addChild(_modeButton, 3);
+
+    updateModeButton();
 }
 
 // ===================================================
@@ -290,12 +360,25 @@ void LevelSelectScene::setupTitle() {
 // ===================================================
 
 void LevelSelectScene::setupLevelButtons() {
-    auto visibleSize = Director::getInstance()->getVisibleSize();
-    auto origin = Director::getInstance()->getVisibleOrigin();
+    if (!_levelButtonArea) {
+        auto origin = Director::getInstance()->getVisibleOrigin();
+        _levelButtonArea = Node::create();
+        _levelButtonArea->setPosition(origin);
+        this->addChild(_levelButtonArea, 10);
+    }
 
-    _levelButtonArea = Node::create();
-    _levelButtonArea->setPosition(origin);
-    this->addChild(_levelButtonArea, 10);
+    rebuildLevelButtons();
+}
+
+void LevelSelectScene::rebuildLevelButtons() {
+    if (!_levelButtonArea) {
+        return;
+    }
+
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+
+    _levelButtonArea->removeAllChildren();
+    _levelButtonNodes.clear();
 
     // 计算按钮起始位置（网格居中）
     float buttonSize = LevelSelectConfig::LEVEL_BUTTON_SIZE;
@@ -369,19 +452,19 @@ Node* LevelSelectScene::createLevelButton(const LevelInfo& level, int index) {
     }
 
     if (level.isUnlocked) {
-        auto numberNode = createLevelNumberNode(level.levelId, size * 0.55f, size * 0.4f);
+        auto numberNode = createLevelNumberNode(level.displayId, size * 0.55f, size * 0.4f);
         if (numberNode) {
             numberNode->setPosition(Vec2(size / 2, size / 2 + 6.0f));
             node->addChild(numberNode, 2);
         }
         else {
             auto numLabel = Label::createWithTTF(
-                std::to_string(level.levelId),
+                std::to_string(level.displayId),
                 "fonts/ScienceGothic.ttf",
                 26
             );
             if (!numLabel) {
-                numLabel = Label::createWithSystemFont(std::to_string(level.levelId), "Arial", 24);
+                numLabel = Label::createWithSystemFont(std::to_string(level.displayId), "Arial", 24);
             }
             numLabel->setPosition(Vec2(size / 2, size / 2 + 6.0f));
             numLabel->setColor(Color3B::WHITE);
@@ -528,11 +611,16 @@ void LevelSelectScene::setupUnitPreview() {
     ));
     previewTitle->setColor(Color3B::WHITE);
     this->addChild(previewTitle, 10);
+    _unitPreviewTitle = previewTitle;
 
     // 兵种图标区域
     _unitPreviewArea = Node::create();
     _unitPreviewArea->setPosition(origin);
     this->addChild(_unitPreviewArea, 10);
+
+    if (_unitPreviewTitle) {
+        _unitPreviewTitle->setString(_currentTab == LevelTab::Defense ? "DEFENSE:" : "UNITS:");
+    }
 
     updateUnitPreview();
 }
@@ -552,6 +640,22 @@ void LevelSelectScene::updateUnitPreview() {
     float spacing = LevelSelectConfig::UNIT_ICON_SPACING;
     float baseY = origin.y + LevelSelectConfig::UNIT_PREVIEW_BOTTOM +
         (LevelSelectConfig::UNIT_PREVIEW_HEIGHT - size) / 2;
+
+    if (_currentTab == LevelTab::Defense) {
+        auto defenseLabel = Label::createWithTTF(
+            "Defense mode - no deployment",
+            "fonts/ScienceGothic.ttf",
+            10
+        );
+        if (!defenseLabel) {
+            defenseLabel = Label::createWithSystemFont("Defense mode - no deployment", "Arial", 10);
+        }
+        defenseLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
+        defenseLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, baseY + size / 2));
+        defenseLabel->setColor(Color3B::GRAY);
+        _unitPreviewArea->addChild(defenseLabel);
+        return;
+    }
 
     if (_selectedUnits.empty()) {
         // 没有选择兵种时显示提示（缩小字体）
@@ -651,64 +755,32 @@ void LevelSelectScene::setupExitButton() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
-    // 按钮尺寸
-    float btnWidth = 60.0f;
-    float btnHeight = 25.0f;
-
-    // 创建按钮容器节点
-    auto exitNode = Node::create();
-
-    // 按钮背景
-    auto bg = LayerColor::create(Color4B(40, 40, 40, 255), btnWidth, btnHeight);
-    bg->setAnchorPoint(Vec2(0.5f, 0.5f));
-    bg->setIgnoreAnchorPointForPosition(false);
-    exitNode->addChild(bg);
-
-    // 边框
-    auto border = DrawNode::create();
-    border->drawRect(Vec2(-btnWidth / 2, -btnHeight / 2), Vec2(btnWidth / 2, btnHeight / 2), Color4F::WHITE);
-    exitNode->addChild(border, 1);
-
-    // 文字
-    auto label = Label::createWithTTF("BACK", "fonts/arial.ttf", 11);
-    if (!label) {
-        label = Label::createWithSystemFont("BACK", "Arial", 11);
+    _exitButton = Button::create("UI/exit.png", "UI/exit.png");
+    if (!_exitButton) {
+        _exitButton = Button::create("exit.png", "exit.png");
     }
-    label->setColor(Color3B::WHITE);
-    exitNode->addChild(label, 2);
+    if (!_exitButton) {
+        return;
+    }
 
-    // 设置位置
-    float btnX = origin.x + LevelSelectConfig::EXIT_BUTTON_MARGIN + btnWidth / 2;
-    float btnY = origin.y + visibleSize.height - LevelSelectConfig::EXIT_BUTTON_MARGIN - btnHeight / 2;
-    exitNode->setPosition(Vec2(btnX, btnY));
-    this->addChild(exitNode, 20);
+    Size btnSize = _exitButton->getContentSize();
+    if (btnSize.width > 0.0f && btnSize.height > 0.0f) {
+        float scale = LevelSelectConfig::EXIT_BUTTON_SIZE / std::max(btnSize.width, btnSize.height);
+        _exitButton->setScale(scale);
+    }
 
-    // 创建透明Button覆盖在上面，确保点击可靠
-    auto touchBtn = Button::create();
-    touchBtn->setContentSize(Size(btnWidth, btnHeight));
-    touchBtn->setScale9Enabled(true);
-    touchBtn->setPosition(Vec2(btnX, btnY));
-    touchBtn->setSwallowTouches(true);
-    const float originScale = exitNode->getScale();
-    touchBtn->addTouchEventListener([this, exitNode, originScale](Ref*, Widget::TouchEventType type) {
-        if (type == Widget::TouchEventType::BEGAN) {
-            exitNode->setScale(originScale * 0.96f);
-            return;
-        }
-        if (type == Widget::TouchEventType::CANCELED) {
-            exitNode->setScale(originScale);
-            return;
-        }
-        if (type != Widget::TouchEventType::ENDED) {
-            return;
-        }
-
-        exitNode->setScale(originScale);
+    float btnX = origin.x + LevelSelectConfig::EXIT_BUTTON_MARGIN + LevelSelectConfig::EXIT_BUTTON_SIZE / 2;
+    float btnY = origin.y + visibleSize.height - LevelSelectConfig::EXIT_BUTTON_MARGIN - LevelSelectConfig::EXIT_BUTTON_SIZE / 2;
+    _exitButton->setPosition(Vec2(btnX, btnY));
+    _exitButton->setPressedActionEnabled(true);
+    _exitButton->setZoomScale(0.06f);
+    _exitButton->setSwallowTouches(true);
+    _exitButton->addClickEventListener([this](Ref*) {
         AudioManager::playButtonCancel();
         CCLOG("[关卡选择] 点击返回按钮");
         this->onExitButton(nullptr);
     });
-    this->addChild(touchBtn, 21);
+    this->addChild(_exitButton, 21);
 }
 
 // ===================================================
@@ -760,8 +832,46 @@ void LevelSelectScene::startBattle(int levelId) {
     // 引入战斗场景头文件在cpp顶部
     // 跳转到战斗场景，传入已选择的兵种
     // 传入已训练兵种，不使用默认兵种
-    auto scene = BattleScene::createScene(levelId, _selectedUnits, false);
+    bool defenseMode = (_currentTab == LevelTab::Defense);
+    auto scene = BattleScene::createScene(levelId, _selectedUnits, false, defenseMode);
     Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
+}
+
+// ===================================================
+// 选项卡切换
+// ===================================================
+
+void LevelSelectScene::switchTab(LevelTab tab) {
+    if (_currentTab == tab) {
+        return;
+    }
+
+    _currentTab = tab;
+    initLevelData(tab);
+    rebuildLevelButtons();
+    updateModeButton();
+    updateUnitPreview();
+}
+
+void LevelSelectScene::updateModeButton() {
+    if (_modeButtonLabel) {
+        _modeButtonLabel->setString(_currentTab == LevelTab::Defense ? "MODE: DEFENSE" : "MODE: ATTACK");
+    }
+    if (_modeButtonBg) {
+        _modeButtonBg->setColor(_currentTab == LevelTab::Defense ? Color3B(80, 60, 60) : Color3B(50, 50, 50));
+    }
+    if (_modeButtonBorder && _modeButtonBg) {
+        Size size = _modeButtonBg->getContentSize();
+        _modeButtonBorder->clear();
+        _modeButtonBorder->drawRect(
+            Vec2(-size.width / 2, -size.height / 2),
+            Vec2(size.width / 2, size.height / 2),
+            Color4F::WHITE
+        );
+    }
+    if (_unitPreviewTitle) {
+        _unitPreviewTitle->setString(_currentTab == LevelTab::Defense ? "DEFENSE:" : "UNITS:");
+    }
 }
 
 // ===================================================

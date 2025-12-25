@@ -49,6 +49,8 @@ private:
     float _lastAttackTime;
     cocos2d::Sprite* _bodySprite;
     cocos2d::Sprite* _healthBar;
+    cocos2d::Sprite* _fireEffect = nullptr;
+    float _fireDamageTimer = 0.0f;
     cocos2d::Node* _target;
     std::string _currentActionKey;
 
@@ -60,8 +62,14 @@ private:
     void applyAoeDamage(const cocos2d::Vec2& center, float range, float damage) const;
     // 是否为树类建筑（使用序列帧资源）
     bool isTreeSprite() const;
+    bool isMagicTower() const;
+    bool isFireTower() const;
     // 播放树的序列帧动画（用于待机/攻击）
     bool playTreeAnimation(int frameCount, float delay, bool loop);
+    void spawnMagicImpact(const cocos2d::Vec2& worldPos);
+    void ensureFireEffect();
+    void updateFireEffectForTarget(const cocos2d::Vec2& targetWorldPos);
+    void updateFireTower(float dt);
     // 当没有对应动画资源时的攻击表现
     void playFallbackAttackEffect();
 

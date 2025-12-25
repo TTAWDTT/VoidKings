@@ -60,6 +60,7 @@ list(APPEND GAME_SOURCE
      Classes/Buildings/DefenceBuilding.cpp
      Classes/Buildings/ProductionBuilding.cpp
      Classes/Buildings/StorageBuilding.cpp
+     Classes/Buildings/Trap.cpp
      Classes/Buildings/BuildingManager.cpp
      Classes/Soldier/Soldier.cpp
      Classes/Soldier/UnitManager.cpp
@@ -87,6 +88,7 @@ list(APPEND GAME_HEADER
      Classes/Buildings/ProductionBuildingData.h
      Classes/Buildings/StorageBuilding.h
      Classes/Buildings/StorageBuildingData.h
+     Classes/Buildings/Trap.h
      Classes/Buildings/BuildingManager.h
      Classes/Soldier/Soldier.h
      Classes/Soldier/UnitData.h

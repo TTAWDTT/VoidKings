@@ -4,6 +4,9 @@
 #include "Utils/AnimationUtils.h"
 #include "Utils/EffectUtils.h"
 #include "Utils/AudioManager.h"
+#include <algorithm>
+#include <cmath>
+#include <limits>
 
 USING_NS_CC;
 
@@ -46,12 +49,18 @@ protected:
     void onReachTarget() override {
         float damage = getDamage();
         if (_isAOE && _enemySoldiers && _aoeRange > 0.0f) {
+            auto* bulletParent = this->getParent();
             Vec2 impactPos = this->getPosition();
             for (auto* soldier : *_enemySoldiers) {
                 if (!canHitSoldier(soldier)) {
                     continue;
                 }
-                if (impactPos.distance(soldier->getPosition()) <= _aoeRange) {
+                Vec2 soldierPos = soldier->getPosition();
+                if (bulletParent && soldier->getParent()) {
+                    Vec2 worldPos = soldier->getParent()->convertToWorldSpace(soldierPos);
+                    soldierPos = bulletParent->convertToNodeSpace(worldPos);
+                }
+                if (impactPos.distance(soldierPos) <= _aoeRange) {
                     soldier->takeDamage(damage);
                 }
             }
@@ -100,6 +109,48 @@ private:
     const std::vector<Soldier*>* _enemySoldiers = nullptr;
     ImpactSound _impactSound = ImpactSound::None;
 };
+
+Animation* buildNumberedAnimation(const std::string& prefix, int start, int end, float delay) {
+    Vector<SpriteFrame*> frames;
+    for (int i = start; i <= end; ++i) {
+        std::string framePath = StringUtils::format("%s%d.png", prefix.c_str(), i);
+        auto texture = Director::getInstance()->getTextureCache()->addImage(framePath);
+        if (!texture) {
+            continue;
+        }
+        Size size = texture->getContentSize();
+        auto frame = SpriteFrame::createWithTexture(texture, Rect(0, 0, size.width, size.height));
+        if (frame) {
+            frames.pushBack(frame);
+        }
+    }
+    if (frames.empty()) {
+        return nullptr;
+    }
+    return Animation::createWithSpriteFrames(frames, delay);
+}
+
+Animation* getMagicImpactAnimation() {
+    static Animation* anim = nullptr;
+    if (!anim) {
+        anim = buildNumberedAnimation("buildings/magic/fire_", 1, 18, 0.05f);
+        if (anim) {
+            anim->retain();
+        }
+    }
+    return anim;
+}
+
+Animation* getFireLoopAnimation() {
+    static Animation* anim = nullptr;
+    if (!anim) {
+        anim = buildNumberedAnimation("buildings/fire/fire_", 1, 33, 0.06f);
+        if (anim) {
+            anim->retain();
+        }
+    }
+    return anim;
+}
 } // namespace
 
 
@@ -129,6 +180,7 @@ bool DefenceBuilding::init(const DefenceBuildingConfig* config, int level) {
     _currentHP = getCurrentMaxHP();
     _target = nullptr;
     _lastAttackTime = 0.0f;
+    _fireDamageTimer = 0.0f;
     _currentActionKey.clear();
 
     _bodySprite = Sprite::create(_config->spriteFrameName);
@@ -165,6 +217,13 @@ bool DefenceBuilding::init(const DefenceBuildingConfig* config, int level) {
 
     updateHealthBar(false);
     this->scheduleUpdate();
+
+    if (isFireTower()) {
+        ensureFireEffect();
+        if (_fireEffect) {
+            _fireEffect->setVisible(false);
+        }
+    }
 
     return true;
 }
@@ -238,6 +297,11 @@ void DefenceBuilding::update(float dt) {
         return;
     }
 
+    if (isFireTower()) {
+        updateFireTower(dt);
+        return;
+    }
+
     if (_target) {
         auto* soldier = dynamic_cast<Soldier*>(_target);
         if (!canTargetSoldier(soldier)) {
@@ -256,12 +320,93 @@ void DefenceBuilding::update(float dt) {
             return;
         }
         float dist = this->getPosition().distance(_target->getPosition());
-        if (dist <= getCurrentATK_RANGE()) {
+        bool inRange = dist <= getCurrentATK_RANGE();
+
+        if (inRange) {
             attackTarget();
         }
         else {
             setTarget(nullptr);
         }
+    }
+}
+
+void DefenceBuilding::updateFireTower(float dt) {
+    std::vector<Soldier*> fallback;
+    const auto* candidates = getEnemySoldiers(fallback);
+    if (!candidates || candidates->empty()) {
+        if (_fireEffect) {
+            _fireEffect->setVisible(false);
+        }
+        _fireDamageTimer = 0.0f;
+        setTarget(nullptr);
+        return;
+    }
+
+    const Vec2 selfPos = this->getPosition();
+    const float range = getCurrentATK_RANGE();
+    std::vector<Soldier*> targets;
+    targets.reserve(candidates->size());
+    Soldier* nearest = nullptr;
+    float nearestDist = std::numeric_limits<float>::max();
+
+    for (auto* soldier : *candidates) {
+        if (!canTargetSoldier(soldier)) {
+            continue;
+        }
+        float dist = selfPos.distance(soldier->getPosition());
+        if (dist > range) {
+            continue;
+        }
+        targets.push_back(soldier);
+        if (dist < nearestDist) {
+            nearestDist = dist;
+            nearest = soldier;
+        }
+    }
+
+    if (targets.empty()) {
+        if (_fireEffect) {
+            _fireEffect->setVisible(false);
+        }
+        _fireDamageTimer = 0.0f;
+        setTarget(nullptr);
+        return;
+    }
+
+    if (nearest) {
+        auto* targetParent = nearest->getParent();
+        Vec2 worldPos = targetParent
+            ? targetParent->convertToWorldSpace(nearest->getPosition())
+            : nearest->getPosition();
+        updateFireEffectForTarget(worldPos);
+        if (_fireEffect) {
+            _fireEffect->setVisible(true);
+        }
+    }
+
+    float tickInterval = getCurrentATK_SPEED();
+    if (tickInterval <= 0.0f) {
+        tickInterval = 0.5f;
+    }
+    if (tickInterval < 0.15f) {
+        tickInterval = 0.15f;
+    }
+
+    _fireDamageTimer += dt;
+    if (_fireDamageTimer < tickInterval) {
+        return;
+    }
+
+    while (_fireDamageTimer >= tickInterval) {
+        _fireDamageTimer -= tickInterval;
+        float damage = getCurrentATK();
+        for (auto* soldier : targets) {
+            if (canTargetSoldier(soldier)) {
+                soldier->takeDamage(damage);
+            }
+        }
+        AudioManager::playFireSpray();
     }
 }
 
@@ -353,6 +498,139 @@ bool DefenceBuilding::isTreeSprite() const {
         return false;
     }
     return _config->spriteFrameName.find("buildings/Tree/") != std::string::npos;
+}
+
+bool DefenceBuilding::isMagicTower() const {
+    if (!_config) {
+        return false;
+    }
+    if (_config->name.find("MagicTower") != std::string::npos) {
+        return true;
+    }
+    return _config->spriteFrameName.find("MagicTower") != std::string::npos;
+}
+
+bool DefenceBuilding::isFireTower() const {
+    if (!_config) {
+        return false;
+    }
+    if (_config->name.find("FireTower") != std::string::npos) {
+        return true;
+    }
+    return _config->spriteFrameName.find("FireTower") != std::string::npos;
+}
+
+void DefenceBuilding::spawnMagicImpact(const Vec2& worldPos) {
+    AudioManager::playMagicHit();
+
+    auto* parent = this->getParent();
+    if (!parent) {
+        return;
+    }
+
+    auto* anim = getMagicImpactAnimation();
+    if (!anim) {
+        return;
+    }
+
+    Sprite* effectSprite = nullptr;
+    const auto& frames = anim->getFrames();
+    if (!frames.empty()) {
+        auto* frame = frames.front()->getSpriteFrame();
+        if (frame) {
+            effectSprite = Sprite::createWithSpriteFrame(frame);
+        }
+    }
+    if (!effectSprite) {
+        effectSprite = Sprite::create("buildings/magic/fire_1.png");
+    }
+    if (!effectSprite) {
+        return;
+    }
+
+    Vec2 localPos = parent->convertToNodeSpace(worldPos);
+    effectSprite->setPosition(localPos);
+    parent->addChild(effectSprite, 30);
+
+    auto sequence = Sequence::create(
+        Animate::create(anim),
+        RemoveSelf::create(),
+        nullptr
+    );
+    effectSprite->runAction(sequence);
+}
+
+void DefenceBuilding::ensureFireEffect() {
+    if (_fireEffect) {
+        return;
+    }
+
+    auto* anim = getFireLoopAnimation();
+    if (!anim) {
+        return;
+    }
+
+    Sprite* effectSprite = nullptr;
+    const auto& frames = anim->getFrames();
+    if (!frames.empty()) {
+        auto* frame = frames.front()->getSpriteFrame();
+        if (frame) {
+            effectSprite = Sprite::createWithSpriteFrame(frame);
+        }
+    }
+    if (!effectSprite) {
+        effectSprite = Sprite::create("buildings/fire/fire_1.png");
+    }
+    if (!effectSprite) {
+        return;
+    }
+
+    effectSprite->setName("fireEffect");
+    effectSprite->setAnchorPoint(Vec2(1.0f, 0.5f));
+    effectSprite->setScale(0.8f);
+
+    Node* attachNode = _bodySprite ? static_cast<Node*>(_bodySprite) : static_cast<Node*>(this);
+    Vec2 center = Vec2::ZERO;
+    if (_bodySprite) {
+        Size size = _bodySprite->getContentSize();
+        center = Vec2(size.width * 0.5f, size.height * 0.5f);
+    }
+    effectSprite->setPosition(center);
+    attachNode->addChild(effectSprite, 2);
+
+    effectSprite->runAction(RepeatForever::create(Animate::create(anim)));
+    _fireEffect = effectSprite;
+}
+
+void DefenceBuilding::updateFireEffectForTarget(const Vec2& targetWorldPos) {
+    ensureFireEffect();
+    if (!_fireEffect) {
+        return;
+    }
+
+    auto* effectParent = _fireEffect->getParent();
+    if (!effectParent) {
+        return;
+    }
+
+    auto* towerParent = this->getParent();
+    Vec2 worldCenter = towerParent
+        ? towerParent->convertToWorldSpace(this->getPosition())
+        : this->getPosition();
+    Vec2 dir = targetWorldPos - worldCenter;
+    float length = dir.length();
+    if (length <= 0.01f) {
+        return;
+    }
+    dir.normalize();
+
+    constexpr float kFireOffset = 8.0f;
+    Vec2 anchorWorld = worldCenter + dir * kFireOffset;
+    Vec2 localPos = effectParent->convertToNodeSpace(anchorWorld);
+    _fireEffect->setPosition(localPos);
+
+    float angle = CC_RADIANS_TO_DEGREES(std::atan2(dir.y, dir.x));
+    _fireEffect->setRotation(-angle + 180.0f);
 }
 
 bool DefenceBuilding::playTreeAnimation(int frameCount, float delay, bool loop) {
@@ -539,6 +817,19 @@ void DefenceBuilding::attackTarget() {
         }
         else {
             soldier->takeDamage(damage);
+        }
+
+        if (isMagicTower() || isFireTower()) {
+            auto* targetParent = soldier->getParent();
+            Vec2 worldPos = targetParent
+                ? targetParent->convertToWorldSpace(soldier->getPosition())
+                : soldier->getPosition();
+            if (isMagicTower()) {
+                spawnMagicImpact(worldPos);
+            }
+            if (isFireTower()) {
+                updateFireEffectForTarget(worldPos);
+            }
         }
     }
 }

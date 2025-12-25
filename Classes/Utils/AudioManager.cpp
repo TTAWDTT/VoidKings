@@ -29,8 +29,12 @@ constexpr const char* kSfxButtonCancel = "music/ButtonCross.wav";
 const char* kSfxArrowShoot = VK_UTF8_LITERAL("music/\u5F13\u7BAD\u5C04\u51FA.wav");
 const char* kSfxArrowHit = VK_UTF8_LITERAL("music/\u5F13\u7BAD\u547D\u4E2D.wav");
 const char* kSfxMeleeHit = VK_UTF8_LITERAL("music/\u8FD1\u6218\u51FB\u6253.wav");
+const char* kSfxMagicHit = VK_UTF8_LITERAL("music/\u95EA\u7535.wav");
+const char* kSfxSpikeAppear = VK_UTF8_LITERAL("music/\u5730\u523A\u51FA\u73B0.wav");
+const char* kSfxSnapTrap = VK_UTF8_LITERAL("music/\u6355\u517D\u5939\u542F\u52A8.wav");
 constexpr const char* kSfxMagicAttack = "music/MagAttack.wav";
 constexpr const char* kSfxBoom = "music/boom.wav";
+constexpr const char* kSfxFireSpray = "music/fire.wav";
 constexpr const char* kSfxBuildingCollapse = "music/building collapse.wav";
 constexpr const char* kSfxHit1 = "music/hit1.wav";
 constexpr const char* kSfxHit2 = "music/hit2.wav";
@@ -46,11 +50,26 @@ SimpleAudioEngine* getEngine() {
     return SimpleAudioEngine::getInstance();
 }
 
+std::string resolveAudioPath(const char* file) {
+    if (!file || file[0] == '\0') {
+        return std::string();
+    }
+    auto* fileUtils = cocos2d::FileUtils::getInstance();
+    if (fileUtils) {
+        std::string fullPath = fileUtils->fullPathForFilename(file);
+        if (!fullPath.empty()) {
+            return fullPath;
+        }
+    }
+    return std::string(file);
+}
+
 void playBgmInternal(const char* file) {
-    if (!file) {
+    std::string path = resolveAudioPath(file);
+    if (path.empty()) {
         return;
     }
-    if (s_currentBgm == file) {
+    if (s_currentBgm == path) {
         return;
     }
     auto* engine = getEngine();
@@ -58,12 +77,13 @@ void playBgmInternal(const char* file) {
         return;
     }
     engine->setBackgroundMusicVolume(kBgmVolume);
-    engine->playBackgroundMusic(file, true);
-    s_currentBgm = file;
+    engine->playBackgroundMusic(path.c_str(), true);
+    s_currentBgm = path;
 }
 
 void playEffectInternal(const char* file) {
-    if (!file) {
+    std::string path = resolveAudioPath(file);
+    if (path.empty()) {
         return;
     }
     auto* engine = getEngine();
@@ -71,7 +91,7 @@ void playEffectInternal(const char* file) {
         return;
     }
     engine->setEffectsVolume(kSfxVolume);
-    engine->playEffect(file, false);
+    engine->playEffect(path.c_str(), false);
 }
 } // namespace
 
@@ -85,19 +105,23 @@ void preload() {
     engine->setBackgroundMusicVolume(kBgmVolume);
     engine->setEffectsVolume(kSfxVolume);
 
-    engine->preloadBackgroundMusic(kBgmStart);
-    engine->preloadBackgroundMusic(kBgmBattle1);
-    engine->preloadBackgroundMusic(kBgmBattle2);
-    engine->preloadBackgroundMusic(kBgmBattle3);
+    engine->preloadBackgroundMusic(resolveAudioPath(kBgmStart).c_str());
+    engine->preloadBackgroundMusic(resolveAudioPath(kBgmBattle1).c_str());
+    engine->preloadBackgroundMusic(resolveAudioPath(kBgmBattle2).c_str());
+    engine->preloadBackgroundMusic(resolveAudioPath(kBgmBattle3).c_str());
 
-    std::array<const char*, 13> effects = {
+    std::array<const char*, 17> effects = {
         kSfxButtonClick,
         kSfxButtonCancel,
         kSfxArrowShoot,
         kSfxArrowHit,
         kSfxMeleeHit,
         kSfxMagicAttack,
+        kSfxMagicHit,
         kSfxBoom,
+        kSfxSpikeAppear,
+        kSfxSnapTrap,
+        kSfxFireSpray,
         kSfxBuildingCollapse,
         kSfxHit1,
         kSfxHit2,
@@ -106,7 +130,7 @@ void preload() {
         kSfxLose
     };
     for (const auto& effect : effects) {
-        engine->preloadEffect(effect);
+        engine->preloadEffect(resolveAudioPath(effect).c_str());
     }
 }
 
@@ -182,8 +206,24 @@ void playMagicAttack() {
     playEffectInternal(kSfxMagicAttack);
 }
 
+void playMagicHit() {
+    playEffectInternal(kSfxMagicHit);
+}
+
 void playBoom() {
     playEffectInternal(kSfxBoom);
+}
+
+void playSpikeAppear() {
+    playEffectInternal(kSfxSpikeAppear);
+}
+
+void playSnapTrap() {
+    playEffectInternal(kSfxSnapTrap);
+}
+
+void playFireSpray() {
+    playEffectInternal(kSfxFireSpray);
 }
 
 void playBuildingCollapse() {

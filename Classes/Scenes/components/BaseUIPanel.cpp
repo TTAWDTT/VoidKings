@@ -289,6 +289,56 @@ void BaseUIPanel::updateResourceDisplay(int gold, int diamond) {
         snprintf(buffer, sizeof(buffer), "Diamonds: %d", diamond);
         diamondLabel->setString(buffer);
     }
+
+    int baseLevel = Core::getInstance()->getBaseLevel();
+    int maxLevel = Core::getInstance()->getBaseMaxLevel();
+    int upgradeCost = Core::getInstance()->getBaseUpgradeCost();
+    bool isMax = (baseLevel >= maxLevel) || (upgradeCost <= 0);
+    bool canUpgrade = (!isMax && diamond >= upgradeCost);
+
+    auto basePanel = findChildRecursive(_idCardPanel, "basePanel");
+    auto baseLevelLabel = basePanel ? dynamic_cast<Label*>(findChildRecursive(basePanel, "baseLevelLabel")) : nullptr;
+    if (baseLevelLabel) {
+        char buffer[64];
+        snprintf(buffer, sizeof(buffer), "Base Lv: %d", baseLevel);
+        baseLevelLabel->setString(buffer);
+    }
+
+    auto upgradeLabel = dynamic_cast<Label*>(findChildRecursive(_idCardPanel, "baseUpgradeLabel"));
+    if (upgradeLabel) {
+        if (isMax) {
+            upgradeLabel->setString("MAX");
+        }
+        else {
+            char buffer[32];
+            snprintf(buffer, sizeof(buffer), "UP %dD", upgradeCost);
+            upgradeLabel->setString(buffer);
+        }
+        upgradeLabel->setColor(canUpgrade ? Color3B::WHITE : Color3B(170, 170, 170));
+    }
+
+    auto upgradeBg = dynamic_cast<LayerColor*>(findChildRecursive(_idCardPanel, "baseUpgradeBg"));
+    if (upgradeBg) {
+        upgradeBg->setColor(canUpgrade ? Color3B(80, 70, 40) : Color3B(70, 70, 70));
+    }
+
+    auto upgradeBorder = dynamic_cast<DrawNode*>(findChildRecursive(_idCardPanel, "baseUpgradeBorder"));
+    if (upgradeBorder) {
+        upgradeBorder->clear();
+        Size size = upgradeBg ? upgradeBg->getContentSize() : Size(78.0f, 16.0f);
+        Color4F borderColor = canUpgrade ? Color4F::WHITE : Color4F(0.4f, 0.4f, 0.4f, 1.0f);
+        upgradeBorder->drawRect(
+            Vec2(-size.width / 2, -size.height / 2),
+            Vec2(size.width / 2, size.height / 2),
+            borderColor
+        );
+    }
+
+    auto upgradeButton = dynamic_cast<Button*>(findChildRecursive(_idCardPanel, "baseUpgradeButton"));
+    if (upgradeButton) {
+        upgradeButton->setEnabled(canUpgrade);
+        upgradeButton->setBright(canUpgrade);
+    }
 }
 
 Vec2 BaseUIPanel::getResourceIconWorldPosition(ResourceType type) const {
