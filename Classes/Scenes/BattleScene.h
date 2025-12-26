@@ -163,7 +163,6 @@ private:
     void createDefenseTower(int gridX, int gridY, int type, int level = 0);
     void createSpikeTrap(int gridX, int gridY);
     void createSnapTrap(int gridX, int gridY);
-    void addAttackExtras();
     void addTrapCluster(int startX, int startY, int width, int height, const std::vector<Vec2>& snapCells);
 
     // ==================== 辅助方法 ====================

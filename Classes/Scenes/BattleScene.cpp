@@ -42,10 +42,10 @@ constexpr int kTowerMagic = 4;
 constexpr int kTowerFire = 5;
 
 int resolveAttackTowerLevel(int levelId) {
-    if (levelId >= 10) {
+    if (levelId >= 7) {
         return kEnemyMaxBuildingLevel;
     }
-    if (levelId >= 5) {
+    if (levelId >= 4) {
         return 1;
     }
     return 0;
@@ -349,379 +349,323 @@ void BattleScene::initLevel() {
         break;
     }
 
-    addAttackExtras();
-
     CCLOG("[战斗场景] 关卡 %d 初始化完成，共 %d 个建筑", _levelId, _totalBuildingCount);
 }
 
 // ===================================================
-// 创建第1关 - 简单测试关卡
+// 创建第1关 - 入门试炼：双箭护卫
 // ===================================================
 
 void BattleScene::createLevel1() {
     int towerLevel = resolveAttackTowerLevel(_levelId);
-    createEnemyBase(26, 12, 0);
+    createEnemyBase(26, 12, towerLevel);
 
-    createDefenseTower(8, 6, kTowerArrow, towerLevel);
-    createDefenseTower(8, 14, kTowerArrow, towerLevel);
-    createDefenseTower(14, 6, kTowerDoubleBoom, towerLevel);
-    createDefenseTower(20, 6, kTowerBoom, towerLevel);
+    createDefenseTower(16, 8, kTowerArrow, towerLevel);
+    createDefenseTower(16, 18, kTowerArrow, towerLevel);
 
-    for (int x = 12; x <= 15; ++x) {
-        createSpikeTrap(x, 12);
+    for (int x = 10; x <= 14; ++x) {
+        createSpikeTrap(x, 13);
     }
-    for (int y = 13; y <= 15; ++y) {
-        createSpikeTrap(12, y);
-    }
-    createSnapTrap(18, 12);
+    createSnapTrap(12, 10);
 }
 
 // ===================================================
-// 创建第2关 - 进阶：更多塔位与交叉火力
+// 创建第2关 - 交叉火力走廊
 // ===================================================
 
 void BattleScene::createLevel2() {
     int towerLevel = resolveAttackTowerLevel(_levelId);
-    createEnemyBase(26, 12, 0);
+    createEnemyBase(26, 12, towerLevel);
 
-    createDefenseTower(8, 6, kTowerArrow, towerLevel);
-    createDefenseTower(8, 22, kTowerArrow, towerLevel);
-    createDefenseTower(14, 6, kTowerBoom, towerLevel);
-    createDefenseTower(14, 14, kTowerDoubleBoom, towerLevel);
-    createDefenseTower(18, 22, kTowerMagic, towerLevel);
+    createDefenseTower(14, 6, kTowerArrow, towerLevel);
+    createDefenseTower(14, 22, kTowerArrow, towerLevel);
+    createDefenseTower(18, 14, kTowerBoom, towerLevel);
 
-    for (int x = 10; x <= 18; ++x) {
-        createSpikeTrap(x, 12);
-    }
-    for (int y = 13; y <= 17; ++y) {
-        createSpikeTrap(12, y);
-    }
-    for (int x = 12; x <= 16; ++x) {
+    for (int x = 8; x <= 18; ++x) {
+        createSpikeTrap(x, 10);
         createSpikeTrap(x, 18);
     }
-    createSnapTrap(16, 13);
+    createSnapTrap(10, 12);
+    createSnapTrap(10, 16);
 }
 
 // ===================================================
-// 创建第3关 - 中级：密集守卫与远近混合
+// 创建第3关 - 陷阱方阵
 // ===================================================
 
 void BattleScene::createLevel3() {
     int towerLevel = resolveAttackTowerLevel(_levelId);
-    createEnemyBase(26, 12, 1);
+    createEnemyBase(26, 12, towerLevel);
 
-    createDefenseTower(8, 6, kTowerArrow, towerLevel);
-    createDefenseTower(8, 22, kTowerArrow, towerLevel);
-    createDefenseTower(14, 6, kTowerBoom, towerLevel);
-    createDefenseTower(20, 6, kTowerBoom, towerLevel);
-    createDefenseTower(14, 14, kTowerDoubleBoom, towerLevel);
-    createDefenseTower(18, 22, kTowerMagic, towerLevel);
+    createDefenseTower(12, 8, kTowerArrow, towerLevel);
+    createDefenseTower(12, 20, kTowerArrow, towerLevel);
+    createDefenseTower(18, 12, kTowerDoubleBoom, towerLevel);
+    createDefenseTower(20, 20, kTowerMagic, towerLevel);
 
-    for (int x = 10; x <= 20; ++x) {
+    for (int x = 8; x <= 16; ++x) {
         createSpikeTrap(x, 12);
-    }
-    for (int x = 12; x <= 20; ++x) {
         createSpikeTrap(x, 18);
     }
-    for (int y = 13; y <= 17; ++y) {
-        createSpikeTrap(12, y);
+    for (int y = 12; y <= 18; ++y) {
+        createSpikeTrap(8, y);
+        createSpikeTrap(16, y);
     }
-    createSnapTrap(18, 14);
+    createSnapTrap(10, 14);
+    createSnapTrap(14, 16);
 }
 
 // ===================================================
-// 创建第4关 - 高级：多点炮塔与中心重防
+// 创建第4关 - 断层火力
 // ===================================================
 
 void BattleScene::createLevel4() {
     int towerLevel = resolveAttackTowerLevel(_levelId);
-    createEnemyBase(26, 12, 1);
+    createEnemyBase(26, 12, towerLevel);
 
-    createDefenseTower(8, 6, kTowerArrow, towerLevel);
-    createDefenseTower(8, 22, kTowerArrow, towerLevel);
-    createDefenseTower(14, 6, kTowerBoom, towerLevel);
-    createDefenseTower(20, 6, kTowerBoom, towerLevel);
-    createDefenseTower(14, 14, kTowerDoubleBoom, towerLevel);
-    createDefenseTower(14, 22, kTowerMagic, towerLevel);
-    createDefenseTower(20, 22, kTowerDoubleBoom, towerLevel);
+    createDefenseTower(10, 14, kTowerArrow, towerLevel);
+    createDefenseTower(16, 6, kTowerBoom, towerLevel);
+    createDefenseTower(16, 20, kTowerBoom, towerLevel);
+    createDefenseTower(20, 14, kTowerMagic, towerLevel);
 
-    for (int x = 8; x <= 22; ++x) {
-        createSpikeTrap(x, 12);
-    }
-    for (int x = 10; x <= 22; ++x) {
+    for (int x = 8; x <= 20; ++x) {
+        if (x == 14) {
+            continue;
+        }
+        createSpikeTrap(x, 10);
         createSpikeTrap(x, 18);
     }
-    for (int y = 13; y <= 17; ++y) {
-        createSpikeTrap(12, y);
-        createSpikeTrap(18, y);
-    }
-    createSnapTrap(10, 16);
-    createSnapTrap(17, 16);
+    createSnapTrap(14, 12);
+    createSnapTrap(14, 16);
 }
 
 // ===================================================
-// 创建第5关 - 困难：高密度火力与双侧夹击
+// 创建第5关 - 双管压制
 // ===================================================
 
 void BattleScene::createLevel5() {
     int towerLevel = resolveAttackTowerLevel(_levelId);
-    createEnemyBase(26, 12, 1);
+    createEnemyBase(26, 12, towerLevel);
 
-    createDefenseTower(8, 6, kTowerArrow, towerLevel);
-    createDefenseTower(8, 22, kTowerArrow, towerLevel);
-    createDefenseTower(14, 6, kTowerBoom, towerLevel);
-    createDefenseTower(20, 6, kTowerBoom, towerLevel);
-    createDefenseTower(14, 14, kTowerDoubleBoom, towerLevel);
-    createDefenseTower(20, 14, kTowerFire, towerLevel);
-    createDefenseTower(14, 22, kTowerMagic, towerLevel);
-    createDefenseTower(20, 22, kTowerMagic, towerLevel);
+    createDefenseTower(12, 6, kTowerArrow, towerLevel);
+    createDefenseTower(12, 22, kTowerArrow, towerLevel);
+    createDefenseTower(18, 8, kTowerDoubleBoom, towerLevel);
+    createDefenseTower(18, 18, kTowerDoubleBoom, towerLevel);
+    createDefenseTower(22, 14, kTowerFire, towerLevel);
 
-    for (int x = 8; x <= 24; ++x) {
-        createSpikeTrap(x, 12);
+    for (int x = 8; x <= 22; ++x) {
+        createSpikeTrap(x, 11);
+        createSpikeTrap(x, 17);
     }
-    for (int x = 8; x <= 24; ++x) {
-        createSpikeTrap(x, 18);
-    }
-    for (int y = 13; y <= 17; ++y) {
-        createSpikeTrap(12, y);
+    for (int y = 12; y <= 16; ++y) {
+        createSpikeTrap(10, y);
         createSpikeTrap(20, y);
     }
-    createSnapTrap(18, 15);
-    createSnapTrap(16, 17);
+    createSnapTrap(14, 14);
 }
 
 // ===================================================
-// 创建第6关 - 高级：内外双圈火力
+// 创建第6关 - 火焰走廊
 // ===================================================
 
 void BattleScene::createLevel6() {
     int towerLevel = resolveAttackTowerLevel(_levelId);
-    createEnemyBase(26, 12, 2);
+    createEnemyBase(26, 12, towerLevel);
 
-    createDefenseTower(8, 6, kTowerArrow, towerLevel);
-    createDefenseTower(8, 22, kTowerArrow, towerLevel);
-    createDefenseTower(14, 6, kTowerBoom, towerLevel);
-    createDefenseTower(20, 6, kTowerBoom, towerLevel);
-    createDefenseTower(14, 14, kTowerDoubleBoom, towerLevel);
-    createDefenseTower(20, 14, kTowerFire, towerLevel);
-    createDefenseTower(14, 22, kTowerMagic, towerLevel);
-    createDefenseTower(20, 22, kTowerMagic, towerLevel);
+    createDefenseTower(10, 14, kTowerBoom, towerLevel);
+    createDefenseTower(16, 8, kTowerFire, towerLevel);
+    createDefenseTower(16, 18, kTowerFire, towerLevel);
+    createDefenseTower(20, 14, kTowerMagic, towerLevel);
 
-    for (int x = 6; x <= 24; ++x) {
+    for (int x = 6; x <= 20; ++x) {
+        if (x == 14) {
+            continue;
+        }
         createSpikeTrap(x, 12);
     }
-    for (int x = 6; x <= 24; ++x) {
-        createSpikeTrap(x, 18);
+    for (int x = 8; x <= 18; ++x) {
+        if (x == 14) {
+            continue;
+        }
+        if (x >= 10 && x <= 12) {
+            continue;
+        }
+        createSpikeTrap(x, 16);
     }
-    for (int y = 13; y <= 17; ++y) {
-        createSpikeTrap(12, y);
-        createSpikeTrap(18, y);
-        createSpikeTrap(24, y);
-    }
-    createSnapTrap(16, 17);
-    createSnapTrap(19, 16);
-    createSnapTrap(9, 16);
+    createSnapTrap(14, 12);
+    createSnapTrap(14, 18);
 }
 
 // ===================================================
-// 创建第7关 - 高级：外圈密集火力
+// 创建第7关 - 极限交叉火力
 // ===================================================
 
 void BattleScene::createLevel7() {
     int towerLevel = resolveAttackTowerLevel(_levelId);
-    createEnemyBase(26, 12, 2);
+    createEnemyBase(26, 12, towerLevel);
 
-    createDefenseTower(8, 6, kTowerArrow, towerLevel);
-    createDefenseTower(8, 22, kTowerArrow, towerLevel);
-    createDefenseTower(14, 6, kTowerBoom, towerLevel);
-    createDefenseTower(20, 6, kTowerBoom, towerLevel);
-    createDefenseTower(14, 14, kTowerDoubleBoom, towerLevel);
-    createDefenseTower(20, 14, kTowerFire, towerLevel);
-    createDefenseTower(14, 22, kTowerMagic, towerLevel);
+    createDefenseTower(6, 6, kTowerArrow, towerLevel);
+    createDefenseTower(6, 22, kTowerArrow, towerLevel);
+    createDefenseTower(12, 6, kTowerBoom, towerLevel);
+    createDefenseTower(12, 22, kTowerBoom, towerLevel);
+    createDefenseTower(18, 12, kTowerDoubleBoom, towerLevel);
+    createDefenseTower(20, 6, kTowerMagic, towerLevel);
     createDefenseTower(20, 22, kTowerMagic, towerLevel);
+    createDefenseTower(22, 14, kTowerFire, towerLevel);
 
     for (int x = 6; x <= 24; ++x) {
-        createSpikeTrap(x, 12);
-    }
-    for (int x = 6; x <= 24; ++x) {
+        createSpikeTrap(x, 10);
         createSpikeTrap(x, 18);
     }
-    for (int y = 13; y <= 17; ++y) {
+    for (int y = 11; y <= 17; ++y) {
         createSpikeTrap(10, y);
-        createSpikeTrap(18, y);
-        createSpikeTrap(24, y);
+        createSpikeTrap(16, y);
     }
-    createSnapTrap(11, 15);
-    createSnapTrap(17, 15);
-    createSnapTrap(19, 17);
+    createSnapTrap(14, 14);
+    createSnapTrap(18, 16);
 }
 
 // ===================================================
-// 创建第8关 - 精英：多层交叉火力
+// 创建第8关 - 交错火网
 // ===================================================
 
 void BattleScene::createLevel8() {
     int towerLevel = resolveAttackTowerLevel(_levelId);
-    createEnemyBase(26, 12, 2);
+    createEnemyBase(26, 12, towerLevel);
 
-    createDefenseTower(8, 6, kTowerArrow, towerLevel);
-    createDefenseTower(8, 22, kTowerArrow, towerLevel);
-    createDefenseTower(14, 6, kTowerBoom, towerLevel);
-    createDefenseTower(20, 6, kTowerBoom, towerLevel);
-    createDefenseTower(14, 14, kTowerDoubleBoom, towerLevel);
-    createDefenseTower(20, 14, kTowerFire, towerLevel);
-    createDefenseTower(14, 22, kTowerMagic, towerLevel);
-    createDefenseTower(20, 22, kTowerMagic, towerLevel);
+    createDefenseTower(8, 14, kTowerArrow, towerLevel);
+    createDefenseTower(12, 6, kTowerMagic, towerLevel);
+    createDefenseTower(12, 22, kTowerMagic, towerLevel);
+    createDefenseTower(18, 8, kTowerDoubleBoom, towerLevel);
+    createDefenseTower(18, 18, kTowerDoubleBoom, towerLevel);
+    createDefenseTower(22, 14, kTowerFire, towerLevel);
 
-    for (int x = 6; x <= 24; ++x) {
+    for (int x = 8; x <= 20; ++x) {
+        if (x == 14) {
+            continue;
+        }
         createSpikeTrap(x, 12);
     }
-    for (int x = 6; x <= 24; ++x) {
-        createSpikeTrap(x, 18);
+    for (int x = 10; x <= 18; ++x) {
+        if (x == 10) {
+            continue;
+        }
+        if (x == 14) {
+            continue;
+        }
+        createSpikeTrap(x, 16);
     }
-    for (int y = 13; y <= 17; ++y) {
-        createSpikeTrap(12, y);
-        createSpikeTrap(18, y);
-        createSpikeTrap(24, y);
+    for (int y = 10; y <= 18; ++y) {
+        createSpikeTrap(14, y);
     }
-    createSnapTrap(11, 16);
-    createSnapTrap(17, 16);
-    createSnapTrap(19, 17);
+    createSnapTrap(12, 14);
+    createSnapTrap(16, 14);
 }
 
 // ===================================================
-// 创建第9关 - 精英：纵深压制
+// 创建第9关 - 究极地刺
 // ===================================================
 
 void BattleScene::createLevel9() {
     int towerLevel = resolveAttackTowerLevel(_levelId);
-    createEnemyBase(26, 12, 2);
+    createEnemyBase(26, 12, towerLevel);
 
-    createDefenseTower(8, 6, kTowerArrow, towerLevel);
-    createDefenseTower(8, 22, kTowerArrow, towerLevel);
-    createDefenseTower(14, 6, kTowerBoom, towerLevel);
-    createDefenseTower(20, 6, kTowerBoom, towerLevel);
-    createDefenseTower(14, 14, kTowerDoubleBoom, towerLevel);
-    createDefenseTower(20, 14, kTowerFire, towerLevel);
-    createDefenseTower(14, 22, kTowerMagic, towerLevel);
-    createDefenseTower(20, 22, kTowerMagic, towerLevel);
+    createDefenseTower(18, 12, kTowerDoubleBoom, towerLevel);
+    createDefenseTower(22, 6, kTowerArrow, towerLevel);
+    createDefenseTower(22, 18, kTowerMagic, towerLevel);
 
-    for (int x = 4; x <= 24; ++x) {
-        createSpikeTrap(x, 12);
+    for (int y = 8; y <= 22; y += 2) {
+        for (int x = 6; x <= 16; ++x) {
+            createSpikeTrap(x, y);
+        }
     }
-    for (int x = 4; x <= 24; ++x) {
-        createSpikeTrap(x, 18);
+    for (int x = 8; x <= 16; x += 4) {
+        for (int y = 9; y <= 21; ++y) {
+            createSpikeTrap(x, y);
+        }
     }
-    for (int y = 13; y <= 17; ++y) {
-        createSpikeTrap(8, y);
-        createSpikeTrap(18, y);
-    }
-    createSnapTrap(12, 16);
-    createSnapTrap(19, 16);
-    createSnapTrap(21, 17);
+    createSnapTrap(14, 12);
+    createSnapTrap(14, 18);
 }
 
 // ===================================================
-// 创建第10关 - 困难：火力矩阵
+// 创建第10关 - 双管炮的极意
 // ===================================================
 
 void BattleScene::createLevel10() {
     int towerLevel = resolveAttackTowerLevel(_levelId);
-    createEnemyBase(26, 12, 2);
+    createEnemyBase(26, 12, towerLevel);
 
-    createDefenseTower(8, 6, kTowerArrow, towerLevel);
-    createDefenseTower(8, 22, kTowerArrow, towerLevel);
-    createDefenseTower(14, 6, kTowerBoom, towerLevel);
-    createDefenseTower(20, 6, kTowerBoom, towerLevel);
-    createDefenseTower(14, 14, kTowerDoubleBoom, towerLevel);
-    createDefenseTower(20, 14, kTowerFire, towerLevel);
-    createDefenseTower(14, 22, kTowerMagic, towerLevel);
-    createDefenseTower(20, 22, kTowerMagic, towerLevel);
+    createDefenseTower(10, 6, kTowerDoubleBoom, towerLevel);
+    createDefenseTower(10, 20, kTowerDoubleBoom, towerLevel);
+    createDefenseTower(16, 6, kTowerDoubleBoom, towerLevel);
+    createDefenseTower(16, 20, kTowerDoubleBoom, towerLevel);
+    createDefenseTower(14, 12, kTowerDoubleBoom, towerLevel);
+    createDefenseTower(22, 12, kTowerFire, towerLevel);
 
-    for (int x = 4; x <= 24; ++x) {
-        createSpikeTrap(x, 12);
-    }
-    for (int x = 4; x <= 24; ++x) {
+    for (int x = 6; x <= 20; ++x) {
+        if (x == 14) {
+            continue;
+        }
+        createSpikeTrap(x, 10);
         createSpikeTrap(x, 18);
     }
-    for (int y = 13; y <= 17; ++y) {
-        createSpikeTrap(8, y);
-        createSpikeTrap(18, y);
+    for (int y = 11; y <= 17; ++y) {
+        createSpikeTrap(12, y);
     }
-    createSnapTrap(12, 15);
-    createSnapTrap(15, 17);
-    createSnapTrap(21, 17);
+    createSnapTrap(14, 10);
+    createSnapTrap(14, 18);
 }
 
 // ===================================================
-// 创建第11关 - 困难：多点夹击
+// 创建第11关 - 夺命连环箭
 // ===================================================
 
 void BattleScene::createLevel11() {
     int towerLevel = resolveAttackTowerLevel(_levelId);
-    createEnemyBase(26, 12, 2);
+    createEnemyBase(26, 12, towerLevel);
 
     createDefenseTower(8, 6, kTowerArrow, towerLevel);
+    createDefenseTower(12, 6, kTowerArrow, towerLevel);
+    createDefenseTower(16, 6, kTowerArrow, towerLevel);
     createDefenseTower(8, 22, kTowerArrow, towerLevel);
-    createDefenseTower(20, 6, kTowerBoom, towerLevel);
-    createDefenseTower(14, 14, kTowerDoubleBoom, towerLevel);
-    createDefenseTower(14, 6, kTowerDoubleBoom, towerLevel);
-    createDefenseTower(14, 22, kTowerMagic, towerLevel);
-    createDefenseTower(20, 22, kTowerMagic, towerLevel);
-    createDefenseTower(20, 14, kTowerFire, towerLevel);
+    createDefenseTower(12, 22, kTowerArrow, towerLevel);
+    createDefenseTower(16, 22, kTowerArrow, towerLevel);
 
-    for (int x = 4; x <= 24; ++x) {
+    for (int x = 6; x <= 22; ++x) {
         createSpikeTrap(x, 12);
-    }
-    for (int x = 4; x <= 24; ++x) {
         createSpikeTrap(x, 18);
     }
-    for (int y = 13; y <= 17; ++y) {
-        createSpikeTrap(6, y);
-        createSpikeTrap(12, y);
-        createSpikeTrap(18, y);
-    }
-    createSnapTrap(9, 16);
-    createSnapTrap(17, 16);
-    createSnapTrap(19, 17);
+    createSnapTrap(10, 14);
+    createSnapTrap(14, 14);
+    createSnapTrap(18, 14);
 }
 
 // ===================================================
-// 创建第12关 - 噩梦：全域覆盖
+// 创建第12关 - 地狱的火焰
 // ===================================================
 
 void BattleScene::createLevel12() {
     int towerLevel = resolveAttackTowerLevel(_levelId);
-    createEnemyBase(26, 12, 2);
+    createEnemyBase(26, 12, towerLevel);
 
-    createDefenseTower(8, 6, kTowerArrow, towerLevel);
-    createDefenseTower(8, 22, kTowerArrow, towerLevel);
-    createDefenseTower(14, 6, kTowerBoom, towerLevel);
-    createDefenseTower(20, 6, kTowerBoom, towerLevel);
-    createDefenseTower(14, 14, kTowerDoubleBoom, towerLevel);
-    createDefenseTower(20, 14, kTowerFire, towerLevel);
-    createDefenseTower(14, 22, kTowerMagic, towerLevel);
-    createDefenseTower(20, 22, kTowerMagic, towerLevel);
+    for (int y = 6; y <= 22; ++y) {
+        createSnapTrap(6, y);
+        createSnapTrap(8, y);
+    }
 
-    for (int x = 4; x <= 24; ++x) {
-        createSpikeTrap(x, 12);
-    }
-    for (int x = 4; x <= 24; ++x) {
-        createSpikeTrap(x, 18);
-    }
-    for (int x = 6; x <= 24; ++x) {
-        createSpikeTrap(x, 20);
-    }
-    for (int y = 13; y <= 19; ++y) {
-        if (y == 18) {
-            continue;
-        }
+    for (int y = 6; y <= 22; ++y) {
         createSpikeTrap(10, y);
-        createSpikeTrap(18, y);
+        createSpikeTrap(12, y);
+        createSpikeTrap(14, y);
+        createSpikeTrap(16, y);
     }
-    createSnapTrap(11, 16);
-    createSnapTrap(19, 16);
-    createSnapTrap(22, 17);
+
+    int towerRows[] = { 6, 14, 22 };
+    for (int row : towerRows) {
+        createDefenseTower(17, row, kTowerFire, towerLevel);
+        createDefenseTower(20, row, kTowerFire, towerLevel);
+        createDefenseTower(23, row, kTowerBoom, towerLevel);
+    }
 }
 
 // ===================================================
@@ -801,7 +745,7 @@ void BattleScene::createDefenseBaseLayout(int towerLevel) {
         baseConfig.id = 3001;
         baseConfig.name = "Base";
         baseConfig.spriteFrameName = "buildings/base.png";
-        baseConfig.HP = { 2000, 2500, 3000 };
+        baseConfig.HP = { 2400, 3000, 3600 };
         baseConfig.DP = { 0, 0.05f, 0.1f };
         baseConfig.length = baseWidth;
         baseConfig.width = baseHeight;
@@ -829,7 +773,7 @@ void BattleScene::createDefenseBaseLayout(int towerLevel) {
         barracksConfig.id = 3002;
         barracksConfig.name = "SoldierBuilder";
         barracksConfig.spriteFrameName = "buildings/soldierbuilder.png";
-        barracksConfig.HP = { 600, 750, 900 };
+        barracksConfig.HP = { 720, 900, 1080 };
         barracksConfig.DP = { 0, 0, 0 };
         barracksConfig.length = 5;
         barracksConfig.width = 5;
@@ -948,7 +892,7 @@ void BattleScene::createEnemyBase(int gridX, int gridY, int level) {
     baseConfig.id = 9001;
     baseConfig.name = "EnemyBase";
     baseConfig.spriteFrameName = "buildings/base.png";
-    baseConfig.HP = { 1300, 1800, 2400 };
+    baseConfig.HP = { 1560, 2160, 2880 };
     baseConfig.DP = { 0, 0, 0 };
     baseConfig.length = 4;
     baseConfig.width = 4;
@@ -1006,10 +950,10 @@ void BattleScene::createDefenseTower(int gridX, int gridY, int type, int level) 
         towerConfig->id = 9101;
         towerConfig->name = "EnemyArrowTower";
         towerConfig->spriteFrameName = "buildings/ArrowTower.png";
-        towerConfig->HP = { 320, 420, 520 };
+        towerConfig->HP = { 380, 500, 620 };
         towerConfig->DP = { 0, 0.05f, 0.1f };
         towerConfig->ATK = { 35, 50, 70 };
-        towerConfig->ATK_RANGE = { 170, 200, 230 };
+        towerConfig->ATK_RANGE = { 200, 230, 260 };
         towerConfig->ATK_SPEED = { 0.95f, 0.85f, 0.75f };
         towerConfig->SKY_ABLE = true;
         towerConfig->GROUND_ABLE = true;
@@ -1023,44 +967,44 @@ void BattleScene::createDefenseTower(int gridX, int gridY, int type, int level) 
         towerConfig->id = 9102;
         towerConfig->name = "EnemyBoomTower";
         towerConfig->spriteFrameName = "buildings/BoomTower.png";
-        towerConfig->HP = { 450, 600, 760 };
+        towerConfig->HP = { 540, 720, 910 };
         towerConfig->DP = { 0.05f, 0.1f, 0.15f };
-        towerConfig->ATK = { 80, 105, 135 };
-        towerConfig->ATK_RANGE = { 140, 170, 200 };
+        towerConfig->ATK = { 160, 210, 270 };
+        towerConfig->ATK_RANGE = { 2000, 2000, 2000 };
         towerConfig->ATK_SPEED = { 1.3f, 1.2f, 1.1f };
         towerConfig->SKY_ABLE = false;
         towerConfig->GROUND_ABLE = true;
         towerConfig->bulletSpriteFrameName = "bullet/bomb.png";
         towerConfig->bulletSpeed = 200.0f;
         towerConfig->bulletIsAOE = true;
-        towerConfig->bulletAOERange = 40.0f;
+        towerConfig->bulletAOERange = 160.0f;
         break;
     case kTowerDoubleBoom:
         towerConfig = &doubleBoomConfig;
         towerConfig->id = 9103;
         towerConfig->name = "EnemyDoubleBoomTower";
         towerConfig->spriteFrameName = "buildings/DoubleBoomTower.png";
-        towerConfig->HP = { 430, 560, 720 };
+        towerConfig->HP = { 520, 670, 860 };
         towerConfig->DP = { 0.05f, 0.1f, 0.15f };
         towerConfig->ATK = { 70, 95, 125 };
-        towerConfig->ATK_RANGE = { 140, 170, 200 };
+        towerConfig->ATK_RANGE = { 180, 210, 240 };
         towerConfig->ATK_SPEED = { 0.65f, 0.6f, 0.55f };
         towerConfig->SKY_ABLE = false;
         towerConfig->GROUND_ABLE = true;
         towerConfig->bulletSpriteFrameName = "bullet/bomb.png";
         towerConfig->bulletSpeed = 200.0f;
         towerConfig->bulletIsAOE = true;
-        towerConfig->bulletAOERange = 35.0f;
+        towerConfig->bulletAOERange = 130.0f;
         break;
     case kTowerMagic:
         towerConfig = &magicConfig;
         towerConfig->id = 9104;
         towerConfig->name = "EnemyMagicTower";
         towerConfig->spriteFrameName = "buildings/MagicTower.png";
-        towerConfig->HP = { 360, 480, 620 };
+        towerConfig->HP = { 430, 580, 740 };
         towerConfig->DP = { 0.0f, 0.05f, 0.1f };
         towerConfig->ATK = { 220, 280, 340 };
-        towerConfig->ATK_RANGE = { 190, 220, 250 };
+        towerConfig->ATK_RANGE = { 210, 240, 270 };
         towerConfig->ATK_SPEED = { 2.2f, 2.0f, 1.8f };
         towerConfig->SKY_ABLE = true;
         towerConfig->GROUND_ABLE = true;
@@ -1074,10 +1018,10 @@ void BattleScene::createDefenseTower(int gridX, int gridY, int type, int level) 
         towerConfig->id = 9105;
         towerConfig->name = "EnemyFireTower";
         towerConfig->spriteFrameName = "buildings/FireTower.png";
-        towerConfig->HP = { 500, 650, 820 };
+        towerConfig->HP = { 600, 780, 980 };
         towerConfig->DP = { 0.05f, 0.1f, 0.15f };
         towerConfig->ATK = { 100, 130, 160 };
-        towerConfig->ATK_RANGE = { 150, 175, 200 };
+        towerConfig->ATK_RANGE = { 55, 65, 75 };
         towerConfig->ATK_SPEED = { 0.65f, 0.6f, 0.55f };
         towerConfig->SKY_ABLE = false;
         towerConfig->GROUND_ABLE = true;
@@ -1191,14 +1135,6 @@ void BattleScene::addTrapCluster(int startX, int startY, int width, int height, 
     }
 }
 
-void BattleScene::addAttackExtras() {
-    int towerLevel = resolveAttackTowerLevel(_levelId);
-    createDefenseTower(11, 4, kTowerArrow, towerLevel);
-    createDefenseTower(11, 22, kTowerBoom, towerLevel);
-
-    addTrapCluster(23, 4, 3, 3, { Vec2(24, 5), Vec2(25, 4) });
-    addTrapCluster(23, 22, 3, 3, { Vec2(24, 23), Vec2(25, 22) });
-}
 
 // ===================================================
 // 建筑缩放调整

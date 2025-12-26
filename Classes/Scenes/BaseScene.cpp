@@ -353,7 +353,7 @@ void BaseScene::initBaseBuilding() {
     _baseConfig.id = 3001;
     _baseConfig.name = "Base";
     _baseConfig.spriteFrameName = "buildings/base.png";
-    _baseConfig.HP = { 2000, 2500, 3000 };
+    _baseConfig.HP = { 2400, 3000, 3600 };
     _baseConfig.DP = { 0, 0.05f, 0.1f };
     _baseConfig.length = 4;  // 大本营 4x4
     _baseConfig.width = 4;
@@ -390,7 +390,7 @@ void BaseScene::initBaseBuilding() {
     _barracksConfig.id = 3002;
     _barracksConfig.name = "SoldierBuilder";
     _barracksConfig.spriteFrameName = "buildings/soldierbuilder.png";
-    _barracksConfig.HP = { 600, 750, 900 };
+    _barracksConfig.HP = { 720, 900, 1080 };
     _barracksConfig.DP = { 0, 0, 0 };
     _barracksConfig.length = 5;  // 兵营 5x5
     _barracksConfig.width = 5;
@@ -836,7 +836,7 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.id = 2001;
         config.name = "ArrowTower";
         config.spriteFrameName = option.spritePath;
-        config.HP = { 500, 750, 1000 };
+        config.HP = { 600, 900, 1200 };
         config.DP = { 0, 0.05f, 0.1f };
         config.ATK = { 40, 60, 85 };
         config.ATK_RANGE = { 200, 250, 300 };
@@ -858,17 +858,17 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.id = 2002;
         config.name = "BoomTower";
         config.spriteFrameName = option.spritePath;
-        config.HP = { 600, 900, 1200 };
+        config.HP = { 720, 1080, 1440 };
         config.DP = { 0.05f, 0.1f, 0.15f };
-        config.ATK = { 70, 95, 125 };
-        config.ATK_RANGE = { 180, 220, 260 };
+        config.ATK = { 140, 190, 250 };
+        config.ATK_RANGE = { 2000, 2000, 2000 };
         config.ATK_SPEED = { 1.5f, 1.4f, 1.3f };
         config.SKY_ABLE = false;
         config.GROUND_ABLE = true;
         config.bulletSpriteFrameName = "bullet/bomb.png";
         config.bulletSpeed = 200.0f;
         config.bulletIsAOE = true;
-        config.bulletAOERange = 40.0f;
+        config.bulletAOERange = 160.0f;
         config.length = 3;  // 3x3格子
         config.width = 3;
         config.MAXLEVEL = 2;
@@ -880,7 +880,7 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.id = 2008;
         config.name = "DoubleBoomTower";
         config.spriteFrameName = option.spritePath;
-        config.HP = { 620, 880, 1160 };
+        config.HP = { 740, 1060, 1390 };
         config.DP = { 0.05f, 0.1f, 0.15f };
         config.ATK = { 60, 85, 110 };
         config.ATK_RANGE = { 180, 220, 260 };
@@ -890,7 +890,7 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.bulletSpriteFrameName = "bullet/bomb.png";
         config.bulletSpeed = 200.0f;
         config.bulletIsAOE = true;
-        config.bulletAOERange = 40.0f;
+        config.bulletAOERange = 130.0f;
         config.length = 3;
         config.width = 3;
         config.MAXLEVEL = 2;
@@ -902,7 +902,7 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.id = 2009;
         config.name = "MagicTower";
         config.spriteFrameName = option.spritePath;
-        config.HP = { 520, 760, 980 };
+        config.HP = { 620, 910, 1180 };
         config.DP = { 0.0f, 0.05f, 0.1f };
         config.ATK = { 240, 300, 360 };
         config.ATK_RANGE = { 200, 240, 280 };
@@ -924,10 +924,10 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.id = 2010;
         config.name = "FireTower";
         config.spriteFrameName = option.spritePath;
-        config.HP = { 650, 900, 1150 };
+        config.HP = { 780, 1080, 1380 };
         config.DP = { 0.05f, 0.1f, 0.15f };
         config.ATK = { 110, 150, 190 };
-        config.ATK_RANGE = { 160, 190, 220 };
+        config.ATK_RANGE = { 55, 65, 75 };
         config.ATK_SPEED = { 0.65f, 0.6f, 0.55f };
         config.SKY_ABLE = false;
         config.GROUND_ABLE = true;
@@ -946,7 +946,7 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.id = 2003;
         config.name = "Tree";
         config.spriteFrameName = option.spritePath;
-        config.HP = { 450, 650, 850 };
+        config.HP = { 540, 780, 1020 };
         config.DP = { 0, 0.05f, 0.1f };
         config.ATK = { 35, 55, 75 };
         config.ATK_RANGE = { 220, 270, 320 };
@@ -964,7 +964,7 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.id = 4001;
         config.name = "Snowman";
         config.spriteFrameName = option.spritePath;
-        config.HP = { 800, 1000, 1200 };
+        config.HP = { 960, 1200, 1440 };
         config.DP = { 0.1f, 0.15f, 0.2f };
         config.length = 3;  // 3x3格子
         config.width = 3;
@@ -979,7 +979,7 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.id = 3002;
         config.name = "SoldierBuilder";
         config.spriteFrameName = option.spritePath;
-        config.HP = { 600, 750, 900 };
+        config.HP = { 720, 900, 1080 };
         config.DP = { 0, 0, 0 };
         config.length = 5;  // 5x5格子
         config.width = 5;
@@ -996,7 +996,7 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.id = 3003;
         config.name = "GoldMaker";
         config.spriteFrameName = option.spritePath;
-        config.HP = { 500, 650, 820 };
+        config.HP = { 600, 780, 980 };
         config.DP = { 0, 0.05f, 0.1f };
         config.length = 3;
         config.width = 3;
@@ -1013,7 +1013,7 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.id = 3004;
         config.name = "DiamondMaker";
         config.spriteFrameName = option.spritePath;
-        config.HP = { 520, 680, 860 };
+        config.HP = { 620, 820, 1030 };
         config.DP = { 0, 0.05f, 0.1f };
         config.length = 3;
         config.width = 3;
