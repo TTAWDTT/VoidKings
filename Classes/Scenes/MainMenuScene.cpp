@@ -420,6 +420,24 @@ void MainMenuScene::createSettingsLayer()
     label->setPosition(Vec2(0, panelHeight / 2 - 20));  // 相对 panel 的位置
     panel->addChild(label, 2);
 
+    // 设置说明内容
+    std::string settingsText =
+        "Audio: On\n"
+        "Music Volume: 55%\n"
+        "SFX Volume: 90%\n"
+        "Language: English\n"
+        "Difficulty: Normal\n"
+        "Tips: Enabled";
+    auto settingsLabel = Label::createWithTTF(settingsText, "fonts/ScienceGothic.ttf", 20);
+    if (!settingsLabel) {
+        settingsLabel = Label::createWithSystemFont(settingsText, "Arial", 20);
+    }
+    settingsLabel->setAnchorPoint(Vec2(0.5f, 1.0f));
+    settingsLabel->setAlignment(TextHAlignment::LEFT);
+    settingsLabel->setPosition(Vec2(0, panelHeight / 2 - 80));
+    settingsLabel->setLineSpacing(8.0f);
+    panel->addChild(settingsLabel, 2);
+
     //Return 按钮
     auto returnBtn = createIconButton(
         "Return",
@@ -464,9 +482,26 @@ void MainMenuScene::createRuleLayer()
     rulePanel = panel;
 
     //标题
-    auto label = Label::createWithTTF("Rule", "fonts/ScienceGothic.ttf", 32);
+    auto label = Label::createWithTTF("Rules", "fonts/ScienceGothic.ttf", 32);
     label->setPosition(Vec2(0, panelHeight / 2 - 20));  // 相对 panel 的位置
     panel->addChild(label, 2);
+
+    // 规则说明内容
+    std::string rulesText =
+        "1. Deploy units within the green zone.\n"
+        "2. Destroy enemy buildings to gain progress.\n"
+        "3. Fewer casualties earn more stars.\n"
+        "4. Traps trigger on contact.\n"
+        "5. Defeat the enemy base to win early.";
+    auto rulesLabel = Label::createWithTTF(rulesText, "fonts/ScienceGothic.ttf", 20);
+    if (!rulesLabel) {
+        rulesLabel = Label::createWithSystemFont(rulesText, "Arial", 20);
+    }
+    rulesLabel->setAnchorPoint(Vec2(0.5f, 1.0f));
+    rulesLabel->setAlignment(TextHAlignment::LEFT);
+    rulesLabel->setPosition(Vec2(0, panelHeight / 2 - 80));
+    rulesLabel->setLineSpacing(8.0f);
+    panel->addChild(rulesLabel, 2);
 
     //Return 按钮
     auto returnBtn = createIconButton(
