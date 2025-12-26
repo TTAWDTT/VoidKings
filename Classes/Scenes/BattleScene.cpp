@@ -2500,27 +2500,44 @@ void BattleScene::showBattleResult(bool isWin, int stars) {
         _resultLayer->addChild(resultSprite, 1);
     }
 
-    const char* starPath = "UI/Star_1.png";
-    if (stars >= 3) {
-        starPath = "UI/Star_3.png";
+    // 统一用三颗星展示评级（左到右：实心/空心）
+    const char* filledStarPath = "UI/LevelSelect/result_1.png";
+    const char* emptyStarPath = "UI/LevelSelect/result_2.png";
+    int clampedStars = std::max(0, std::min(3, stars));
+    auto sampleStar = Sprite::create(filledStarPath);
+    if (!sampleStar) {
+        sampleStar = Sprite::create(emptyStarPath);
     }
-    else if (stars == 2) {
-        starPath = "UI/Star_2.png";
-    }
-    auto starSprite = Sprite::create(starPath);
-    if (starSprite) {
+    if (sampleStar) {
         float maxWidth = visibleSize.width * 0.45f;
         float maxHeight = visibleSize.height * 0.18f;
-        Size size = starSprite->getContentSize();
-        if (size.width > 0 && size.height > 0) {
-            float scale = std::min(maxWidth / size.width, maxHeight / size.height);
-            starSprite->setScale(scale);
+        Size size = sampleStar->getContentSize();
+        float spacing = size.width * 0.35f;
+        float totalWidth = size.width * 3 + spacing * 2;
+        float scale = 1.0f;
+        if (size.width > 0.0f && size.height > 0.0f) {
+            scale = std::min(maxWidth / totalWidth, maxHeight / size.height);
         }
-        starSprite->setPosition(Vec2(
+        float scaledWidth = size.width * scale;
+        float scaledSpacing = spacing * scale;
+        float startX = -(scaledWidth * 3 + scaledSpacing * 2) * 0.5f + scaledWidth * 0.5f;
+
+        auto starGroup = Node::create();
+        starGroup->setPosition(Vec2(
             origin.x + visibleSize.width * 0.5f,
             origin.y + visibleSize.height * 0.53f
         ));
-        _resultLayer->addChild(starSprite, 1);
+        for (int i = 0; i < 3; ++i) {
+            const char* starPath = (i < clampedStars) ? filledStarPath : emptyStarPath;
+            auto starSprite = Sprite::create(starPath);
+            if (!starSprite) {
+                continue;
+            }
+            starSprite->setScale(scale);
+            starSprite->setPosition(Vec2(startX + i * (scaledWidth + scaledSpacing), 0.0f));
+            starGroup->addChild(starSprite, 1);
+        }
+        _resultLayer->addChild(starGroup, 1);
     }
 
     createResultButtons(_resultLayer, isWin);
