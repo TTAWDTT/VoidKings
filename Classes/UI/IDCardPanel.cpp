@@ -9,6 +9,8 @@ Node* IDCardPanel::createResourceLabel(
     const std::string& valueName
 )
 {
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
     float paddingY = minHeight * 0.15f;
     float paddingX = minHeight * 0.35f;
     float spacing  = 8.0f;
@@ -56,21 +58,21 @@ Node* IDCardPanel::createResourceLabel(
     panel->setIgnoreAnchorPointForPosition(false);
     panel->setAnchorPoint(Vec2(0, 1));   
 
-    auto bg = DrawNode::create();
-    bg->drawSolidRect(
-        Vec2(0, -height),
-        Vec2(width, 0),
-        Color4F(0.15f, 0.15f, 0.2f, 0.75f)
-    );
-    panel->addChild(bg);
+     float panelLength = visibleSize.width * 0.05f;
 
-    auto innerBg = DrawNode::create();
-    innerBg->drawSolidRect(
-        Vec2(2, -height + 2),
-        Vec2(width - 2, -2),
-        Color4F(0.2f, 0.4f, 0.9f, 0.4f)
-    );
-    panel->addChild(innerBg);
+    auto bgRect = Sprite::create("UI/resource_show_background.png");
+    if (bgRect)
+    {
+    bgRect->setAnchorPoint(Vec2(0.5f, 0.5f));
+
+    bgRect->setPosition(Vec2(width / 2, -height / 2));
+
+    Size bgSize = bgRect->getContentSize();
+    bgRect->setScaleX(width / bgSize.width);
+    bgRect->setScaleY(height / bgSize.height);
+
+    panel->addChild(bgRect, -1);
+    }
 
     float cursorX = paddingX;
 
@@ -92,7 +94,7 @@ Node* IDCardPanel::createPanel(Node* backgroundLayer)
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
-    float panelWidth = visibleSize.width * 0.32f;
+    float panelWidth = visibleSize.width * 0.18f;
     float panelHeight = visibleSize.height * 0.18f;
     float margin = 24.0f;
 
@@ -127,10 +129,11 @@ Node* IDCardPanel::createPanel(Node* backgroundLayer)
         "fonts/ScienceGothic.ttf",
         22
     );
-    title->setPosition(Vec2(0, panelHeight / 2 - 10));
+    title->setPosition(Vec2(0, panelHeight / 2 - 16));
     bg->addChild(title, 2);
 
-    float contentTopY = panelHeight / 2 -5;
+    float infoX = -panelWidth / 2 +15;
+    float contentTopY = panelHeight/2;
 
     auto photoFrame = Sprite::create("UI/ID_card_photo_frame.png");
     float photoWidth = 0.0f;
@@ -145,13 +148,32 @@ Node* IDCardPanel::createPanel(Node* backgroundLayer)
 
         photoFrame->setAnchorPoint(Vec2(0, 1)); 
         photoFrame->setPosition(Vec2(
-            -panelWidth / 2 + 5,
-            contentTopY -15
+               infoX+10,
+            contentTopY-35
         ));
         bg->addChild(photoFrame, 2);
     }
 
-    float infoX = -panelWidth / 2  + photoWidth +10;
+    auto photoBorder = Sprite::create("UI/head_portrait_background.png");
+    if (photoBorder)
+    {
+        photoBorder->setAnchorPoint(Vec2(0.5f, 0.5f));
+
+        Size frameSize=photoFrame->getContentSize();
+        photoBorder->setPosition(Vec2(
+            frameSize.width / 2,
+            frameSize.height / 2
+        ));
+
+        float borderScaleX =1.4* 
+            frameSize.width / photoBorder->getContentSize().width;
+        float borderScaleY =1.4* 
+            frameSize.height / photoBorder->getContentSize().height;
+
+        photoBorder->setScale(borderScaleX, borderScaleY);
+
+        photoFrame->addChild(photoBorder, 1);
+    }
 
     int gold = Core::getInstance()->getResource(ResourceType::COIN);
     int diamond = Core::getInstance()->getResource(ResourceType::DIAMOND);
@@ -168,7 +190,7 @@ Node* IDCardPanel::createPanel(Node* backgroundLayer)
     goldLabel->setAnchorPoint(Vec2(0, 1));
     goldLabel->setPosition(Vec2(
         infoX,
-        contentTopY
+        contentTopY-65
     ));
     bg->addChild(goldLabel, 2);
 
@@ -189,7 +211,7 @@ Node* IDCardPanel::createPanel(Node* backgroundLayer)
     diamondLabel->setAnchorPoint(Vec2(0, 1));
     diamondLabel->setPosition(Vec2(
         infoX,
-        contentTopY - 15
+        contentTopY - 85
     ));
     bg->addChild(diamondLabel, 2);
 
@@ -210,8 +232,8 @@ Node* IDCardPanel::createPanel(Node* backgroundLayer)
     baseLabel->setName("basePanel");
     baseLabel->setAnchorPoint(Vec2(0, 1));
     baseLabel->setPosition(Vec2(
-        infoX,
-        contentTopY - 30
+        infoX+100,
+        contentTopY - 15
     ));
     bg->addChild(baseLabel, 2);
 
@@ -220,8 +242,8 @@ Node* IDCardPanel::createPanel(Node* backgroundLayer)
 
     const float upgradeWidth = 78.0f;
     const float upgradeHeight = 16.0f;
-    float upgradeY = contentTopY - 30 - upgradeHeight * 0.5f;
-    float upgradeX = panelWidth / 2 - upgradeWidth / 2 - 8.0f;
+    float upgradeY = contentTopY - 60 ;
+    float upgradeX = infoX+140;
     auto upgradeNode = Node::create();
     upgradeNode->setName("baseUpgradeNode");
     upgradeNode->setPosition(Vec2(upgradeX, upgradeY));
