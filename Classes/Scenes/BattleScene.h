@@ -163,6 +163,7 @@ private:
     void createDefenseTower(int gridX, int gridY, int type, int level = 0);
     void createSpikeTrap(int gridX, int gridY);
     void createSnapTrap(int gridX, int gridY);
+    void addTrapCluster(int startX, int startY, int width, int height, const std::vector<Vec2>& snapCells);
 
     // ==================== 辅助方法 ====================
     /**
@@ -201,6 +202,7 @@ private:
     void updateBattle(float dt);
     void updateDefenseSpawns();
     void checkBattleEnd();
+    void freezeBattleActors();
     void onBattleWin();
     void onBattleLose();
     int calculateStarCount() const;

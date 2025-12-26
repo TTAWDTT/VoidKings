@@ -35,6 +35,7 @@ const char* kSfxSnapTrap = VK_UTF8_LITERAL("music/\u6355\u517D\u5939\u542F\u52A8
 constexpr const char* kSfxMagicAttack = "music/MagAttack.wav";
 constexpr const char* kSfxBoom = "music/boom.wav";
 constexpr const char* kSfxFireSpray = "music/fire.wav";
+constexpr const char* kSfxMoneyGet = "music/MoneyGet.wav";
 constexpr const char* kSfxBuildingCollapse = "music/building collapse.wav";
 constexpr const char* kSfxHit1 = "music/hit1.wav";
 constexpr const char* kSfxHit2 = "music/hit2.wav";
@@ -110,7 +111,7 @@ void preload() {
     engine->preloadBackgroundMusic(resolveAudioPath(kBgmBattle2).c_str());
     engine->preloadBackgroundMusic(resolveAudioPath(kBgmBattle3).c_str());
 
-    std::array<const char*, 17> effects = {
+    std::array<const char*, 18> effects = {
         kSfxButtonClick,
         kSfxButtonCancel,
         kSfxArrowShoot,
@@ -122,6 +123,7 @@ void preload() {
         kSfxSpikeAppear,
         kSfxSnapTrap,
         kSfxFireSpray,
+        kSfxMoneyGet,
         kSfxBuildingCollapse,
         kSfxHit1,
         kSfxHit2,
@@ -224,6 +226,10 @@ void playSnapTrap() {
 
 void playFireSpray() {
     playEffectInternal(kSfxFireSpray);
+}
+
+void playMoneyGet() {
+    playEffectInternal(kSfxMoneyGet);
 }
 
 void playBuildingCollapse() {

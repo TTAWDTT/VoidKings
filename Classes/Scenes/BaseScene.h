@@ -77,7 +77,8 @@ public:
     static const std::vector<BaseSavedBuilding>& getSavedBuildings();
     static Vec2 getBaseAnchorGrid();
     static Vec2 getBarracksAnchorGrid();
-    static Node* createBuildingFromOptionForDefense(const BuildingOption& option);
+    static int getBarracksLevel();
+    static Node* createBuildingFromOptionForDefense(const BuildingOption& option, int level = 0);
 
 private:
     // ==================== 核心组件 ====================
@@ -97,6 +98,16 @@ private:
     DrawNode* _hoverRangeNode = nullptr;           // 攻击范围虚线
     DrawNode* _hoverFootprintNode = nullptr;       // 占地实线框
     Node* _hoveredBuilding = nullptr;              // 当前悬浮建筑
+    Node* _hoverUpgradeNode = nullptr;             // 升级按钮容器
+    LayerColor* _hoverUpgradeBg = nullptr;         // 升级按钮背景
+    DrawNode* _hoverUpgradeBorder = nullptr;       // 升级按钮边框
+    Label* _hoverUpgradeLabel = nullptr;           // 升级按钮文字
+    Button* _hoverUpgradeButton = nullptr;         // 升级按钮
+    Node* _hoverSellNode = nullptr;                // 拆毁按钮容器
+    LayerColor* _hoverSellBg = nullptr;            // 拆毁按钮背景
+    DrawNode* _hoverSellBorder = nullptr;          // 拆毁按钮边框
+    Label* _hoverSellLabel = nullptr;              // 拆毁按钮文字
+    Button* _hoverSellButton = nullptr;            // 拆毁按钮
 
     // ==================== 建筑配置 ====================
     ProductionBuildingConfig _baseConfig;          // 基地建筑配置
@@ -185,6 +196,7 @@ private:
      * @return 创建的建筑节点
      */
     Node* createBuildingFromOption(const BuildingOption& option);
+    Node* createBuildingFromOption(const BuildingOption& option, int level);
 
     /**
      * @brief 计算建筑在世界坐标系中的位置
@@ -208,7 +220,7 @@ private:
      * @param gridX 网格X坐标
      * @param gridY 网格Y坐标
      */
-    void savePlacedBuilding(const BuildingOption& option, int gridX, int gridY);
+    void savePlacedBuilding(const BuildingOption& option, int gridX, int gridY, Node* building);
 
     /**
      * @brief 调整建筑缩放以适应格子大小
@@ -220,7 +232,7 @@ private:
     void scaleBuildingToFit(Node* building, int gridWidth, int gridHeight, float cellSize);
     void setupProductionCollect(ProductionBuilding* building);
     void playCollectEffect(ResourceType type, int amount, const Vec2& worldPos);
-    static Node* buildBuildingFromOption(const BuildingOption& option, BaseScene* owner);
+    static Node* buildBuildingFromOption(const BuildingOption& option, BaseScene* owner, int level);
 
     // ==================== 触摸事件处理 ====================
 
@@ -249,6 +261,18 @@ private:
     void clearBuildingInfo();
     void updateHoverOverlays(Node* building);
     void updateHoverPanelPosition(const Vec2& worldPos);
+    bool isHoverPanelHit(const Vec2& worldPos) const;
+    void setupHoverUpgradeUI();
+    void updateUpgradeUI(Node* building);
+    bool tryUpgradeBuilding(Node* building);
+    void setupHoverSellUI();
+    void updateSellUI(Node* building);
+    bool tryDemolishBuilding(Node* building);
+    bool canDemolishBuilding(Node* building, int& savedIndex) const;
+    void removeSavedBuildingAt(int index);
+    bool getUpgradeInfo(Node* building, int& currentLevel, int& maxLevel, int& cost, ResourceType& resource, bool& isBase) const;
+    int getSavedBuildingIndex(Node* building) const;
+    void syncBaseBuildingLevel();
 };
 
 #endif // __BASE_SCENE_H__

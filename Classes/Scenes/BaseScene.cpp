@@ -31,14 +31,101 @@ constexpr float kHoverPanelPaddingX = 16.0f;
 constexpr float kHoverPanelPaddingY = 14.0f;
 constexpr float kHoverPanelMinWidth = 260.0f;
 constexpr float kHoverPanelMinHeight = 140.0f;
+constexpr float kHoverUpgradeWidth = 78.0f;
+constexpr float kHoverUpgradeHeight = 18.0f;
+constexpr float kHoverSellWidth = 78.0f;
+constexpr float kHoverSellHeight = 18.0f;
+constexpr float kHoverSellGap = 6.0f;
+constexpr float kHoverPanelOffsetX = 16.0f;
+constexpr float kUpgradeCostFactor = 0.6f;
+constexpr float kSellRefundRate = 0.5f;
+constexpr int kSpikeTrapType = 11;
 constexpr int kBaseAnchorX = 36;
 constexpr int kBaseAnchorY = 36;
 constexpr int kBarracksAnchorX = 30;
 constexpr int kBarracksAnchorY = 36;
+constexpr int kSavedBuildingTagBase = 10000;
 
 Vec2 s_baseAnchor(static_cast<float>(kBaseAnchorX), static_cast<float>(kBaseAnchorY));
 Vec2 s_barracksAnchor(static_cast<float>(kBarracksAnchorX), static_cast<float>(kBarracksAnchorY));
+int s_barracksLevel = 0;
 std::vector<BaseSavedBuilding> s_savedBuildings;
+
+Vec2 getHoverAnchorWorldPos(cocos2d::Node* building) {
+    if (!building) {
+        return cocos2d::Vec2::ZERO;
+    }
+    const auto* bodySprite = NodeUtils::findBodySprite(building);
+    cocos2d::Rect localBounds = bodySprite ? bodySprite->getBoundingBox() : building->getBoundingBox();
+    if (localBounds.size.width <= 0.0f || localBounds.size.height <= 0.0f) {
+        auto* parent = building->getParent();
+        return parent ? parent->convertToWorldSpace(building->getPosition()) : building->getPosition();
+    }
+    cocos2d::Vec2 localRightCenter(localBounds.getMaxX(), localBounds.getMidY());
+    return building->convertToWorldSpace(localRightCenter);
+}
+
+cocos2d::Rect getBuildingWorldRect(cocos2d::Node* building) {
+    if (!building) {
+        return cocos2d::Rect::ZERO;
+    }
+    const auto* bodySprite = NodeUtils::findBodySprite(building);
+    if (bodySprite) {
+        cocos2d::Rect localRect = bodySprite->getBoundingBox();
+        cocos2d::Vec2 worldBL = building->convertToWorldSpace(localRect.origin);
+        cocos2d::Vec2 worldTR = building->convertToWorldSpace(
+            localRect.origin + cocos2d::Vec2(localRect.size.width, localRect.size.height));
+        float minX = std::min(worldBL.x, worldTR.x);
+        float minY = std::min(worldBL.y, worldTR.y);
+        float maxX = std::max(worldBL.x, worldTR.x);
+        float maxY = std::max(worldBL.y, worldTR.y);
+        return cocos2d::Rect(minX, minY, maxX - minX, maxY - minY);
+    }
+    auto* parent = building->getParent();
+    if (parent) {
+        cocos2d::Rect localRect = building->getBoundingBox();
+        cocos2d::Vec2 worldBL = parent->convertToWorldSpace(localRect.origin);
+        cocos2d::Vec2 worldTR = parent->convertToWorldSpace(
+            localRect.origin + cocos2d::Vec2(localRect.size.width, localRect.size.height));
+        float minX = std::min(worldBL.x, worldTR.x);
+        float minY = std::min(worldBL.y, worldTR.y);
+        float maxX = std::max(worldBL.x, worldTR.x);
+        float maxY = std::max(worldBL.y, worldTR.y);
+        return cocos2d::Rect(minX, minY, maxX - minX, maxY - minY);
+    }
+    return cocos2d::Rect::ZERO;
+}
+
+cocos2d::Rect getHoverPanelWorldRect(const cocos2d::Node* panel,
+                                    const cocos2d::LayerColor* bg) {
+    if (!panel || !bg) {
+        return cocos2d::Rect::ZERO;
+    }
+    cocos2d::Size panelSize = bg->getContentSize();
+    cocos2d::Vec2 panelPos = panel->getPosition();
+    return cocos2d::Rect(panelPos.x,
+                         panelPos.y - panelSize.height * 0.5f,
+                         panelSize.width,
+                         panelSize.height);
+}
+
+cocos2d::Rect getHoverKeepRect(cocos2d::Node* building,
+                              const cocos2d::Node* panel,
+                              const cocos2d::LayerColor* bg) {
+    cocos2d::Rect buildingRect = getBuildingWorldRect(building);
+    cocos2d::Rect panelRect = getHoverPanelWorldRect(panel, bg);
+    if (buildingRect.size.width <= 0.0f || buildingRect.size.height <= 0.0f) {
+        return panelRect;
+    }
+    if (panelRect.size.width <= 0.0f || panelRect.size.height <= 0.0f) {
+        return buildingRect;
+    }
+    float minX = std::min(buildingRect.getMinX(), panelRect.getMinX());
+    float minY = std::min(buildingRect.getMinY(), panelRect.getMinY());
+    float maxX = std::max(buildingRect.getMaxX(), panelRect.getMaxX());
+    float maxY = std::max(buildingRect.getMaxY(), panelRect.getMaxY());
+    return cocos2d::Rect(minX, minY, maxX - minX, maxY - minY);
+}
 
 } // namespace
 
@@ -81,6 +168,10 @@ bool BaseScene::init() {
                 Core::getInstance()->getResource(ResourceType::DIAMOND)
             );
         }
+        syncBaseBuildingLevel();
+        if (_hoverInfoPanel && _hoverInfoPanel->isVisible() && _hoveredBuilding) {
+            updateUpgradeUI(_hoveredBuilding);
+        }
     }, 0.5f, "resource_tick");
 
     CCLOG("[基地场景] 初始化完成（模块化版本）");
@@ -98,6 +189,10 @@ Vec2 BaseScene::getBaseAnchorGrid() {
 
 Vec2 BaseScene::getBarracksAnchorGrid() {
     return s_barracksAnchor;
+}
+
+int BaseScene::getBarracksLevel() {
+    return s_barracksLevel;
 }
 
 // ==================== 网格地图初始化 ====================
@@ -258,7 +353,7 @@ void BaseScene::initBaseBuilding() {
     _baseConfig.id = 3001;
     _baseConfig.name = "Base";
     _baseConfig.spriteFrameName = "buildings/base.png";
-    _baseConfig.HP = { 2000, 2500, 3000 };
+    _baseConfig.HP = { 2400, 3000, 3600 };
     _baseConfig.DP = { 0, 0.05f, 0.1f };
     _baseConfig.length = 4;  // 大本营 4x4
     _baseConfig.width = 4;
@@ -270,7 +365,14 @@ void BaseScene::initBaseBuilding() {
 
     const int baseGridX = kBaseAnchorX;
     const int baseGridY = kBaseAnchorY;
-    auto base = ProductionBuilding::create(&_baseConfig, 0);
+    int baseLevel = Core::getInstance()->getBaseLevel() - 1;
+    if (baseLevel < 0) {
+        baseLevel = 0;
+    }
+    if (baseLevel > _baseConfig.MAXLEVEL) {
+        baseLevel = _baseConfig.MAXLEVEL;
+    }
+    auto base = ProductionBuilding::create(&_baseConfig, baseLevel);
     if (base) {
         _buildingLayer->addChild(base);
         // 将基地放置在地图中心位置（80x80网格的中心为36,36附近，确保4x4建筑在网格内）
@@ -288,7 +390,7 @@ void BaseScene::initBaseBuilding() {
     _barracksConfig.id = 3002;
     _barracksConfig.name = "SoldierBuilder";
     _barracksConfig.spriteFrameName = "buildings/soldierbuilder.png";
-    _barracksConfig.HP = { 600, 750, 900 };
+    _barracksConfig.HP = { 720, 900, 1080 };
     _barracksConfig.DP = { 0, 0, 0 };
     _barracksConfig.length = 5;  // 兵营 5x5
     _barracksConfig.width = 5;
@@ -300,7 +402,15 @@ void BaseScene::initBaseBuilding() {
 
     const int barracksGridX = kBarracksAnchorX;
     const int barracksGridY = kBarracksAnchorY;
-    auto barracks = ProductionBuilding::create(&_barracksConfig, 0);
+    int barracksLevel = s_barracksLevel;
+    if (barracksLevel < 0) {
+        barracksLevel = 0;
+    }
+    if (barracksLevel > _barracksConfig.MAXLEVEL) {
+        barracksLevel = _barracksConfig.MAXLEVEL;
+    }
+    s_barracksLevel = barracksLevel;
+    auto barracks = ProductionBuilding::create(&_barracksConfig, barracksLevel);
     if (barracks) {
         _buildingLayer->addChild(barracks);
         // 将兵营放置在基地旁边（5x5格子，确保在网格内）
@@ -378,11 +488,13 @@ void BaseScene::initTouchListener() {
 
 void BaseScene::initHoverInfo() {
     _hoverInfoPanel = Node::create();
+    _hoverInfoPanel->setAnchorPoint(Vec2(0, 0.5f));
+    _hoverInfoPanel->setIgnoreAnchorPointForPosition(false);
     _hoverInfoPanel->setVisible(false);
     this->addChild(_hoverInfoPanel, 200);
 
-    _hoverInfoBg = LayerColor::create(Color4B(12, 12, 12, 240), 260, 140);
-    _hoverInfoBg->setAnchorPoint(Vec2(0, 1));
+    _hoverInfoBg = LayerColor::create(Color4B(12, 12, 12, 128), 260, 140);
+    _hoverInfoBg->setAnchorPoint(Vec2(0, 0));
     _hoverInfoBg->setIgnoreAnchorPointForPosition(false);
     _hoverInfoPanel->addChild(_hoverInfoBg);
 
@@ -401,6 +513,9 @@ void BaseScene::initHoverInfo() {
     _hoverInfoLabel->setWidth(300);
     _hoverInfoPanel->addChild(_hoverInfoLabel);
 
+    setupHoverUpgradeUI();
+    setupHoverSellUI();
+
     if (_gridMap) {
         _hoverRangeNode = DrawNode::create();
         _hoverFootprintNode = DrawNode::create();
@@ -415,6 +530,171 @@ void BaseScene::initHoverInfo() {
         updateHoverInfo(Vec2(event->getCursorX(), event->getCursorY()));
     };
     _eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, this);
+}
+
+void BaseScene::setupHoverUpgradeUI() {
+    if (!_hoverInfoPanel) {
+        return;
+    }
+
+    _hoverUpgradeNode = Node::create();
+    _hoverUpgradeNode->setName("hoverUpgradeNode");
+    _hoverUpgradeNode->setVisible(false);
+    _hoverInfoPanel->addChild(_hoverUpgradeNode, 2);
+
+    _hoverUpgradeBg = LayerColor::create(Color4B(60, 60, 60, 255), kHoverUpgradeWidth, kHoverUpgradeHeight);
+    _hoverUpgradeBg->setAnchorPoint(Vec2(0.5f, 0.5f));
+    _hoverUpgradeBg->setIgnoreAnchorPointForPosition(false);
+    _hoverUpgradeBg->setName("hoverUpgradeBg");
+    _hoverUpgradeNode->addChild(_hoverUpgradeBg);
+
+    _hoverUpgradeBorder = DrawNode::create();
+    _hoverUpgradeBorder->setName("hoverUpgradeBorder");
+    _hoverUpgradeNode->addChild(_hoverUpgradeBorder, 1);
+
+    _hoverUpgradeLabel = Label::createWithTTF("UP", "fonts/ScienceGothic.ttf", 10);
+    if (!_hoverUpgradeLabel) {
+        _hoverUpgradeLabel = Label::createWithSystemFont("UP", "Arial", 10);
+    }
+    _hoverUpgradeLabel->setName("hoverUpgradeLabel");
+    _hoverUpgradeLabel->setColor(Color3B::WHITE);
+    _hoverUpgradeNode->addChild(_hoverUpgradeLabel, 2);
+
+    _hoverUpgradeButton = Button::create();
+    _hoverUpgradeButton->setScale9Enabled(true);
+    _hoverUpgradeButton->setContentSize(Size(kHoverUpgradeWidth, kHoverUpgradeHeight));
+    _hoverUpgradeButton->setPosition(Vec2::ZERO);
+    _hoverUpgradeButton->setSwallowTouches(true);
+    _hoverUpgradeButton->setName("hoverUpgradeButton");
+    _hoverUpgradeNode->addChild(_hoverUpgradeButton, 5);
+
+    auto showLevelUpToast = [this]() {
+        if (!_hoverInfoPanel || !_hoverUpgradeNode) {
+            return;
+        }
+
+        const float toastWidth = 90.0f;
+        const float toastHeight = 20.0f;
+        auto toastRoot = Node::create();
+        toastRoot->setCascadeOpacityEnabled(true);
+
+        auto toastBg = LayerColor::create(Color4B(10, 10, 10, 220), toastWidth, toastHeight);
+        toastBg->setAnchorPoint(Vec2(0.5f, 0.5f));
+        toastBg->setIgnoreAnchorPointForPosition(false);
+        toastRoot->addChild(toastBg);
+
+        auto border = DrawNode::create();
+        border->drawRect(
+            Vec2(-toastWidth / 2, -toastHeight / 2),
+            Vec2(toastWidth / 2, toastHeight / 2),
+            Color4F(1.0f, 1.0f, 1.0f, 0.8f)
+        );
+        toastRoot->addChild(border, 1);
+
+        auto toastLabel = Label::createWithTTF("Level up!", "fonts/ScienceGothic.ttf", 12);
+        if (!toastLabel) {
+            toastLabel = Label::createWithSystemFont("Level up!", "Arial", 12);
+        }
+        toastLabel->setPosition(Vec2(0.0f, 0.0f));
+        toastLabel->setColor(Color3B::WHITE);
+        toastRoot->addChild(toastLabel, 2);
+
+        Vec2 basePos = _hoverUpgradeNode->getPosition();
+        toastRoot->setPosition(basePos + Vec2(0.0f, 22.0f));
+        toastRoot->setOpacity(230);
+        _hoverInfoPanel->addChild(toastRoot, 6);
+
+        auto moveUp = MoveBy::create(1.2f, Vec2(0.0f, 14.0f));
+        auto fadeOut = FadeOut::create(1.2f);
+        toastRoot->runAction(Sequence::create(
+            Spawn::create(moveUp, fadeOut, nullptr),
+            RemoveSelf::create(),
+            nullptr
+        ));
+    };
+
+    _hoverUpgradeButton->addClickEventListener([this, showLevelUpToast](Ref*) {
+        if (!_hoveredBuilding) {
+            return;
+        }
+        bool upgraded = tryUpgradeBuilding(_hoveredBuilding);
+        if (upgraded) {
+            AudioManager::playButtonClick();
+            showLevelUpToast();
+        }
+        else {
+            AudioManager::playButtonCancel();
+        }
+        if (_uiPanel) {
+            _uiPanel->updateResourceDisplay(
+                Core::getInstance()->getResource(ResourceType::COIN),
+                Core::getInstance()->getResource(ResourceType::DIAMOND)
+            );
+        }
+        if (_hoveredBuilding) {
+            showBuildingInfo(_hoveredBuilding);
+        }
+    });
+}
+
+void BaseScene::setupHoverSellUI() {
+    if (!_hoverInfoPanel) {
+        return;
+    }
+
+    _hoverSellNode = Node::create();
+    _hoverSellNode->setName("hoverSellNode");
+    _hoverSellNode->setVisible(false);
+    _hoverInfoPanel->addChild(_hoverSellNode, 2);
+
+    _hoverSellBg = LayerColor::create(Color4B(70, 45, 45, 255), kHoverSellWidth, kHoverSellHeight);
+    _hoverSellBg->setAnchorPoint(Vec2(0.5f, 0.5f));
+    _hoverSellBg->setIgnoreAnchorPointForPosition(false);
+    _hoverSellBg->setName("hoverSellBg");
+    _hoverSellNode->addChild(_hoverSellBg);
+
+    _hoverSellBorder = DrawNode::create();
+    _hoverSellBorder->setName("hoverSellBorder");
+    _hoverSellNode->addChild(_hoverSellBorder, 1);
+
+    _hoverSellLabel = Label::createWithTTF("SELL", "fonts/ScienceGothic.ttf", 10);
+    if (!_hoverSellLabel) {
+        _hoverSellLabel = Label::createWithSystemFont("SELL", "Arial", 10);
+    }
+    _hoverSellLabel->setName("hoverSellLabel");
+    _hoverSellLabel->setColor(Color3B::WHITE);
+    _hoverSellNode->addChild(_hoverSellLabel, 2);
+
+    _hoverSellButton = Button::create();
+    _hoverSellButton->setScale9Enabled(true);
+    _hoverSellButton->setContentSize(Size(kHoverSellWidth, kHoverSellHeight));
+    _hoverSellButton->setPosition(Vec2::ZERO);
+    _hoverSellButton->setSwallowTouches(true);
+    _hoverSellButton->setName("hoverSellButton");
+    _hoverSellNode->addChild(_hoverSellButton, 5);
+
+    _hoverSellButton->addClickEventListener([this](Ref*) {
+        if (!_hoveredBuilding) {
+            return;
+        }
+        bool removed = tryDemolishBuilding(_hoveredBuilding);
+        if (removed) {
+            AudioManager::playButtonClick();
+        }
+        else {
+            AudioManager::playButtonCancel();
+        }
+    });
+}
+
+bool BaseScene::isHoverPanelHit(const Vec2& worldPos) const {
+    if (!_hoverInfoPanel || !_hoverInfoBg || !_hoverInfoPanel->isVisible()) {
+        return false;
+    }
+    Size panelSize = _hoverInfoBg->getContentSize();
+    Vec2 panelPos = _hoverInfoPanel->getPosition();
+    Rect worldRect(panelPos.x, panelPos.y - panelSize.height * 0.5f, panelSize.width, panelSize.height);
+    return worldRect.containsPoint(worldPos);
 }
 
 // ==================== 按钮回调 ====================
@@ -465,6 +745,8 @@ void BaseScene::onPlacementConfirmed(const BuildingOption& option, int gridX, in
 
     // 先扣除资源，避免放置成功但资源不足
     int cost = option.cost;
+    bool isSpikePlacing = (_placementManager && _placementManager->isPlacing()
+        && option.type == kSpikeTrapType);
     if (!Core::getInstance()->consumeResource(ResourceType::COIN, cost)) {
         CCLOG("[基地场景] 金币不足，无法建造: %s", option.name.c_str());
         AudioManager::playButtonCancel();
@@ -473,7 +755,12 @@ void BaseScene::onPlacementConfirmed(const BuildingOption& option, int gridX, in
                 Core::getInstance()->getResource(ResourceType::COIN),
                 Core::getInstance()->getResource(ResourceType::DIAMOND)
             );
-            _uiPanel->setButtonsEnabled(true);
+            if (!isSpikePlacing) {
+                _uiPanel->setButtonsEnabled(true);
+            }
+        }
+        if (isSpikePlacing && _placementManager) {
+            _placementManager->cancelPlacement();
         }
         return;
     }
@@ -504,7 +791,7 @@ void BaseScene::onPlacementConfirmed(const BuildingOption& option, int gridX, in
             EaseBackOut::create(ScaleTo::create(0.12f, 1.0f)),
             nullptr));
 
-        savePlacedBuilding(option, gridX, gridY);
+        savePlacedBuilding(option, gridX, gridY, newBuilding);
         AudioManager::playButtonClick();
 
         CCLOG("[基地场景] 建筑创建成功，剩余金币: %d",
@@ -520,21 +807,27 @@ void BaseScene::onPlacementConfirmed(const BuildingOption& option, int gridX, in
             Core::getInstance()->getResource(ResourceType::COIN),
             Core::getInstance()->getResource(ResourceType::DIAMOND)
         );
-        _uiPanel->setButtonsEnabled(true);
+        if (!isSpikePlacing) {
+            _uiPanel->setButtonsEnabled(true);
+        }
     }
 }
 
 // ==================== 建筑创建 ====================
 
 Node* BaseScene::createBuildingFromOption(const BuildingOption& option) {
-    return buildBuildingFromOption(option, this);
+    return buildBuildingFromOption(option, this, 0);
 }
 
-Node* BaseScene::createBuildingFromOptionForDefense(const BuildingOption& option) {
-    return buildBuildingFromOption(option, nullptr);
+Node* BaseScene::createBuildingFromOption(const BuildingOption& option, int level) {
+    return buildBuildingFromOption(option, this, level);
 }
 
-Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene* owner) {
+Node* BaseScene::createBuildingFromOptionForDefense(const BuildingOption& option, int level) {
+    return buildBuildingFromOption(option, nullptr, level);
+}
+
+Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene* owner, int level) {
     Node* newBuilding = nullptr;
 
     switch (option.type) {
@@ -543,9 +836,9 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.id = 2001;
         config.name = "ArrowTower";
         config.spriteFrameName = option.spritePath;
-        config.HP = { 500, 750, 1000 };
+        config.HP = { 600, 900, 1200 };
         config.DP = { 0, 0.05f, 0.1f };
-        config.ATK = { 30, 45, 60 };
+        config.ATK = { 40, 60, 85 };
         config.ATK_RANGE = { 200, 250, 300 };
         config.ATK_SPEED = { 1.0f, 0.9f, 0.8f };
         config.SKY_ABLE = true;
@@ -557,7 +850,7 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.length = 3;  // 3x3格子
         config.width = 3;
         config.MAXLEVEL = 2;
-        newBuilding = DefenceBuilding::create(&config, 0);
+        newBuilding = DefenceBuilding::create(&config, level);
         break;
     }
     case 2: { // 炮塔 (3x3格子)
@@ -565,21 +858,21 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.id = 2002;
         config.name = "BoomTower";
         config.spriteFrameName = option.spritePath;
-        config.HP = { 600, 900, 1200 };
+        config.HP = { 720, 1080, 1440 };
         config.DP = { 0.05f, 0.1f, 0.15f };
-        config.ATK = { 50, 75, 100 };
-        config.ATK_RANGE = { 180, 220, 260 };
+        config.ATK = { 140, 190, 250 };
+        config.ATK_RANGE = { 2000, 2000, 2000 };
         config.ATK_SPEED = { 1.5f, 1.4f, 1.3f };
         config.SKY_ABLE = false;
         config.GROUND_ABLE = true;
         config.bulletSpriteFrameName = "bullet/bomb.png";
         config.bulletSpeed = 200.0f;
         config.bulletIsAOE = true;
-        config.bulletAOERange = 40.0f;
+        config.bulletAOERange = 160.0f;
         config.length = 3;  // 3x3格子
         config.width = 3;
         config.MAXLEVEL = 2;
-        newBuilding = DefenceBuilding::create(&config, 0);
+        newBuilding = DefenceBuilding::create(&config, level);
         break;
     }
     case 8: { // 双倍攻速炮塔 (3x3格子)
@@ -587,9 +880,9 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.id = 2008;
         config.name = "DoubleBoomTower";
         config.spriteFrameName = option.spritePath;
-        config.HP = { 620, 880, 1160 };
+        config.HP = { 740, 1060, 1390 };
         config.DP = { 0.05f, 0.1f, 0.15f };
-        config.ATK = { 50, 75, 100 };
+        config.ATK = { 60, 85, 110 };
         config.ATK_RANGE = { 180, 220, 260 };
         config.ATK_SPEED = { 0.75f, 0.7f, 0.65f };
         config.SKY_ABLE = false;
@@ -597,11 +890,11 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.bulletSpriteFrameName = "bullet/bomb.png";
         config.bulletSpeed = 200.0f;
         config.bulletIsAOE = true;
-        config.bulletAOERange = 40.0f;
+        config.bulletAOERange = 130.0f;
         config.length = 3;
         config.width = 3;
         config.MAXLEVEL = 2;
-        newBuilding = DefenceBuilding::create(&config, 0);
+        newBuilding = DefenceBuilding::create(&config, level);
         break;
     }
     case 9: { // 魔法塔 (3x3格子)
@@ -609,11 +902,11 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.id = 2009;
         config.name = "MagicTower";
         config.spriteFrameName = option.spritePath;
-        config.HP = { 520, 760, 980 };
+        config.HP = { 620, 910, 1180 };
         config.DP = { 0.0f, 0.05f, 0.1f };
-        config.ATK = { 40, 60, 80 };
+        config.ATK = { 240, 300, 360 };
         config.ATK_RANGE = { 200, 240, 280 };
-        config.ATK_SPEED = { 1.2f, 1.1f, 1.0f };
+        config.ATK_SPEED = { 2.2f, 2.0f, 1.8f };
         config.SKY_ABLE = true;
         config.GROUND_ABLE = true;
         config.bulletSpriteFrameName.clear();
@@ -623,7 +916,7 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.length = 3;
         config.width = 3;
         config.MAXLEVEL = 2;
-        newBuilding = DefenceBuilding::create(&config, 0);
+        newBuilding = DefenceBuilding::create(&config, level);
         break;
     }
     case 10: { // 火焰塔 (3x3格子)
@@ -631,11 +924,11 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.id = 2010;
         config.name = "FireTower";
         config.spriteFrameName = option.spritePath;
-        config.HP = { 650, 900, 1150 };
+        config.HP = { 780, 1080, 1380 };
         config.DP = { 0.05f, 0.1f, 0.15f };
-        config.ATK = { 20, 30, 40 };
-        config.ATK_RANGE = { 160, 190, 220 };
-        config.ATK_SPEED = { 0.6f, 0.55f, 0.5f };
+        config.ATK = { 110, 150, 190 };
+        config.ATK_RANGE = { 55, 65, 75 };
+        config.ATK_SPEED = { 0.65f, 0.6f, 0.55f };
         config.SKY_ABLE = false;
         config.GROUND_ABLE = true;
         config.bulletSpriteFrameName.clear();
@@ -645,7 +938,7 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.length = 3;
         config.width = 3;
         config.MAXLEVEL = 2;
-        newBuilding = DefenceBuilding::create(&config, 0);
+        newBuilding = DefenceBuilding::create(&config, level);
         break;
     }
     case 3: { // 装饰树 (2x2格子)
@@ -653,9 +946,9 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.id = 2003;
         config.name = "Tree";
         config.spriteFrameName = option.spritePath;
-        config.HP = { 450, 650, 850 };
+        config.HP = { 540, 780, 1020 };
         config.DP = { 0, 0.05f, 0.1f };
-        config.ATK = { 25, 40, 55 };
+        config.ATK = { 35, 55, 75 };
         config.ATK_RANGE = { 220, 270, 320 };
         config.ATK_SPEED = { 0.8f, 0.7f, 0.6f };
         config.SKY_ABLE = false;
@@ -663,7 +956,7 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.length = 2;  // 2x2格子
         config.width = 2;
         config.MAXLEVEL = 2;
-        newBuilding = DefenceBuilding::create(&config, 0);
+        newBuilding = DefenceBuilding::create(&config, level);
         break;
     }
     case 4: { // 雪人仓库 (3x3格子)
@@ -671,14 +964,14 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.id = 4001;
         config.name = "Snowman";
         config.spriteFrameName = option.spritePath;
-        config.HP = { 800, 1000, 1200 };
+        config.HP = { 960, 1200, 1440 };
         config.DP = { 0.1f, 0.15f, 0.2f };
         config.length = 3;  // 3x3格子
         config.width = 3;
         config.MAXLEVEL = 2;
         config.ADD_STORAGE_ELIXIR_CAPACITY = { 1000, 2000, 4000 };
         config.ADD_STORAGE_GOLD_CAPACITY = { 1000, 2000, 4000 };
-        newBuilding = StorageBuilding::create(&config, 0);
+        newBuilding = StorageBuilding::create(&config, level);
         break;
     }
     case 5: { // 兵营 (5x5格子)
@@ -686,7 +979,7 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.id = 3002;
         config.name = "SoldierBuilder";
         config.spriteFrameName = option.spritePath;
-        config.HP = { 600, 750, 900 };
+        config.HP = { 720, 900, 1080 };
         config.DP = { 0, 0, 0 };
         config.length = 5;  // 5x5格子
         config.width = 5;
@@ -695,7 +988,7 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.STORAGE_ELIXIR_CAPACITY = { 0, 0, 0 };
         config.PRODUCE_GOLD = { 0, 0, 0 };
         config.STORAGE_GOLD_CAPACITY = { 0, 0, 0 };
-        newBuilding = ProductionBuilding::create(&config, 0);
+        newBuilding = ProductionBuilding::create(&config, level);
         break;
     }
     case 6: { // 金币工厂 (3x3格子)
@@ -703,7 +996,7 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.id = 3003;
         config.name = "GoldMaker";
         config.spriteFrameName = option.spritePath;
-        config.HP = { 500, 650, 820 };
+        config.HP = { 600, 780, 980 };
         config.DP = { 0, 0.05f, 0.1f };
         config.length = 3;
         config.width = 3;
@@ -712,7 +1005,7 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.PRODUCE_ELIXIR = { 0, 0, 0 };
         config.STORAGE_GOLD_CAPACITY = { 0, 0, 0 };
         config.STORAGE_ELIXIR_CAPACITY = { 0, 0, 0 };
-        newBuilding = ProductionBuilding::create(&config, 0);
+        newBuilding = ProductionBuilding::create(&config, level);
         break;
     }
     case 7: { // 钻石工厂 (3x3格子)
@@ -720,7 +1013,7 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.id = 3004;
         config.name = "DiamondMaker";
         config.spriteFrameName = option.spritePath;
-        config.HP = { 520, 680, 860 };
+        config.HP = { 620, 820, 1030 };
         config.DP = { 0, 0.05f, 0.1f };
         config.length = 3;
         config.width = 3;
@@ -729,7 +1022,7 @@ Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene
         config.PRODUCE_ELIXIR = { 2, 3, 4 };
         config.STORAGE_GOLD_CAPACITY = { 0, 0, 0 };
         config.STORAGE_ELIXIR_CAPACITY = { 0, 0, 0 };
-        newBuilding = ProductionBuilding::create(&config, 0);
+        newBuilding = ProductionBuilding::create(&config, level);
         break;
     }
     case 11: { // 地刺 (1x1格子)
@@ -763,9 +1056,13 @@ Vec2 BaseScene::calculateBuildingPosition(int gridX, int gridY, int width, int h
 
 // ==================== 建筑状态保存/恢复 ====================
 
-void BaseScene::savePlacedBuilding(const BuildingOption& option, int gridX, int gridY) {
-    for (const auto& saved : s_savedBuildings) {
+void BaseScene::savePlacedBuilding(const BuildingOption& option, int gridX, int gridY, Node* building) {
+    for (size_t i = 0; i < s_savedBuildings.size(); ++i) {
+        const auto& saved = s_savedBuildings[i];
         if (saved.gridX == gridX && saved.gridY == gridY && saved.option.type == option.type) {
+            if (building) {
+                building->setTag(static_cast<int>(kSavedBuildingTagBase + i));
+            }
             return;
         }
     }
@@ -777,6 +1074,9 @@ void BaseScene::savePlacedBuilding(const BuildingOption& option, int gridX, int 
     saved.gridY = gridY;
     saved.level = 0;
     s_savedBuildings.push_back(saved);
+    if (building) {
+        building->setTag(static_cast<int>(kSavedBuildingTagBase + s_savedBuildings.size() - 1));
+    }
 }
 
 void BaseScene::restoreSavedBuildings() {
@@ -785,18 +1085,20 @@ void BaseScene::restoreSavedBuildings() {
     }
 
     float cellSize = _gridMap->getCellSize();
-    for (const auto& saved : s_savedBuildings) {
+    for (size_t i = 0; i < s_savedBuildings.size(); ++i) {
+        const auto& saved = s_savedBuildings[i];
         const auto& option = saved.option;
         if (!_gridMap->canPlaceBuilding(saved.gridX, saved.gridY, option.gridWidth, option.gridHeight)) {
             continue;
         }
 
-        Node* building = createBuildingFromOption(option);
+        Node* building = createBuildingFromOption(option, saved.level);
         if (!building) {
             continue;
         }
 
         _buildingLayer->addChild(building);
+        building->setTag(static_cast<int>(kSavedBuildingTagBase + i));
         Vec2 buildingPos = calculateBuildingPosition(saved.gridX, saved.gridY, option.gridWidth, option.gridHeight);
         building->setPosition(buildingPos);
         scaleBuildingToFit(building, option.gridWidth, option.gridHeight, cellSize);
@@ -935,6 +1237,9 @@ void BaseScene::onTouchMoved(Touch* touch, Event* event) {
         Vec2 touchPos = touch->getLocation();
         Vec2 localPos = _gridMap->convertToNodeSpace(touchPos);
         _placementManager->updatePreviewPosition(localPos);
+        if (_placementManager->getState().buildingType == kSpikeTrapType) {
+            _placementManager->tryPaintPlacement(localPos);
+        }
     }
 }
 
@@ -943,6 +1248,11 @@ void BaseScene::onTouchEnded(Touch* touch, Event* event) {
     if (_placementManager && _placementManager->isPlacing()) {
         Vec2 touchPos = touch->getLocation();
         Vec2 localPos = _gridMap->convertToNodeSpace(touchPos);
+        if (_placementManager->getState().buildingType == kSpikeTrapType) {
+            _placementManager->tryPaintPlacement(localPos);
+            _placementManager->cancelPlacement();
+            return;
+        }
 
         // 尝试确认放置，如果失败则取消
         if (!_placementManager->tryConfirmPlacement(localPos)) {
@@ -970,8 +1280,18 @@ void BaseScene::updateHoverInfo(const Vec2& worldPos) {
         return;
     }
 
+    if (_hoverInfoPanel && _hoverInfoPanel->isVisible() && isHoverPanelHit(worldPos)) {
+        return;
+    }
+
     Node* building = pickBuildingAt(worldPos);
     if (!building) {
+        if (_hoverInfoPanel && _hoverInfoBg && _hoverInfoPanel->isVisible() && _hoveredBuilding) {
+            Rect keepRect = getHoverKeepRect(_hoveredBuilding, _hoverInfoPanel, _hoverInfoBg);
+            if (keepRect.containsPoint(worldPos)) {
+                return;
+            }
+        }
         clearBuildingInfo();
         return;
     }
@@ -980,7 +1300,11 @@ void BaseScene::updateHoverInfo(const Vec2& worldPos) {
         _hoveredBuilding = building;
     }
     showBuildingInfo(building);
-    updateHoverPanelPosition(worldPos);
+    Vec2 anchorPos = getHoverAnchorWorldPos(building);
+    if (anchorPos == Vec2::ZERO) {
+        anchorPos = worldPos;
+    }
+    updateHoverPanelPosition(anchorPos);
 }
 
 Node* BaseScene::pickBuildingAt(const Vec2& worldPos) const {
@@ -994,7 +1318,8 @@ Node* BaseScene::pickBuildingAt(const Vec2& worldPos) const {
         }
         if (dynamic_cast<DefenceBuilding*>(child)
             || dynamic_cast<ProductionBuilding*>(child)
-            || dynamic_cast<StorageBuilding*>(child)) {
+            || dynamic_cast<StorageBuilding*>(child)
+            || dynamic_cast<TrapBase*>(child)) {
             if (NodeUtils::hitTestBuilding(child, worldPos)) {
                 return child;
             }
@@ -1019,6 +1344,7 @@ void BaseScene::showBuildingInfo(Node* building) {
     int produceGold = 0;
     int produceElixir = 0;
     bool hasAttack = false;
+    std::string upgradeText = "-";
 
     if (auto* defence = dynamic_cast<DefenceBuilding*>(building)) {
         name = defence->getName();
@@ -1049,6 +1375,16 @@ void BaseScene::showBuildingInfo(Node* building) {
         sizeW = storage->getWidth();
         sizeH = storage->getLength();
     }
+    else if (dynamic_cast<TrapBase*>(building)) {
+        int savedIndex = getSavedBuildingIndex(building);
+        if (savedIndex >= 0 && savedIndex < static_cast<int>(s_savedBuildings.size())) {
+            const auto& saved = s_savedBuildings[static_cast<size_t>(savedIndex)];
+            name = saved.option.name;
+            level = 1;
+            sizeW = saved.option.gridWidth;
+            sizeH = saved.option.gridHeight;
+        }
+    }
 
     std::string attackText = hasAttack ? StringUtils::format("%.0f", atk) : "-";
     std::string rangeText = hasAttack ? StringUtils::format("%.0f", range) : "-";
@@ -1057,9 +1393,24 @@ void BaseScene::showBuildingInfo(Node* building) {
         produceText = StringUtils::format("Gold+%d Elixir+%d", produceGold, produceElixir);
     }
 
-    char infoText[256];
+    int upgradeLevel = 0;
+    int upgradeMax = 0;
+    int upgradeCost = 0;
+    ResourceType upgradeResource = ResourceType::COIN;
+    bool upgradeIsBase = false;
+    if (getUpgradeInfo(building, upgradeLevel, upgradeMax, upgradeCost, upgradeResource, upgradeIsBase)) {
+        if (upgradeLevel >= upgradeMax || upgradeCost <= 0) {
+            upgradeText = "MAX";
+        }
+        else {
+            const char* suffix = (upgradeResource == ResourceType::DIAMOND) ? "D" : "G";
+            upgradeText = StringUtils::format("%d%s", upgradeCost, suffix);
+        }
+    }
+
+    char infoText[320];
     snprintf(infoText, sizeof(infoText),
-        "Name: %s\nLevel: %d\nHP: %.0f / %.0f\nATK: %s\nRange: %s\nProduction: %s\nFootprint: %dx%d",
+        "Name: %s\nLevel: %d\nHP: %.0f / %.0f\nATK: %s\nRange: %s\nProduction: %s\nUpgrade: %s\nFootprint: %dx%d",
         name.c_str(),
         level,
         hp,
@@ -1067,6 +1418,7 @@ void BaseScene::showBuildingInfo(Node* building) {
         attackText.c_str(),
         rangeText.c_str(),
         produceText.c_str(),
+        upgradeText.c_str(),
         sizeW,
         sizeH
     );
@@ -1076,16 +1428,29 @@ void BaseScene::showBuildingInfo(Node* building) {
     float panelWidth = std::max(kHoverPanelMinWidth, textSize.width + kHoverPanelPaddingX * 2);
     float panelHeight = std::max(kHoverPanelMinHeight, textSize.height + kHoverPanelPaddingY * 2);
     _hoverInfoBg->setContentSize(Size(panelWidth, panelHeight));
-    _hoverInfoLabel->setPosition(Vec2(kHoverPanelPaddingX, -kHoverPanelPaddingY));
+    _hoverInfoLabel->setPosition(Vec2(kHoverPanelPaddingX, panelHeight - kHoverPanelPaddingY));
+    _hoverInfoPanel->setContentSize(Size(panelWidth, panelHeight));
+
+    float upgradeX = panelWidth - kHoverUpgradeWidth * 0.5f - 8.0f;
+    float upgradeY = kHoverUpgradeHeight * 0.5f + 8.0f;
+    if (_hoverUpgradeNode) {
+        _hoverUpgradeNode->setPosition(Vec2(upgradeX, upgradeY));
+    }
+    if (_hoverSellNode) {
+        float sellX = upgradeX - (kHoverUpgradeWidth * 0.5f + kHoverSellWidth * 0.5f + kHoverSellGap);
+        _hoverSellNode->setPosition(Vec2(sellX, upgradeY));
+    }
 
     auto border = dynamic_cast<DrawNode*>(_hoverInfoPanel->getChildByName("hoverBorder"));
     if (border) {
         border->clear();
-        border->drawRect(Vec2(0, 0), Vec2(panelWidth, -panelHeight), Color4F(0.8f, 0.8f, 0.8f, 1.0f));
+        border->drawRect(Vec2(0, 0), Vec2(panelWidth, panelHeight), Color4F(0.8f, 0.8f, 0.8f, 1.0f));
     }
 
     _hoverInfoPanel->setVisible(true);
     updateHoverOverlays(building);
+    updateUpgradeUI(building);
+    updateSellUI(building);
 }
 
 void BaseScene::updateHoverOverlays(Node* building) {
@@ -1141,12 +1506,15 @@ void BaseScene::updateHoverPanelPosition(const Vec2& worldPos) {
     auto origin = Director::getInstance()->getVisibleOrigin();
 
     Size panelSize = _hoverInfoBg->getContentSize();
-    Vec2 desiredPos = worldPos + Vec2(16.0f, 20.0f);
+    Vec2 desiredPos(
+        worldPos.x + kHoverPanelOffsetX,
+        worldPos.y
+    );
 
     float maxX = origin.x + visibleSize.width - panelSize.width - 6.0f;
     float minX = origin.x + 6.0f;
-    float maxY = origin.y + visibleSize.height - 6.0f;
-    float minY = origin.y + panelSize.height + 6.0f;
+    float maxY = origin.y + visibleSize.height - panelSize.height * 0.5f - 6.0f;
+    float minY = origin.y + panelSize.height * 0.5f + 6.0f;
 
     float clampedX = std::min(std::max(desiredPos.x, minX), maxX);
     float clampedY = std::min(std::max(desiredPos.y, minY), maxY);
@@ -1159,6 +1527,12 @@ void BaseScene::clearBuildingInfo() {
     if (_hoverInfoPanel) {
         _hoverInfoPanel->setVisible(false);
     }
+    if (_hoverUpgradeNode) {
+        _hoverUpgradeNode->setVisible(false);
+    }
+    if (_hoverSellNode) {
+        _hoverSellNode->setVisible(false);
+    }
     if (_hoverRangeNode) {
         _hoverRangeNode->clear();
         _hoverRangeNode->setVisible(false);
@@ -1166,5 +1540,357 @@ void BaseScene::clearBuildingInfo() {
     if (_hoverFootprintNode) {
         _hoverFootprintNode->clear();
         _hoverFootprintNode->setVisible(false);
+    }
+}
+
+int BaseScene::getSavedBuildingIndex(Node* building) const {
+    if (!building) {
+        return -1;
+    }
+    int tag = building->getTag();
+    int index = tag - kSavedBuildingTagBase;
+    if (index < 0 || index >= static_cast<int>(s_savedBuildings.size())) {
+        return -1;
+    }
+    return index;
+}
+
+bool BaseScene::canDemolishBuilding(Node* building, int& savedIndex) const {
+    savedIndex = getSavedBuildingIndex(building);
+    if (savedIndex < 0) {
+        return false;
+    }
+    if (savedIndex >= static_cast<int>(s_savedBuildings.size())) {
+        return false;
+    }
+    return true;
+}
+
+void BaseScene::removeSavedBuildingAt(int index) {
+    if (index < 0 || index >= static_cast<int>(s_savedBuildings.size())) {
+        return;
+    }
+    s_savedBuildings.erase(s_savedBuildings.begin() + index);
+    if (!_buildingLayer) {
+        return;
+    }
+
+    int tagThreshold = kSavedBuildingTagBase + index;
+    for (auto* child : _buildingLayer->getChildren()) {
+        if (!child) {
+            continue;
+        }
+        int tag = child->getTag();
+        if (tag > tagThreshold) {
+            child->setTag(tag - 1);
+        }
+    }
+}
+
+bool BaseScene::getUpgradeInfo(Node* building,
+                               int& currentLevel,
+                               int& maxLevel,
+                               int& cost,
+                               ResourceType& resource,
+                               bool& isBase) const {
+    currentLevel = 0;
+    maxLevel = 0;
+    cost = 0;
+    resource = ResourceType::COIN;
+    isBase = false;
+
+    if (!building) {
+        return false;
+    }
+
+    if (auto* production = dynamic_cast<ProductionBuilding*>(building)) {
+        int id = production->getId();
+        const std::string& name = production->getName();
+        if (id == 3001 || name == "Base") {
+            isBase = true;
+            int baseLevel = Core::getInstance()->getBaseLevel() - 1;
+            if (baseLevel < 0) {
+                baseLevel = 0;
+            }
+            int baseMax = Core::getInstance()->getBaseMaxLevel() - 1;
+            if (baseMax < 0) {
+                baseMax = 0;
+            }
+            maxLevel = std::min(baseMax, production->getMaxLevel());
+            if (baseLevel > maxLevel) {
+                baseLevel = maxLevel;
+            }
+            currentLevel = baseLevel;
+            cost = Core::getInstance()->getBaseUpgradeCost();
+            resource = ResourceType::DIAMOND;
+            return true;
+        }
+    }
+
+    int width = 0;
+    int height = 0;
+    if (auto* defence = dynamic_cast<DefenceBuilding*>(building)) {
+        currentLevel = defence->getLevel();
+        maxLevel = defence->getMaxLevel();
+        width = defence->getWidth();
+        height = defence->getLength();
+    }
+    else if (auto* production = dynamic_cast<ProductionBuilding*>(building)) {
+        currentLevel = production->getLevel();
+        maxLevel = production->getMaxLevel();
+        width = production->getWidth();
+        height = production->getLength();
+    }
+    else if (auto* storage = dynamic_cast<StorageBuilding*>(building)) {
+        currentLevel = storage->getLevel();
+        maxLevel = storage->getMaxLevel();
+        width = storage->getWidth();
+        height = storage->getLength();
+    }
+    else {
+        return false;
+    }
+
+    int baseCost = 0;
+    int savedIndex = getSavedBuildingIndex(building);
+    if (savedIndex >= 0) {
+        baseCost = s_savedBuildings[static_cast<size_t>(savedIndex)].option.cost;
+    }
+    if (baseCost <= 0) {
+        int area = std::max(1, width * height);
+        baseCost = area * 20;
+        if (baseCost < 50) {
+            baseCost = 50;
+        }
+    }
+    cost = baseCost * (currentLevel + 1);
+    cost = static_cast<int>(std::round(cost * kUpgradeCostFactor));
+    if (cost < 1) {
+        cost = 1;
+    }
+    resource = ResourceType::COIN;
+    return true;
+}
+
+void BaseScene::updateUpgradeUI(Node* building) {
+    if (!_hoverUpgradeNode || !_hoverUpgradeLabel || !_hoverUpgradeBg || !_hoverUpgradeBorder || !_hoverUpgradeButton) {
+        return;
+    }
+
+    int currentLevel = 0;
+    int maxLevel = 0;
+    int cost = 0;
+    ResourceType resource = ResourceType::COIN;
+    bool isBase = false;
+    if (!getUpgradeInfo(building, currentLevel, maxLevel, cost, resource, isBase)) {
+        _hoverUpgradeNode->setVisible(false);
+        return;
+    }
+
+    bool isMax = (currentLevel >= maxLevel) || (cost <= 0);
+    int available = Core::getInstance()->getResource(resource);
+    bool canUpgrade = (!isMax && available >= cost);
+
+    _hoverUpgradeNode->setVisible(true);
+    if (_hoverUpgradeLabel) {
+        if (isMax) {
+            _hoverUpgradeLabel->setString("MAX");
+        }
+        else {
+            char buffer[32];
+            const char* suffix = (resource == ResourceType::DIAMOND) ? "D" : "G";
+            snprintf(buffer, sizeof(buffer), "UP %d%s", cost, suffix);
+            _hoverUpgradeLabel->setString(buffer);
+        }
+        _hoverUpgradeLabel->setColor(canUpgrade ? Color3B::WHITE : Color3B(170, 170, 170));
+    }
+
+    if (_hoverUpgradeBg) {
+        _hoverUpgradeBg->setColor(canUpgrade ? Color3B(80, 70, 40) : Color3B(70, 70, 70));
+    }
+    if (_hoverUpgradeBorder) {
+        _hoverUpgradeBorder->clear();
+        Color4F borderColor = canUpgrade ? Color4F::WHITE : Color4F(0.4f, 0.4f, 0.4f, 1.0f);
+        _hoverUpgradeBorder->drawRect(
+            Vec2(-kHoverUpgradeWidth / 2, -kHoverUpgradeHeight / 2),
+            Vec2(kHoverUpgradeWidth / 2, kHoverUpgradeHeight / 2),
+            borderColor
+        );
+    }
+    if (_hoverUpgradeButton) {
+        _hoverUpgradeButton->setEnabled(canUpgrade);
+        _hoverUpgradeButton->setBright(canUpgrade);
+    }
+}
+
+void BaseScene::updateSellUI(Node* building) {
+    if (!_hoverSellNode || !_hoverSellLabel || !_hoverSellBg || !_hoverSellBorder || !_hoverSellButton) {
+        return;
+    }
+
+    int savedIndex = -1;
+    if (!canDemolishBuilding(building, savedIndex)) {
+        _hoverSellNode->setVisible(false);
+        return;
+    }
+
+    int refund = 0;
+    if (savedIndex >= 0 && savedIndex < static_cast<int>(s_savedBuildings.size())) {
+        refund = static_cast<int>(std::round(s_savedBuildings[static_cast<size_t>(savedIndex)].option.cost * kSellRefundRate));
+    }
+    if (refund < 0) {
+        refund = 0;
+    }
+
+    char buffer[32];
+    snprintf(buffer, sizeof(buffer), "SELL %dG", refund);
+    _hoverSellLabel->setString(buffer);
+    _hoverSellLabel->setColor(Color3B::WHITE);
+
+    _hoverSellBg->setColor(Color3B(70, 45, 45));
+    _hoverSellBorder->clear();
+    _hoverSellBorder->drawRect(
+        Vec2(-kHoverSellWidth / 2, -kHoverSellHeight / 2),
+        Vec2(kHoverSellWidth / 2, kHoverSellHeight / 2),
+        Color4F(0.9f, 0.9f, 0.9f, 1.0f)
+    );
+    _hoverSellButton->setEnabled(true);
+    _hoverSellButton->setBright(true);
+    _hoverSellNode->setVisible(true);
+}
+
+bool BaseScene::tryUpgradeBuilding(Node* building) {
+    if (!building) {
+        return false;
+    }
+
+    int currentLevel = 0;
+    int maxLevel = 0;
+    int cost = 0;
+    ResourceType resource = ResourceType::COIN;
+    bool isBase = false;
+    if (!getUpgradeInfo(building, currentLevel, maxLevel, cost, resource, isBase)) {
+        return false;
+    }
+
+    if (currentLevel >= maxLevel || cost <= 0) {
+        return false;
+    }
+
+    if (isBase) {
+        if (!Core::getInstance()->upgradeBase()) {
+            return false;
+        }
+        syncBaseBuildingLevel();
+        return true;
+    }
+
+    if (!Core::getInstance()->consumeResource(resource, cost)) {
+        return false;
+    }
+
+    int nextLevel = currentLevel + 1;
+    if (auto* defence = dynamic_cast<DefenceBuilding*>(building)) {
+        defence->setLevel(nextLevel);
+    }
+    else if (auto* production = dynamic_cast<ProductionBuilding*>(building)) {
+        production->setLevel(nextLevel);
+        int id = production->getId();
+        const std::string& name = production->getName();
+        if (id == 3002 || name == "SoldierBuilder") {
+            s_barracksLevel = nextLevel;
+        }
+    }
+    else if (auto* storage = dynamic_cast<StorageBuilding*>(building)) {
+        storage->setLevel(nextLevel);
+    }
+    else {
+        return false;
+    }
+
+    int savedIndex = getSavedBuildingIndex(building);
+    if (savedIndex >= 0) {
+        s_savedBuildings[static_cast<size_t>(savedIndex)].level = nextLevel;
+    }
+
+    auto* bodySprite = NodeUtils::findBodySprite(building);
+    if (bodySprite) {
+        constexpr int kUpgradeEffectTag = 21001;
+        bodySprite->stopActionByTag(kUpgradeEffectTag);
+        float baseScaleX = bodySprite->getScaleX();
+        float baseScaleY = bodySprite->getScaleY();
+        auto scaleUp = ScaleTo::create(0.08f, baseScaleX * 1.05f, baseScaleY * 1.05f);
+        auto scaleDown = ScaleTo::create(0.12f, baseScaleX, baseScaleY);
+        auto seq = Sequence::create(scaleUp, scaleDown, nullptr);
+        seq->setTag(kUpgradeEffectTag);
+        bodySprite->runAction(seq);
+    }
+
+    return true;
+}
+
+bool BaseScene::tryDemolishBuilding(Node* building) {
+    if (!building || !_gridMap || !_buildingLayer) {
+        return false;
+    }
+
+    int savedIndex = -1;
+    if (!canDemolishBuilding(building, savedIndex)) {
+        return false;
+    }
+
+    const auto& saved = s_savedBuildings[static_cast<size_t>(savedIndex)];
+    const auto& option = saved.option;
+    int refund = static_cast<int>(std::round(option.cost * kSellRefundRate));
+    if (refund < 0) {
+        refund = 0;
+    }
+
+    _gridMap->freeCell(saved.gridX, saved.gridY, option.gridWidth, option.gridHeight);
+    building->removeFromParent();
+    removeSavedBuildingAt(savedIndex);
+
+    Core::getInstance()->addResource(ResourceType::COIN, refund);
+    if (_uiPanel) {
+        _uiPanel->updateResourceDisplay(
+            Core::getInstance()->getResource(ResourceType::COIN),
+            Core::getInstance()->getResource(ResourceType::DIAMOND)
+        );
+    }
+
+    _hoveredBuilding = nullptr;
+    clearBuildingInfo();
+    return true;
+}
+
+void BaseScene::syncBaseBuildingLevel() {
+    if (!_buildingLayer) {
+        return;
+    }
+
+    int baseLevel = Core::getInstance()->getBaseLevel() - 1;
+    if (baseLevel < 0) {
+        baseLevel = 0;
+    }
+
+    for (auto* child : _buildingLayer->getChildren()) {
+        auto* production = dynamic_cast<ProductionBuilding*>(child);
+        if (!production) {
+            continue;
+        }
+        int id = production->getId();
+        const std::string& name = production->getName();
+        if (id != 3001 && name != "Base") {
+            continue;
+        }
+
+        int maxLevel = production->getMaxLevel();
+        if (baseLevel > maxLevel) {
+            baseLevel = maxLevel;
+        }
+        if (production->getLevel() != baseLevel) {
+            production->setLevel(baseLevel);
+        }
+        break;
     }
 }

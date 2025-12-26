@@ -20,6 +20,7 @@ public:
     void takeDamage(float damage);
 
     int getLevel() const { return _level; }
+    int getMaxLevel() const { return _config ? _config->MAXLEVEL : 0; }
     void setLevel(int level);
 
     float getCurrentHP() const { return _currentHP; }

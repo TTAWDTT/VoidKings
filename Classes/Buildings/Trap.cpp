@@ -16,7 +16,7 @@ constexpr int kTrapFrameEnd = 4;
 constexpr float kTrapFrameDelay = 0.1f;
 
 constexpr float kSpikeDamageInterval = 0.5f;
-constexpr float kSpikeDamagePerTick = 12.0f;
+constexpr float kSpikeDamagePerTick = 18.0f;
 
 Animation* buildNumberedAnimation(const std::string& prefix, int start, int end, float delay) {
     Vector<SpriteFrame*> frames;
@@ -262,6 +262,7 @@ void SnapTrap::update(float dt) {
     }
 
     Rect triggerRect = getTriggerRect();
+    std::vector<Soldier*> victims;
     for (auto* soldier : *s_enemySoldiers) {
         if (!soldier || !soldier->getParent()) {
             continue;
@@ -285,18 +286,24 @@ void SnapTrap::update(float dt) {
         }
 
         if (shouldTrigger) {
-            triggerOnSoldier(soldier);
-            return;
+            victims.push_back(soldier);
         }
+    }
+
+    if (!victims.empty()) {
+        // 捕兽夹一次吞噬格子内所有敌人，避免多人叠加时漏触发
+        triggerOnSoldiers(victims);
     }
 }
 
-void SnapTrap::triggerOnSoldier(Soldier* soldier) {
+void SnapTrap::triggerOnSoldiers(const std::vector<Soldier*>& soldiers) {
     _triggered = true;
 
     AudioManager::playSnapTrap();
-    if (soldier) {
-        soldier->takeDamage(soldier->getCurrentHP() + 1.0f);
+    for (auto* soldier : soldiers) {
+        if (soldier) {
+            soldier->takeDamage(soldier->getCurrentHP() + 1.0f);
+        }
     }
 
     if (_bodySprite) {

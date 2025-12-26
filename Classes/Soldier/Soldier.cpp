@@ -147,7 +147,7 @@ bool Soldier::init(const UnitConfig* config, int level) {
        // 兜底：避免配置缺失导致单位无法更新
        _currentHP = 1.0f;
    }
-   _lastAttackTime = 0.0f;
+   _attackTimer = 0.0f;
    _targetRefreshTimer = 0.0f;
    _direction = Direction::RIGHT;  // 默认朝右
    _currentActionKey.clear();
@@ -271,6 +271,8 @@ void Soldier::update(float dt) {
     if (_currentHP <= 0) {
         return;
     }
+
+    _attackTimer += dt;
 
     if (_target && !_target->getParent()) {
         setTarget(nullptr);
@@ -527,7 +529,6 @@ void Soldier::attackTarget() {
         return;
     }
 
-    float currentTime = cocos2d::Director::getInstance()->getTotalFrames() / 60.0f;
     float attackInterval = 0.4f;
     if (_config) {
         attackInterval = _config->anim_attack_delay * _config->anim_attack_frames;
@@ -537,10 +538,10 @@ void Soldier::attackTarget() {
     }
 
     // 简单攻击间隔控制
-    if (currentTime - _lastAttackTime < attackInterval) {
+    if (_attackTimer < attackInterval) {
         return;
     }
-    _lastAttackTime = currentTime;
+    _attackTimer = 0.0f;
 
     // 计算攻击方向
     cocos2d::Vec2 targetPos = getTargetPositionInParent(_target);
@@ -673,8 +674,9 @@ float Soldier::getDistanceToTarget(const cocos2d::Node* target) const {
 
     cocos2d::Vec2 selfPos = this->getPosition();
     cocos2d::Vec2 targetPos = getTargetPositionInParent(target);
+    float centerDist = selfPos.distance(targetPos);
     if (_config && _config->ISREMOTE) {
-        return selfPos.distance(targetPos);
+        return centerDist;
     }
 
     const cocos2d::Node* parent = this->getParent();
@@ -682,11 +684,18 @@ float Soldier::getDistanceToTarget(const cocos2d::Node* target) const {
     cocos2d::Rect targetRect = rectInParentSpace(target, NodeUtils::findBodySprite(target), parent);
     if (selfRect.size.width <= 0.0f || selfRect.size.height <= 0.0f
         || targetRect.size.width <= 0.0f || targetRect.size.height <= 0.0f) {
-        return selfPos.distance(targetPos);
+        return centerDist;
     }
 
     // 近战单位使用边缘距离，避免贴近目标却一直走动。
-    return rectDistance(selfRect, targetRect);
+    float edgeDist = rectDistance(selfRect, targetRect);
+    if (!std::isfinite(edgeDist)) {
+        return centerDist;
+    }
+    if (edgeDist > centerDist + 5.0f) {
+        return centerDist;
+    }
+    return edgeDist;
 }
 
 // 更新精灵朝向 - 通过水平翻转实现左向

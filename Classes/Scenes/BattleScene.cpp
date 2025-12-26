@@ -29,14 +29,103 @@ constexpr float kHoverPanelPaddingX = 16.0f;
 constexpr float kHoverPanelPaddingY = 14.0f;
 constexpr float kHoverPanelMinWidth = 260.0f;
 constexpr float kHoverPanelMinHeight = 140.0f;
+constexpr float kHoverPanelOffsetX = 16.0f;
 constexpr int kMaxLevelId = 12;
 constexpr int kDefenseLevelOffset = 100;
 constexpr int kDefenseMaxLevelId = 6;
+constexpr int kEnemyMaxBuildingLevel = 2;
+constexpr int kKingUnitId = 1007;
 constexpr int kTowerArrow = 1;
 constexpr int kTowerBoom = 2;
 constexpr int kTowerDoubleBoom = 3;
 constexpr int kTowerMagic = 4;
 constexpr int kTowerFire = 5;
+
+int resolveAttackTowerLevel(int levelId) {
+    if (levelId >= 7) {
+        return kEnemyMaxBuildingLevel;
+    }
+    if (levelId >= 4) {
+        return 1;
+    }
+    return 0;
+}
+
+cocos2d::Vec2 getHoverAnchorWorldPos(cocos2d::Node* building) {
+    if (!building) {
+        return cocos2d::Vec2::ZERO;
+    }
+    const auto* bodySprite = NodeUtils::findBodySprite(building);
+    cocos2d::Rect localBounds = bodySprite ? bodySprite->getBoundingBox() : building->getBoundingBox();
+    if (localBounds.size.width <= 0.0f || localBounds.size.height <= 0.0f) {
+        auto* parent = building->getParent();
+        return parent ? parent->convertToWorldSpace(building->getPosition()) : building->getPosition();
+    }
+    cocos2d::Vec2 localRightCenter(localBounds.getMaxX(), localBounds.getMidY());
+    return building->convertToWorldSpace(localRightCenter);
+}
+
+cocos2d::Rect getBuildingWorldRect(cocos2d::Node* building) {
+    if (!building) {
+        return cocos2d::Rect::ZERO;
+    }
+    const auto* bodySprite = NodeUtils::findBodySprite(building);
+    if (bodySprite) {
+        cocos2d::Rect localRect = bodySprite->getBoundingBox();
+        cocos2d::Vec2 worldBL = building->convertToWorldSpace(localRect.origin);
+        cocos2d::Vec2 worldTR = building->convertToWorldSpace(
+            localRect.origin + cocos2d::Vec2(localRect.size.width, localRect.size.height));
+        float minX = std::min(worldBL.x, worldTR.x);
+        float minY = std::min(worldBL.y, worldTR.y);
+        float maxX = std::max(worldBL.x, worldTR.x);
+        float maxY = std::max(worldBL.y, worldTR.y);
+        return cocos2d::Rect(minX, minY, maxX - minX, maxY - minY);
+    }
+    auto* parent = building->getParent();
+    if (parent) {
+        cocos2d::Rect localRect = building->getBoundingBox();
+        cocos2d::Vec2 worldBL = parent->convertToWorldSpace(localRect.origin);
+        cocos2d::Vec2 worldTR = parent->convertToWorldSpace(
+            localRect.origin + cocos2d::Vec2(localRect.size.width, localRect.size.height));
+        float minX = std::min(worldBL.x, worldTR.x);
+        float minY = std::min(worldBL.y, worldTR.y);
+        float maxX = std::max(worldBL.x, worldTR.x);
+        float maxY = std::max(worldBL.y, worldTR.y);
+        return cocos2d::Rect(minX, minY, maxX - minX, maxY - minY);
+    }
+    return cocos2d::Rect::ZERO;
+}
+
+cocos2d::Rect getHoverPanelWorldRect(const cocos2d::Node* panel,
+                                    const cocos2d::LayerColor* bg) {
+    if (!panel || !bg) {
+        return cocos2d::Rect::ZERO;
+    }
+    cocos2d::Size panelSize = bg->getContentSize();
+    cocos2d::Vec2 panelPos = panel->getPosition();
+    return cocos2d::Rect(panelPos.x,
+                         panelPos.y - panelSize.height * 0.5f,
+                         panelSize.width,
+                         panelSize.height);
+}
+
+cocos2d::Rect getHoverKeepRect(cocos2d::Node* building,
+                              const cocos2d::Node* panel,
+                              const cocos2d::LayerColor* bg) {
+    cocos2d::Rect buildingRect = getBuildingWorldRect(building);
+    cocos2d::Rect panelRect = getHoverPanelWorldRect(panel, bg);
+    if (buildingRect.size.width <= 0.0f || buildingRect.size.height <= 0.0f) {
+        return panelRect;
+    }
+    if (panelRect.size.width <= 0.0f || panelRect.size.height <= 0.0f) {
+        return buildingRect;
+    }
+    float minX = std::min(buildingRect.getMinX(), panelRect.getMinX());
+    float minY = std::min(buildingRect.getMinY(), panelRect.getMinY());
+    float maxX = std::max(buildingRect.getMaxX(), panelRect.getMaxX());
+    float maxY = std::max(buildingRect.getMaxY(), panelRect.getMaxY());
+    return cocos2d::Rect(minX, minY, maxX - minX, maxY - minY);
+}
 
 } // namespace
 
@@ -69,10 +158,24 @@ bool BattleScene::init() {
         return false;
     }
 
-    CCLOG("[战斗场景] 初始化关卡 %d", _levelId);
+    // 切关时先清空旧战斗引用，避免伤害残留
+    Soldier::setEnemyBuildings(nullptr);
+    DefenceBuilding::setEnemySoldiers(nullptr);
+    TrapBase::setEnemySoldiers(nullptr);
+
+    _soldiers.clear();
+    _enemyBuildings.clear();
+    _enemyBase = nullptr;
+    _enemyBaseDestroyed = false;
+    _battleTime = 0.0f;
+    _battleEnded = false;
+    _destroyedBuildingCount = 0;
+    _totalBuildingCount = 0;
     _totalDeployedCount = 0;
     _deadSoldierCount = 0;
     _resultLayer = nullptr;
+
+    CCLOG("[战斗场景] 初始化关卡 %d", _levelId);
 
     // 确保兵种配置已加载（避免直接进入战斗时配置缺失）
     if (UnitManager::getInstance()->getAllUnitIds().empty()) {
@@ -264,361 +367,319 @@ void BattleScene::initLevel() {
 }
 
 // ===================================================
-// 创建第1关 - 简单测试关卡
+// 创建第1关 - 入门试炼：双箭护卫
 // ===================================================
 
 void BattleScene::createLevel1() {
-    createEnemyBase(26, 12, 0);
+    int towerLevel = resolveAttackTowerLevel(_levelId);
+    createEnemyBase(26, 12, towerLevel);
 
-    createDefenseTower(8, 6, kTowerArrow, 0);
-    createDefenseTower(8, 14, kTowerArrow, 0);
-    createDefenseTower(14, 6, kTowerDoubleBoom, 0);
-    createDefenseTower(20, 6, kTowerBoom, 0);
+    createDefenseTower(16, 8, kTowerArrow, towerLevel);
+    createDefenseTower(16, 18, kTowerArrow, towerLevel);
 
-    for (int x = 12; x <= 15; ++x) {
-        createSpikeTrap(x, 12);
+    for (int x = 10; x <= 14; ++x) {
+        createSpikeTrap(x, 13);
     }
-    for (int y = 13; y <= 15; ++y) {
-        createSpikeTrap(12, y);
-    }
-    createSnapTrap(18, 12);
+    createSnapTrap(12, 10);
 }
 
 // ===================================================
-// 创建第2关 - 进阶：更多塔位与交叉火力
+// 创建第2关 - 交叉火力走廊
 // ===================================================
 
 void BattleScene::createLevel2() {
-    createEnemyBase(26, 12, 0);
+    int towerLevel = resolveAttackTowerLevel(_levelId);
+    createEnemyBase(26, 12, towerLevel);
 
-    createDefenseTower(8, 6, kTowerArrow, 0);
-    createDefenseTower(8, 22, kTowerArrow, 0);
-    createDefenseTower(14, 6, kTowerBoom, 0);
-    createDefenseTower(14, 14, kTowerDoubleBoom, 0);
-    createDefenseTower(18, 22, kTowerMagic, 0);
+    createDefenseTower(14, 6, kTowerArrow, towerLevel);
+    createDefenseTower(14, 22, kTowerArrow, towerLevel);
+    createDefenseTower(18, 14, kTowerBoom, towerLevel);
 
-    for (int x = 10; x <= 18; ++x) {
-        createSpikeTrap(x, 12);
-    }
-    for (int y = 13; y <= 17; ++y) {
-        createSpikeTrap(12, y);
-    }
-    for (int x = 12; x <= 16; ++x) {
+    for (int x = 8; x <= 18; ++x) {
+        createSpikeTrap(x, 10);
         createSpikeTrap(x, 18);
     }
-    createSnapTrap(16, 13);
+    createSnapTrap(10, 12);
+    createSnapTrap(10, 16);
 }
 
 // ===================================================
-// 创建第3关 - 中级：密集守卫与远近混合
+// 创建第3关 - 陷阱方阵
 // ===================================================
 
 void BattleScene::createLevel3() {
-    createEnemyBase(26, 12, 1);
+    int towerLevel = resolveAttackTowerLevel(_levelId);
+    createEnemyBase(26, 12, towerLevel);
 
-    createDefenseTower(8, 6, kTowerArrow, 0);
-    createDefenseTower(8, 22, kTowerArrow, 0);
-    createDefenseTower(14, 6, kTowerBoom, 0);
-    createDefenseTower(20, 6, kTowerBoom, 0);
-    createDefenseTower(14, 14, kTowerDoubleBoom, 0);
-    createDefenseTower(18, 22, kTowerMagic, 0);
+    createDefenseTower(12, 8, kTowerArrow, towerLevel);
+    createDefenseTower(12, 20, kTowerArrow, towerLevel);
+    createDefenseTower(18, 12, kTowerDoubleBoom, towerLevel);
+    createDefenseTower(20, 20, kTowerMagic, towerLevel);
 
-    for (int x = 10; x <= 20; ++x) {
+    for (int x = 8; x <= 16; ++x) {
         createSpikeTrap(x, 12);
-    }
-    for (int x = 12; x <= 20; ++x) {
         createSpikeTrap(x, 18);
     }
-    for (int y = 13; y <= 17; ++y) {
+    for (int y = 12; y <= 18; ++y) {
+        createSpikeTrap(8, y);
+        createSpikeTrap(16, y);
+    }
+    createSnapTrap(10, 14);
+    createSnapTrap(14, 16);
+}
+
+// ===================================================
+// 创建第4关 - 断层火力
+// ===================================================
+
+void BattleScene::createLevel4() {
+    int towerLevel = resolveAttackTowerLevel(_levelId);
+    createEnemyBase(26, 12, towerLevel);
+
+    createDefenseTower(10, 14, kTowerArrow, towerLevel);
+    createDefenseTower(16, 6, kTowerBoom, towerLevel);
+    createDefenseTower(16, 20, kTowerBoom, towerLevel);
+    createDefenseTower(20, 14, kTowerMagic, towerLevel);
+
+    for (int x = 8; x <= 20; ++x) {
+        if (x == 14) {
+            continue;
+        }
+        createSpikeTrap(x, 10);
+        createSpikeTrap(x, 18);
+    }
+    createSnapTrap(14, 12);
+    createSnapTrap(14, 16);
+}
+
+// ===================================================
+// 创建第5关 - 双管压制
+// ===================================================
+
+void BattleScene::createLevel5() {
+    int towerLevel = resolveAttackTowerLevel(_levelId);
+    createEnemyBase(26, 12, towerLevel);
+
+    createDefenseTower(12, 6, kTowerArrow, towerLevel);
+    createDefenseTower(12, 22, kTowerArrow, towerLevel);
+    createDefenseTower(18, 8, kTowerDoubleBoom, towerLevel);
+    createDefenseTower(18, 18, kTowerDoubleBoom, towerLevel);
+    createDefenseTower(22, 14, kTowerFire, towerLevel);
+
+    for (int x = 8; x <= 22; ++x) {
+        createSpikeTrap(x, 11);
+        createSpikeTrap(x, 17);
+    }
+    for (int y = 12; y <= 16; ++y) {
+        createSpikeTrap(10, y);
+        createSpikeTrap(20, y);
+    }
+    createSnapTrap(14, 14);
+}
+
+// ===================================================
+// 创建第6关 - 火焰走廊
+// ===================================================
+
+void BattleScene::createLevel6() {
+    int towerLevel = resolveAttackTowerLevel(_levelId);
+    createEnemyBase(26, 12, towerLevel);
+
+    createDefenseTower(10, 14, kTowerBoom, towerLevel);
+    createDefenseTower(16, 8, kTowerFire, towerLevel);
+    createDefenseTower(16, 18, kTowerFire, towerLevel);
+    createDefenseTower(20, 14, kTowerMagic, towerLevel);
+
+    for (int x = 6; x <= 20; ++x) {
+        if (x == 14) {
+            continue;
+        }
+        createSpikeTrap(x, 12);
+    }
+    for (int x = 8; x <= 18; ++x) {
+        if (x == 14) {
+            continue;
+        }
+        if (x >= 10 && x <= 12) {
+            continue;
+        }
+        createSpikeTrap(x, 16);
+    }
+    createSnapTrap(14, 12);
+    createSnapTrap(14, 18);
+}
+
+// ===================================================
+// 创建第7关 - 极限交叉火力
+// ===================================================
+
+void BattleScene::createLevel7() {
+    int towerLevel = resolveAttackTowerLevel(_levelId);
+    createEnemyBase(26, 12, towerLevel);
+
+    createDefenseTower(6, 6, kTowerArrow, towerLevel);
+    createDefenseTower(6, 22, kTowerArrow, towerLevel);
+    createDefenseTower(12, 6, kTowerBoom, towerLevel);
+    createDefenseTower(12, 22, kTowerBoom, towerLevel);
+    createDefenseTower(18, 12, kTowerDoubleBoom, towerLevel);
+    createDefenseTower(20, 6, kTowerMagic, towerLevel);
+    createDefenseTower(20, 22, kTowerMagic, towerLevel);
+    createDefenseTower(22, 14, kTowerFire, towerLevel);
+
+    for (int x = 6; x <= 24; ++x) {
+        createSpikeTrap(x, 10);
+        createSpikeTrap(x, 18);
+    }
+    for (int y = 11; y <= 17; ++y) {
+        createSpikeTrap(10, y);
+        createSpikeTrap(16, y);
+    }
+    createSnapTrap(14, 14);
+    createSnapTrap(18, 16);
+}
+
+// ===================================================
+// 创建第8关 - 交错火网
+// ===================================================
+
+void BattleScene::createLevel8() {
+    int towerLevel = resolveAttackTowerLevel(_levelId);
+    createEnemyBase(26, 12, towerLevel);
+
+    createDefenseTower(8, 14, kTowerArrow, towerLevel);
+    createDefenseTower(12, 6, kTowerMagic, towerLevel);
+    createDefenseTower(12, 22, kTowerMagic, towerLevel);
+    createDefenseTower(18, 8, kTowerDoubleBoom, towerLevel);
+    createDefenseTower(18, 18, kTowerDoubleBoom, towerLevel);
+    createDefenseTower(22, 14, kTowerFire, towerLevel);
+
+    for (int x = 8; x <= 20; ++x) {
+        if (x == 14) {
+            continue;
+        }
+        createSpikeTrap(x, 12);
+    }
+    for (int x = 10; x <= 18; ++x) {
+        if (x == 10) {
+            continue;
+        }
+        if (x == 14) {
+            continue;
+        }
+        createSpikeTrap(x, 16);
+    }
+    for (int y = 10; y <= 18; ++y) {
+        createSpikeTrap(14, y);
+    }
+    createSnapTrap(12, 14);
+    createSnapTrap(16, 14);
+}
+
+// ===================================================
+// 创建第9关 - 究极地刺
+// ===================================================
+
+void BattleScene::createLevel9() {
+    int towerLevel = resolveAttackTowerLevel(_levelId);
+    createEnemyBase(26, 12, towerLevel);
+
+    createDefenseTower(18, 12, kTowerDoubleBoom, towerLevel);
+    createDefenseTower(22, 6, kTowerArrow, towerLevel);
+    createDefenseTower(22, 18, kTowerMagic, towerLevel);
+
+    for (int y = 8; y <= 22; y += 2) {
+        for (int x = 6; x <= 16; ++x) {
+            createSpikeTrap(x, y);
+        }
+    }
+    for (int x = 8; x <= 16; x += 4) {
+        for (int y = 9; y <= 21; ++y) {
+            createSpikeTrap(x, y);
+        }
+    }
+    createSnapTrap(14, 12);
+    createSnapTrap(14, 18);
+}
+
+// ===================================================
+// 创建第10关 - 双管炮的极意
+// ===================================================
+
+void BattleScene::createLevel10() {
+    int towerLevel = resolveAttackTowerLevel(_levelId);
+    createEnemyBase(26, 12, towerLevel);
+
+    createDefenseTower(10, 6, kTowerDoubleBoom, towerLevel);
+    createDefenseTower(10, 20, kTowerDoubleBoom, towerLevel);
+    createDefenseTower(16, 6, kTowerDoubleBoom, towerLevel);
+    createDefenseTower(16, 20, kTowerDoubleBoom, towerLevel);
+    createDefenseTower(14, 12, kTowerDoubleBoom, towerLevel);
+    createDefenseTower(22, 12, kTowerFire, towerLevel);
+
+    for (int x = 6; x <= 20; ++x) {
+        if (x == 14) {
+            continue;
+        }
+        createSpikeTrap(x, 10);
+        createSpikeTrap(x, 18);
+    }
+    for (int y = 11; y <= 17; ++y) {
         createSpikeTrap(12, y);
     }
+    createSnapTrap(14, 10);
+    createSnapTrap(14, 18);
+}
+
+// ===================================================
+// 创建第11关 - 夺命连环箭
+// ===================================================
+
+void BattleScene::createLevel11() {
+    int towerLevel = resolveAttackTowerLevel(_levelId);
+    createEnemyBase(26, 12, towerLevel);
+
+    createDefenseTower(8, 6, kTowerArrow, towerLevel);
+    createDefenseTower(12, 6, kTowerArrow, towerLevel);
+    createDefenseTower(16, 6, kTowerArrow, towerLevel);
+    createDefenseTower(8, 22, kTowerArrow, towerLevel);
+    createDefenseTower(12, 22, kTowerArrow, towerLevel);
+    createDefenseTower(16, 22, kTowerArrow, towerLevel);
+
+    for (int x = 6; x <= 22; ++x) {
+        createSpikeTrap(x, 12);
+        createSpikeTrap(x, 18);
+    }
+    createSnapTrap(10, 14);
+    createSnapTrap(14, 14);
     createSnapTrap(18, 14);
 }
 
 // ===================================================
-// 创建第4关 - 高级：多点炮塔与中心重防
-// ===================================================
-
-void BattleScene::createLevel4() {
-    createEnemyBase(26, 12, 1);
-
-    createDefenseTower(8, 6, kTowerArrow, 0);
-    createDefenseTower(8, 22, kTowerArrow, 0);
-    createDefenseTower(14, 6, kTowerBoom, 0);
-    createDefenseTower(20, 6, kTowerBoom, 0);
-    createDefenseTower(14, 14, kTowerDoubleBoom, 0);
-    createDefenseTower(14, 22, kTowerMagic, 0);
-    createDefenseTower(20, 22, kTowerDoubleBoom, 0);
-
-    for (int x = 8; x <= 22; ++x) {
-        createSpikeTrap(x, 12);
-    }
-    for (int x = 10; x <= 22; ++x) {
-        createSpikeTrap(x, 18);
-    }
-    for (int y = 13; y <= 17; ++y) {
-        createSpikeTrap(12, y);
-        createSpikeTrap(18, y);
-    }
-    createSnapTrap(10, 16);
-    createSnapTrap(17, 16);
-}
-
-// ===================================================
-// 创建第5关 - 困难：高密度火力与双侧夹击
-// ===================================================
-
-void BattleScene::createLevel5() {
-    createEnemyBase(26, 12, 1);
-
-    createDefenseTower(8, 6, kTowerArrow, 0);
-    createDefenseTower(8, 22, kTowerArrow, 0);
-    createDefenseTower(14, 6, kTowerBoom, 0);
-    createDefenseTower(20, 6, kTowerBoom, 0);
-    createDefenseTower(14, 14, kTowerDoubleBoom, 0);
-    createDefenseTower(20, 14, kTowerFire, 0);
-    createDefenseTower(14, 22, kTowerMagic, 0);
-    createDefenseTower(20, 22, kTowerMagic, 0);
-
-    for (int x = 8; x <= 24; ++x) {
-        createSpikeTrap(x, 12);
-    }
-    for (int x = 8; x <= 24; ++x) {
-        createSpikeTrap(x, 18);
-    }
-    for (int y = 13; y <= 17; ++y) {
-        createSpikeTrap(12, y);
-        createSpikeTrap(20, y);
-    }
-    createSnapTrap(18, 15);
-    createSnapTrap(16, 17);
-}
-
-// ===================================================
-// 创建第6关 - 高级：内外双圈火力
-// ===================================================
-
-void BattleScene::createLevel6() {
-    createEnemyBase(26, 12, 2);
-
-    createDefenseTower(8, 6, kTowerArrow, 0);
-    createDefenseTower(8, 22, kTowerArrow, 0);
-    createDefenseTower(14, 6, kTowerBoom, 0);
-    createDefenseTower(20, 6, kTowerBoom, 0);
-    createDefenseTower(14, 14, kTowerDoubleBoom, 0);
-    createDefenseTower(20, 14, kTowerFire, 0);
-    createDefenseTower(14, 22, kTowerMagic, 0);
-    createDefenseTower(20, 22, kTowerMagic, 0);
-
-    for (int x = 6; x <= 24; ++x) {
-        createSpikeTrap(x, 12);
-    }
-    for (int x = 6; x <= 24; ++x) {
-        createSpikeTrap(x, 18);
-    }
-    for (int y = 13; y <= 17; ++y) {
-        createSpikeTrap(12, y);
-        createSpikeTrap(18, y);
-        createSpikeTrap(24, y);
-    }
-    createSnapTrap(16, 17);
-    createSnapTrap(19, 16);
-    createSnapTrap(9, 16);
-}
-
-// ===================================================
-// 创建第7关 - 高级：外圈密集火力
-// ===================================================
-
-void BattleScene::createLevel7() {
-    createEnemyBase(26, 12, 2);
-
-    createDefenseTower(8, 6, kTowerArrow, 0);
-    createDefenseTower(8, 22, kTowerArrow, 0);
-    createDefenseTower(14, 6, kTowerBoom, 0);
-    createDefenseTower(20, 6, kTowerBoom, 0);
-    createDefenseTower(14, 14, kTowerDoubleBoom, 0);
-    createDefenseTower(20, 14, kTowerFire, 0);
-    createDefenseTower(14, 22, kTowerMagic, 0);
-    createDefenseTower(20, 22, kTowerMagic, 0);
-
-    for (int x = 6; x <= 24; ++x) {
-        createSpikeTrap(x, 12);
-    }
-    for (int x = 6; x <= 24; ++x) {
-        createSpikeTrap(x, 18);
-    }
-    for (int y = 13; y <= 17; ++y) {
-        createSpikeTrap(10, y);
-        createSpikeTrap(18, y);
-        createSpikeTrap(24, y);
-    }
-    createSnapTrap(11, 15);
-    createSnapTrap(17, 15);
-    createSnapTrap(19, 17);
-}
-
-// ===================================================
-// 创建第8关 - 精英：多层交叉火力
-// ===================================================
-
-void BattleScene::createLevel8() {
-    createEnemyBase(26, 12, 2);
-
-    createDefenseTower(8, 6, kTowerArrow, 0);
-    createDefenseTower(8, 22, kTowerArrow, 0);
-    createDefenseTower(14, 6, kTowerBoom, 0);
-    createDefenseTower(20, 6, kTowerBoom, 0);
-    createDefenseTower(14, 14, kTowerDoubleBoom, 0);
-    createDefenseTower(20, 14, kTowerFire, 0);
-    createDefenseTower(14, 22, kTowerMagic, 0);
-    createDefenseTower(20, 22, kTowerMagic, 0);
-
-    for (int x = 6; x <= 24; ++x) {
-        createSpikeTrap(x, 12);
-    }
-    for (int x = 6; x <= 24; ++x) {
-        createSpikeTrap(x, 18);
-    }
-    for (int y = 13; y <= 17; ++y) {
-        createSpikeTrap(12, y);
-        createSpikeTrap(18, y);
-        createSpikeTrap(24, y);
-    }
-    createSnapTrap(11, 16);
-    createSnapTrap(17, 16);
-    createSnapTrap(19, 17);
-}
-
-// ===================================================
-// 创建第9关 - 精英：纵深压制
-// ===================================================
-
-void BattleScene::createLevel9() {
-    createEnemyBase(26, 12, 2);
-
-    createDefenseTower(8, 6, kTowerArrow, 0);
-    createDefenseTower(8, 22, kTowerArrow, 0);
-    createDefenseTower(14, 6, kTowerBoom, 0);
-    createDefenseTower(20, 6, kTowerBoom, 0);
-    createDefenseTower(14, 14, kTowerDoubleBoom, 0);
-    createDefenseTower(20, 14, kTowerFire, 0);
-    createDefenseTower(14, 22, kTowerMagic, 0);
-    createDefenseTower(20, 22, kTowerMagic, 0);
-
-    for (int x = 4; x <= 24; ++x) {
-        createSpikeTrap(x, 12);
-    }
-    for (int x = 4; x <= 24; ++x) {
-        createSpikeTrap(x, 18);
-    }
-    for (int y = 13; y <= 17; ++y) {
-        createSpikeTrap(8, y);
-        createSpikeTrap(18, y);
-    }
-    createSnapTrap(12, 16);
-    createSnapTrap(19, 16);
-    createSnapTrap(21, 17);
-}
-
-// ===================================================
-// 创建第10关 - 困难：火力矩阵
-// ===================================================
-
-void BattleScene::createLevel10() {
-    createEnemyBase(26, 12, 2);
-
-    createDefenseTower(8, 6, kTowerArrow, 1);
-    createDefenseTower(8, 22, kTowerArrow, 1);
-    createDefenseTower(14, 6, kTowerBoom, 1);
-    createDefenseTower(20, 6, kTowerBoom, 1);
-    createDefenseTower(14, 14, kTowerDoubleBoom, 1);
-    createDefenseTower(20, 14, kTowerFire, 1);
-    createDefenseTower(14, 22, kTowerMagic, 1);
-    createDefenseTower(20, 22, kTowerMagic, 1);
-
-    for (int x = 4; x <= 24; ++x) {
-        createSpikeTrap(x, 12);
-    }
-    for (int x = 4; x <= 24; ++x) {
-        createSpikeTrap(x, 18);
-    }
-    for (int y = 13; y <= 17; ++y) {
-        createSpikeTrap(8, y);
-        createSpikeTrap(18, y);
-    }
-    createSnapTrap(12, 15);
-    createSnapTrap(15, 17);
-    createSnapTrap(21, 17);
-}
-
-// ===================================================
-// 创建第11关 - 困难：多点夹击
-// ===================================================
-
-void BattleScene::createLevel11() {
-    createEnemyBase(26, 12, 2);
-
-    createDefenseTower(8, 6, kTowerArrow, 2);
-    createDefenseTower(8, 22, kTowerArrow, 2);
-    createDefenseTower(20, 6, kTowerBoom, 2);
-    createDefenseTower(14, 14, kTowerDoubleBoom, 2);
-    createDefenseTower(14, 6, kTowerDoubleBoom, 2);
-    createDefenseTower(14, 22, kTowerMagic, 2);
-    createDefenseTower(20, 22, kTowerMagic, 2);
-    createDefenseTower(20, 14, kTowerFire, 2);
-
-    for (int x = 4; x <= 24; ++x) {
-        createSpikeTrap(x, 12);
-    }
-    for (int x = 4; x <= 24; ++x) {
-        createSpikeTrap(x, 18);
-    }
-    for (int y = 13; y <= 17; ++y) {
-        createSpikeTrap(6, y);
-        createSpikeTrap(12, y);
-        createSpikeTrap(18, y);
-    }
-    createSnapTrap(9, 16);
-    createSnapTrap(17, 16);
-    createSnapTrap(19, 17);
-}
-
-// ===================================================
-// 创建第12关 - 噩梦：全域覆盖
+// 创建第12关 - 地狱的火焰
 // ===================================================
 
 void BattleScene::createLevel12() {
-    createEnemyBase(26, 12, 2);
+    int towerLevel = resolveAttackTowerLevel(_levelId);
+    createEnemyBase(26, 12, towerLevel);
 
-    createDefenseTower(8, 6, kTowerArrow, 2);
-    createDefenseTower(8, 22, kTowerArrow, 2);
-    createDefenseTower(14, 6, kTowerBoom, 2);
-    createDefenseTower(20, 6, kTowerBoom, 2);
-    createDefenseTower(14, 14, kTowerDoubleBoom, 2);
-    createDefenseTower(20, 14, kTowerFire, 2);
-    createDefenseTower(14, 22, kTowerMagic, 2);
-    createDefenseTower(20, 22, kTowerMagic, 2);
+    for (int y = 6; y <= 22; ++y) {
+        createSnapTrap(6, y);
+        createSnapTrap(8, y);
+    }
 
-    for (int x = 4; x <= 24; ++x) {
-        createSpikeTrap(x, 12);
-    }
-    for (int x = 4; x <= 24; ++x) {
-        createSpikeTrap(x, 18);
-    }
-    for (int x = 6; x <= 24; ++x) {
-        createSpikeTrap(x, 20);
-    }
-    for (int y = 13; y <= 19; ++y) {
-        if (y == 18) {
-            continue;
-        }
+    for (int y = 6; y <= 22; ++y) {
         createSpikeTrap(10, y);
-        createSpikeTrap(18, y);
+        createSpikeTrap(12, y);
+        createSpikeTrap(14, y);
+        createSpikeTrap(16, y);
     }
-    createSnapTrap(11, 16);
-    createSnapTrap(19, 16);
-    createSnapTrap(22, 17);
+
+    int towerRows[] = { 6, 14, 22 };
+    for (int row : towerRows) {
+        createDefenseTower(17, row, kTowerFire, towerLevel);
+        createDefenseTower(20, row, kTowerFire, towerLevel);
+        createDefenseTower(23, row, kTowerBoom, towerLevel);
+    }
 }
 
 // ===================================================
@@ -698,7 +759,7 @@ void BattleScene::createDefenseBaseLayout(int towerLevel) {
         baseConfig.id = 3001;
         baseConfig.name = "Base";
         baseConfig.spriteFrameName = "buildings/base.png";
-        baseConfig.HP = { 2000, 2500, 3000 };
+        baseConfig.HP = { 2400, 3000, 3600 };
         baseConfig.DP = { 0, 0.05f, 0.1f };
         baseConfig.length = baseWidth;
         baseConfig.width = baseHeight;
@@ -726,7 +787,7 @@ void BattleScene::createDefenseBaseLayout(int towerLevel) {
         barracksConfig.id = 3002;
         barracksConfig.name = "SoldierBuilder";
         barracksConfig.spriteFrameName = "buildings/soldierbuilder.png";
-        barracksConfig.HP = { 600, 750, 900 };
+        barracksConfig.HP = { 720, 900, 1080 };
         barracksConfig.DP = { 0, 0, 0 };
         barracksConfig.length = 5;
         barracksConfig.width = 5;
@@ -740,7 +801,14 @@ void BattleScene::createDefenseBaseLayout(int towerLevel) {
 
     int defenseBarracksX = barracksX + offsetX;
     int defenseBarracksY = barracksY + offsetY;
-    auto barracks = ProductionBuilding::create(&barracksConfig, 0);
+    int barracksLevel = BaseScene::getBarracksLevel();
+    if (barracksLevel < 0) {
+        barracksLevel = 0;
+    }
+    if (barracksLevel > barracksConfig.MAXLEVEL) {
+        barracksLevel = barracksConfig.MAXLEVEL;
+    }
+    auto barracks = ProductionBuilding::create(&barracksConfig, barracksLevel);
     placeBuilding(barracks, defenseBarracksX, defenseBarracksY, 5, 5, false);
 
     const auto& savedBuildings = BaseScene::getSavedBuildings();
@@ -749,7 +817,7 @@ void BattleScene::createDefenseBaseLayout(int towerLevel) {
         int gridX = saved.gridX + offsetX;
         int gridY = saved.gridY + offsetY;
 
-        Node* building = BaseScene::createBuildingFromOptionForDefense(option);
+        Node* building = BaseScene::createBuildingFromOptionForDefense(option, saved.level);
         if (!building) {
             continue;
         }
@@ -821,7 +889,7 @@ void BattleScene::createDefenseLevel5() {
 void BattleScene::createDefenseLevel6() {
     createDefenseBaseLayout(2);
     resetDefenseSpawns();
-    addDefenseWave(1007, 2, 0.9f, 0.8f);
+    addDefenseWave(1007, 20, 0.55f, 0.6f);
     addDefenseWave(1009, 4, 0.7f, 0.8f);
     addDefenseWave(1002, 4, 0.75f, 0.9f);
     addDefenseWave(1003, 4, 0.55f, 0.8f);
@@ -838,7 +906,7 @@ void BattleScene::createEnemyBase(int gridX, int gridY, int level) {
     baseConfig.id = 9001;
     baseConfig.name = "EnemyBase";
     baseConfig.spriteFrameName = "buildings/base.png";
-    baseConfig.HP = { 1300, 1800, 2400 };
+    baseConfig.HP = { 1560, 2160, 2880 };
     baseConfig.DP = { 0, 0, 0 };
     baseConfig.length = 4;
     baseConfig.width = 4;
@@ -896,10 +964,10 @@ void BattleScene::createDefenseTower(int gridX, int gridY, int type, int level) 
         towerConfig->id = 9101;
         towerConfig->name = "EnemyArrowTower";
         towerConfig->spriteFrameName = "buildings/ArrowTower.png";
-        towerConfig->HP = { 320, 420, 520 };
+        towerConfig->HP = { 380, 500, 620 };
         towerConfig->DP = { 0, 0.05f, 0.1f };
-        towerConfig->ATK = { 25, 35, 50 };
-        towerConfig->ATK_RANGE = { 170, 200, 230 };
+        towerConfig->ATK = { 35, 50, 70 };
+        towerConfig->ATK_RANGE = { 200, 230, 260 };
         towerConfig->ATK_SPEED = { 0.95f, 0.85f, 0.75f };
         towerConfig->SKY_ABLE = true;
         towerConfig->GROUND_ABLE = true;
@@ -913,45 +981,45 @@ void BattleScene::createDefenseTower(int gridX, int gridY, int type, int level) 
         towerConfig->id = 9102;
         towerConfig->name = "EnemyBoomTower";
         towerConfig->spriteFrameName = "buildings/BoomTower.png";
-        towerConfig->HP = { 450, 600, 760 };
+        towerConfig->HP = { 540, 720, 910 };
         towerConfig->DP = { 0.05f, 0.1f, 0.15f };
-        towerConfig->ATK = { 55, 75, 95 };
-        towerConfig->ATK_RANGE = { 140, 170, 200 };
+        towerConfig->ATK = { 160, 210, 270 };
+        towerConfig->ATK_RANGE = { 2000, 2000, 2000 };
         towerConfig->ATK_SPEED = { 1.3f, 1.2f, 1.1f };
         towerConfig->SKY_ABLE = false;
         towerConfig->GROUND_ABLE = true;
         towerConfig->bulletSpriteFrameName = "bullet/bomb.png";
         towerConfig->bulletSpeed = 200.0f;
         towerConfig->bulletIsAOE = true;
-        towerConfig->bulletAOERange = 40.0f;
+        towerConfig->bulletAOERange = 160.0f;
         break;
     case kTowerDoubleBoom:
         towerConfig = &doubleBoomConfig;
         towerConfig->id = 9103;
         towerConfig->name = "EnemyDoubleBoomTower";
         towerConfig->spriteFrameName = "buildings/DoubleBoomTower.png";
-        towerConfig->HP = { 430, 560, 720 };
+        towerConfig->HP = { 520, 670, 860 };
         towerConfig->DP = { 0.05f, 0.1f, 0.15f };
-        towerConfig->ATK = { 48, 68, 88 };
-        towerConfig->ATK_RANGE = { 140, 170, 200 };
+        towerConfig->ATK = { 70, 95, 125 };
+        towerConfig->ATK_RANGE = { 180, 210, 240 };
         towerConfig->ATK_SPEED = { 0.65f, 0.6f, 0.55f };
         towerConfig->SKY_ABLE = false;
         towerConfig->GROUND_ABLE = true;
         towerConfig->bulletSpriteFrameName = "bullet/bomb.png";
         towerConfig->bulletSpeed = 200.0f;
         towerConfig->bulletIsAOE = true;
-        towerConfig->bulletAOERange = 35.0f;
+        towerConfig->bulletAOERange = 130.0f;
         break;
     case kTowerMagic:
         towerConfig = &magicConfig;
         towerConfig->id = 9104;
         towerConfig->name = "EnemyMagicTower";
         towerConfig->spriteFrameName = "buildings/MagicTower.png";
-        towerConfig->HP = { 360, 480, 620 };
+        towerConfig->HP = { 430, 580, 740 };
         towerConfig->DP = { 0.0f, 0.05f, 0.1f };
-        towerConfig->ATK = { 40, 55, 72 };
-        towerConfig->ATK_RANGE = { 190, 220, 250 };
-        towerConfig->ATK_SPEED = { 1.1f, 1.0f, 0.9f };
+        towerConfig->ATK = { 220, 280, 340 };
+        towerConfig->ATK_RANGE = { 210, 240, 270 };
+        towerConfig->ATK_SPEED = { 2.2f, 2.0f, 1.8f };
         towerConfig->SKY_ABLE = true;
         towerConfig->GROUND_ABLE = true;
         towerConfig->bulletSpriteFrameName.clear();
@@ -964,11 +1032,11 @@ void BattleScene::createDefenseTower(int gridX, int gridY, int type, int level) 
         towerConfig->id = 9105;
         towerConfig->name = "EnemyFireTower";
         towerConfig->spriteFrameName = "buildings/FireTower.png";
-        towerConfig->HP = { 500, 650, 820 };
+        towerConfig->HP = { 600, 780, 980 };
         towerConfig->DP = { 0.05f, 0.1f, 0.15f };
-        towerConfig->ATK = { 18, 26, 34 };
-        towerConfig->ATK_RANGE = { 150, 175, 200 };
-        towerConfig->ATK_SPEED = { 0.7f, 0.65f, 0.6f };
+        towerConfig->ATK = { 100, 130, 160 };
+        towerConfig->ATK_RANGE = { 55, 65, 75 };
+        towerConfig->ATK_SPEED = { 0.65f, 0.6f, 0.55f };
         towerConfig->SKY_ABLE = false;
         towerConfig->GROUND_ABLE = true;
         towerConfig->bulletSpriteFrameName.clear();
@@ -1056,6 +1124,31 @@ void BattleScene::createSnapTrap(int gridX, int gridY) {
     _gridMap->occupyCell(gridX, gridY, 1, 1, trap);
     trap->setGridContext(_gridMap, gridX, gridY, 1, 1);
 }
+
+void BattleScene::addTrapCluster(int startX, int startY, int width, int height, const std::vector<Vec2>& snapCells) {
+    auto isSnapCell = [&snapCells](int x, int y) {
+        for (const auto& cell : snapCells) {
+            if (static_cast<int>(cell.x) == x && static_cast<int>(cell.y) == y) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    for (int x = startX; x < startX + width; ++x) {
+        for (int y = startY; y < startY + height; ++y) {
+            if (isSnapCell(x, y)) {
+                continue;
+            }
+            createSpikeTrap(x, y);
+        }
+    }
+
+    for (const auto& cell : snapCells) {
+        createSnapTrap(static_cast<int>(cell.x), static_cast<int>(cell.y));
+    }
+}
+
 
 // ===================================================
 // 建筑缩放调整
@@ -1651,11 +1744,13 @@ void BattleScene::initTouchListener() {
 
 void BattleScene::initHoverInfo() {
     _hoverInfoPanel = Node::create();
+    _hoverInfoPanel->setAnchorPoint(Vec2(0, 0.5f));
+    _hoverInfoPanel->setIgnoreAnchorPointForPosition(false);
     _hoverInfoPanel->setVisible(false);
     this->addChild(_hoverInfoPanel, 200);
 
-    _hoverInfoBg = LayerColor::create(Color4B(12, 12, 12, 240), 260, 140);
-    _hoverInfoBg->setAnchorPoint(Vec2(0, 1));
+    _hoverInfoBg = LayerColor::create(Color4B(12, 12, 12, 128), 260, 140);
+    _hoverInfoBg->setAnchorPoint(Vec2(0, 0));
     _hoverInfoBg->setIgnoreAnchorPointForPosition(false);
     _hoverInfoPanel->addChild(_hoverInfoBg);
 
@@ -1756,8 +1851,23 @@ void BattleScene::updateHoverInfo(const Vec2& worldPos) {
         return;
     }
 
+    if (_hoverInfoPanel && _hoverInfoBg && _hoverInfoPanel->isVisible()) {
+        Size panelSize = _hoverInfoBg->getContentSize();
+        Vec2 panelPos = _hoverInfoPanel->getPosition();
+        Rect worldRect(panelPos.x, panelPos.y - panelSize.height * 0.5f, panelSize.width, panelSize.height);
+        if (worldRect.containsPoint(worldPos)) {
+            return;
+        }
+    }
+
     Node* building = pickBuildingAt(worldPos);
     if (!building) {
+        if (_hoverInfoPanel && _hoverInfoBg && _hoverInfoPanel->isVisible() && _hoveredBuilding) {
+            Rect keepRect = getHoverKeepRect(_hoveredBuilding, _hoverInfoPanel, _hoverInfoBg);
+            if (keepRect.containsPoint(worldPos)) {
+                return;
+            }
+        }
         clearBuildingInfo();
         return;
     }
@@ -1766,7 +1876,11 @@ void BattleScene::updateHoverInfo(const Vec2& worldPos) {
         _hoveredBuilding = building;
     }
     showBuildingInfo(building);
-    updateHoverPanelPosition(worldPos);
+    Vec2 anchorPos = getHoverAnchorWorldPos(building);
+    if (anchorPos == Vec2::ZERO) {
+        anchorPos = worldPos;
+    }
+    updateHoverPanelPosition(anchorPos);
 }
 
 Node* BattleScene::pickBuildingAt(const Vec2& worldPos) const {
@@ -1862,12 +1976,13 @@ void BattleScene::showBuildingInfo(Node* building) {
     float panelWidth = std::max(kHoverPanelMinWidth, textSize.width + kHoverPanelPaddingX * 2);
     float panelHeight = std::max(kHoverPanelMinHeight, textSize.height + kHoverPanelPaddingY * 2);
     _hoverInfoBg->setContentSize(Size(panelWidth, panelHeight));
-    _hoverInfoLabel->setPosition(Vec2(kHoverPanelPaddingX, -kHoverPanelPaddingY));
+    _hoverInfoLabel->setPosition(Vec2(kHoverPanelPaddingX, panelHeight - kHoverPanelPaddingY));
+    _hoverInfoPanel->setContentSize(Size(panelWidth, panelHeight));
 
     auto border = dynamic_cast<DrawNode*>(_hoverInfoPanel->getChildByName("hoverBorder"));
     if (border) {
         border->clear();
-        border->drawRect(Vec2(0, 0), Vec2(panelWidth, -panelHeight), Color4F(0.8f, 0.8f, 0.8f, 1.0f));
+        border->drawRect(Vec2(0, 0), Vec2(panelWidth, panelHeight), Color4F(0.8f, 0.8f, 0.8f, 1.0f));
     }
 
     _hoverInfoPanel->setVisible(true);
@@ -1927,12 +2042,15 @@ void BattleScene::updateHoverPanelPosition(const Vec2& worldPos) {
     auto origin = Director::getInstance()->getVisibleOrigin();
 
     Size panelSize = _hoverInfoBg->getContentSize();
-    Vec2 desiredPos = worldPos + Vec2(16.0f, 20.0f);
+    Vec2 desiredPos(
+        worldPos.x + kHoverPanelOffsetX,
+        worldPos.y
+    );
 
     float maxX = origin.x + visibleSize.width - panelSize.width - 6.0f;
     float minX = origin.x + 6.0f;
-    float maxY = origin.y + visibleSize.height - 6.0f;
-    float minY = origin.y + panelSize.height + 6.0f;
+    float maxY = origin.y + visibleSize.height - panelSize.height * 0.5f - 6.0f;
+    float minY = origin.y + panelSize.height * 0.5f + 6.0f;
 
     float clampedX = std::min(std::max(desiredPos.x, minX), maxX);
     float clampedY = std::min(std::max(desiredPos.y, minY), maxY);
@@ -1985,6 +2103,7 @@ void BattleScene::update(float dt) {
 void BattleScene::onExit() {
     DefenceBuilding::setEnemySoldiers(nullptr);
     TrapBase::setEnemySoldiers(nullptr);
+    Soldier::setEnemyBuildings(nullptr);
 
     // 释放保留的引用，避免内存泄漏
     for (auto& soldier : _soldiers) {
@@ -2070,8 +2189,15 @@ void BattleScene::updateDefenseSpawns() {
         if (_battleTime < spawn.time) {
             break;
         }
+        int resolvedLevel = enemyLevel;
+        if (defenseId == kDefenseMaxLevelId && spawn.unitId == kKingUnitId) {
+            const UnitConfig* cfg = UnitManager::getInstance()->getConfig(spawn.unitId);
+            if (cfg) {
+                resolvedLevel = cfg->MAXLEVEL;
+            }
+        }
         Vec2 pos = getDefenseSpawnPosition(static_cast<int>(_nextDefenseSpawnIndex));
-        spawnEnemySoldier(spawn.unitId, pos, enemyLevel);
+        spawnEnemySoldier(spawn.unitId, pos, resolvedLevel);
         _nextDefenseSpawnIndex++;
     }
 }
@@ -2148,12 +2274,31 @@ void BattleScene::checkBattleEnd() {
     }
 }
 
+void BattleScene::freezeBattleActors() {
+    // 战斗结束后冻结场上单位，避免切换关卡时残留伤害
+    Soldier::setEnemyBuildings(nullptr);
+    DefenceBuilding::setEnemySoldiers(nullptr);
+    TrapBase::setEnemySoldiers(nullptr);
+
+    for (auto* soldier : _soldiers) {
+        if (soldier) {
+            soldier->unscheduleUpdate();
+        }
+    }
+    for (auto* building : _enemyBuildings) {
+        if (building) {
+            building->unscheduleUpdate();
+        }
+    }
+}
+
 // ===================================================
 // 战斗胜利
 // ===================================================
 
 void BattleScene::onBattleWin() {
     _battleEnded = true;
+    freezeBattleActors();
     CCLOG("[战斗场景] 战斗胜利！");
     AudioManager::stopBgm();
     AudioManager::playVictory();
@@ -2194,6 +2339,7 @@ void BattleScene::onBattleWin() {
 
 void BattleScene::onBattleLose() {
     _battleEnded = true;
+    freezeBattleActors();
     CCLOG("[战斗场景] 战斗失败！");
     AudioManager::stopBgm();
     AudioManager::playLose();
@@ -2354,27 +2500,44 @@ void BattleScene::showBattleResult(bool isWin, int stars) {
         _resultLayer->addChild(resultSprite, 1);
     }
 
-    const char* starPath = "UI/Star_1.png";
-    if (stars >= 3) {
-        starPath = "UI/Star_3.png";
+    // 统一用三颗星展示评级（左到右：实心/空心）
+    const char* filledStarPath = "UI/LevelSelect/result_1.png";
+    const char* emptyStarPath = "UI/LevelSelect/result_2.png";
+    int clampedStars = std::max(0, std::min(3, stars));
+    auto sampleStar = Sprite::create(filledStarPath);
+    if (!sampleStar) {
+        sampleStar = Sprite::create(emptyStarPath);
     }
-    else if (stars == 2) {
-        starPath = "UI/Star_2.png";
-    }
-    auto starSprite = Sprite::create(starPath);
-    if (starSprite) {
+    if (sampleStar) {
         float maxWidth = visibleSize.width * 0.45f;
         float maxHeight = visibleSize.height * 0.18f;
-        Size size = starSprite->getContentSize();
-        if (size.width > 0 && size.height > 0) {
-            float scale = std::min(maxWidth / size.width, maxHeight / size.height);
-            starSprite->setScale(scale);
+        Size size = sampleStar->getContentSize();
+        float spacing = size.width * 0.35f;
+        float totalWidth = size.width * 3 + spacing * 2;
+        float scale = 1.0f;
+        if (size.width > 0.0f && size.height > 0.0f) {
+            scale = std::min(maxWidth / totalWidth, maxHeight / size.height);
         }
-        starSprite->setPosition(Vec2(
+        float scaledWidth = size.width * scale;
+        float scaledSpacing = spacing * scale;
+        float startX = -(scaledWidth * 3 + scaledSpacing * 2) * 0.5f + scaledWidth * 0.5f;
+
+        auto starGroup = Node::create();
+        starGroup->setPosition(Vec2(
             origin.x + visibleSize.width * 0.5f,
             origin.y + visibleSize.height * 0.53f
         ));
-        _resultLayer->addChild(starSprite, 1);
+        for (int i = 0; i < 3; ++i) {
+            const char* starPath = (i < clampedStars) ? filledStarPath : emptyStarPath;
+            auto starSprite = Sprite::create(starPath);
+            if (!starSprite) {
+                continue;
+            }
+            starSprite->setScale(scale);
+            starSprite->setPosition(Vec2(startX + i * (scaledWidth + scaledSpacing), 0.0f));
+            starGroup->addChild(starSprite, 1);
+        }
+        _resultLayer->addChild(starGroup, 1);
     }
 
     createResultButtons(_resultLayer, isWin);

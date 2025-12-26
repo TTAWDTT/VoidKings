@@ -224,6 +224,29 @@ void LevelSelectScene::initLevelData(LevelTab tab) {
         level.isUnlocked = (i <= unlockLimit);
         level.description = "Challenge Level " + std::to_string(i);
 
+        if (tab == LevelTab::Attack) {
+            switch (i) {
+            case 9:
+                level.name = "究极地刺";
+                level.description = "密集地刺阵，考验部署节奏";
+                break;
+            case 10:
+                level.name = "双管炮的极意";
+                level.description = "双管炮覆盖中路，注意兵种分批";
+                break;
+            case 11:
+                level.name = "夺命连环箭";
+                level.description = "多重箭塔连锁压制";
+                break;
+            case 12:
+                level.name = "地狱的火焰";
+                level.description = "火焰塔与炮塔构成炼狱列阵";
+                break;
+            default:
+                break;
+            }
+        }
+
         _levels.push_back(level);
     }
 }
