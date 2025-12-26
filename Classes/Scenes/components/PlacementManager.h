@@ -91,6 +91,13 @@ public:
     bool tryConfirmPlacement(const Vec2& worldPos);
 
     /**
+     * @brief 拖拽连续放置（用于地刺等）
+     * @param worldPos 世界坐标位置
+     * @return 是否成功放置
+     */
+    bool tryPaintPlacement(const Vec2& worldPos);
+
+    /**
      * @brief 取消放置
      */
     void cancelPlacement();
@@ -131,6 +138,8 @@ private:
     BuildingOption _currentOption;
     int _currentGridX = 0;
     int _currentGridY = 0;
+    int _lastPaintGridX = -9999;
+    int _lastPaintGridY = -9999;
 
     // 回调函数
     std::function<void(const BuildingOption&, int, int)> _onPlacementConfirmed;

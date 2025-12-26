@@ -52,7 +52,7 @@ private:
     // 运行时数据
     int _level;                   // 当前等级
     float _currentHP;
-    float _lastAttackTime;
+    float _attackTimer;
     float _targetRefreshTimer;    // 目标刷新计时
     cocos2d::Sprite* _bodySprite; // 以后会定义这个为动画,暂时应该渲染成图片
     cocos2d::Sprite* _healthBar;  // 血条精灵

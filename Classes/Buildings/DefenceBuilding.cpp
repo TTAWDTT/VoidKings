@@ -244,9 +244,17 @@ void DefenceBuilding::refreshHealthBarPosition() {
 }
 
 void DefenceBuilding::setLevel(int level) {
+    if (!_config) {
+        return;
+    }
     if (level < 0) level = 0;
     if (level > _config->MAXLEVEL) level = _config->MAXLEVEL;
+    if (_level == level) {
+        return;
+    }
     _level = level;
+    _currentHP = getCurrentMaxHP();
+    updateHealthBar(false);
 }
 
 float DefenceBuilding::getCurrentMaxHP() const {

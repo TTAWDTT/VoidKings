@@ -16,7 +16,7 @@ constexpr int kTrapFrameEnd = 4;
 constexpr float kTrapFrameDelay = 0.1f;
 
 constexpr float kSpikeDamageInterval = 0.5f;
-constexpr float kSpikeDamagePerTick = 12.0f;
+constexpr float kSpikeDamagePerTick = 18.0f;
 
 Animation* buildNumberedAnimation(const std::string& prefix, int start, int end, float delay) {
     Vector<SpriteFrame*> frames;

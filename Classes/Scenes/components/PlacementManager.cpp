@@ -6,6 +6,10 @@
 #include "PlacementManager.h"
 #include <algorithm>
 
+namespace {
+constexpr int kSpikeTrapType = 11;
+}
+
  // ===================================================
  // 创建与初始化
  // ===================================================
@@ -67,6 +71,8 @@ void PlacementManager::startPlacement(const BuildingOption& option) {
     _state.spritePath = option.spritePath;
     _state.cost = option.cost;
     _currentOption = option;
+    _lastPaintGridX = -9999;
+    _lastPaintGridY = -9999;
 
     // 创建预览精灵
     _previewSprite = Sprite::create(option.spritePath);
@@ -370,6 +376,39 @@ bool PlacementManager::tryConfirmPlacement(const Vec2& worldPos) {
         CCLOG("[放置管理器] 无法放置建筑，位置不可用");
         return false;
     }
+}
+
+// ===================================================
+// 拖拽连续放置（用于地刺等）
+// ===================================================
+bool PlacementManager::tryPaintPlacement(const Vec2& worldPos) {
+    if (!_state.isPlacing || !_gridMap) {
+        return false;
+    }
+    if (_state.buildingType != kSpikeTrapType) {
+        return false;
+    }
+
+    Vec2 gridPos = _gridMap->worldToGrid(worldPos);
+    int gridX = static_cast<int>(gridPos.x);
+    int gridY = static_cast<int>(gridPos.y);
+
+    if (gridX == _lastPaintGridX && gridY == _lastPaintGridY) {
+        return false;
+    }
+    _lastPaintGridX = gridX;
+    _lastPaintGridY = gridY;
+    _currentGridX = gridX;
+    _currentGridY = gridY;
+
+    if (!_gridMap->canPlaceBuilding(gridX, gridY, _state.gridWidth, _state.gridHeight)) {
+        return false;
+    }
+
+    if (_onPlacementConfirmed) {
+        _onPlacementConfirmed(_currentOption, gridX, gridY);
+    }
+    return true;
 }
 
 // ===================================================

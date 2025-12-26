@@ -99,9 +99,17 @@ void ProductionBuilding::refreshCollectIconPosition() {
 }
 
 void ProductionBuilding::setLevel(int level) {
+    if (!_config) {
+        return;
+    }
     if (level < 0) level = 0;
     if (level > _config->MAXLEVEL) level = _config->MAXLEVEL;
+    if (_level == level) {
+        return;
+    }
     _level = level;
+    _currentHP = getCurrentMaxHP();
+    updateHealthBar(false);
 }
 
 float ProductionBuilding::getCurrentMaxHP() const {
@@ -442,6 +450,10 @@ void ProductionBuilding::collectPending() {
     }
 
     clearCollectIcon();
+
+    if (_collectType == ResourceType::COIN) {
+        AudioManager::playMoneyGet();
+    }
 
     if (_collectCallback) {
         _collectCallback(this, _collectType, amount, worldPos);

@@ -201,7 +201,7 @@ int Core::getBaseMaxLevel() const
 
 int Core::getBaseUpgradeCost() const
 {
-    static const int kUpgradeCosts[] = { 0, 0, 200, 500, 900, 1400 };
+    static const int kUpgradeCosts[] = { 0, 0, 120, 300, 540, 840 };
     int maxLevel = getBaseMaxLevel();
     if (_baseLevel >= maxLevel) {
         return 0;

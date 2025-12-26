@@ -77,7 +77,7 @@ void BuildShopPanel::initBuildingOptions() {
         {2, "Boom Tower", 150, 3, 3, "buildings/BoomTower.png", true},        // 炮塔 3x3
         {8, "Double Boom", 220, 3, 3, "buildings/DoubleBoomTower.png", true}, // 双倍攻速炮塔 3x3
         {9, "Magic Tower", 240, 3, 3, "buildings/MagicTower.png", true},      // 魔法塔 3x3
-        {10, "Fire Tower", 800, 3, 3, "buildings/FireTower.png", true},       // 火焰塔 3x3
+        {10, "Fire Tower", 500, 3, 3, "buildings/FireTower.png", true},       // 火焰塔 3x3
         {11, "Spike Trap", 10, 1, 1, "buildings/spike/spike_1.png", true},    // 地刺 1x1
         {12, "Snap Trap", 100, 1, 1, "buildings/trap/trap_1.png", true},      // 捕兽夹 1x1
         {3, "Tree", 80, 2, 2, "buildings/Tree/sprite_0000.png", true},        // 树 2x2
