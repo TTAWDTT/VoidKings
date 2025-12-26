@@ -109,10 +109,6 @@ private:
     Label* _hoverSellLabel = nullptr;              // 拆毁按钮文字
     Button* _hoverSellButton = nullptr;            // 拆毁按钮
 
-    // ==================== 建筑配置 ====================
-    ProductionBuildingConfig _baseConfig;          // 基地建筑配置
-    ProductionBuildingConfig _barracksConfig;      // 兵营建筑配置
-
     // ==================== 初始化方法 ====================
 
     /**

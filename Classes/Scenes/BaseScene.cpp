@@ -40,6 +40,7 @@ constexpr float kHoverPanelOffsetX = 16.0f;
 constexpr float kUpgradeCostFactor = 0.6f;
 constexpr float kSellRefundRate = 0.5f;
 constexpr int kSpikeTrapType = 11;
+constexpr int kSnapTrapType = 12;
 constexpr int kBaseAnchorX = 36;
 constexpr int kBaseAnchorY = 36;
 constexpr int kBarracksAnchorX = 30;
@@ -346,22 +347,18 @@ void BaseScene::onUnitTrainComplete(int unitId) {
 // ==================== 基地建筑初始化 ====================
 
 void BaseScene::initBaseBuilding() {
-    BuildingManager::getInstance()->setGridMap(_gridMap);
+    auto* manager = BuildingManager::getInstance();
+    manager->setGridMap(_gridMap);
+    manager->loadConfigs();
     float cellSize = _gridMap->getCellSize();
 
-    // 初始化基地建筑配置（4x4格子，符合部落冲突设定）
-    _baseConfig.id = 3001;
-    _baseConfig.name = "Base";
-    _baseConfig.spriteFrameName = "buildings/base.png";
-    _baseConfig.HP = { 2400, 3000, 3600 };
-    _baseConfig.DP = { 0, 0.05f, 0.1f };
-    _baseConfig.length = 4;  // 大本营 4x4
-    _baseConfig.width = 4;
-    _baseConfig.MAXLEVEL = 2;
-    _baseConfig.PRODUCE_GOLD = { 0, 0, 0 };
-    _baseConfig.PRODUCE_ELIXIR = { 0, 0, 0 };
-    _baseConfig.STORAGE_GOLD_CAPACITY = { 1000, 2000, 4000 };
-    _baseConfig.STORAGE_ELIXIR_CAPACITY = { 500, 1000, 2000 };
+    int baseId = manager->getMainBaseId();
+    if (baseId <= 0) {
+        baseId = 3001;
+    }
+    const auto* baseConfig = manager->getProductionConfig(baseId);
+    int baseWidth = baseConfig ? baseConfig->width : 4;
+    int baseHeight = baseConfig ? baseConfig->length : 4;
 
     const int baseGridX = kBaseAnchorX;
     const int baseGridY = kBaseAnchorY;
@@ -369,36 +366,28 @@ void BaseScene::initBaseBuilding() {
     if (baseLevel < 0) {
         baseLevel = 0;
     }
-    if (baseLevel > _baseConfig.MAXLEVEL) {
-        baseLevel = _baseConfig.MAXLEVEL;
+    if (baseConfig && baseLevel > baseConfig->MAXLEVEL) {
+        baseLevel = baseConfig->MAXLEVEL;
     }
-    auto base = ProductionBuilding::create(&_baseConfig, baseLevel);
+    auto base = manager->createProductionBuilding(baseId, baseLevel);
     if (base) {
         _buildingLayer->addChild(base);
-        // 将基地放置在地图中心位置（80x80网格的中心为36,36附近，确保4x4建筑在网格内）
-        BuildingManager::getInstance()->placeBuilding(base, baseGridX, baseGridY, 4, 4);
+        BuildingManager::getInstance()->placeBuilding(base, baseGridX, baseGridY, baseWidth, baseHeight);
         s_baseAnchor = Vec2(static_cast<float>(baseGridX), static_cast<float>(baseGridY));
 
-        // 调整建筑缩放以适应格子大小
-        scaleBuildingToFit(base, 4, 4, cellSize);
+        scaleBuildingToFit(base, baseWidth, baseHeight, cellSize);
         setupProductionCollect(base);
 
-        CCLOG("[基地场景] 基地建筑放置完成 (4x4格子，位置36,36)");
+        CCLOG("[基地场景] 基地建筑放置完成 (%dx%d格子，位置%d,%d)", baseWidth, baseHeight, baseGridX, baseGridY);
     }
 
-    // 初始化兵营建筑配置（5x5格子）
-    _barracksConfig.id = 3002;
-    _barracksConfig.name = "SoldierBuilder";
-    _barracksConfig.spriteFrameName = "buildings/soldierbuilder.png";
-    _barracksConfig.HP = { 720, 900, 1080 };
-    _barracksConfig.DP = { 0, 0, 0 };
-    _barracksConfig.length = 5;  // 兵营 5x5
-    _barracksConfig.width = 5;
-    _barracksConfig.MAXLEVEL = 2;
-    _barracksConfig.PRODUCE_GOLD = { 0, 0, 0 };
-    _barracksConfig.PRODUCE_ELIXIR = { 0, 0, 0 };
-    _barracksConfig.STORAGE_GOLD_CAPACITY = { 0, 0, 0 };
-    _barracksConfig.STORAGE_ELIXIR_CAPACITY = { 0, 0, 0 };
+    int barracksId = manager->getBarracksId();
+    if (barracksId <= 0) {
+        barracksId = 3002;
+    }
+    const auto* barracksConfig = manager->getProductionConfig(barracksId);
+    int barracksWidth = barracksConfig ? barracksConfig->width : 5;
+    int barracksHeight = barracksConfig ? barracksConfig->length : 5;
 
     const int barracksGridX = kBarracksAnchorX;
     const int barracksGridY = kBarracksAnchorY;
@@ -406,22 +395,20 @@ void BaseScene::initBaseBuilding() {
     if (barracksLevel < 0) {
         barracksLevel = 0;
     }
-    if (barracksLevel > _barracksConfig.MAXLEVEL) {
-        barracksLevel = _barracksConfig.MAXLEVEL;
+    if (barracksConfig && barracksLevel > barracksConfig->MAXLEVEL) {
+        barracksLevel = barracksConfig->MAXLEVEL;
     }
     s_barracksLevel = barracksLevel;
-    auto barracks = ProductionBuilding::create(&_barracksConfig, barracksLevel);
+    auto barracks = manager->createProductionBuilding(barracksId, barracksLevel);
     if (barracks) {
         _buildingLayer->addChild(barracks);
-        // 将兵营放置在基地旁边（5x5格子，确保在网格内）
-        BuildingManager::getInstance()->placeBuilding(barracks, barracksGridX, barracksGridY, 5, 5);
+        BuildingManager::getInstance()->placeBuilding(barracks, barracksGridX, barracksGridY, barracksWidth, barracksHeight);
         s_barracksAnchor = Vec2(static_cast<float>(barracksGridX), static_cast<float>(barracksGridY));
 
-        // 调整建筑缩放以适应格子大小
-        scaleBuildingToFit(barracks, 5, 5, cellSize);
+        scaleBuildingToFit(barracks, barracksWidth, barracksHeight, cellSize);
         setupProductionCollect(barracks);
 
-        CCLOG("[基地场景] 兵营建筑放置完成 (5x5格子，位置30,36)");
+        CCLOG("[基地场景] 兵营建筑放置完成 (%dx%d格子，位置%d,%d)", barracksWidth, barracksHeight, barracksGridX, barracksGridY);
     }
 
     restoreSavedBuildings();
@@ -829,210 +816,27 @@ Node* BaseScene::createBuildingFromOptionForDefense(const BuildingOption& option
 
 Node* BaseScene::buildBuildingFromOption(const BuildingOption& option, BaseScene* owner, int level) {
     Node* newBuilding = nullptr;
+    auto* manager = BuildingManager::getInstance();
 
-    switch (option.type) {
-    case 1: { // 箭塔 (3x3格子)
-        static DefenceBuildingConfig config;
-        config.id = 2001;
-        config.name = "ArrowTower";
-        config.spriteFrameName = option.spritePath;
-        config.HP = { 600, 900, 1200 };
-        config.DP = { 0, 0.05f, 0.1f };
-        config.ATK = { 40, 60, 85 };
-        config.ATK_RANGE = { 200, 250, 300 };
-        config.ATK_SPEED = { 1.0f, 0.9f, 0.8f };
-        config.SKY_ABLE = true;
-        config.GROUND_ABLE = true;
-        config.bulletSpriteFrameName = "bullet/arrow.png";
-        config.bulletSpeed = 400.0f;
-        config.bulletIsAOE = false;
-        config.bulletAOERange = 0.0f;
-        config.length = 3;  // 3x3格子
-        config.width = 3;
-        config.MAXLEVEL = 2;
-        newBuilding = DefenceBuilding::create(&config, level);
+    switch (option.category) {
+    case BuildingCategory::Defence:
+        newBuilding = manager->createDefenceBuilding(option.configId, level);
         break;
-    }
-    case 2: { // 炮塔 (3x3格子)
-        static DefenceBuildingConfig config;
-        config.id = 2002;
-        config.name = "BoomTower";
-        config.spriteFrameName = option.spritePath;
-        config.HP = { 720, 1080, 1440 };
-        config.DP = { 0.05f, 0.1f, 0.15f };
-        config.ATK = { 140, 190, 250 };
-        config.ATK_RANGE = { 2000, 2000, 2000 };
-        config.ATK_SPEED = { 1.5f, 1.4f, 1.3f };
-        config.SKY_ABLE = false;
-        config.GROUND_ABLE = true;
-        config.bulletSpriteFrameName = "bullet/bomb.png";
-        config.bulletSpeed = 200.0f;
-        config.bulletIsAOE = true;
-        config.bulletAOERange = 160.0f;
-        config.length = 3;  // 3x3格子
-        config.width = 3;
-        config.MAXLEVEL = 2;
-        newBuilding = DefenceBuilding::create(&config, level);
+    case BuildingCategory::Production:
+        newBuilding = manager->createProductionBuilding(option.configId, level);
         break;
-    }
-    case 8: { // 双倍攻速炮塔 (3x3格子)
-        static DefenceBuildingConfig config;
-        config.id = 2008;
-        config.name = "DoubleBoomTower";
-        config.spriteFrameName = option.spritePath;
-        config.HP = { 740, 1060, 1390 };
-        config.DP = { 0.05f, 0.1f, 0.15f };
-        config.ATK = { 60, 85, 110 };
-        config.ATK_RANGE = { 180, 220, 260 };
-        config.ATK_SPEED = { 0.75f, 0.7f, 0.65f };
-        config.SKY_ABLE = false;
-        config.GROUND_ABLE = true;
-        config.bulletSpriteFrameName = "bullet/bomb.png";
-        config.bulletSpeed = 200.0f;
-        config.bulletIsAOE = true;
-        config.bulletAOERange = 130.0f;
-        config.length = 3;
-        config.width = 3;
-        config.MAXLEVEL = 2;
-        newBuilding = DefenceBuilding::create(&config, level);
+    case BuildingCategory::Storage:
+        newBuilding = manager->createStorageBuilding(option.configId, level);
         break;
-    }
-    case 9: { // 魔法塔 (3x3格子)
-        static DefenceBuildingConfig config;
-        config.id = 2009;
-        config.name = "MagicTower";
-        config.spriteFrameName = option.spritePath;
-        config.HP = { 620, 910, 1180 };
-        config.DP = { 0.0f, 0.05f, 0.1f };
-        config.ATK = { 240, 300, 360 };
-        config.ATK_RANGE = { 200, 240, 280 };
-        config.ATK_SPEED = { 2.2f, 2.0f, 1.8f };
-        config.SKY_ABLE = true;
-        config.GROUND_ABLE = true;
-        config.bulletSpriteFrameName.clear();
-        config.bulletSpeed = 0.0f;
-        config.bulletIsAOE = false;
-        config.bulletAOERange = 0.0f;
-        config.length = 3;
-        config.width = 3;
-        config.MAXLEVEL = 2;
-        newBuilding = DefenceBuilding::create(&config, level);
+    case BuildingCategory::Trap:
+        if (option.type == kSpikeTrapType) {
+            newBuilding = SpikeTrap::create();
+        } else if (option.type == kSnapTrapType) {
+            newBuilding = SnapTrap::create();
+        }
         break;
-    }
-    case 10: { // 火焰塔 (3x3格子)
-        static DefenceBuildingConfig config;
-        config.id = 2010;
-        config.name = "FireTower";
-        config.spriteFrameName = option.spritePath;
-        config.HP = { 780, 1080, 1380 };
-        config.DP = { 0.05f, 0.1f, 0.15f };
-        config.ATK = { 110, 150, 190 };
-        config.ATK_RANGE = { 55, 65, 75 };
-        config.ATK_SPEED = { 0.65f, 0.6f, 0.55f };
-        config.SKY_ABLE = false;
-        config.GROUND_ABLE = true;
-        config.bulletSpriteFrameName.clear();
-        config.bulletSpeed = 0.0f;
-        config.bulletIsAOE = true;
-        config.bulletAOERange = 80.0f;
-        config.length = 3;
-        config.width = 3;
-        config.MAXLEVEL = 2;
-        newBuilding = DefenceBuilding::create(&config, level);
+    default:
         break;
-    }
-    case 3: { // 装饰树 (2x2格子)
-        static DefenceBuildingConfig config;
-        config.id = 2003;
-        config.name = "Tree";
-        config.spriteFrameName = option.spritePath;
-        config.HP = { 540, 780, 1020 };
-        config.DP = { 0, 0.05f, 0.1f };
-        config.ATK = { 35, 55, 75 };
-        config.ATK_RANGE = { 220, 270, 320 };
-        config.ATK_SPEED = { 0.8f, 0.7f, 0.6f };
-        config.SKY_ABLE = false;
-        config.GROUND_ABLE = true;
-        config.length = 2;  // 2x2格子
-        config.width = 2;
-        config.MAXLEVEL = 2;
-        newBuilding = DefenceBuilding::create(&config, level);
-        break;
-    }
-    case 4: { // 雪人仓库 (3x3格子)
-        static StorageBuildingConfig config;
-        config.id = 4001;
-        config.name = "Snowman";
-        config.spriteFrameName = option.spritePath;
-        config.HP = { 960, 1200, 1440 };
-        config.DP = { 0.1f, 0.15f, 0.2f };
-        config.length = 3;  // 3x3格子
-        config.width = 3;
-        config.MAXLEVEL = 2;
-        config.ADD_STORAGE_ELIXIR_CAPACITY = { 1000, 2000, 4000 };
-        config.ADD_STORAGE_GOLD_CAPACITY = { 1000, 2000, 4000 };
-        newBuilding = StorageBuilding::create(&config, level);
-        break;
-    }
-    case 5: { // 兵营 (5x5格子)
-        static ProductionBuildingConfig config;
-        config.id = 3002;
-        config.name = "SoldierBuilder";
-        config.spriteFrameName = option.spritePath;
-        config.HP = { 720, 900, 1080 };
-        config.DP = { 0, 0, 0 };
-        config.length = 5;  // 5x5格子
-        config.width = 5;
-        config.MAXLEVEL = 2;
-        config.PRODUCE_ELIXIR = { 0, 0, 0 };
-        config.STORAGE_ELIXIR_CAPACITY = { 0, 0, 0 };
-        config.PRODUCE_GOLD = { 0, 0, 0 };
-        config.STORAGE_GOLD_CAPACITY = { 0, 0, 0 };
-        newBuilding = ProductionBuilding::create(&config, level);
-        break;
-    }
-    case 6: { // 金币工厂 (3x3格子)
-        static ProductionBuildingConfig config;
-        config.id = 3003;
-        config.name = "GoldMaker";
-        config.spriteFrameName = option.spritePath;
-        config.HP = { 600, 780, 980 };
-        config.DP = { 0, 0.05f, 0.1f };
-        config.length = 3;
-        config.width = 3;
-        config.MAXLEVEL = 2;
-        config.PRODUCE_GOLD = { 40, 55, 75 };
-        config.PRODUCE_ELIXIR = { 0, 0, 0 };
-        config.STORAGE_GOLD_CAPACITY = { 0, 0, 0 };
-        config.STORAGE_ELIXIR_CAPACITY = { 0, 0, 0 };
-        newBuilding = ProductionBuilding::create(&config, level);
-        break;
-    }
-    case 7: { // 钻石工厂 (3x3格子)
-        static ProductionBuildingConfig config;
-        config.id = 3004;
-        config.name = "DiamondMaker";
-        config.spriteFrameName = option.spritePath;
-        config.HP = { 620, 820, 1030 };
-        config.DP = { 0, 0.05f, 0.1f };
-        config.length = 3;
-        config.width = 3;
-        config.MAXLEVEL = 2;
-        config.PRODUCE_GOLD = { 0, 0, 0 };
-        config.PRODUCE_ELIXIR = { 2, 3, 4 };
-        config.STORAGE_GOLD_CAPACITY = { 0, 0, 0 };
-        config.STORAGE_ELIXIR_CAPACITY = { 0, 0, 0 };
-        newBuilding = ProductionBuilding::create(&config, level);
-        break;
-    }
-    case 11: { // 地刺 (1x1格子)
-        newBuilding = SpikeTrap::create();
-        break;
-    }
-    case 12: { // 捕兽夹 (1x1格子)
-        newBuilding = SnapTrap::create();
-        break;
-    }
     }
 
     if (owner) {

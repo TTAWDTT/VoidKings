@@ -16,6 +16,7 @@ public:
 
     // 设置敌方士兵列表（由战斗场景提供）
     static void setEnemySoldiers(const std::vector<Soldier*>* soldiers);
+    static void clearEnemySoldiersIf(const std::vector<Soldier*>* soldiers);
 
     void takeDamage(float damage);
 

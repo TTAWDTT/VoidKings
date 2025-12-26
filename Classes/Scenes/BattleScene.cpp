@@ -11,6 +11,7 @@
 #include "BattleScene.h"
 #include "BaseScene.h"
 #include "Core/Core.h"
+#include "Buildings/BuildingManager.h"
 #include "Buildings/DefenceBuilding.h"
 #include "Buildings/ProductionBuilding.h"
 #include "Buildings/StorageBuilding.h"
@@ -176,6 +177,7 @@ bool BattleScene::init() {
     _resultLayer = nullptr;
 
     CCLOG("[战斗场景] 初始化关卡 %d", _levelId);
+    BuildingManager::getInstance()->loadConfigs();
 
     // 确保兵种配置已加载（避免直接进入战斗时配置缺失）
     if (UnitManager::getInstance()->getAllUnitIds().empty()) {
@@ -692,9 +694,18 @@ void BattleScene::createDefenseBaseLayout(int towerLevel) {
         return;
     }
 
+    auto* manager = BuildingManager::getInstance();
+    manager->loadConfigs();
+
     const float cellSize = _gridMap->getCellSize();
-    const int baseWidth = 4;
-    const int baseHeight = 4;
+
+    int baseId = manager->getMainBaseId();
+    if (baseId <= 0) {
+        baseId = 3001;
+    }
+    const auto* baseConfig = manager->getProductionConfig(baseId);
+    int baseWidth = baseConfig ? baseConfig->width : 4;
+    int baseHeight = baseConfig ? baseConfig->length : 4;
     int defenseBaseX = BattleConfig::GRID_WIDTH / 2 - baseWidth / 2;
     int defenseBaseY = BattleConfig::GRID_HEIGHT / 2 - baseHeight / 2;
     if (defenseBaseX < 0) defenseBaseX = 0;
@@ -753,51 +764,23 @@ void BattleScene::createDefenseBaseLayout(int towerLevel) {
         registerBuilding(building, isBase);
     };
 
-    static ProductionBuildingConfig baseConfig;
-    static bool baseConfigReady = false;
-    if (!baseConfigReady) {
-        baseConfig.id = 3001;
-        baseConfig.name = "Base";
-        baseConfig.spriteFrameName = "buildings/base.png";
-        baseConfig.HP = { 2400, 3000, 3600 };
-        baseConfig.DP = { 0, 0.05f, 0.1f };
-        baseConfig.length = baseWidth;
-        baseConfig.width = baseHeight;
-        baseConfig.MAXLEVEL = 2;
-        baseConfig.PRODUCE_GOLD = { 0, 0, 0 };
-        baseConfig.PRODUCE_ELIXIR = { 0, 0, 0 };
-        baseConfig.STORAGE_GOLD_CAPACITY = { 1000, 2000, 4000 };
-        baseConfig.STORAGE_ELIXIR_CAPACITY = { 500, 1000, 2000 };
-        baseConfigReady = true;
-    }
-
     int baseLevel = Core::getInstance()->getBaseLevel() - 1;
     if (baseLevel < 0) {
         baseLevel = 0;
     }
-    if (baseLevel > baseConfig.MAXLEVEL) {
-        baseLevel = baseConfig.MAXLEVEL;
+    if (baseConfig && baseLevel > baseConfig->MAXLEVEL) {
+        baseLevel = baseConfig->MAXLEVEL;
     }
-    auto base = ProductionBuilding::create(&baseConfig, baseLevel);
+    auto base = manager->createProductionBuilding(baseId, baseLevel);
     placeBuilding(base, defenseBaseX, defenseBaseY, baseWidth, baseHeight, true);
 
-    static ProductionBuildingConfig barracksConfig;
-    static bool barracksConfigReady = false;
-    if (!barracksConfigReady) {
-        barracksConfig.id = 3002;
-        barracksConfig.name = "SoldierBuilder";
-        barracksConfig.spriteFrameName = "buildings/soldierbuilder.png";
-        barracksConfig.HP = { 720, 900, 1080 };
-        barracksConfig.DP = { 0, 0, 0 };
-        barracksConfig.length = 5;
-        barracksConfig.width = 5;
-        barracksConfig.MAXLEVEL = 2;
-        barracksConfig.PRODUCE_GOLD = { 0, 0, 0 };
-        barracksConfig.PRODUCE_ELIXIR = { 0, 0, 0 };
-        barracksConfig.STORAGE_GOLD_CAPACITY = { 0, 0, 0 };
-        barracksConfig.STORAGE_ELIXIR_CAPACITY = { 0, 0, 0 };
-        barracksConfigReady = true;
+    int barracksId = manager->getBarracksId();
+    if (barracksId <= 0) {
+        barracksId = 3002;
     }
+    const auto* barracksConfig = manager->getProductionConfig(barracksId);
+    int barracksWidth = barracksConfig ? barracksConfig->width : 5;
+    int barracksHeight = barracksConfig ? barracksConfig->length : 5;
 
     int defenseBarracksX = barracksX + offsetX;
     int defenseBarracksY = barracksY + offsetY;
@@ -805,11 +788,11 @@ void BattleScene::createDefenseBaseLayout(int towerLevel) {
     if (barracksLevel < 0) {
         barracksLevel = 0;
     }
-    if (barracksLevel > barracksConfig.MAXLEVEL) {
-        barracksLevel = barracksConfig.MAXLEVEL;
+    if (barracksConfig && barracksLevel > barracksConfig->MAXLEVEL) {
+        barracksLevel = barracksConfig->MAXLEVEL;
     }
-    auto barracks = ProductionBuilding::create(&barracksConfig, barracksLevel);
-    placeBuilding(barracks, defenseBarracksX, defenseBarracksY, 5, 5, false);
+    auto barracks = manager->createProductionBuilding(barracksId, barracksLevel);
+    placeBuilding(barracks, defenseBarracksX, defenseBarracksY, barracksWidth, barracksHeight, false);
 
     const auto& savedBuildings = BaseScene::getSavedBuildings();
     for (const auto& saved : savedBuildings) {
@@ -901,39 +884,36 @@ void BattleScene::createDefenseLevel6() {
 // ===================================================
 
 void BattleScene::createEnemyBase(int gridX, int gridY, int level) {
-    // 创建敌方基地建筑配置
-    static ProductionBuildingConfig baseConfig;
-    baseConfig.id = 9001;
-    baseConfig.name = "EnemyBase";
-    baseConfig.spriteFrameName = "buildings/base.png";
-    baseConfig.HP = { 1560, 2160, 2880 };
-    baseConfig.DP = { 0, 0, 0 };
-    baseConfig.length = 4;
-    baseConfig.width = 4;
-    baseConfig.MAXLEVEL = 2;
+    auto* manager = BuildingManager::getInstance();
+    manager->loadConfigs();
+
+    int baseId = manager->getEnemyBaseId();
+    if (baseId <= 0) {
+        baseId = 9001;
+    }
+    const auto* baseConfig = manager->getProductionConfig(baseId);
+    int baseWidth = baseConfig ? baseConfig->width : 4;
+    int baseHeight = baseConfig ? baseConfig->length : 4;
 
     int resolvedLevel = level;
     if (resolvedLevel < 0) {
         resolvedLevel = 0;
     }
-    if (resolvedLevel > baseConfig.MAXLEVEL) {
-        resolvedLevel = baseConfig.MAXLEVEL;
+    if (baseConfig && resolvedLevel > baseConfig->MAXLEVEL) {
+        resolvedLevel = baseConfig->MAXLEVEL;
     }
-    auto base = ProductionBuilding::create(&baseConfig, resolvedLevel);
+    auto base = manager->createProductionBuilding(baseId, resolvedLevel);
     if (base) {
         _buildingLayer->addChild(base);
 
-        // 计算位置
         float cellSize = _gridMap->getCellSize();
-        float centerX = (gridX + 2.0f) * cellSize;
-        float centerY = (gridY + 2.0f) * cellSize;
+        float centerX = (gridX + baseWidth * 0.5f) * cellSize;
+        float centerY = (gridY + baseHeight * 0.5f) * cellSize;
         base->setPosition(Vec2(centerX, centerY));
 
-        // 缩放建筑以适应格子大小
-        scaleBuildingToFit(base, 4, 4, cellSize);
+        scaleBuildingToFit(base, baseWidth, baseHeight, cellSize);
 
-        // 标记格子占用
-        _gridMap->occupyCell(gridX, gridY, 4, 4, base);
+        _gridMap->occupyCell(gridX, gridY, baseWidth, baseHeight, base);
 
         _enemyBuildings.push_back(base);
         base->retain();
@@ -950,108 +930,22 @@ void BattleScene::createEnemyBase(int gridX, int gridY, int level) {
 // ===================================================
 
 void BattleScene::createDefenseTower(int gridX, int gridY, int type, int level) {
-    // 创建防御塔建筑配置（分类型缓存，避免互相覆盖）
-    static DefenceBuildingConfig arrowConfig;
-    static DefenceBuildingConfig boomConfig;
-    static DefenceBuildingConfig doubleBoomConfig;
-    static DefenceBuildingConfig magicConfig;
-    static DefenceBuildingConfig fireConfig;
+    auto* manager = BuildingManager::getInstance();
+    manager->loadConfigs();
 
-    DefenceBuildingConfig* towerConfig = nullptr;
-    switch (type) {
-    case kTowerArrow:
-        towerConfig = &arrowConfig;
-        towerConfig->id = 9101;
-        towerConfig->name = "EnemyArrowTower";
-        towerConfig->spriteFrameName = "buildings/ArrowTower.png";
-        towerConfig->HP = { 380, 500, 620 };
-        towerConfig->DP = { 0, 0.05f, 0.1f };
-        towerConfig->ATK = { 35, 50, 70 };
-        towerConfig->ATK_RANGE = { 200, 230, 260 };
-        towerConfig->ATK_SPEED = { 0.95f, 0.85f, 0.75f };
-        towerConfig->SKY_ABLE = true;
-        towerConfig->GROUND_ABLE = true;
-        towerConfig->bulletSpriteFrameName = "bullet/arrow.png";
-        towerConfig->bulletSpeed = 400.0f;
-        towerConfig->bulletIsAOE = false;
-        towerConfig->bulletAOERange = 0.0f;
-        break;
-    case kTowerBoom:
-        towerConfig = &boomConfig;
-        towerConfig->id = 9102;
-        towerConfig->name = "EnemyBoomTower";
-        towerConfig->spriteFrameName = "buildings/BoomTower.png";
-        towerConfig->HP = { 540, 720, 910 };
-        towerConfig->DP = { 0.05f, 0.1f, 0.15f };
-        towerConfig->ATK = { 160, 210, 270 };
-        towerConfig->ATK_RANGE = { 2000, 2000, 2000 };
-        towerConfig->ATK_SPEED = { 1.3f, 1.2f, 1.1f };
-        towerConfig->SKY_ABLE = false;
-        towerConfig->GROUND_ABLE = true;
-        towerConfig->bulletSpriteFrameName = "bullet/bomb.png";
-        towerConfig->bulletSpeed = 200.0f;
-        towerConfig->bulletIsAOE = true;
-        towerConfig->bulletAOERange = 160.0f;
-        break;
-    case kTowerDoubleBoom:
-        towerConfig = &doubleBoomConfig;
-        towerConfig->id = 9103;
-        towerConfig->name = "EnemyDoubleBoomTower";
-        towerConfig->spriteFrameName = "buildings/DoubleBoomTower.png";
-        towerConfig->HP = { 520, 670, 860 };
-        towerConfig->DP = { 0.05f, 0.1f, 0.15f };
-        towerConfig->ATK = { 70, 95, 125 };
-        towerConfig->ATK_RANGE = { 180, 210, 240 };
-        towerConfig->ATK_SPEED = { 0.65f, 0.6f, 0.55f };
-        towerConfig->SKY_ABLE = false;
-        towerConfig->GROUND_ABLE = true;
-        towerConfig->bulletSpriteFrameName = "bullet/bomb.png";
-        towerConfig->bulletSpeed = 200.0f;
-        towerConfig->bulletIsAOE = true;
-        towerConfig->bulletAOERange = 130.0f;
-        break;
-    case kTowerMagic:
-        towerConfig = &magicConfig;
-        towerConfig->id = 9104;
-        towerConfig->name = "EnemyMagicTower";
-        towerConfig->spriteFrameName = "buildings/MagicTower.png";
-        towerConfig->HP = { 430, 580, 740 };
-        towerConfig->DP = { 0.0f, 0.05f, 0.1f };
-        towerConfig->ATK = { 220, 280, 340 };
-        towerConfig->ATK_RANGE = { 210, 240, 270 };
-        towerConfig->ATK_SPEED = { 2.2f, 2.0f, 1.8f };
-        towerConfig->SKY_ABLE = true;
-        towerConfig->GROUND_ABLE = true;
-        towerConfig->bulletSpriteFrameName.clear();
-        towerConfig->bulletSpeed = 0.0f;
-        towerConfig->bulletIsAOE = false;
-        towerConfig->bulletAOERange = 0.0f;
-        break;
-    case kTowerFire:
-        towerConfig = &fireConfig;
-        towerConfig->id = 9105;
-        towerConfig->name = "EnemyFireTower";
-        towerConfig->spriteFrameName = "buildings/FireTower.png";
-        towerConfig->HP = { 600, 780, 980 };
-        towerConfig->DP = { 0.05f, 0.1f, 0.15f };
-        towerConfig->ATK = { 100, 130, 160 };
-        towerConfig->ATK_RANGE = { 55, 65, 75 };
-        towerConfig->ATK_SPEED = { 0.65f, 0.6f, 0.55f };
-        towerConfig->SKY_ABLE = false;
-        towerConfig->GROUND_ABLE = true;
-        towerConfig->bulletSpriteFrameName.clear();
-        towerConfig->bulletSpeed = 0.0f;
-        towerConfig->bulletIsAOE = true;
-        towerConfig->bulletAOERange = 70.0f;
-        break;
-    default:
-        towerConfig = &arrowConfig;
-        break;
+    int configId = manager->getBattleTowerConfigId(type);
+    if (configId <= 0) {
+        CCLOG("[战斗场景] 未找到防御塔配置类型: %d", type);
+        return;
+    }
+    const auto* towerConfig = manager->getDefenceConfig(configId);
+    if (!towerConfig) {
+        CCLOG("[战斗场景] 防御塔配置缺失: %d", configId);
+        return;
     }
 
-    towerConfig->length = 3;
-    towerConfig->width = 3;
-    towerConfig->MAXLEVEL = 2;
+    int towerWidth = towerConfig->width > 0 ? towerConfig->width : 3;
+    int towerHeight = towerConfig->length > 0 ? towerConfig->length : 3;
 
     int resolvedLevel = level;
     if (resolvedLevel < 0) {
@@ -1061,21 +955,18 @@ void BattleScene::createDefenseTower(int gridX, int gridY, int type, int level) 
         resolvedLevel = towerConfig->MAXLEVEL;
     }
 
-    auto tower = DefenceBuilding::create(towerConfig, resolvedLevel);
+    auto tower = manager->createDefenceBuilding(configId, resolvedLevel);
     if (tower) {
         _buildingLayer->addChild(tower);
 
-        // 计算位置
         float cellSize = _gridMap->getCellSize();
-        float centerX = (gridX + 1.5f) * cellSize;
-        float centerY = (gridY + 1.5f) * cellSize;
+        float centerX = (gridX + towerWidth * 0.5f) * cellSize;
+        float centerY = (gridY + towerHeight * 0.5f) * cellSize;
         tower->setPosition(Vec2(centerX, centerY));
 
-        // 缩放建筑以适应格子大小
-        scaleBuildingToFit(tower, 3, 3, cellSize);
+        scaleBuildingToFit(tower, towerWidth, towerHeight, cellSize);
 
-        // 标记格子占用
-        _gridMap->occupyCell(gridX, gridY, 3, 3, tower);
+        _gridMap->occupyCell(gridX, gridY, towerWidth, towerHeight, tower);
 
         _enemyBuildings.push_back(tower);
         tower->retain();
@@ -2101,9 +1992,9 @@ void BattleScene::update(float dt) {
 }
 
 void BattleScene::onExit() {
-    DefenceBuilding::setEnemySoldiers(nullptr);
-    TrapBase::setEnemySoldiers(nullptr);
-    Soldier::setEnemyBuildings(nullptr);
+    DefenceBuilding::clearEnemySoldiersIf(&_soldiers);
+    TrapBase::clearEnemySoldiersIf(&_soldiers);
+    Soldier::clearEnemyBuildingsIf(&_enemyBuildings);
 
     // 释放保留的引用，避免内存泄漏
     for (auto& soldier : _soldiers) {

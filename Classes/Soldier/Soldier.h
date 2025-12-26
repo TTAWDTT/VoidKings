@@ -22,6 +22,7 @@ public:
 
     // 设置敌方建筑列表（由战斗场景提供）
     static void setEnemyBuildings(const std::vector<cocos2d::Node*>* buildings);
+    static void clearEnemyBuildingsIf(const std::vector<cocos2d::Node*>* buildings);
 
     // 状态操作
     void takeDamage(float damage);

@@ -45,6 +45,12 @@ void TrapBase::setEnemySoldiers(const std::vector<Soldier*>* soldiers) {
     s_enemySoldiers = soldiers;
 }
 
+void TrapBase::clearEnemySoldiersIf(const std::vector<Soldier*>* soldiers) {
+    if (s_enemySoldiers == soldiers) {
+        s_enemySoldiers = nullptr;
+    }
+}
+
 void TrapBase::setGridContext(GridMap* gridMap, int gridX, int gridY, int width, int height) {
     _gridMap = gridMap;
     _gridX = gridX;

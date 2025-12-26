@@ -11,6 +11,7 @@
 
 #include "cocos2d.h"
 #include "ui/CocosGUI.h"
+#include "Buildings/BuildingCatalog.h"
 #include <functional>
 #include <vector>
 
@@ -38,19 +39,6 @@ namespace BuildShopConfig {
     // 关闭按钮配置
     constexpr float CLOSE_BUTTON_BOTTOM = 30.0f;
 }
-
-// ===================================================
-// 建筑选项结构（部落冲突设定）
-// ===================================================
-struct BuildingOption {
-    int type;               // 建筑类型ID
-    std::string name;       // 建筑名称
-    int cost;               // 建筑费用
-    int gridWidth;          // 占用格子宽度（部落冲突设定）
-    int gridHeight;         // 占用格子高度（部落冲突设定）
-    std::string spritePath; // 建筑图片路径
-    bool canBuild;          // 是否可以建造（基地和兵营只能有一个）
-};
 
 // ===================================================
 // 建筑商店面板类

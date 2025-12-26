@@ -130,6 +130,12 @@ void Soldier::setEnemyBuildings(const std::vector<cocos2d::Node*>* buildings) {
     s_enemyBuildings = buildings;
 }
 
+void Soldier::clearEnemyBuildingsIf(const std::vector<cocos2d::Node*>* buildings) {
+    if (s_enemyBuildings == buildings) {
+        s_enemyBuildings = nullptr;
+    }
+}
+
 bool Soldier::init(const UnitConfig* config, int level) {
    if (!Node::init()) return false;
 

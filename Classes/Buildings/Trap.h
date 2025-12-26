@@ -10,6 +10,7 @@ class Soldier;
 class TrapBase : public cocos2d::Node {
 public:
     static void setEnemySoldiers(const std::vector<Soldier*>* soldiers);
+    static void clearEnemySoldiersIf(const std::vector<Soldier*>* soldiers);
     void setGridContext(GridMap* gridMap, int gridX, int gridY, int width, int height);
 
 protected:

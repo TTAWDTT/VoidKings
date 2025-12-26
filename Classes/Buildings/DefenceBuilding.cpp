@@ -158,6 +158,12 @@ void DefenceBuilding::setEnemySoldiers(const std::vector<Soldier*>* soldiers) {
     s_enemySoldiers = soldiers;
 }
 
+void DefenceBuilding::clearEnemySoldiersIf(const std::vector<Soldier*>* soldiers) {
+    if (s_enemySoldiers == soldiers) {
+        s_enemySoldiers = nullptr;
+    }
+}
+
 
 DefenceBuilding* DefenceBuilding::create(const DefenceBuildingConfig* config, int level) {
     DefenceBuilding* pRet = new(std::nothrow) DefenceBuilding();

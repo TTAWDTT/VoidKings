@@ -10,6 +10,7 @@
  */
 
 #include "BuildShopPanel.h"
+#include "Buildings/BuildingManager.h"
 #include "Utils/AudioManager.h"
 #include <algorithm>
 #include <memory>
@@ -65,29 +66,11 @@ bool BuildShopPanel::init(
 // ��ʼ������ѡ������ͻ�趨��
 // ===================================================
 void BuildShopPanel::initBuildingOptions() {
-    // ���ݲ����ͻ�Ľ����ߴ��趨��
-    // - �������ࣨ�����������ȣ���3x3����
-    // - ��Դ�������ֿ�ȣ���3x3����
-    // - ��Ӫ��5x5���ӣ����ɽ��죬����Ĭ�ϱ�Ӫ��
-    // - ��Ӫ��4x4���ӣ����ɽ��죬����Ĭ�ϻ��أ�
-    // - װ������ȣ���2x2����
+    auto* manager = BuildingManager::getInstance();
+    manager->loadConfigs();
+    _buildingOptions = manager->getBuildOptions();
 
-    _buildingOptions = {
-        {1, "Arrow Tower", 100, 3, 3, "buildings/ArrowTower.png", true},      // 箭塔 3x3
-        {2, "Boom Tower", 320, 3, 3, "buildings/BoomTower.png", true},        // 炮塔 3x3
-        {8, "Double Boom", 220, 3, 3, "buildings/DoubleBoomTower.png", true}, // 双倍攻速炮塔 3x3
-        {9, "Magic Tower", 240, 3, 3, "buildings/MagicTower.png", true},      // 魔法塔 3x3
-        {10, "Fire Tower", 500, 3, 3, "buildings/FireTower.png", true},       // 火焰塔 3x3
-        {11, "Spike Trap", 10, 1, 1, "buildings/spike/spike_1.png", true},    // 地刺 1x1
-        {12, "Snap Trap", 100, 1, 1, "buildings/trap/trap_1.png", true},      // 捕兽夹 1x1
-        {3, "Tree", 80, 2, 2, "buildings/Tree/sprite_0000.png", true},        // 树 2x2
-        {4, "Storage", 200, 3, 3, "buildings/snowman.png", true},             // 仓库 3x3
-        {5, "Barracks", 300, 5, 5, "buildings/soldierbuilder.png", false},    // 兵营 5x5不可重复
-        {6, "GoldMaker", 250, 3, 3, "buildings/GoldMaker.png", true},         // 金币工厂 3x3
-        {7, "DiamondMaker", 400, 3, 3, "buildings/DiamondMaker.png", true}    // 钻石工厂 3x3
-    };
-
-    CCLOG("[�����̵�] ��ʼ�� %zu ������ѡ��", _buildingOptions.size());
+    CCLOG("[BuildShop] Loaded %zu building options", _buildingOptions.size());
 }
 
 // ===================================================
