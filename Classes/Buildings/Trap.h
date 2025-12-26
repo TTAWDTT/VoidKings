@@ -57,7 +57,7 @@ public:
 
 private:
     bool _triggered = false;
-    void triggerOnSoldier(Soldier* soldier);
+    void triggerOnSoldiers(const std::vector<Soldier*>& soldiers);
 };
 
 #endif // __TRAP_H__

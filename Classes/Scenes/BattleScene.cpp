@@ -158,10 +158,24 @@ bool BattleScene::init() {
         return false;
     }
 
-    CCLOG("[战斗场景] 初始化关卡 %d", _levelId);
+    // 切关时先清空旧战斗引用，避免伤害残留
+    Soldier::setEnemyBuildings(nullptr);
+    DefenceBuilding::setEnemySoldiers(nullptr);
+    TrapBase::setEnemySoldiers(nullptr);
+
+    _soldiers.clear();
+    _enemyBuildings.clear();
+    _enemyBase = nullptr;
+    _enemyBaseDestroyed = false;
+    _battleTime = 0.0f;
+    _battleEnded = false;
+    _destroyedBuildingCount = 0;
+    _totalBuildingCount = 0;
     _totalDeployedCount = 0;
     _deadSoldierCount = 0;
     _resultLayer = nullptr;
+
+    CCLOG("[战斗场景] 初始化关卡 %d", _levelId);
 
     // 确保兵种配置已加载（避免直接进入战斗时配置缺失）
     if (UnitManager::getInstance()->getAllUnitIds().empty()) {
@@ -2089,6 +2103,7 @@ void BattleScene::update(float dt) {
 void BattleScene::onExit() {
     DefenceBuilding::setEnemySoldiers(nullptr);
     TrapBase::setEnemySoldiers(nullptr);
+    Soldier::setEnemyBuildings(nullptr);
 
     // 释放保留的引用，避免内存泄漏
     for (auto& soldier : _soldiers) {
@@ -2259,12 +2274,31 @@ void BattleScene::checkBattleEnd() {
     }
 }
 
+void BattleScene::freezeBattleActors() {
+    // 战斗结束后冻结场上单位，避免切换关卡时残留伤害
+    Soldier::setEnemyBuildings(nullptr);
+    DefenceBuilding::setEnemySoldiers(nullptr);
+    TrapBase::setEnemySoldiers(nullptr);
+
+    for (auto* soldier : _soldiers) {
+        if (soldier) {
+            soldier->unscheduleUpdate();
+        }
+    }
+    for (auto* building : _enemyBuildings) {
+        if (building) {
+            building->unscheduleUpdate();
+        }
+    }
+}
+
 // ===================================================
 // 战斗胜利
 // ===================================================
 
 void BattleScene::onBattleWin() {
     _battleEnded = true;
+    freezeBattleActors();
     CCLOG("[战斗场景] 战斗胜利！");
     AudioManager::stopBgm();
     AudioManager::playVictory();
@@ -2305,6 +2339,7 @@ void BattleScene::onBattleWin() {
 
 void BattleScene::onBattleLose() {
     _battleEnded = true;
+    freezeBattleActors();
     CCLOG("[战斗场景] 战斗失败！");
     AudioManager::stopBgm();
     AudioManager::playLose();

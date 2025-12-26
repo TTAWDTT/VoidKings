@@ -202,6 +202,7 @@ private:
     void updateBattle(float dt);
     void updateDefenseSpawns();
     void checkBattleEnd();
+    void freezeBattleActors();
     void onBattleWin();
     void onBattleLose();
     int calculateStarCount() const;

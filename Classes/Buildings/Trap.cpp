@@ -262,6 +262,7 @@ void SnapTrap::update(float dt) {
     }
 
     Rect triggerRect = getTriggerRect();
+    std::vector<Soldier*> victims;
     for (auto* soldier : *s_enemySoldiers) {
         if (!soldier || !soldier->getParent()) {
             continue;
@@ -285,18 +286,24 @@ void SnapTrap::update(float dt) {
         }
 
         if (shouldTrigger) {
-            triggerOnSoldier(soldier);
-            return;
+            victims.push_back(soldier);
         }
+    }
+
+    if (!victims.empty()) {
+        // 捕兽夹一次吞噬格子内所有敌人，避免多人叠加时漏触发
+        triggerOnSoldiers(victims);
     }
 }
 
-void SnapTrap::triggerOnSoldier(Soldier* soldier) {
+void SnapTrap::triggerOnSoldiers(const std::vector<Soldier*>& soldiers) {
     _triggered = true;
 
     AudioManager::playSnapTrap();
-    if (soldier) {
-        soldier->takeDamage(soldier->getCurrentHP() + 1.0f);
+    for (auto* soldier : soldiers) {
+        if (soldier) {
+            soldier->takeDamage(soldier->getCurrentHP() + 1.0f);
+        }
     }
 
     if (_bodySprite) {
