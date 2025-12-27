@@ -5,45 +5,45 @@
       "name": "Archer",
       "spriteFrameName": "unit/MiniArcherMan_output/archer",
       "HP": [
+        80,
         90,
-        108,
-        129,
-        155,
-        186
+        110,
+        130,
+        160
       ],
       "SPEED": [
-        78,
+        80,
         80,
         83,
-        86,
-        90
+        83,
+        86
       ],
       "DP": [
-        4,
-        5,
-        6,
-        7,
-        8
+        0,
+        1,
+        2,
+        3,
+        5
       ],
       "ATK": [
-        22,
-        26,
-        31,
-        37,
-        45
+        20,
+        25,
+        30,
+        35,
+        42
       ],
       "RANGE": [
-        80,
-        85,
-        90,
-        95,
-        100
+        195,
+        195,
+        230,
+        230,
+        250
       ],
       "aiType": 0,
       "ISREMOTE": true,
       "ISFLY": false,
       "MAXLEVEL": 4,
-      "COST_COIN": 50,
+      "COST_COIN": 75,
       "COST_ELIXIR": 0,
       "COST_POPULATION": 1,
       "TRAIN_TIME": 25,
@@ -52,7 +52,7 @@
       "anim_walk_delay": 0.1,
       "anim_attack": "attack",
       "anim_attack_frames": 11,
-      "anim_attack_delay": 0.08,
+      "anim_attack_delay": 0.04,
       "anim_idle": "idle",
       "anim_idle_frames": 1,
       "anim_idle_delay": 0.15,
@@ -66,10 +66,10 @@
       "spriteFrameName": "unit/MiniArchMage_output/archmage",
       "HP": [
         80,
-        95,
-        112,
-        132,
-        155
+        90,
+        110,
+        130,
+        160
       ],
       "SPEED": [
         70,
@@ -79,24 +79,24 @@
         82
       ],
       "DP": [
-        3,
-        4,
+        0,
         5,
-        6,
-        7
+        8,
+        10,
+        15
       ],
       "ATK": [
         45,
-        54,
+        55,
         65,
-        78,
-        94
+        75,
+        90
       ],
       "RANGE": [
+        110,
+        110,
         130,
-        136,
-        142,
-        148,
+        130,
         155
       ],
       "aiType": 2,
@@ -112,7 +112,7 @@
       "anim_walk_delay": 0.1,
       "anim_attack": "attack",
       "anim_attack_frames": 11,
-      "anim_attack_delay": 0.08,
+      "anim_attack_delay": 0.25,
       "anim_idle": "idle",
       "anim_idle_frames": 1,
       "anim_idle_delay": 0.15,
@@ -127,37 +127,37 @@
       "HP": [
         200,
         240,
-        290,
-        350,
-        420
+        280,
+        320,
+        360
       ],
       "SPEED": [
-        100,
-        105,
         110,
-        116,
-        124
+        110,
+        120,
+        120,
+        150
       ],
       "DP": [
-        12,
-        15,
-        18,
-        22,
-        27
+        20,
+        20,
+        30,
+        30,
+        50
       ],
       "ATK": [
-        35,
-        42,
-        50,
-        60,
-        72
+        15,
+        20,
+        25,
+        30,
+        35
       ],
       "RANGE": [
-        32,
-        34,
-        35,
-        37,
-        40
+        30,
+        30,
+        40,
+        40,
+        45
       ],
       "aiType": 0,
       "ISREMOTE": false,
@@ -172,7 +172,7 @@
       "anim_walk_delay": 0.1,
       "anim_attack": "attack",
       "anim_attack_frames": 7,
-      "anim_attack_delay": 0.08,
+      "anim_attack_delay": 0.1,
       "anim_idle": "idle",
       "anim_idle_frames": 1,
       "anim_idle_delay": 0.15,
@@ -185,45 +185,45 @@
       "name": "CrossBowMan",
       "spriteFrameName": "unit/MiniCrossBowMan_output/crossbowman",
       "HP": [
+        80,
         90,
-        108,
+        110,
         130,
-        156,
-        187
+        160
       ],
       "SPEED": [
-        75,
-        78,
-        81,
-        85,
-        90
+        80,
+        80,
+        83,
+        83,
+        86
       ],
       "DP": [
-        4,
-        5,
-        6,
-        7,
-        9
+        0,
+        1,
+        2,
+        3,
+        5
       ],
       "ATK": [
-        32,
-        38,
-        46,
-        55,
-        66
+        15,
+        20,
+        25,
+        30,
+        35
       ],
       "RANGE": [
-        120,
-        126,
-        132,
-        138,
-        145
+        185,
+        185,
+        215,
+        215,
+        225
       ],
       "aiType": 0,
       "ISREMOTE": true,
       "ISFLY": false,
       "MAXLEVEL": 4,
-      "COST_COIN": 70,
+      "COST_COIN": 100,
       "COST_ELIXIR": 10,
       "COST_POPULATION": 1,
       "TRAIN_TIME": 30,
@@ -232,7 +232,7 @@
       "anim_walk_delay": 0.1,
       "anim_attack": "attack",
       "anim_attack_frames": 10,
-      "anim_attack_delay": 0.08,
+      "anim_attack_delay": 0.01,
       "anim_idle": "idle",
       "anim_idle_frames": 1,
       "anim_idle_delay": 0.15,
@@ -245,25 +245,25 @@
       "name": "HalberdMan",
       "spriteFrameName": "unit/MiniHalberdMan_output/halberdman",
       "HP": [
-        180,
-        216,
+        200,
+        210,
         260,
-        312,
-        374
+        270,
+        370
       ],
       "SPEED": [
-        65,
-        68,
-        71,
-        74,
-        78
+        83,
+        83,
+        86,
+        86,
+        89
       ],
       "DP": [
-        15,
-        18,
-        22,
-        26,
-        32
+        10,
+        10,
+        20,
+        20,
+        30
       ],
       "ATK": [
         40,
@@ -273,11 +273,11 @@
         84
       ],
       "RANGE": [
-        32,
-        34,
         35,
-        37,
-        40
+        35,
+        40,
+        40,
+        45
       ],
       "aiType": 0,
       "ISREMOTE": false,
@@ -306,37 +306,37 @@
       "spriteFrameName": "unit/MiniHorseMan_output/horseman",
       "HP": [
         160,
-        192,
+        160,
+        200,
         230,
-        276,
-        331
+        330
       ],
       "SPEED": [
         120,
-        126,
-        133,
+        125,
         140,
-        150
+        145,
+        500
       ],
       "DP": [
         8,
         10,
-        12,
+        10,
         14,
-        17
+        14
       ],
       "ATK": [
-        28,
-        34,
-        41,
-        49,
-        59
+        30,
+        35,
+        40,
+        45,
+        55
       ],
       "RANGE": [
-        36,
-        38,
-        39,
-        42,
+        30,
+        30,
+        40,
+        40,
         45
       ],
       "aiType": 1,
@@ -367,37 +367,37 @@
       "HP": [
         500,
         600,
-        720,
-        864,
-        1037
+        800,
+        900,
+        1200
       ],
       "SPEED": [
+        45,
+        50,
         60,
-        62,
         65,
-        68,
-        72
+        77
       ],
       "DP": [
         25,
         30,
-        36,
-        43,
-        52
+        35,
+        40,
+        50
       ],
       "ATK": [
         80,
-        96,
-        115,
-        138,
-        166
+        80,
+        120,
+        130,
+        150
       ],
       "RANGE": [
-        44,
-        46,
-        49,
-        52,
-        56
+        50,
+        50,
+        60,
+        60,
+        70
       ],
       "aiType": 0,
       "ISREMOTE": false,
@@ -412,7 +412,7 @@
       "anim_walk_delay": 0.12,
       "anim_attack": "attack",
       "anim_attack_frames": 10,
-      "anim_attack_delay": 0.08,
+      "anim_attack_delay": 0.12,
       "anim_idle": "idle",
       "anim_idle_frames": 1,
       "anim_idle_delay": 0.15,
@@ -425,45 +425,45 @@
       "name": "Mage",
       "spriteFrameName": "unit/MiniMage_output/mage",
       "HP": [
-        70,
-        84,
-        101,
-        121,
-        145
+        80,
+        90,
+        110,
+        130,
+        160
       ],
       "SPEED": [
-        68,
         70,
-        73,
-        76,
-        80
+        72,
+        75,
+        78,
+        82
       ],
       "DP": [
+        0,
+        1,
+        1,
         2,
-        3,
-        4,
-        5,
-        6
+        3
       ],
       "ATK": [
-        38,
-        46,
+        25,
         55,
-        66,
-        79
+        65,
+        75,
+        90
       ],
       "RANGE": [
-        125,
+        110,
+        110,
         130,
-        135,
-        140,
-        145
+        130,
+        155
       ],
       "aiType": 0,
       "ISREMOTE": true,
       "ISFLY": false,
       "MAXLEVEL": 4,
-      "COST_COIN": 80,
+      "COST_COIN": 50,
       "COST_ELIXIR": 15,
       "COST_POPULATION": 2,
       "TRAIN_TIME": 35,
@@ -472,7 +472,7 @@
       "anim_walk_delay": 0.1,
       "anim_attack": "attack",
       "anim_attack_frames": 11,
-      "anim_attack_delay": 0.08,
+      "anim_attack_delay": 0.25,
       "anim_idle": "idle",
       "anim_idle_frames": 1,
       "anim_idle_delay": 0.15,
@@ -485,39 +485,39 @@
       "name": "PrinceMan",
       "spriteFrameName": "unit/MiniPrinceMan_output/princeman",
       "HP": [
-        220,
-        264,
-        317,
-        380,
-        456
+        250,
+        300,
+        350,
+        400,
+        450
       ],
       "SPEED": [
         85,
-        89,
-        93,
-        98,
-        104
+        90,
+        95,
+        100,
+        110
       ],
       "DP": [
-        14,
-        17,
+        15,
         20,
-        24,
-        29
+        25,
+        25,
+        30
       ],
       "ATK": [
         45,
-        54,
+        50,
         65,
-        78,
-        94
+        75,
+        90
       ],
       "RANGE": [
-        38,
-        40,
-        42,
-        45,
-        48
+        30,
+        30,
+        35,
+        35,
+        45
       ],
       "aiType": 0,
       "ISREMOTE": false,
@@ -545,39 +545,39 @@
       "name": "ShieldMan",
       "spriteFrameName": "unit/MiniShieldMan_output/shieldman",
       "HP": [
-        300,
-        360,
-        432,
-        518,
-        622
+        500,
+        750,
+        1000,
+        1200,
+        10000
       ],
       "SPEED": [
-        50,
-        52,
-        54,
-        56,
-        60
+        20,
+        22,
+        24,
+        26,
+        28
       ],
       "DP": [
-        30,
-        36,
-        43,
-        52,
-        62
+        5,
+        5,
+        10,
+        10,
+        20
       ],
       "ATK": [
+        5,
+        5,
+        15,
         20,
-        24,
-        29,
-        35,
-        42
+        20
       ],
       "RANGE": [
-        28,
-        29,
+        25,
+        25,
         30,
-        32,
-        34
+        30,
+        35
       ],
       "aiType": 2,
       "ISREMOTE": false,
@@ -592,7 +592,7 @@
       "anim_walk_delay": 0.12,
       "anim_attack": "attack",
       "anim_attack_frames": 6,
-      "anim_attack_delay": 0.1,
+      "anim_attack_delay": 0.5,
       "anim_idle": "idle",
       "anim_idle_frames": 1,
       "anim_idle_delay": 0.15,
@@ -605,39 +605,39 @@
       "name": "SpearMan",
       "spriteFrameName": "unit/MiniSpearMan_output/spearman",
       "HP": [
-        120,
-        144,
-        173,
-        208,
-        250
+        12,
+        14,
+        17,
+        20,
+        25
       ],
       "SPEED": [
-        78,
-        81,
-        85,
-        89,
-        94
+        72,
+        74,
+        79,
+        82,
+        84
       ],
       "DP": [
-        6,
-        7,
-        9,
-        11,
-        13
+        5,
+        5,
+        10,
+        10,
+        15
       ],
       "ATK": [
-        30,
-        36,
-        43,
-        52,
-        62
+        100,
+        150,
+        200,
+        350,
+        1000
       ],
       "RANGE": [
-        44,
-        46,
-        49,
-        52,
-        56
+        110,
+        110,
+        130,
+        130,
+        160
       ],
       "aiType": 0,
       "ISREMOTE": false,
@@ -652,7 +652,7 @@
       "anim_walk_delay": 0.1,
       "anim_attack": "attack",
       "anim_attack_frames": 6,
-      "anim_attack_delay": 0.1,
+      "anim_attack_delay": 0.05,
       "anim_idle": "idle",
       "anim_idle_frames": 1,
       "anim_idle_delay": 0.15,

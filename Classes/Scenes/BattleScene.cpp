@@ -377,8 +377,10 @@ void BattleScene::createLevel1() {
     int towerLevel = resolveAttackTowerLevel(_levelId);
     createEnemyBase(26, 12, towerLevel);
 
+    // 教学关：宽松的箭塔与地刺引导
     createDefenseTower(16, 8, kTowerArrow, towerLevel);
     createDefenseTower(16, 18, kTowerArrow, towerLevel);
+    createDefenseTower(18, 12, kTowerBoom, towerLevel);
 
     for (int x = 10; x <= 14; ++x) {
         createSpikeTrap(x, 13);
@@ -394,9 +396,11 @@ void BattleScene::createLevel2() {
     int towerLevel = resolveAttackTowerLevel(_levelId);
     createEnemyBase(26, 12, towerLevel);
 
+    // 交叉火力走廊：箭塔与炮塔组合
     createDefenseTower(14, 6, kTowerArrow, towerLevel);
     createDefenseTower(14, 22, kTowerArrow, towerLevel);
     createDefenseTower(18, 14, kTowerBoom, towerLevel);
+    createDefenseTower(20, 12, kTowerMagic, towerLevel);
 
     for (int x = 8; x <= 18; ++x) {
         createSpikeTrap(x, 10);
@@ -414,18 +418,18 @@ void BattleScene::createLevel3() {
     int towerLevel = resolveAttackTowerLevel(_levelId);
     createEnemyBase(26, 12, towerLevel);
 
+    // 陷阱方阵：环形/棋盘陷阱并辅以双管炮
     createDefenseTower(12, 8, kTowerArrow, towerLevel);
     createDefenseTower(12, 20, kTowerArrow, towerLevel);
     createDefenseTower(18, 12, kTowerDoubleBoom, towerLevel);
     createDefenseTower(20, 20, kTowerMagic, towerLevel);
 
-    for (int x = 8; x <= 16; ++x) {
-        createSpikeTrap(x, 12);
-        createSpikeTrap(x, 18);
-    }
-    for (int y = 12; y <= 18; ++y) {
-        createSpikeTrap(8, y);
-        createSpikeTrap(16, y);
+    for (int x = 8; x <= 18; ++x) {
+        for (int y = 10; y <= 20; ++y) {
+            if ((x + y) % 2 == 0) {
+                createSpikeTrap(x, y);
+            }
+        }
     }
     createSnapTrap(10, 14);
     createSnapTrap(14, 16);
@@ -439,15 +443,14 @@ void BattleScene::createLevel4() {
     int towerLevel = resolveAttackTowerLevel(_levelId);
     createEnemyBase(26, 12, towerLevel);
 
+    // 断层火力：左右断层组合
     createDefenseTower(10, 14, kTowerArrow, towerLevel);
     createDefenseTower(16, 6, kTowerBoom, towerLevel);
     createDefenseTower(16, 20, kTowerBoom, towerLevel);
     createDefenseTower(20, 14, kTowerMagic, towerLevel);
 
     for (int x = 8; x <= 20; ++x) {
-        if (x == 14) {
-            continue;
-        }
+        if (x == 14) continue;
         createSpikeTrap(x, 10);
         createSpikeTrap(x, 18);
     }
@@ -463,6 +466,7 @@ void BattleScene::createLevel5() {
     int towerLevel = resolveAttackTowerLevel(_levelId);
     createEnemyBase(26, 12, towerLevel);
 
+    // 双管压制：中心炮线与两翼箭塔
     createDefenseTower(12, 6, kTowerArrow, towerLevel);
     createDefenseTower(12, 22, kTowerArrow, towerLevel);
     createDefenseTower(18, 8, kTowerDoubleBoom, towerLevel);
@@ -520,25 +524,18 @@ void BattleScene::createLevel7() {
     int towerLevel = resolveAttackTowerLevel(_levelId);
     createEnemyBase(26, 12, towerLevel);
 
-    createDefenseTower(6, 6, kTowerArrow, towerLevel);
-    createDefenseTower(6, 22, kTowerArrow, towerLevel);
-    createDefenseTower(12, 6, kTowerBoom, towerLevel);
-    createDefenseTower(12, 22, kTowerBoom, towerLevel);
-    createDefenseTower(18, 12, kTowerDoubleBoom, towerLevel);
-    createDefenseTower(20, 6, kTowerMagic, towerLevel);
-    createDefenseTower(20, 22, kTowerMagic, towerLevel);
-    createDefenseTower(22, 14, kTowerFire, towerLevel);
+    // 超多火焰塔阵列（火焰为主的关卡）
+    for (int y = 6; y <= 20; y += 2) {
+        createDefenseTower(12, y, kTowerFire, towerLevel);
+        createDefenseTower(14, y, kTowerFire, towerLevel);
+        createDefenseTower(16, y, kTowerFire, towerLevel);
+        createDefenseTower(18, y, kTowerFire, towerLevel);
+    }
 
-    for (int x = 6; x <= 24; ++x) {
-        createSpikeTrap(x, 10);
-        createSpikeTrap(x, 18);
-    }
-    for (int y = 11; y <= 17; ++y) {
-        createSpikeTrap(10, y);
-        createSpikeTrap(16, y);
-    }
-    createSnapTrap(14, 14);
-    createSnapTrap(18, 16);
+    // 少量其他类型作点缀
+    createDefenseTower(20, 12, kTowerBoom, towerLevel);
+    createSnapTrap(10, 12);
+    createSpikeTrap(8, 14);
 }
 
 // ===================================================
@@ -549,6 +546,7 @@ void BattleScene::createLevel8() {
     int towerLevel = resolveAttackTowerLevel(_levelId);
     createEnemyBase(26, 12, towerLevel);
 
+    // 交错火网：魔法与双管炮穿插
     createDefenseTower(8, 14, kTowerArrow, towerLevel);
     createDefenseTower(12, 6, kTowerMagic, towerLevel);
     createDefenseTower(12, 22, kTowerMagic, towerLevel);
@@ -557,18 +555,11 @@ void BattleScene::createLevel8() {
     createDefenseTower(22, 14, kTowerFire, towerLevel);
 
     for (int x = 8; x <= 20; ++x) {
-        if (x == 14) {
-            continue;
-        }
+        if (x == 14) continue;
         createSpikeTrap(x, 12);
     }
     for (int x = 10; x <= 18; ++x) {
-        if (x == 10) {
-            continue;
-        }
-        if (x == 14) {
-            continue;
-        }
+        if (x == 14) continue;
         createSpikeTrap(x, 16);
     }
     for (int y = 10; y <= 18; ++y) {
@@ -586,22 +577,18 @@ void BattleScene::createLevel9() {
     int towerLevel = resolveAttackTowerLevel(_levelId);
     createEnemyBase(26, 12, towerLevel);
 
-    createDefenseTower(18, 12, kTowerDoubleBoom, towerLevel);
-    createDefenseTower(22, 6, kTowerArrow, towerLevel);
-    createDefenseTower(22, 18, kTowerMagic, towerLevel);
+    // 超多地刺：大范围覆盖
+    for (int y = 6; y <= 22; ++y) {
+        for (int x = 6; x <= 20; ++x) {
+            // 密集但留出通路每5列一小间隙
+            if (x % 5 == 0) continue;
+            createSpikeTrap(x, y);
+        }
+    }
 
-    for (int y = 8; y <= 22; y += 2) {
-        for (int x = 6; x <= 16; ++x) {
-            createSpikeTrap(x, y);
-        }
-    }
-    for (int x = 8; x <= 16; x += 4) {
-        for (int y = 9; y <= 21; ++y) {
-            createSpikeTrap(x, y);
-        }
-    }
-    createSnapTrap(14, 12);
-    createSnapTrap(14, 18);
+    // 支撑性防御塔
+    createDefenseTower(22, 10, kTowerArrow, towerLevel);
+    createDefenseTower(22, 14, kTowerMagic, towerLevel);
 }
 
 // ===================================================
@@ -612,6 +599,7 @@ void BattleScene::createLevel10() {
     int towerLevel = resolveAttackTowerLevel(_levelId);
     createEnemyBase(26, 12, towerLevel);
 
+    // 双管炮密集阵：侧翼与中路重炮
     createDefenseTower(10, 6, kTowerDoubleBoom, towerLevel);
     createDefenseTower(10, 20, kTowerDoubleBoom, towerLevel);
     createDefenseTower(16, 6, kTowerDoubleBoom, towerLevel);
@@ -620,9 +608,7 @@ void BattleScene::createLevel10() {
     createDefenseTower(22, 12, kTowerFire, towerLevel);
 
     for (int x = 6; x <= 20; ++x) {
-        if (x == 14) {
-            continue;
-        }
+        if (x == 14) continue;
         createSpikeTrap(x, 10);
         createSpikeTrap(x, 18);
     }
@@ -641,6 +627,7 @@ void BattleScene::createLevel11() {
     int towerLevel = resolveAttackTowerLevel(_levelId);
     createEnemyBase(26, 12, towerLevel);
 
+    // 夺命连环箭：多列箭塔压制并穿插地刺
     createDefenseTower(8, 6, kTowerArrow, towerLevel);
     createDefenseTower(12, 6, kTowerArrow, towerLevel);
     createDefenseTower(16, 6, kTowerArrow, towerLevel);
@@ -665,23 +652,21 @@ void BattleScene::createLevel12() {
     int towerLevel = resolveAttackTowerLevel(_levelId);
     createEnemyBase(26, 12, towerLevel);
 
+    // 最后一关：先三列夹子（snap trap），然后每类防御塔各一列
+    // 三列夹子（x=6,8,10）覆盖纵向
     for (int y = 6; y <= 22; ++y) {
         createSnapTrap(6, y);
         createSnapTrap(8, y);
+        createSnapTrap(10, y);
     }
 
-    for (int y = 6; y <= 22; ++y) {
-        createSpikeTrap(10, y);
-        createSpikeTrap(12, y);
-        createSpikeTrap(14, y);
-        createSpikeTrap(16, y);
-    }
-
-    int towerRows[] = { 6, 14, 22 };
-    for (int row : towerRows) {
-        createDefenseTower(17, row, kTowerFire, towerLevel);
-        createDefenseTower(20, row, kTowerFire, towerLevel);
-        createDefenseTower(23, row, kTowerBoom, towerLevel);
+    // 每类防御塔各一列（arrow, boom, doubleboom, magic, fire）
+    for (int y = 6; y <= 22; y+=3) {
+        createDefenseTower(14, y, kTowerArrow, towerLevel);
+        createDefenseTower(16, y, kTowerBoom, towerLevel);
+        createDefenseTower(18, y, kTowerDoubleBoom, towerLevel);
+        createDefenseTower(20, y, kTowerMagic, towerLevel);
+        createDefenseTower(22, y, kTowerFire, towerLevel);
     }
 }
 
@@ -862,17 +847,21 @@ void BattleScene::createDefenseLevel4() {
 }
 
 void BattleScene::createDefenseLevel5() {
-    createDefenseBaseLayout(2);
+    // 倒数第二防守关卡：大量国王防守（60 个）
+    createDefenseBaseLayout(3);
     resetDefenseSpawns();
-    addDefenseWave(1010, 6, 0.5f, 0.6f);
-    addDefenseWave(1004, 5, 0.6f, 0.8f);
-    addDefenseWave(1002, 3, 0.75f, 1.0f);
-    addDefenseWave(1009, 3, 0.65f, 0.8f);
+    // 放置 60 个国王作为主要波次
+    addDefenseWave(1007, 60, 0.5f, 0.8f);
+    // 小量辅助小兵
+    addDefenseWave(1009, 6, 0.7f, 1.0f);
 }
 
 void BattleScene::createDefenseLevel6() {
     createDefenseBaseLayout(2);
     resetDefenseSpawns();
+    addDefenseWave(1001, 20, 0.55f, 0.6f);
+    addDefenseWave(1010, 20, 0.55f, 0.6f);
+    addDefenseWave(1011, 20, 0.55f, 0.6f);
     addDefenseWave(1007, 20, 0.55f, 0.6f);
     addDefenseWave(1009, 4, 0.7f, 0.8f);
     addDefenseWave(1002, 4, 0.75f, 0.9f);
