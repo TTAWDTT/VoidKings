@@ -35,10 +35,15 @@ public:
     void addTrainedUnit(int unitId, int count = 1);
     bool consumeTrainedUnit(int unitId, int count = 1);
     void resetTrainedUnits();
+    void setTrainedUnits(const std::map<int, int>& units);
 
     // 兵种等级管理
     int getUnitLevel(int unitId) const;
     void setUnitLevel(int unitId, int level);
+    const std::map<int, int>& getUnitLevels() const;
+    void setUnitLevels(const std::map<int, int>& levels);
+
+    void resetState();
 
 private:
     UnitManager() = default;

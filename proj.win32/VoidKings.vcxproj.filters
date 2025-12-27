@@ -102,6 +102,9 @@
     <ClCompile Include="..\Classes\Core\Core.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\Save\SaveManager.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\Classes\UI\TrainPanel.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -192,6 +195,9 @@
       <Filter>src\Utils</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\Core\Core.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Save\SaveManager.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\Classes\UI\TrainPanel.h">

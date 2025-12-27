@@ -213,6 +213,15 @@ void UnitManager::resetTrainedUnits() {
     _trainedUnits.clear();
 }
 
+void UnitManager::setTrainedUnits(const std::map<int, int>& units) {
+    _trainedUnits.clear();
+    for (const auto& pair : units) {
+        if (pair.first > 0 && pair.second > 0) {
+            _trainedUnits[pair.first] = pair.second;
+        }
+    }
+}
+
 int UnitManager::getUnitLevel(int unitId) const {
     auto it = _unitLevels.find(unitId);
     return it != _unitLevels.end() ? it->second : 0;
@@ -229,6 +238,26 @@ void UnitManager::setUnitLevel(int unitId, int level) {
         }
     }
     _unitLevels[unitId] = level;
+}
+
+const std::map<int, int>& UnitManager::getUnitLevels() const {
+    return _unitLevels;
+}
+
+void UnitManager::setUnitLevels(const std::map<int, int>& levels) {
+    _unitLevels.clear();
+    for (const auto& pair : levels) {
+        if (pair.first > 0) {
+            setUnitLevel(pair.first, pair.second);
+        }
+    }
+    initInventoryForUnits();
+}
+
+void UnitManager::resetState() {
+    _trainedUnits.clear();
+    _unitLevels.clear();
+    initInventoryForUnits();
 }
 
 void UnitManager::initInventoryForUnits() {

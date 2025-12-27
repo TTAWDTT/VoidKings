@@ -11,6 +11,7 @@
 #include "BattleScene.h"
 #include "BaseScene.h"
 #include "Core/Core.h"
+#include "Save/SaveManager.h"
 #include "Buildings/BuildingManager.h"
 #include "Buildings/DefenceBuilding.h"
 #include "Buildings/ProductionBuilding.h"
@@ -2464,6 +2465,7 @@ void BattleScene::createResultButtons(Node* parent, bool isWin) {
         applyStyle(exitBtn);
         exitBtn->addClickEventListener([this](Ref*) {
             AudioManager::playButtonCancel();
+            SaveManager::getInstance()->saveActiveSlot();
             auto scene = BaseScene::createScene();
             Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
         });
@@ -2476,6 +2478,7 @@ void BattleScene::createResultButtons(Node* parent, bool isWin) {
         applyStyle(retryBtn);
         retryBtn->addClickEventListener([this](Ref*) {
             AudioManager::playButtonClick();
+            SaveManager::getInstance()->saveActiveSlot();
             bool defenseMode = (_battleMode == BattleMode::Defense);
             int retryLevel = defenseMode ? getRecordLevelId() : _levelId;
             auto scene = BattleScene::createScene(retryLevel, _deployableUnits, _allowDefaultUnits, defenseMode);
@@ -2499,6 +2502,7 @@ void BattleScene::createResultButtons(Node* parent, bool isWin) {
         }
         nextBtn->addClickEventListener([this](Ref*) {
             AudioManager::playButtonClick();
+            SaveManager::getInstance()->saveActiveSlot();
             bool defenseMode = (_battleMode == BattleMode::Defense);
             int currentLevelId = defenseMode ? getRecordLevelId() : _levelId;
             int maxLevelId = defenseMode ? (kDefenseLevelOffset + kDefenseMaxLevelId) : kMaxLevelId;
@@ -2522,6 +2526,7 @@ void BattleScene::createResultButtons(Node* parent, bool isWin) {
 void BattleScene::onExitButton(Ref* sender) {
     CCLOG("[战斗场景] 退出战斗");
 
+    SaveManager::getInstance()->saveActiveSlot();
     auto scene = BaseScene::createScene();
     Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
 }

@@ -18,6 +18,7 @@
 #include "Buildings/Trap.h"
 #include "UI/TrainPanel.h"
 #include "Core/Core.h"
+#include "Save/SaveManager.h"
 #include "Soldier/UnitManager.h"
 #include "Utils/AudioManager.h"
 #include "Utils/NodeUtils.h"
@@ -196,6 +197,23 @@ int BaseScene::getBarracksLevel() {
     return s_barracksLevel;
 }
 
+void BaseScene::applySavedState(const std::vector<BaseSavedBuilding>& buildings,
+                                const Vec2& baseAnchor,
+                                const Vec2& barracksAnchor,
+                                int barracksLevel) {
+    s_savedBuildings = buildings;
+    s_baseAnchor = baseAnchor;
+    s_barracksAnchor = barracksAnchor;
+    s_barracksLevel = barracksLevel;
+}
+
+void BaseScene::resetSavedState() {
+    s_savedBuildings.clear();
+    s_baseAnchor = Vec2(static_cast<float>(kBaseAnchorX), static_cast<float>(kBaseAnchorY));
+    s_barracksAnchor = Vec2(static_cast<float>(kBarracksAnchorX), static_cast<float>(kBarracksAnchorY));
+    s_barracksLevel = 0;
+}
+
 // ==================== 网格地图初始化 ====================
 
 void BaseScene::initGridMap() {
@@ -360,8 +378,8 @@ void BaseScene::initBaseBuilding() {
     int baseWidth = baseConfig ? baseConfig->width : 4;
     int baseHeight = baseConfig ? baseConfig->length : 4;
 
-    const int baseGridX = kBaseAnchorX;
-    const int baseGridY = kBaseAnchorY;
+    const int baseGridX = static_cast<int>(std::round(s_baseAnchor.x));
+    const int baseGridY = static_cast<int>(std::round(s_baseAnchor.y));
     int baseLevel = Core::getInstance()->getBaseLevel() - 1;
     if (baseLevel < 0) {
         baseLevel = 0;
@@ -389,8 +407,8 @@ void BaseScene::initBaseBuilding() {
     int barracksWidth = barracksConfig ? barracksConfig->width : 5;
     int barracksHeight = barracksConfig ? barracksConfig->length : 5;
 
-    const int barracksGridX = kBarracksAnchorX;
-    const int barracksGridY = kBarracksAnchorY;
+    const int barracksGridX = static_cast<int>(std::round(s_barracksAnchor.x));
+    const int barracksGridY = static_cast<int>(std::round(s_barracksAnchor.y));
     int barracksLevel = s_barracksLevel;
     if (barracksLevel < 0) {
         barracksLevel = 0;
@@ -695,6 +713,8 @@ void BaseScene::onAttackClicked() {
         trainedUnits = _trainPanel->getTrainedUnits();
     }
 
+    SaveManager::getInstance()->saveActiveSlot();
+
     // 跳转到关卡选择场景
     auto scene = LevelSelectScene::createScene(trainedUnits);
     Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
@@ -710,6 +730,7 @@ void BaseScene::onBuildClicked() {
 }
 
 void BaseScene::onExitClicked() {
+    SaveManager::getInstance()->saveActiveSlot();
     auto scene = MainMenuScene::createScene();
     Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
 }

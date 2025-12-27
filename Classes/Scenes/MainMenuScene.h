@@ -48,6 +48,7 @@ protected:
 	void createMainMenuLayer();
 	void createSettingsLayer();
 	void createRuleLayer();
+	void createSaveLayer();
 	void switchToLayer(Node* targetLayer);
 	void animateMenuButtons();
 	void animatePanel(Node* panel);
@@ -55,17 +56,31 @@ protected:
 		const std::string& title,
 		const std::string& iconPath,
 		const Widget::ccWidgetTouchCallback& callback);
+	Button* createTextButton(
+		const std::string& title,
+		float width,
+		float height,
+		const Widget::ccWidgetTouchCallback& callback);
+	void showSaveLayer();
+	void refreshSaveSlots();
+	void onSaveSlotSelected(int slot);
+	void onSaveSlotDelete(int slot);
 private:
 	Node* mainMenuLayer = nullptr;
 	Node* settingsLayer = nullptr;
 	Node* ruleLayer = nullptr;
+	Node* saveLayer = nullptr;
 	LayerColor* modalOverlay = nullptr;
 	Node* settingsPanel = nullptr;
 	Node* rulePanel = nullptr;
+	Node* savePanel = nullptr;
 	Label* headLogo = nullptr;
 	std::vector<Button*> menuButtons;
 	Vector<Sprite*> backgroundList;
 	int currentBgIndex = 0;
+	std::vector<Label*> saveSlotLabels;
+	std::vector<Button*> saveSlotLoadButtons;
+	std::vector<Button*> saveSlotDeleteButtons;
 };
 
 #endif // __MAIN_MENU_SCENE_H__

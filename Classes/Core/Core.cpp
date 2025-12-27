@@ -189,6 +189,19 @@ long long Core::getTotalEarned(ResourceType type) const
     return 0;
 }
 
+void Core::setTotalEarned(ResourceType type, long long amount)
+{
+    if (amount < 0) {
+        amount = 0;
+    }
+    if (type == ResourceType::COIN) {
+        _totalEarnedGold = amount;
+    }
+    else if (type == ResourceType::DIAMOND) {
+        _totalEarnedDiamond = amount;
+    }
+}
+
 int Core::getBaseLevel() const
 {
     return _baseLevel;
@@ -228,6 +241,18 @@ bool Core::upgradeBase()
     }
     _baseLevel += 1;
     return true;
+}
+
+void Core::setBaseLevel(int level)
+{
+    if (level < 1) {
+        level = 1;
+    }
+    int maxLevel = getBaseMaxLevel();
+    if (level > maxLevel) {
+        level = maxLevel;
+    }
+    _baseLevel = level;
 }
 
 float Core::getBaseProduceSpeedMultiplier() const
@@ -283,4 +308,34 @@ void Core::setLevelStars(int levelId, int stars)
 bool Core::isLevelCompleted(int levelId) const
 {
     return getLevelStars(levelId) > 0;
+}
+
+void Core::clearLevelStars()
+{
+    _levelStars.clear();
+}
+
+std::vector<std::pair<int, int>> Core::getLevelStarsData() const
+{
+    std::vector<std::pair<int, int>> data;
+    data.reserve(_levelStars.size());
+    for (const auto& pair : _levelStars) {
+        data.emplace_back(pair.first, pair.second);
+    }
+    return data;
+}
+
+void Core::setLevelStarsData(const std::vector<std::pair<int, int>>& data)
+{
+    _levelStars.clear();
+    for (const auto& pair : data) {
+        if (pair.first > 0) {
+            _levelStars[pair.first] = std::max(0, std::min(pair.second, 3));
+        }
+    }
+}
+
+void Core::resetState()
+{
+    init();
 }

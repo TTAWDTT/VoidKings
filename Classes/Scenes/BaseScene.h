@@ -78,6 +78,11 @@ public:
     static Vec2 getBaseAnchorGrid();
     static Vec2 getBarracksAnchorGrid();
     static int getBarracksLevel();
+    static void applySavedState(const std::vector<BaseSavedBuilding>& buildings,
+                                const Vec2& baseAnchor,
+                                const Vec2& barracksAnchor,
+                                int barracksLevel);
+    static void resetSavedState();
     static Node* createBuildingFromOptionForDefense(const BuildingOption& option, int level = 0);
 
 private:

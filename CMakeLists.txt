@@ -50,6 +50,7 @@ list(APPEND GAME_SOURCE
      Classes/AppDelegate.cpp
      Classes/HelloWorldScene.cpp
      Classes/Core/Core.cpp
+     Classes/Save/SaveManager.cpp
      Classes/Scenes/MainMenuScene.cpp
      Classes/Scenes/BaseScene.cpp
      Classes/Scenes/LevelSelectScene.cpp
@@ -75,6 +76,7 @@ list(APPEND GAME_HEADER
      Classes/AppDelegate.h
      Classes/HelloWorldScene.h
      Classes/Core/Core.h
+     Classes/Save/SaveManager.h
      Classes/Scenes/MainMenuScene.h
      Classes/Scenes/BaseScene.h
      Classes/Scenes/LevelSelectScene.h

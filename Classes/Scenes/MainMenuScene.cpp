@@ -25,7 +25,9 @@
 
 #include "MainMenuScene.h"
 #include "BaseScene.h"
+#include "Save/SaveManager.h"
 #include "Utils/AudioManager.h"
+#include <algorithm>
 
 Scene* MainMenuScene::createScene()
 {
@@ -43,16 +45,21 @@ bool MainMenuScene::init()
 	createHeadLogo();
 	createOtherThings();
 	createModalOverlay();
+    SaveManager::getInstance();
 	
 	// 创建各个界面层
 	createMainMenuLayer();
 	createSettingsLayer();
 	createRuleLayer();
+    createSaveLayer();
 
 	// 初始显示主菜单
 	mainMenuLayer->setVisible(true);
 	settingsLayer->setVisible(false);
 	ruleLayer->setVisible(false);
+    if (saveLayer) {
+        saveLayer->setVisible(false);
+    }
 	animateMenuButtons();
 	AudioManager::playMainBgm();
 
@@ -289,6 +296,28 @@ Button* MainMenuScene::createIconButton(
     return button;
 }
 
+Button* MainMenuScene::createTextButton(
+    const std::string& title,
+    float width,
+    float height,
+    const Widget::ccWidgetTouchCallback& callback)
+{
+    auto button = Button::create("btn_normal.png", "btn_pressed.png");
+    if (!button) {
+        return nullptr;
+    }
+    button->setScale9Enabled(true);
+    button->setContentSize(Size(width, height));
+    button->setTitleFontName("fonts/ScienceGothic.ttf");
+    button->setTitleFontSize(20);
+    button->setTitleText(title);
+    button->setPressedActionEnabled(true);
+    button->setZoomScale(0.05f);
+    button->setSwallowTouches(true);
+    button->addTouchEventListener(callback);
+    return button;
+}
+
 void MainMenuScene::createMainMenuLayer() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
@@ -346,8 +375,7 @@ void MainMenuScene::createMainMenuLayer() {
 }
 
 void MainMenuScene::onStart(Ref* sender) {
-    auto scene = BaseScene::createScene();
-    Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene, Color3B::BLACK));
+    showSaveLayer();
 }
 
 void MainMenuScene::switchToLayer(Node* targetLayer)
@@ -355,6 +383,9 @@ void MainMenuScene::switchToLayer(Node* targetLayer)
     mainMenuLayer->setVisible(targetLayer == mainMenuLayer);
     settingsLayer->setVisible(targetLayer == settingsLayer);
     ruleLayer->setVisible(targetLayer == ruleLayer);
+    if (saveLayer) {
+        saveLayer->setVisible(targetLayer == saveLayer);
+    }
 
     const bool showModal = targetLayer != mainMenuLayer;
     if (modalOverlay) {
@@ -381,6 +412,9 @@ void MainMenuScene::switchToLayer(Node* targetLayer)
     }
     else if (targetLayer == ruleLayer) {
         animatePanel(rulePanel);
+    }
+    else if (targetLayer == saveLayer) {
+        animatePanel(savePanel);
     }
 }
 
@@ -512,6 +546,160 @@ void MainMenuScene::createRuleLayer()
 
     returnBtn->setPosition(Vec2(0, -panelHeight / 2 + 60)); // 放在底部区域
     panel->addChild(returnBtn, 2);
+}
+
+void MainMenuScene::createSaveLayer()
+{
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+
+    saveLayer = Node::create();
+    this->addChild(saveLayer, 20);
+
+    auto dimBg = LayerColor::create(Color4B(0, 0, 0, 80),
+        visibleSize.width,
+        visibleSize.height);
+    dimBg->setPosition(origin);
+    saveLayer->addChild(dimBg, 0);
+
+    float panelWidth = visibleSize.width * 0.7f;
+    float panelHeight = visibleSize.height * 0.75f;
+
+    auto panel = DrawNode::create();
+    Color4F panelColor(0.0f, 0.0f, 0.0f, 0.45f);
+    panel->drawSolidRect(Vec2(-panelWidth / 2, -panelHeight / 2),
+        Vec2(panelWidth / 2, panelHeight / 2),
+        panelColor);
+    panel->setPosition(Vec2(visibleSize.width / 2,
+        visibleSize.height / 2 - 20));
+    saveLayer->addChild(panel, 1);
+    savePanel = panel;
+
+    auto title = Label::createWithTTF("Save Slots", "fonts/ScienceGothic.ttf", 32);
+    if (!title) {
+        title = Label::createWithSystemFont("Save Slots", "Arial", 32);
+    }
+    title->setPosition(Vec2(0, panelHeight / 2 - 20));
+    panel->addChild(title, 2);
+
+    saveSlotLabels.clear();
+    saveSlotLoadButtons.clear();
+    saveSlotDeleteButtons.clear();
+
+    float rowStartY = panelHeight / 2 - 80.0f;
+    float rowSpacing = 60.0f;
+    float labelX = -panelWidth / 2 + 30.0f;
+    float loadX = panelWidth / 2 - 220.0f;
+    float deleteX = panelWidth / 2 - 90.0f;
+    float btnWidth = 100.0f;
+    float btnHeight = 36.0f;
+
+    for (int i = 0; i < 6; ++i) {
+        int slot = i + 1;
+        float y = rowStartY - i * rowSpacing;
+
+        std::string labelText = StringUtils::format("Slot %d: Empty", slot);
+        auto label = Label::createWithTTF(labelText, "fonts/ScienceGothic.ttf", 18);
+        if (!label) {
+            label = Label::createWithSystemFont(labelText, "Arial", 18);
+        }
+        label->setAnchorPoint(Vec2(0, 0.5f));
+        label->setPosition(Vec2(labelX, y));
+        panel->addChild(label, 2);
+        saveSlotLabels.push_back(label);
+
+        auto loadBtn = createTextButton("Load", btnWidth, btnHeight,
+            [this, slot](Ref* sender, Widget::TouchEventType type) {
+                if (type == Widget::TouchEventType::ENDED) {
+                    AudioManager::playButtonClick();
+                    onSaveSlotSelected(slot);
+                }
+            });
+        if (loadBtn) {
+            loadBtn->setPosition(Vec2(loadX, y));
+            panel->addChild(loadBtn, 2);
+        }
+        saveSlotLoadButtons.push_back(loadBtn);
+
+        auto deleteBtn = createTextButton("Delete", btnWidth, btnHeight,
+            [this, slot](Ref* sender, Widget::TouchEventType type) {
+                if (type == Widget::TouchEventType::ENDED) {
+                    AudioManager::playButtonCancel();
+                    onSaveSlotDelete(slot);
+                }
+            });
+        if (deleteBtn) {
+            deleteBtn->setPosition(Vec2(deleteX, y));
+            panel->addChild(deleteBtn, 2);
+        }
+        saveSlotDeleteButtons.push_back(deleteBtn);
+    }
+
+    auto returnBtn = createIconButton(
+        "Return",
+        "exit.png",
+        CC_CALLBACK_2(MainMenuScene::onReturnTouch, this)
+    );
+    if (returnBtn) {
+        returnBtn->setPosition(Vec2(0, -panelHeight / 2 + 60));
+        panel->addChild(returnBtn, 2);
+    }
+
+    refreshSaveSlots();
+}
+
+void MainMenuScene::showSaveLayer()
+{
+    if (!saveLayer) {
+        return;
+    }
+    refreshSaveSlots();
+    switchToLayer(saveLayer);
+}
+
+void MainMenuScene::refreshSaveSlots()
+{
+    auto slots = SaveManager::getInstance()->listSlots();
+    size_t count = std::min(slots.size(), saveSlotLabels.size());
+    for (size_t i = 0; i < count; ++i) {
+        const auto& info = slots[i];
+        auto* label = saveSlotLabels[i];
+        if (label) {
+            std::string text = StringUtils::format("Slot %d: %s", info.slot, info.summary.c_str());
+            label->setString(text);
+        }
+
+        auto* loadBtn = (i < saveSlotLoadButtons.size()) ? saveSlotLoadButtons[i] : nullptr;
+        if (loadBtn) {
+            loadBtn->setTitleText(info.exists ? "Load" : "New");
+            loadBtn->setEnabled(true);
+            loadBtn->setBright(true);
+            loadBtn->setOpacity(255);
+        }
+
+        auto* deleteBtn = (i < saveSlotDeleteButtons.size()) ? saveSlotDeleteButtons[i] : nullptr;
+        if (deleteBtn) {
+            deleteBtn->setEnabled(info.exists);
+            deleteBtn->setBright(info.exists);
+            deleteBtn->setOpacity(info.exists ? 255 : 150);
+        }
+    }
+}
+
+void MainMenuScene::onSaveSlotSelected(int slot)
+{
+    auto* saveManager = SaveManager::getInstance();
+    saveManager->setActiveSlot(slot);
+    saveManager->loadSlot(slot);
+
+    auto scene = BaseScene::createScene();
+    Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene, Color3B::BLACK));
+}
+
+void MainMenuScene::onSaveSlotDelete(int slot)
+{
+    SaveManager::getInstance()->deleteSlot(slot);
+    refreshSaveSlots();
 }
 
 void MainMenuScene::onReturnTouch(Ref* sender, ui::Widget::TouchEventType type)

@@ -4,6 +4,7 @@
 
 #include "cocos2d.h"
 #include <unordered_map>
+#include <vector>
 
 enum class ResourceType {
     COIN,
@@ -25,12 +26,14 @@ public:
 
     // 资源历史累计
     long long getTotalEarned(ResourceType type) const;
+    void setTotalEarned(ResourceType type, long long amount);
 
     // 基地等级（钻石升级）
     int getBaseLevel() const;
     int getBaseMaxLevel() const;
     int getBaseUpgradeCost() const;
     bool upgradeBase();
+    void setBaseLevel(int level);
     float getBaseProduceSpeedMultiplier() const;
     float getTrainingCostMultiplier() const;
 
@@ -38,6 +41,11 @@ public:
     int getLevelStars(int levelId) const;
     void setLevelStars(int levelId, int stars);
     bool isLevelCompleted(int levelId) const;
+    void clearLevelStars();
+    std::vector<std::pair<int, int>> getLevelStarsData() const;
+    void setLevelStarsData(const std::vector<std::pair<int, int>>& data);
+
+    void resetState();
 
 protected:
     Core();
