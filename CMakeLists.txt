@@ -53,6 +53,7 @@ list(APPEND GAME_SOURCE
      Classes/Save/SaveManager.cpp
      Classes/Scenes/MainMenuScene.cpp
      Classes/Scenes/BaseScene.cpp
+     Classes/Scenes/BattleScene.cpp
      Classes/Scenes/LevelSelectScene.cpp
      Classes/Scenes/Components/BuildShopPanel.cpp
      Classes/Scenes/Components/PlacementManager.cpp
@@ -69,6 +70,7 @@ list(APPEND GAME_SOURCE
      Classes/Map/GridMap.cpp
      Classes/UI/IDCardPanel.cpp
      Classes/UI/TrainPanel.cpp
+     Classes/Utils/AudioManager.cpp
      Classes/Utils/AnimationUtils.cpp
      Classes/Utils/EffectUtils.cpp
      )
@@ -79,6 +81,7 @@ list(APPEND GAME_HEADER
      Classes/Save/SaveManager.h
      Classes/Scenes/MainMenuScene.h
      Classes/Scenes/BaseScene.h
+     Classes/Scenes/BattleScene.h
      Classes/Scenes/LevelSelectScene.h
      Classes/Scenes/Components/BuildShopPanel.h
      Classes/Scenes/Components/PlacementManager.h
@@ -99,14 +102,14 @@ list(APPEND GAME_HEADER
      Classes/Map/GridMap.h
      Classes/UI/IDCardPanel.h
      Classes/UI/TrainPanel.h
+     Classes/Utils/AudioManager.h
      Classes/Utils/AnimationUtils.h
      Classes/Utils/NodeUtils.h
      Classes/Utils/EffectUtils.h
      )
 
 if(ANDROID)
-    # change APP_NAME to the share library name for Android, it's value depend on AndroidManifest.xml
-    set(APP_NAME MyGame)
+    # keep APP_NAME aligned with AndroidManifest meta-data
     list(APPEND GAME_SOURCE
          proj.android/app/jni/hellocpp/main.cpp
          )
@@ -173,7 +176,7 @@ if (OHOS)
     add_library(${APP_NAME} STATIC ${all_code_files})
     target_include_directories(${APP_NAME} PUBLIC ${COCOS2DX_ROOT_PATH}/cocos/platform/ohos)
 elseif(NOT ANDROID)
-    add_executable(${APP_NAME} ${all_code_files} "Classes/Scenes/BattleScene.h" "Classes/Scenes/BattleScene.cpp")
+    add_executable(${APP_NAME} ${all_code_files})
 else()
     add_library(${APP_NAME} SHARED ${all_code_files})
     add_subdirectory(${COCOS2DX_ROOT_PATH}/cocos/platform/android ${ENGINE_BINARY_PATH}/cocos/platform)

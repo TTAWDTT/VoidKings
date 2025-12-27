@@ -1,4 +1,4 @@
-﻿import org.gradle.internal.os.OperatingSystem
+import org.gradle.internal.os.OperatingSystem
 
 apply plugin: 'com.android.application'
 
@@ -6,7 +6,7 @@ android {
     compileSdkVersion PROP_COMPILE_SDK_VERSION.toInteger()
 
     defaultConfig {
-        applicationId "com.VoidKings.game"
+        applicationId "com.voidkings.game"
         minSdkVersion PROP_MIN_SDK_VERSION
         targetSdkVersion PROP_TARGET_SDK_VERSION
         versionCode 1
@@ -15,7 +15,7 @@ android {
         externalNativeBuild {
             if (PROP_BUILD_TYPE == 'ndk-build') {
                 ndkBuild {
-                    targets 'MyGame'
+                    targets 'VoidKings'
                     arguments 'NDK_TOOLCHAIN_VERSION=clang'
                     arguments '-j' + Runtime.runtime.availableProcessors()
 
@@ -33,7 +33,7 @@ android {
             }
             else if (PROP_BUILD_TYPE == 'cmake') {
                 cmake {
-                    targets 'MyGame'
+                    targets 'VoidKings'
                     arguments "-DCMAKE_FIND_ROOT_PATH=", "-DANDROID_STL=c++_static", "-DANDROID_TOOLCHAIN=clang", "-DANDROID_ARM_NEON=TRUE"
                     cppFlags "-frtti -fexceptions -fsigned-char"
                 }

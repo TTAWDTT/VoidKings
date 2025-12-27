@@ -1,4 +1,44 @@
-﻿include ':libcocos2dx'
+def localProps = new File(settingsDir, "local.properties")
+if (!localProps.exists()) {
+    def candidates = []
+    def envSdk = System.getenv("ANDROID_SDK_ROOT")
+    if (envSdk == null || envSdk.isEmpty()) {
+        envSdk = System.getenv("ANDROID_HOME")
+    }
+    if (envSdk != null && !envSdk.isEmpty()) {
+        candidates << envSdk
+    }
+    def localAppData = System.getenv("LOCALAPPDATA")
+    if (localAppData != null && !localAppData.isEmpty()) {
+        candidates << "${localAppData}\\Android\\Sdk"
+    }
+    candidates << "C:\\Android\\Sdk"
+    candidates << "C:\\Android\\android-sdk"
+    candidates << "D:\\Android\\Sdk"
+    candidates << "D:\\Android\\android-sdk"
+    candidates << "D:\\Sdk\\Android\\Sdk"
+
+    def sdkPath = candidates.find { new File(it).exists() }
+    if (sdkPath != null) {
+        def content = "sdk.dir=" + sdkPath.replace("\\", "\\\\") + "\n"
+        def ndkBundle = new File(sdkPath, "ndk-bundle")
+        if (ndkBundle.exists()) {
+            content += "ndk.dir=" + ndkBundle.absolutePath.replace("\\", "\\\\") + "\n"
+        } else {
+            def ndkRoot = new File(sdkPath, "ndk")
+            if (ndkRoot.exists()) {
+                def versions = ndkRoot.listFiles().findAll { it.isDirectory() }.sort { a, b -> a.name <=> b.name }
+                if (!versions.isEmpty()) {
+                    def ndkPath = versions.last().absolutePath
+                    content += "ndk.dir=" + ndkPath.replace("\\", "\\\\") + "\n"
+                }
+            }
+        }
+        localProps.text = content
+    }
+}
+
+include ':libcocos2dx'
 project(':libcocos2dx').projectDir = new File(settingsDir, '../cocos2d/cocos/platform/android/libcocos2dx')
 include ':VoidKings'
 project(':VoidKings').projectDir = new File(settingsDir, 'app')
