@@ -27,7 +27,51 @@
 #include "BaseScene.h"
 #include "Save/SaveManager.h"
 #include "Utils/AudioManager.h"
+#include "Utils/GameSettings.h"
 #include <algorithm>
+#include <cmath>
+#include <functional>
+#include <memory>
+
+namespace {
+const char* kMenuFont = "fonts/ScienceGothic.ttf";
+const char* kFallbackFont = "Arial";
+
+const char* getCjkFontName() {
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
+    return "Microsoft YaHei";
+#elif (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+    return "DroidSansFallback";
+#elif (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
+    return "PingFang SC";
+#else
+    return "Arial";
+#endif
+}
+
+bool hasNonAscii(const std::string& text) {
+    for (unsigned char ch : text) {
+        if (ch >= 0x80) {
+            return true;
+        }
+    }
+    return false;
+}
+
+Label* createMenuLabel(const std::string& text, float fontSize) {
+    if (hasNonAscii(text)) {
+        auto label = Label::createWithSystemFont(text, getCjkFontName(), fontSize);
+        if (label) {
+            return label;
+        }
+    }
+    auto label = Label::createWithTTF(text, kMenuFont, fontSize);
+    if (!label) {
+        label = Label::createWithSystemFont(text, kFallbackFont, fontSize);
+    }
+    return label;
+}
+} // namespace
 
 Scene* MainMenuScene::createScene()
 {
@@ -40,6 +84,8 @@ bool MainMenuScene::init()
 	{
 		return false;
 	}
+    GameSettings::applyShowFps();
+    GameSettings::applyBattleSpeed(false);
 	// 创建各个UI组件
 	createBackground();
 	createHeadLogo();
@@ -435,7 +481,7 @@ void MainMenuScene::createSettingsLayer()
 
 	// 面板背景
     float panelWidth = visibleSize.width * 0.6f;   // 面板宽度
-    float panelHeight = visibleSize.height * 0.7f; // 面板高度
+    float panelHeight = visibleSize.height * 0.78f; // 面板高度
 
     auto panel = DrawNode::create();
     Color4F panelColor(0.0f, 0.0f, 0.0f, 0.45f);  // 半透明黑
@@ -450,27 +496,137 @@ void MainMenuScene::createSettingsLayer()
     settingsPanel = panel;
 
     //标题
-    auto label = Label::createWithTTF("Settings", "fonts/ScienceGothic.ttf", 32);
-    label->setPosition(Vec2(0, panelHeight / 2 - 20));  // 相对 panel 的位置
-    panel->addChild(label, 2);
-
-    // 设置说明内容
-    std::string settingsText =
-        "Audio: On\n"
-        "Music Volume: 55%\n"
-        "SFX Volume: 90%\n"
-        "Language: English\n"
-        "Difficulty: Normal\n"
-        "Tips: Enabled";
-    auto settingsLabel = Label::createWithTTF(settingsText, "fonts/ScienceGothic.ttf", 20);
-    if (!settingsLabel) {
-        settingsLabel = Label::createWithSystemFont(settingsText, "Arial", 20);
+    auto label = createMenuLabel("Settings", 32);
+    if (label) {
+        label->setPosition(Vec2(0, panelHeight / 2 - 20));  // 相对 panel 的位置
+        panel->addChild(label, 2);
     }
-    settingsLabel->setAnchorPoint(Vec2(0.5f, 1.0f));
-    settingsLabel->setAlignment(TextHAlignment::LEFT);
-    settingsLabel->setPosition(Vec2(0, panelHeight / 2 - 80));
-    settingsLabel->setLineSpacing(8.0f);
-    panel->addChild(settingsLabel, 2);
+
+    float contentLeft = -panelWidth / 2 + 40.0f;
+    float contentRight = panelWidth / 2 - 40.0f;
+    float cursorY = panelHeight / 2 - 80.0f;
+    auto addLine = [&](const std::string& text, float fontSize, const Color3B& color, float gap) {
+        auto line = createMenuLabel(text, fontSize);
+        if (!line) {
+            return;
+        }
+        line->setAnchorPoint(Vec2(0.0f, 1.0f));
+        line->setAlignment(TextHAlignment::LEFT);
+        line->setColor(color);
+        line->setPosition(Vec2(contentLeft, cursorY));
+        panel->addChild(line, 2);
+        cursorY -= (fontSize + gap);
+    };
+
+    auto addToggle = [&](const std::string& title,
+                         bool enabled,
+                         const std::function<void(bool)>& onToggle) {
+        const Color3B bodyColor(230, 230, 230);
+
+        auto titleLabel = createMenuLabel(title, 18);
+        if (!titleLabel) {
+            return;
+        }
+        titleLabel->setAnchorPoint(Vec2(0.0f, 0.5f));
+        titleLabel->setColor(bodyColor);
+        titleLabel->setPosition(Vec2(contentLeft, cursorY));
+        panel->addChild(titleLabel, 2);
+
+        auto state = std::make_shared<bool>(enabled);
+        auto toggleBtn = createTextButton(*state ? "On" : "Off", 80.0f, 30.0f,
+            [state, onToggle](Ref* sender, Widget::TouchEventType type) {
+                if (type != Widget::TouchEventType::ENDED) {
+                    return;
+                }
+                *state = !*state;
+                auto* button = dynamic_cast<Button*>(sender);
+                if (button) {
+                    button->setTitleText(*state ? "On" : "Off");
+                }
+                onToggle(*state);
+            });
+        if (toggleBtn) {
+            toggleBtn->setPosition(Vec2(contentRight - 40.0f, cursorY));
+            panel->addChild(toggleBtn, 2);
+        }
+
+        cursorY -= 34.0f;
+    };
+
+    auto addSpeedSelector = [&](float current) {
+        const Color3B bodyColor(230, 230, 230);
+        const Color3B activeColor(255, 220, 90);
+
+        auto titleLabel = createMenuLabel("Battle Speed", 18);
+        if (!titleLabel) {
+            return;
+        }
+        titleLabel->setAnchorPoint(Vec2(0.0f, 0.5f));
+        titleLabel->setColor(bodyColor);
+        titleLabel->setPosition(Vec2(contentLeft, cursorY));
+        panel->addChild(titleLabel, 2);
+
+        std::vector<float> speeds = { 0.5f, 1.0f, 2.0f };
+        auto buttons = std::make_shared<std::vector<Button*>>();
+        float btnWidth = 70.0f;
+        float btnHeight = 30.0f;
+        float spacing = 10.0f;
+        float totalWidth = btnWidth * speeds.size() + spacing * (speeds.size() - 1);
+        float centerX = (contentLeft + contentRight) * 0.5f;
+        float startX = centerX - totalWidth * 0.5f + btnWidth * 0.5f;
+        float buttonY = cursorY - 24.0f;
+
+        auto updateButtons = [buttons, speeds, activeColor](float selected) {
+            for (size_t i = 0; i < buttons->size(); ++i) {
+                auto* button = (*buttons)[i];
+                if (!button) {
+                    continue;
+                }
+                bool isActive = std::fabs(speeds[i] - selected) < 0.01f;
+                button->setTitleColor(isActive ? activeColor : Color3B::WHITE);
+                button->setOpacity(isActive ? 255 : 200);
+            }
+        };
+
+        for (size_t i = 0; i < speeds.size(); ++i) {
+            float speed = speeds[i];
+            auto button = createTextButton(StringUtils::format("%.1fx", speed), btnWidth, btnHeight,
+                [speed, updateButtons](Ref*, Widget::TouchEventType type) mutable {
+                    if (type != Widget::TouchEventType::ENDED) {
+                        return;
+                    }
+                    GameSettings::setBattleSpeed(speed);
+                    updateButtons(speed);
+                });
+            if (button) {
+                button->setPosition(Vec2(startX + i * (btnWidth + spacing), buttonY));
+                panel->addChild(button, 2);
+            }
+            buttons->push_back(button);
+        }
+
+        updateButtons(current);
+        cursorY -= 58.0f;
+    };
+
+    const Color3B headerColor(255, 220, 90);
+
+    addLine("[Audio]", 22, headerColor, 10.0f);
+    addToggle("Music", !AudioManager::isBgmMuted(),
+        [](bool enabled) { AudioManager::setBgmMuted(!enabled); });
+    addToggle("SFX", !AudioManager::isSfxMuted(),
+        [](bool enabled) { AudioManager::setSfxMuted(!enabled); });
+    cursorY -= 4.0f;
+
+    addLine("[Display]", 22, headerColor, 10.0f);
+    addToggle("FPS Counter", GameSettings::getShowFps(),
+        [](bool enabled) { GameSettings::setShowFps(enabled); });
+    addToggle("Show Grid", GameSettings::getShowGrid(),
+        [](bool enabled) { GameSettings::setShowGrid(enabled); });
+    cursorY -= 4.0f;
+
+    addLine("[Battle]", 22, headerColor, 10.0f);
+    addSpeedSelector(GameSettings::getBattleSpeed());
 
     //Return 按钮
     auto returnBtn = createIconButton(
@@ -516,26 +672,49 @@ void MainMenuScene::createRuleLayer()
     rulePanel = panel;
 
     //标题
-    auto label = Label::createWithTTF("Rules", "fonts/ScienceGothic.ttf", 32);
-    label->setPosition(Vec2(0, panelHeight / 2 - 20));  // 相对 panel 的位置
-    panel->addChild(label, 2);
-
-    // 规则说明内容
-    std::string rulesText =
-        "1. Deploy units within the green zone.\n"
-        "2. Destroy enemy buildings to gain progress.\n"
-        "3. Fewer casualties earn more stars.\n"
-        "4. Traps trigger on contact.\n"
-        "5. Defeat the enemy base to win early.";
-    auto rulesLabel = Label::createWithTTF(rulesText, "fonts/ScienceGothic.ttf", 20);
-    if (!rulesLabel) {
-        rulesLabel = Label::createWithSystemFont(rulesText, "Arial", 20);
+    auto label = createMenuLabel("Rules", 32);
+    if (label) {
+        label->setPosition(Vec2(0, panelHeight / 2 - 20));  // 相对 panel 的位置
+        panel->addChild(label, 2);
     }
-    rulesLabel->setAnchorPoint(Vec2(0.5f, 1.0f));
-    rulesLabel->setAlignment(TextHAlignment::LEFT);
-    rulesLabel->setPosition(Vec2(0, panelHeight / 2 - 80));
-    rulesLabel->setLineSpacing(8.0f);
-    panel->addChild(rulesLabel, 2);
+
+    float contentLeft = -panelWidth / 2 + 40.0f;
+    float cursorY = panelHeight / 2 - 80.0f;
+    auto addLine = [&](const std::string& text, float fontSize, const Color3B& color, float gap) {
+        auto line = createMenuLabel(text, fontSize);
+        if (!line) {
+            return;
+        }
+        line->setAnchorPoint(Vec2(0.0f, 1.0f));
+        line->setAlignment(TextHAlignment::LEFT);
+        line->setColor(color);
+        line->setPosition(Vec2(contentLeft, cursorY));
+        panel->addChild(line, 2);
+        cursorY -= (fontSize + gap);
+    };
+
+    const Color3B headerColor(255, 220, 90);
+    const Color3B bodyColor(230, 230, 230);
+
+    addLine("[Win Conditions]", 22, headerColor, 10.0f);
+    addLine("Attack: Destroy the enemy base or all buildings", 18, bodyColor, 6.0f);
+    addLine("Defense: Survive the timer or eliminate all enemies", 18, bodyColor, 6.0f);
+    cursorY -= 6.0f;
+
+    addLine("[Lose Conditions]", 22, headerColor, 10.0f);
+    addLine("Attack: Time runs out or no units remain", 18, bodyColor, 6.0f);
+    addLine("Defense: Your base is destroyed", 18, bodyColor, 6.0f);
+    cursorY -= 6.0f;
+
+    addLine("[Star Rating]", 22, headerColor, 10.0f);
+    addLine("Attack: Fewer casualties earn more stars", 18, bodyColor, 6.0f);
+    addLine("Defense: Less base damage earns more stars", 18, bodyColor, 6.0f);
+    cursorY -= 6.0f;
+
+    addLine("[Resources & Buildings]", 22, headerColor, 10.0f);
+    addLine("Gold/Elixir are used for training and upgrades", 18, bodyColor, 6.0f);
+    addLine("Resource buildings produce over time; tap to collect", 18, bodyColor, 6.0f);
+    addLine("Traps trigger on contact; towers auto-attack", 18, bodyColor, 6.0f);
 
     //Return 按钮
     auto returnBtn = createIconButton(

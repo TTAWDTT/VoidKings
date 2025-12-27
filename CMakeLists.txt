@@ -103,6 +103,7 @@ list(APPEND GAME_HEADER
      Classes/UI/IDCardPanel.h
      Classes/UI/TrainPanel.h
      Classes/Utils/AudioManager.h
+     Classes/Utils/GameSettings.h
      Classes/Utils/AnimationUtils.h
      Classes/Utils/NodeUtils.h
      Classes/Utils/EffectUtils.h

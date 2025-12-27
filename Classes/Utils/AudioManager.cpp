@@ -1,5 +1,6 @@
 ﻿#include "Utils/AudioManager.h"
 #include "audio/include/SimpleAudioEngine.h"
+#include "base/CCUserDefault.h"
 #include "cocos2d.h"
 #include <array>
 #include <string>
@@ -7,9 +8,11 @@
 using namespace CocosDenshion;
 
 namespace {
-// 音量统一在此处调节
-constexpr float kBgmVolume = 0.55f;
-constexpr float kSfxVolume = 0.9f;
+// 音量默认值
+constexpr float kDefaultBgmVolume = 0.55f;
+constexpr float kDefaultSfxVolume = 0.9f;
+constexpr const char* kBgmMuteKey = "audio_bgm_muted";
+constexpr const char* kSfxMuteKey = "audio_sfx_muted";
 
 // 音频资源映射
 #if defined(__cpp_char8_t)
@@ -46,9 +49,39 @@ constexpr const char* kSfxLose = "music/Lose.wav";
 #undef VK_UTF8_LITERAL
 
 std::string s_currentBgm;
+bool s_bgmMuted = false;
+bool s_sfxMuted = false;
+bool s_volumeLoaded = false;
 
 SimpleAudioEngine* getEngine() {
     return SimpleAudioEngine::getInstance();
+}
+
+float getEffectiveBgmVolume() {
+    return s_bgmMuted ? 0.0f : kDefaultBgmVolume;
+}
+
+float getEffectiveSfxVolume() {
+    return s_sfxMuted ? 0.0f : kDefaultSfxVolume;
+}
+
+void applyEngineVolumes() {
+    auto* engine = getEngine();
+    if (!engine) {
+        return;
+    }
+    engine->setBackgroundMusicVolume(getEffectiveBgmVolume());
+    engine->setEffectsVolume(getEffectiveSfxVolume());
+}
+
+void ensureVolumeLoaded() {
+    if (s_volumeLoaded) {
+        return;
+    }
+    auto* defaults = cocos2d::UserDefault::getInstance();
+    s_bgmMuted = defaults->getBoolForKey(kBgmMuteKey, false);
+    s_sfxMuted = defaults->getBoolForKey(kSfxMuteKey, false);
+    s_volumeLoaded = true;
 }
 
 std::string resolveAudioPath(const char* file) {
@@ -66,6 +99,7 @@ std::string resolveAudioPath(const char* file) {
 }
 
 void playBgmInternal(const char* file) {
+    ensureVolumeLoaded();
     std::string path = resolveAudioPath(file);
     if (path.empty()) {
         return;
@@ -77,12 +111,13 @@ void playBgmInternal(const char* file) {
     if (!engine) {
         return;
     }
-    engine->setBackgroundMusicVolume(kBgmVolume);
+    engine->setBackgroundMusicVolume(getEffectiveBgmVolume());
     engine->playBackgroundMusic(path.c_str(), true);
     s_currentBgm = path;
 }
 
 void playEffectInternal(const char* file) {
+    ensureVolumeLoaded();
     std::string path = resolveAudioPath(file);
     if (path.empty()) {
         return;
@@ -91,20 +126,19 @@ void playEffectInternal(const char* file) {
     if (!engine) {
         return;
     }
-    engine->setEffectsVolume(kSfxVolume);
+    engine->setEffectsVolume(getEffectiveSfxVolume());
     engine->playEffect(path.c_str(), false);
 }
 } // namespace
 
 namespace AudioManager {
 void preload() {
-    // 只预加载短音效，避免占用过多内存
+    ensureVolumeLoaded();
     auto* engine = getEngine();
     if (!engine) {
         return;
     }
-    engine->setBackgroundMusicVolume(kBgmVolume);
-    engine->setEffectsVolume(kSfxVolume);
+    applyEngineVolumes();
 
     engine->preloadBackgroundMusic(resolveAudioPath(kBgmStart).c_str());
     engine->preloadBackgroundMusic(resolveAudioPath(kBgmBattle1).c_str());
@@ -134,6 +168,34 @@ void preload() {
     for (const auto& effect : effects) {
         engine->preloadEffect(resolveAudioPath(effect).c_str());
     }
+}
+
+bool isBgmMuted() {
+    ensureVolumeLoaded();
+    return s_bgmMuted;
+}
+
+bool isSfxMuted() {
+    ensureVolumeLoaded();
+    return s_sfxMuted;
+}
+
+void setBgmMuted(bool muted) {
+    ensureVolumeLoaded();
+    s_bgmMuted = muted;
+    applyEngineVolumes();
+    auto* defaults = cocos2d::UserDefault::getInstance();
+    defaults->setBoolForKey(kBgmMuteKey, muted);
+    defaults->flush();
+}
+
+void setSfxMuted(bool muted) {
+    ensureVolumeLoaded();
+    s_sfxMuted = muted;
+    applyEngineVolumes();
+    auto* defaults = cocos2d::UserDefault::getInstance();
+    defaults->setBoolForKey(kSfxMuteKey, muted);
+    defaults->flush();
 }
 
 void playMainBgm() {

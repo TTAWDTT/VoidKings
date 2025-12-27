@@ -9,6 +9,7 @@
 #include "Soldier/UnitData.h"
 #include "Utils/AudioManager.h"
 #include "Utils/AnimationUtils.h"
+#include "Utils/GameSettings.h"
 #include "Core/Core.h"
 #include <algorithm>
 
@@ -155,6 +156,7 @@ bool LevelSelectScene::init() {
     if (!Scene::init()) {
         return false;
     }
+    GameSettings::applyBattleSpeed(false);
 
     CCLOG("[关卡选择] 初始化关卡选择场景");
 

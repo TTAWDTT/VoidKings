@@ -24,6 +24,7 @@
 
 #include "AppDelegate.h"
 #include "Scenes/MainMenuScene.h"
+#include "Utils/GameSettings.h"
 
 // #define USE_AUDIO_ENGINE 1
 // #define USE_SIMPLE_AUDIO_ENGINE 1
@@ -90,8 +91,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
         director->setOpenGLView(glview);
     }
 
-    // turn on display FPS
-    director->setDisplayStats(true);
+    GameSettings::applyShowFps();
 
     // set FPS. the default value is 1.0/60 if you don't call this
     director->setAnimationInterval(1.0f / 60);

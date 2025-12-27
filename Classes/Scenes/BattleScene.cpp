@@ -20,6 +20,7 @@
 #include "Soldier/UnitManager.h"
 #include "Utils/AnimationUtils.h"
 #include "Utils/AudioManager.h"
+#include "Utils/GameSettings.h"
 #include "Utils/NodeUtils.h"
 #include <algorithm>
 #include <cmath>
@@ -159,6 +160,7 @@ bool BattleScene::init() {
     if (!Scene::init()) {
         return false;
     }
+    GameSettings::applyBattleSpeed(true);
 
     // 切关时先清空旧战斗引用，避免伤害残留
     Soldier::setEnemyBuildings(nullptr);
@@ -282,7 +284,7 @@ void BattleScene::initGridMap() {
     _soldierLayer = Node::create();
     _gridMap->addChild(_soldierLayer, 10);
 
-    _gridMap->showGrid(true);
+    _gridMap->showGrid(GameSettings::getShowGrid());
 
     CCLOG("[BattleScene] Grid map initialized");
 }
@@ -1982,6 +1984,7 @@ void BattleScene::update(float dt) {
 }
 
 void BattleScene::onExit() {
+    GameSettings::applyBattleSpeed(false);
     DefenceBuilding::clearEnemySoldiersIf(&_soldiers);
     TrapBase::clearEnemySoldiersIf(&_soldiers);
     Soldier::clearEnemyBuildingsIf(&_enemyBuildings);

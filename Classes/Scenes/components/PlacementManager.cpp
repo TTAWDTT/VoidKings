@@ -4,6 +4,7 @@
  */
 
 #include "PlacementManager.h"
+#include "Utils/GameSettings.h"
 #include <algorithm>
 
 namespace {
@@ -366,7 +367,7 @@ bool PlacementManager::tryConfirmPlacement(const Vec2& worldPos) {
 
         // 隐藏网格辅助线和格子显示
         if (_gridMap) {
-            _gridMap->showGrid(false);
+            _gridMap->showGrid(GameSettings::getShowGrid());
         }
         hideGridDisplay();
 
@@ -424,7 +425,7 @@ void PlacementManager::cancelPlacement() {
 
     // 隐藏网格辅助线和格子显示
     if (_gridMap) {
-        _gridMap->showGrid(false);
+        _gridMap->showGrid(GameSettings::getShowGrid());
     }
     hideGridDisplay();
 

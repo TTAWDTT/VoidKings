@@ -4,6 +4,10 @@
 // 音频管理：统一控制BGM与音效
 namespace AudioManager {
     void preload();
+    bool isBgmMuted();
+    bool isSfxMuted();
+    void setBgmMuted(bool muted);
+    void setSfxMuted(bool muted);
 
     void playMainBgm();
     void playBattleBgm(int levelId);

@@ -21,6 +21,7 @@
 #include "Save/SaveManager.h"
 #include "Soldier/UnitManager.h"
 #include "Utils/AudioManager.h"
+#include "Utils/GameSettings.h"
 #include "Utils/NodeUtils.h"
 #include <algorithm>
 #include <cmath>
@@ -141,6 +142,7 @@ bool BaseScene::init() {
     if (!Scene::init()) {
         return false;
     }
+    GameSettings::applyBattleSpeed(false);
 
     // 清理战斗场景的静态引用，避免野指针
     DefenceBuilding::setEnemySoldiers(nullptr);
@@ -239,6 +241,7 @@ void BaseScene::initGridMap() {
 
     _gridMap->setPosition(Vec2(offsetX, offsetY));
     this->addChild(_gridMap, 0);
+    _gridMap->showGrid(GameSettings::getShowGrid());
 
     // 创建建筑层（作为GridMap的子节点）
     _buildingLayer = Node::create();
