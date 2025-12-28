@@ -4,11 +4,21 @@
  */
 
 #include "PlacementManager.h"
+#include "Buildings/BuildingManager.h"
+#include "Buildings/DefenseBuildingData.h"
 #include "Utils/GameSettings.h"
+#include "Utils/NodeUtils.h"
 #include <algorithm>
 
 namespace {
 constexpr int kSpikeTrapType = 11;
+
+float getFirstFloatValue(const std::vector<float>& values, float fallback) {
+    if (values.empty()) {
+        return fallback;
+    }
+    return values.front();
+}
 }
 
  // ===================================================
@@ -51,6 +61,16 @@ bool PlacementManager::init(
     _placementGridNode = DrawNode::create();
     this->addChild(_placementGridNode, 1);
     _placementGridNode->setVisible(false);
+
+    // 放置占地轮廓
+    _placementFootprintNode = DrawNode::create();
+    this->addChild(_placementFootprintNode, 3);
+    _placementFootprintNode->setVisible(false);
+
+    // 攻击范围提示
+    _placementRangeNode = DrawNode::create();
+    this->addChild(_placementRangeNode, 2);
+    _placementRangeNode->setVisible(false);
 
     CCLOG("[放置管理器] 初始化完成");
 
@@ -170,6 +190,12 @@ void PlacementManager::hideGridDisplay() {
     if (_placementGridNode) {
         _placementGridNode->setVisible(false);
     }
+    if (_placementFootprintNode) {
+        _placementFootprintNode->setVisible(false);
+    }
+    if (_placementRangeNode) {
+        _placementRangeNode->setVisible(false);
+    }
 }
 
 // ===================================================
@@ -249,6 +275,55 @@ void PlacementManager::updatePlacementGridDisplay(int gridX, int gridY, bool can
             _placementGridNode->drawPolygon(vertices, 4, Color4F(0, 0, 0, 0), 1.0f, borderColor);
         }
     }
+
+    updatePlacementOverlays(gridX, gridY, canPlace);
+}
+
+// ===================================================
+// 更新放置辅助线（占地轮廓 + 攻击范围）
+// ===================================================
+void PlacementManager::updatePlacementOverlays(int gridX, int gridY, bool canPlace) {
+    if (!_gridMap || !_placementFootprintNode || !_placementRangeNode) {
+        return;
+    }
+
+    _placementFootprintNode->clear();
+    _placementRangeNode->clear();
+
+    float cellSize = _gridMap->getCellSize();
+    Vec2 bottomLeft(gridX * cellSize, gridY * cellSize);
+    Vec2 topRight((gridX + _state.gridWidth) * cellSize, (gridY + _state.gridHeight) * cellSize);
+
+    Color4F borderColor = canPlace
+        ? PlacementConfig::FOOTPRINT_BORDER
+        : PlacementConfig::FOOTPRINT_BORDER_BLOCKED;
+    _placementFootprintNode->drawRect(bottomLeft, topRight, borderColor);
+    _placementFootprintNode->setVisible(true);
+
+    float range = resolveAttackRange();
+    if (range > 0.0f) {
+        Vec2 centerPos = calculateBuildingCenterPosition(gridX, gridY, _state.gridWidth, _state.gridHeight);
+        NodeUtils::drawDashedCircle(_placementRangeNode, centerPos, range, PlacementConfig::RANGE_RING);
+        _placementRangeNode->setVisible(true);
+    }
+    else {
+        _placementRangeNode->setVisible(false);
+    }
+}
+
+float PlacementManager::resolveAttackRange() const {
+    if (_currentOption.category != BuildingCategory::Defence) {
+        return 0.0f;
+    }
+
+    int configId = _currentOption.configId > 0 ? _currentOption.configId : _currentOption.type;
+    auto* manager = BuildingManager::getInstance();
+    manager->loadConfigs();
+    const DefenceBuildingConfig* config = manager->getDefenceConfig(configId);
+    if (!config) {
+        return 0.0f;
+    }
+    return getFirstFloatValue(config->ATK_RANGE, 0.0f);
 }
 
 // ===================================================
@@ -275,7 +350,9 @@ void PlacementManager::setupPreviewInfo() {
 
     _previewInfoLabel = Label::createWithTTF("", "fonts/ScienceGothic.ttf", 14);
     if (!_previewInfoLabel) {
-        _previewInfoLabel = Label::createWithSystemFont("", "Arial", 14);
+        _previewInfoLabel = Label::create();
+        _previewInfoLabel->setString("");
+        _previewInfoLabel->setSystemFontSize(14);
     }
     _previewInfoLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
     _previewInfoLabel->setAlignment(TextHAlignment::CENTER);
@@ -289,13 +366,30 @@ void PlacementManager::updatePreviewInfo(bool canPlace) {
     }
 
     const char* stateText = canPlace ? "Place" : "Blocked";
-    char buffer[128];
-    snprintf(buffer, sizeof(buffer), "%s  %dG\n%dx%d  %s",
+    char buffer[200];
+    char extraLine[80] = "";
+
+    if (_currentOption.category == BuildingCategory::Defence) {
+        int configId = _currentOption.configId > 0 ? _currentOption.configId : _currentOption.type;
+        auto* manager = BuildingManager::getInstance();
+        manager->loadConfigs();
+        const DefenceBuildingConfig* config = manager->getDefenceConfig(configId);
+        if (config) {
+            float atk = getFirstFloatValue(config->ATK, 0.0f);
+            float range = getFirstFloatValue(config->ATK_RANGE, 0.0f);
+            if (atk > 0.0f || range > 0.0f) {
+                snprintf(extraLine, sizeof(extraLine), "\nATK %.0f  Range %.0f", atk, range);
+            }
+        }
+    }
+
+    snprintf(buffer, sizeof(buffer), "%s  %dG\n%dx%d  %s%s",
         _currentOption.name.c_str(),
         _currentOption.cost,
         _currentOption.gridWidth,
         _currentOption.gridHeight,
-        stateText);
+        stateText,
+        extraLine);
     _previewInfoLabel->setString(buffer);
 
     auto bg = dynamic_cast<LayerColor*>(_previewInfoPanel->getChildByName("previewInfoBg"));
@@ -459,5 +553,13 @@ void PlacementManager::cleanupPreview() {
         _previewInfoPanel->removeFromParent();
         _previewInfoPanel = nullptr;
         _previewInfoLabel = nullptr;
+    }
+    if (_placementFootprintNode) {
+        _placementFootprintNode->clear();
+        _placementFootprintNode->setVisible(false);
+    }
+    if (_placementRangeNode) {
+        _placementRangeNode->clear();
+        _placementRangeNode->setVisible(false);
     }
 }

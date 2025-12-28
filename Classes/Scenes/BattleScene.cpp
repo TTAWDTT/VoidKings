@@ -24,6 +24,7 @@
 #include "Utils/NodeUtils.h"
 #include <algorithm>
 #include <cmath>
+#include <ctime>
 
 USING_NS_CC;
 
@@ -43,6 +44,79 @@ constexpr int kTowerBoom = 2;
 constexpr int kTowerDoubleBoom = 3;
 constexpr int kTowerMagic = 4;
 constexpr int kTowerFire = 5;
+
+const char* kBattleFont = "fonts/ScienceGothic.ttf";
+const Color4B kPauseBtnNormal(44, 110, 160, 220);
+const Color4B kPauseBtnPressed(30, 85, 130, 240);
+const Color4B kStartBtnNormal(86, 150, 96, 230);
+const Color4B kStartBtnPressed(60, 120, 76, 245);
+const Color4B kReplayBtnNormal(70, 70, 70, 220);
+const Color4B kReplayBtnPressed(50, 50, 50, 240);
+
+std::string formatTimeText(float seconds) {
+    if (seconds < 0.0f) {
+        seconds = 0.0f;
+    }
+    int total = static_cast<int>(std::round(seconds));
+    int minutes = total / 60;
+    int secs = total % 60;
+    char buffer[16];
+    snprintf(buffer, sizeof(buffer), "%d:%02d", minutes, secs);
+    return buffer;
+}
+
+Label* createBattleLabel(const std::string& text, float fontSize) {
+    auto label = Label::createWithTTF(text, kBattleFont, fontSize);
+    if (!label) {
+        label = Label::create();
+        label->setString(text);
+        label->setSystemFontSize(fontSize);
+    }
+    return label;
+}
+
+Button* createBattlePlainButton(const std::string& title,
+                                float fontSize,
+                                const Size& size,
+                                const Color4B& normalColor,
+                                const Color4B& pressedColor) {
+    auto button = Button::create();
+    if (!button) {
+        return nullptr;
+    }
+    button->setScale9Enabled(true);
+    button->setContentSize(size);
+    button->setTitleText(title);
+    button->setTitleFontName(kBattleFont);
+    button->setTitleFontSize(fontSize);
+    button->setTitleColor(Color3B(245, 245, 245));
+    button->setPressedActionEnabled(true);
+    button->setZoomScale(0.06f);
+    button->setSwallowTouches(true);
+
+    auto bg = LayerColor::create(normalColor, size.width, size.height);
+    bg->setAnchorPoint(Vec2(0.5f, 0.5f));
+    bg->setIgnoreAnchorPointForPosition(false);
+    bg->setPosition(Vec2(size.width * 0.5f, size.height * 0.5f));
+    bg->setName("btnBg");
+    button->addChild(bg, -1);
+
+    button->addTouchEventListener([bg, normalColor, pressedColor](Ref*, Widget::TouchEventType type) {
+        if (!bg) {
+            return;
+        }
+        if (type == Widget::TouchEventType::BEGAN) {
+            bg->setColor(Color3B(pressedColor.r, pressedColor.g, pressedColor.b));
+            bg->setOpacity(pressedColor.a);
+        }
+        else if (type == Widget::TouchEventType::CANCELED || type == Widget::TouchEventType::ENDED) {
+            bg->setColor(Color3B(normalColor.r, normalColor.g, normalColor.b));
+            bg->setOpacity(normalColor.a);
+        }
+    });
+
+    return button;
+}
 
 int resolveAttackTowerLevel(int levelId) {
     if (levelId >= 7) {
@@ -152,6 +226,45 @@ Scene* BattleScene::createScene(int levelId, const std::map<int, int>& units, bo
     return nullptr;
 }
 
+Scene* BattleScene::createReplayScene(const BattleReplay& replay) {
+    auto scene = new (std::nothrow) BattleScene();
+    if (scene) {
+        scene->_isReplay = true;
+        scene->_replayData = replay;
+        scene->_hasReplayData = true;
+        scene->setLevelId(replay.levelId);
+        scene->setDeployableUnits(replay.deployableUnits);
+        scene->_allowDefaultUnits = replay.allowDefaultUnits;
+        scene->setBattleMode(replay.defenseMode ? BattleMode::Defense : BattleMode::Attack);
+        if (scene->init()) {
+            scene->autorelease();
+            return scene;
+        }
+    }
+    CC_SAFE_DELETE(scene);
+    return nullptr;
+}
+
+Scene* BattleScene::createSnapshotScene(const BaseSnapshot& snapshot,
+    const std::map<int, int>& units,
+    bool useDefaultUnits) {
+    auto scene = new (std::nothrow) BattleScene();
+    if (scene) {
+        scene->setLevelId(1);
+        scene->setDeployableUnits(units);
+        scene->_allowDefaultUnits = useDefaultUnits;
+        scene->setBattleMode(BattleMode::Attack);
+        scene->_useSnapshotLayout = true;
+        scene->_snapshotLayout = snapshot;
+        if (scene->init()) {
+            scene->autorelease();
+            return scene;
+        }
+    }
+    CC_SAFE_DELETE(scene);
+    return nullptr;
+}
+
 // ===================================================
 // 初始化
 // ===================================================
@@ -161,6 +274,9 @@ bool BattleScene::init() {
         return false;
     }
     GameSettings::applyBattleSpeed(true);
+    if (_isReplay && _hasReplayData) {
+        GameSettings::applyTimeScale(_replayData.battleSpeed);
+    }
 
     // 切关时先清空旧战斗引用，避免伤害残留
     Soldier::setEnemyBuildings(nullptr);
@@ -173,11 +289,18 @@ bool BattleScene::init() {
     _enemyBaseDestroyed = false;
     _battleTime = 0.0f;
     _battleEnded = false;
+    _battlePaused = false;
+    _battleBriefing = false;
     _destroyedBuildingCount = 0;
     _totalBuildingCount = 0;
     _totalDeployedCount = 0;
     _deadSoldierCount = 0;
     _resultLayer = nullptr;
+    _pauseButton = nullptr;
+    _pauseOverlay = nullptr;
+    _briefLayer = nullptr;
+    _resultRewardCoin = 0;
+    _resultRewardDiamond = 0;
 
     CCLOG("[战斗场景] 初始化关卡 %d", _levelId);
     BuildingManager::getInstance()->loadConfigs();
@@ -216,6 +339,10 @@ bool BattleScene::init() {
     initUI();
     initTouchListener();
     initHoverInfo();
+    initReplayState();
+    if (!_isReplay) {
+        showBattleBriefing();
+    }
     AudioManager::playBattleBgm(getRewardLevel());
 
     // 设置更新
@@ -295,6 +422,12 @@ void BattleScene::initGridMap() {
 // ===================================================
 
 void BattleScene::initLevel() {
+    if (_useSnapshotLayout) {
+        createSnapshotLayout();
+        CCLOG("[战斗场景] 使用基地快照生成敌方布局，共 %d 个建筑", _totalBuildingCount);
+        return;
+    }
+
     if (_battleMode == BattleMode::Defense) {
         int defenseId = getDefenseLevelIndex();
         switch (defenseId) {
@@ -678,6 +811,21 @@ void BattleScene::createLevel12() {
 
 void BattleScene::createDefenseBaseLayout(int towerLevel) {
     (void)towerLevel;
+    BaseSnapshot snapshot;
+    snapshot.version = 1;
+    snapshot.baseAnchor = BaseScene::getBaseAnchorGrid();
+    snapshot.barracksAnchor = BaseScene::getBarracksAnchorGrid();
+    snapshot.baseLevel = std::max(0, Core::getInstance()->getBaseLevel() - 1);
+    snapshot.barracksLevel = std::max(0, BaseScene::getBarracksLevel());
+    snapshot.buildings = BaseScene::getSavedBuildings();
+    buildSnapshotLayout(snapshot);
+}
+
+void BattleScene::createSnapshotLayout() {
+    buildSnapshotLayout(_snapshotLayout);
+}
+
+void BattleScene::buildSnapshotLayout(const BaseSnapshot& snapshot) {
     if (!_gridMap || !_buildingLayer) {
         return;
     }
@@ -699,13 +847,8 @@ void BattleScene::createDefenseBaseLayout(int towerLevel) {
     if (defenseBaseX < 0) defenseBaseX = 0;
     if (defenseBaseY < 0) defenseBaseY = 0;
 
-    Vec2 baseAnchor = BaseScene::getBaseAnchorGrid();
-    Vec2 barracksAnchor = BaseScene::getBarracksAnchorGrid();
-    int anchorX = static_cast<int>(std::round(baseAnchor.x));
-    int anchorY = static_cast<int>(std::round(baseAnchor.y));
-    int barracksX = static_cast<int>(std::round(barracksAnchor.x));
-    int barracksY = static_cast<int>(std::round(barracksAnchor.y));
-
+    int anchorX = static_cast<int>(std::round(snapshot.baseAnchor.x));
+    int anchorY = static_cast<int>(std::round(snapshot.baseAnchor.y));
     int offsetX = defenseBaseX - anchorX;
     int offsetY = defenseBaseY - anchorY;
 
@@ -723,36 +866,36 @@ void BattleScene::createDefenseBaseLayout(int towerLevel) {
     };
 
     auto placeBuilding = [this, cellSize, &registerBuilding](Node* building,
-                                                             int gridX,
-                                                             int gridY,
-                                                             int width,
-                                                             int height,
-                                                             bool isBase) {
-        if (!building) {
-            return;
-        }
-        if (!_gridMap->canPlaceBuilding(gridX, gridY, width, height)) {
-            return;
-        }
+        int gridX,
+        int gridY,
+        int width,
+        int height,
+        bool isBase) {
+            if (!building) {
+                return;
+            }
+            if (!_gridMap->canPlaceBuilding(gridX, gridY, width, height)) {
+                return;
+            }
 
-        _buildingLayer->addChild(building);
+            _buildingLayer->addChild(building);
 
-        float centerX = (gridX + width * 0.5f) * cellSize;
-        float centerY = (gridY + height * 0.5f) * cellSize;
-        building->setPosition(Vec2(centerX, centerY));
+            float centerX = (gridX + width * 0.5f) * cellSize;
+            float centerY = (gridY + height * 0.5f) * cellSize;
+            building->setPosition(Vec2(centerX, centerY));
 
-        scaleBuildingToFit(building, width, height, cellSize);
-        _gridMap->occupyCell(gridX, gridY, width, height, building);
+            scaleBuildingToFit(building, width, height, cellSize);
+            _gridMap->occupyCell(gridX, gridY, width, height, building);
 
-        if (auto* trap = dynamic_cast<TrapBase*>(building)) {
-            trap->setGridContext(_gridMap, gridX, gridY, width, height);
-            return;
-        }
+            if (auto* trap = dynamic_cast<TrapBase*>(building)) {
+                trap->setGridContext(_gridMap, gridX, gridY, width, height);
+                return;
+            }
 
-        registerBuilding(building, isBase);
+            registerBuilding(building, isBase);
     };
 
-    int baseLevel = Core::getInstance()->getBaseLevel() - 1;
+    int baseLevel = snapshot.baseLevel;
     if (baseLevel < 0) {
         baseLevel = 0;
     }
@@ -770,9 +913,11 @@ void BattleScene::createDefenseBaseLayout(int towerLevel) {
     int barracksWidth = barracksConfig ? barracksConfig->width : 5;
     int barracksHeight = barracksConfig ? barracksConfig->length : 5;
 
+    int barracksX = static_cast<int>(std::round(snapshot.barracksAnchor.x));
+    int barracksY = static_cast<int>(std::round(snapshot.barracksAnchor.y));
     int defenseBarracksX = barracksX + offsetX;
     int defenseBarracksY = barracksY + offsetY;
-    int barracksLevel = BaseScene::getBarracksLevel();
+    int barracksLevel = snapshot.barracksLevel;
     if (barracksLevel < 0) {
         barracksLevel = 0;
     }
@@ -782,8 +927,7 @@ void BattleScene::createDefenseBaseLayout(int towerLevel) {
     auto barracks = manager->createProductionBuilding(barracksId, barracksLevel);
     placeBuilding(barracks, defenseBarracksX, defenseBarracksY, barracksWidth, barracksHeight, false);
 
-    const auto& savedBuildings = BaseScene::getSavedBuildings();
-    for (const auto& saved : savedBuildings) {
+    for (const auto& saved : snapshot.buildings) {
         const auto& option = saved.option;
         int gridX = saved.gridX + offsetX;
         int gridY = saved.gridY + offsetY;
@@ -1096,21 +1240,23 @@ void BattleScene::initUI() {
 
     float topY = origin.y + visibleSize.height - BattleConfig::UI_TOP_HEIGHT / 2;
 
-    _timerLabel = Label::createWithTTF("3:00", "fonts/arial.ttf", 18);
-    if (!_timerLabel) {
-        _timerLabel = Label::createWithSystemFont("3:00", "Arial", 18);
-    }
+    _timerLabel = createBattleLabel("3:00", 18);
     _timerLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, topY));
     _timerLabel->setColor(Color3B::WHITE);
     _uiLayer->addChild(_timerLabel);
 
-    _progressLabel = Label::createWithTTF("0%", "fonts/arial.ttf", 14);
-    if (!_progressLabel) {
-        _progressLabel = Label::createWithSystemFont("0%", "Arial", 14);
-    }
+    _progressLabel = createBattleLabel("0%", 14);
     _progressLabel->setPosition(Vec2(origin.x + visibleSize.width - 60, topY));
     _progressLabel->setColor(Color3B::YELLOW);
     _uiLayer->addChild(_progressLabel);
+
+    if (_isReplay) {
+        auto replayLabel = createBattleLabel("REPLAY", 12);
+        replayLabel->setAnchorPoint(Vec2(0.0f, 0.5f));
+        replayLabel->setPosition(Vec2(origin.x + 78.0f, topY));
+        replayLabel->setColor(Color3B(140, 220, 255));
+        _uiLayer->addChild(replayLabel, 2);
+    }
 
     constexpr float kExitButtonSize = 50.0f;
     constexpr float kExitButtonMargin = 18.0f;
@@ -1137,7 +1283,105 @@ void BattleScene::initUI() {
         _uiLayer->addChild(exitBtn, 10);
     }
 
+    setupPauseControls(topY);
     setupDeployArea();
+}
+
+// ===================================================
+// 暂停控制
+// ===================================================
+void BattleScene::setupPauseControls(float topY) {
+    if (!_uiLayer) {
+        return;
+    }
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+
+    constexpr float kPauseBtnWidth = 108.0f;
+    constexpr float kPauseBtnHeight = 34.0f;
+    float pauseX = origin.x + visibleSize.width - kPauseBtnWidth * 0.5f - 16.0f;
+
+    _pauseButton = createBattlePlainButton("Pause",
+        16,
+        Size(kPauseBtnWidth, kPauseBtnHeight),
+        kPauseBtnNormal,
+        kPauseBtnPressed);
+    if (!_pauseButton) {
+        _pauseButton = Button::create();
+    }
+    _pauseButton->setPosition(Vec2(pauseX, topY));
+    _pauseButton->addClickEventListener([this](Ref*) {
+        AudioManager::playButtonClick();
+        setPausedState(!_battlePaused);
+    });
+    _uiLayer->addChild(_pauseButton, 10);
+
+    if (_progressLabel) {
+        float progressX = pauseX - kPauseBtnWidth * 0.5f - 44.0f;
+        _progressLabel->setPosition(Vec2(progressX, topY));
+    }
+
+    _pauseOverlay = LayerColor::create(
+        Color4B(0, 0, 0, 140),
+        visibleSize.width,
+        visibleSize.height
+    );
+    _pauseOverlay->setPosition(origin);
+    _pauseOverlay->setVisible(false);
+    _uiLayer->addChild(_pauseOverlay, 50);
+
+    auto pausedLabel = createBattleLabel("PAUSED", 36);
+    pausedLabel->setPosition(Vec2(origin.x + visibleSize.width * 0.5f,
+        origin.y + visibleSize.height * 0.58f));
+    pausedLabel->setColor(Color3B::WHITE);
+    _pauseOverlay->addChild(pausedLabel, 1);
+
+    auto hintLabel = createBattleLabel("Tap to resume", 16);
+    hintLabel->setPosition(Vec2(origin.x + visibleSize.width * 0.5f,
+        origin.y + visibleSize.height * 0.52f));
+    hintLabel->setColor(Color3B(220, 220, 220));
+    _pauseOverlay->addChild(hintLabel, 1);
+
+    auto swallow = EventListenerTouchOneByOne::create();
+    swallow->setSwallowTouches(true);
+    swallow->onTouchBegan = [this](Touch*, Event*) {
+        if (!_battlePaused || !_pauseOverlay || !_pauseOverlay->isVisible()) {
+            return false;
+        }
+        return true;
+    };
+    swallow->onTouchEnded = [this](Touch*, Event*) {
+        if (_battlePaused) {
+            setPausedState(false);
+        }
+    };
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(swallow, _pauseOverlay);
+}
+
+void BattleScene::setPausedState(bool paused) {
+    if (_battleEnded && paused) {
+        return;
+    }
+    if (_battlePaused == paused) {
+        return;
+    }
+    _battlePaused = paused;
+
+    if (_gridMap) {
+        if (paused) {
+            _gridMap->pause();
+        }
+        else {
+            _gridMap->resume();
+        }
+    }
+
+    if (_pauseOverlay) {
+        _pauseOverlay->setVisible(paused);
+    }
+    if (_pauseButton) {
+        _pauseButton->setTitleText(paused ? "Resume" : "Pause");
+    }
 }
 
 
@@ -1189,10 +1433,7 @@ void BattleScene::setupDeployArea() {
     _uiLayer->addChild(bottomBg);
 
     if (_battleMode == BattleMode::Defense) {
-        auto infoLabel = Label::createWithTTF("Defense mode", "fonts/arial.ttf", 12);
-        if (!infoLabel) {
-            infoLabel = Label::createWithSystemFont("Defense mode", "Arial", 12);
-        }
+        auto infoLabel = createBattleLabel("Defense mode", 12);
         infoLabel->setPosition(Vec2(origin.x + visibleSize.width / 2,
             origin.y + BattleConfig::UI_BOTTOM_HEIGHT / 2));
         infoLabel->setColor(Color3B::GRAY);
@@ -1202,10 +1443,7 @@ void BattleScene::setupDeployArea() {
     }
 
     if (_remainingUnits.empty()) {
-        auto emptyLabel = Label::createWithTTF("No units trained.", "fonts/arial.ttf", 12);
-        if (!emptyLabel) {
-            emptyLabel = Label::createWithSystemFont("No units trained.", "Arial", 12);
-        }
+        auto emptyLabel = createBattleLabel("No units trained.", 12);
         emptyLabel->setPosition(Vec2(origin.x + visibleSize.width / 2,
             origin.y + BattleConfig::UI_BOTTOM_HEIGHT / 2));
         emptyLabel->setColor(Color3B::GRAY);
@@ -1241,12 +1479,15 @@ void BattleScene::setupDeployArea() {
         index++;
     }
 
-    setSelectedUnit(getFirstAvailableUnitId());
-
-    auto tipLabel = Label::createWithTTF("Tap on map to deploy", "fonts/arial.ttf", 10);
-    if (!tipLabel) {
-        tipLabel = Label::createWithSystemFont("Tap on map to deploy", "Arial", 10);
+    if (_isReplay) {
+        _selectedUnitId = -1;
     }
+    else {
+        setSelectedUnit(getFirstAvailableUnitId());
+    }
+
+    std::string tipText = _isReplay ? "Replay: input disabled" : "Tap on map to deploy";
+    auto tipLabel = createBattleLabel(tipText, 10);
     tipLabel->setPosition(Vec2(
         origin.x + visibleSize.width - 90,
         centerY
@@ -1260,6 +1501,155 @@ void BattleScene::setupDeployArea() {
 // 创建部署按钮
 // ===================================================
 
+// ===================================================
+// 战前简报
+// ===================================================
+void BattleScene::showBattleBriefing() {
+    if (_battleBriefing || !_uiLayer) {
+        return;
+    }
+    _battleBriefing = true;
+
+    if (_gridMap) {
+        _gridMap->pause();
+    }
+    if (_pauseButton) {
+        _pauseButton->setEnabled(false);
+        _pauseButton->setBright(false);
+        _pauseButton->setOpacity(160);
+    }
+
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+
+    _briefLayer = Node::create();
+    _uiLayer->addChild(_briefLayer, 200);
+
+    auto mask = LayerColor::create(Color4B(0, 0, 0, 170), visibleSize.width, visibleSize.height);
+    mask->setPosition(origin);
+    _briefLayer->addChild(mask, 0);
+
+    float panelWidth = visibleSize.width * 0.68f;
+    float panelHeight = visibleSize.height * 0.5f;
+    auto panel = LayerColor::create(Color4B(20, 20, 20, 230), panelWidth, panelHeight);
+    panel->setPosition(Vec2(origin.x + (visibleSize.width - panelWidth) * 0.5f,
+        origin.y + (visibleSize.height - panelHeight) * 0.5f));
+    _briefLayer->addChild(panel, 1);
+
+    auto title = createBattleLabel("Mission Briefing", 28);
+    title->setPosition(Vec2(panelWidth * 0.5f, panelHeight - 30.0f));
+    title->setColor(Color3B::WHITE);
+    panel->addChild(title, 2);
+
+    int towerCount = 0;
+    int trapCount = 0;
+    int resourceCount = 0;
+    for (auto* building : _enemyBuildings) {
+        if (!building) {
+            continue;
+        }
+        if (dynamic_cast<DefenceBuilding*>(building)) {
+            towerCount++;
+        }
+        else if (dynamic_cast<TrapBase*>(building)) {
+            trapCount++;
+        }
+        else if (dynamic_cast<ProductionBuilding*>(building) || dynamic_cast<StorageBuilding*>(building)) {
+            resourceCount++;
+        }
+    }
+    int totalUnits = 0;
+    for (const auto& pair : _remainingUnits) {
+        totalUnits += pair.second;
+    }
+
+    std::string modeText = (_battleMode == BattleMode::Defense) ? "Defense" : "Attack";
+    std::string objectiveText = (_battleMode == BattleMode::Defense)
+        ? "Hold until the timer ends."
+        : "Destroy the enemy base.";
+    std::string buildingLine = (_battleMode == BattleMode::Defense)
+        ? StringUtils::format("Your Buildings: %d (Towers %d / Traps %d / Resources %d)",
+            _totalBuildingCount, towerCount, trapCount, resourceCount)
+        : StringUtils::format("Enemy Buildings: %d (Towers %d / Traps %d / Resources %d)",
+            _totalBuildingCount, towerCount, trapCount, resourceCount);
+    std::string unitLine = (_battleMode == BattleMode::Defense)
+        ? StringUtils::format("Incoming Units: %d", _defenseTotalUnits)
+        : StringUtils::format("Deployable Units: %d", totalUnits);
+    std::string timeLine = StringUtils::format("Time Limit: %s", formatTimeText(BattleConfig::BATTLE_TIME_LIMIT).c_str());
+
+    std::string briefingText = StringUtils::format(
+        "Mode: %s\nObjective: %s\n%s\n%s\n%s",
+        modeText.c_str(),
+        objectiveText.c_str(),
+        buildingLine.c_str(),
+        unitLine.c_str(),
+        timeLine.c_str()
+    );
+
+    auto bodyLabel = createBattleLabel(briefingText, 16);
+    bodyLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
+    bodyLabel->setAlignment(TextHAlignment::LEFT);
+    bodyLabel->setColor(Color3B(230, 230, 230));
+    bodyLabel->setPosition(Vec2(panelWidth * 0.5f, panelHeight * 0.5f + 10.0f));
+    bodyLabel->setWidth(panelWidth - 60.0f);
+    panel->addChild(bodyLabel, 2);
+
+    auto startBtn = createBattlePlainButton("Start",
+        16,
+        Size(130.0f, 38.0f),
+        kStartBtnNormal,
+        kStartBtnPressed);
+    if (!startBtn) {
+        startBtn = Button::create();
+    }
+    startBtn->setPosition(Vec2(panelWidth * 0.5f, 40.0f));
+    startBtn->addClickEventListener([this](Ref*) {
+        AudioManager::playButtonClick();
+        hideBattleBriefing();
+    });
+    panel->addChild(startBtn, 2);
+
+    auto swallow = EventListenerTouchOneByOne::create();
+    swallow->setSwallowTouches(true);
+    swallow->onTouchBegan = [panel](Touch* touch, Event*) {
+        if (!panel || !panel->getParent()) {
+            return true;
+        }
+        Vec2 localPos = panel->getParent()->convertToNodeSpace(touch->getLocation());
+        if (panel->getBoundingBox().containsPoint(localPos)) {
+            return false;
+        }
+        return true;
+    };
+    swallow->onTouchEnded = [this](Touch*, Event*) {
+        hideBattleBriefing();
+    };
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(swallow, mask);
+}
+
+void BattleScene::hideBattleBriefing() {
+    if (!_battleBriefing) {
+        return;
+    }
+    _battleBriefing = false;
+
+    if (_briefLayer) {
+        _briefLayer->removeFromParent();
+        _briefLayer = nullptr;
+    }
+    if (_gridMap) {
+        _gridMap->resume();
+    }
+    if (_pauseButton) {
+        _pauseButton->setEnabled(true);
+        _pauseButton->setBright(true);
+        _pauseButton->setOpacity(255);
+    }
+}
+
+// ===================================================
+// 创建部署按钮
+// ===================================================
 Node* BattleScene::createDeployButton(int unitId, int count, float x) {
     auto node = Node::create();
     node->setPosition(Vec2(x, 0));
@@ -1292,10 +1682,7 @@ Node* BattleScene::createDeployButton(int unitId, int count, float x) {
     node->addChild(selectBorder, 3);
 
     // 单位名称
-    auto nameLabel = Label::createWithTTF(unitName, "fonts/arial.ttf", 9);
-    if (!nameLabel) {
-        nameLabel = Label::createWithSystemFont(unitName, "Arial", 9);
-    }
+    auto nameLabel = createBattleLabel(unitName, 9);
     nameLabel->setPosition(Vec2(0, 16));
     nameLabel->setColor(Color3B::WHITE);
     nameLabel->setName("nameLabel");
@@ -1311,10 +1698,7 @@ Node* BattleScene::createDeployButton(int unitId, int count, float x) {
     }
 
     // 数量
-    auto countLabel = Label::createWithTTF("x" + std::to_string(count), "fonts/arial.ttf", 10);
-    if (!countLabel) {
-        countLabel = Label::createWithSystemFont("x" + std::to_string(count), "Arial", 10);
-    }
+    auto countLabel = createBattleLabel("x" + std::to_string(count), 10);
     countLabel->setPosition(Vec2(0, -16));
     countLabel->setColor(Color3B::YELLOW);
     countLabel->setName("countLabel");
@@ -1328,23 +1712,30 @@ Node* BattleScene::createDeployButton(int unitId, int count, float x) {
     selectButton->setPosition(Vec2::ZERO);
     const float originScale = node->getScale();
     selectButton->setSwallowTouches(true);
-    selectButton->addTouchEventListener([this, unitId, node, originScale](Ref*, Widget::TouchEventType type) {
-        if (type == Widget::TouchEventType::BEGAN) {
-            node->setScale(originScale * 0.96f);
-            return;
-        }
-        if (type == Widget::TouchEventType::CANCELED) {
-            node->setScale(originScale);
-            return;
-        }
-        if (type != Widget::TouchEventType::ENDED) {
-            return;
-        }
+    if (!_isReplay) {
+        selectButton->addTouchEventListener([this, unitId, node, originScale](Ref*, Widget::TouchEventType type) {
+            if (type == Widget::TouchEventType::BEGAN) {
+                node->setScale(originScale * 0.96f);
+                return;
+            }
+            if (type == Widget::TouchEventType::CANCELED) {
+                node->setScale(originScale);
+                return;
+            }
+            if (type != Widget::TouchEventType::ENDED) {
+                return;
+            }
 
-        node->setScale(originScale);
-        AudioManager::playButtonClick();
-        setSelectedUnit(unitId);
-    });
+            node->setScale(originScale);
+            AudioManager::playButtonClick();
+            setSelectedUnit(unitId);
+        });
+    }
+    else {
+        selectButton->setEnabled(false);
+        selectButton->setBright(false);
+        selectButton->setOpacity(160);
+    }
     selectButton->setName("selectButton");
     node->addChild(selectButton, 4);
 
@@ -1540,10 +1931,12 @@ bool BattleScene::isDeployGridAllowed(int gridX, int gridY) const {
 
 void BattleScene::deploySoldier(int unitId, const Vec2& position) {
     // 兜底检查，避免非法位置部署
+    int gridX = -1;
+    int gridY = -1;
     if (_gridMap) {
         Vec2 gridPos = _gridMap->worldToGrid(position);
-        int gridX = static_cast<int>(gridPos.x);
-        int gridY = static_cast<int>(gridPos.y);
+        gridX = static_cast<int>(gridPos.x);
+        gridY = static_cast<int>(gridPos.y);
         if (!isDeployGridAllowed(gridX, gridY)) {
             return;
         }
@@ -1566,6 +1959,10 @@ void BattleScene::deploySoldier(int unitId, const Vec2& position) {
         _totalDeployedCount++;
 
         spawnDeployEffect(position);
+
+        if (_recordingEnabled && gridX >= 0 && gridY >= 0) {
+            recordDeployEvent(unitId, unitLevel, gridX, gridY);
+        }
 
         // 更新剩余数量
         it->second--;
@@ -1611,6 +2008,60 @@ void BattleScene::spawnDeployEffect(const Vec2& position) {
     ring->runAction(Sequence::create(Spawn::create(scale, fade, nullptr), RemoveSelf::create(), nullptr));
 }
 
+void BattleScene::recordDeployEvent(int unitId, int unitLevel, int gridX, int gridY) {
+    if (!_recordingEnabled) {
+        return;
+    }
+    ReplayDeployEvent event;
+    event.time = _battleTime;
+    event.unitId = unitId;
+    event.gridX = gridX;
+    event.gridY = gridY;
+    event.level = unitLevel;
+    _recording.events.push_back(event);
+}
+
+void BattleScene::updateReplayPlayback() {
+    if (!_isReplay || !_hasReplayData || !_gridMap) {
+        return;
+    }
+    while (_replayEventIndex < _replayData.events.size()) {
+        const auto& event = _replayData.events[_replayEventIndex];
+        if (_battleTime + 0.0001f < event.time) {
+            break;
+        }
+        deployReplaySoldier(event);
+        _replayEventIndex++;
+    }
+}
+
+void BattleScene::deployReplaySoldier(const ReplayDeployEvent& event) {
+    if (!_gridMap) {
+        return;
+    }
+    Vec2 position = _gridMap->gridToWorld(event.gridX, event.gridY);
+    auto soldier = UnitManager::getInstance()->spawnSoldier(event.unitId, position, event.level);
+    if (!soldier) {
+        return;
+    }
+
+    _soldierLayer->addChild(soldier);
+    _soldiers.push_back(soldier);
+    soldier->retain();
+    _totalDeployedCount++;
+
+    spawnDeployEffect(position);
+
+    auto it = _remainingUnits.find(event.unitId);
+    if (it != _remainingUnits.end() && it->second > 0) {
+        it->second--;
+        refreshDeployButton(event.unitId);
+        if (it->second <= 0 && event.unitId == _selectedUnitId) {
+            setSelectedUnit(getFirstAvailableUnitId());
+        }
+    }
+}
+
 // ===================================================
 // 触摸事件初始化
 // ===================================================
@@ -1641,10 +2092,7 @@ void BattleScene::initHoverInfo() {
     border->setName("hoverBorder");
     _hoverInfoPanel->addChild(border, 1);
 
-    _hoverInfoLabel = Label::createWithTTF("", "fonts/ScienceGothic.ttf", 18);
-    if (!_hoverInfoLabel) {
-        _hoverInfoLabel = Label::createWithSystemFont("", "Arial", 18);
-    }
+    _hoverInfoLabel = createBattleLabel("", 18);
     _hoverInfoLabel->setAnchorPoint(Vec2(0, 1));
     _hoverInfoLabel->setAlignment(TextHAlignment::LEFT);
     _hoverInfoLabel->setTextColor(Color4B(255, 255, 255, 255));
@@ -1668,8 +2116,29 @@ void BattleScene::initHoverInfo() {
     _eventDispatcher->addEventListenerWithSceneGraphPriority(mouseListener, this);
 }
 
+void BattleScene::initReplayState() {
+    _replayEventIndex = 0;
+    _replayFinalized = false;
+
+    if (_isReplay) {
+        _recordingEnabled = false;
+        return;
+    }
+
+    _recordingEnabled = true;
+    _recording = BattleReplay();
+    _recording.version = 1;
+    _recording.levelId = _levelId;
+    _recording.defenseMode = (_battleMode == BattleMode::Defense);
+    _recording.allowDefaultUnits = _allowDefaultUnits;
+    _recording.battleSpeed = GameSettings::getBattleSpeed();
+    _recording.timestamp = static_cast<int64_t>(std::time(nullptr));
+    _recording.deployableUnits = _remainingUnits;
+    _recording.events.clear();
+}
+
 bool BattleScene::onTouchBegan(Touch* touch, Event* event) {
-    if (_battleMode == BattleMode::Defense) {
+    if (_battleMode == BattleMode::Defense || _battlePaused || _battleBriefing || _isReplay) {
         return false;
     }
     auto visibleSize = Director::getInstance()->getVisibleSize();
@@ -1721,7 +2190,7 @@ bool BattleScene::onTouchBegan(Touch* touch, Event* event) {
 // ===================================================
 
 void BattleScene::updateHoverInfo(const Vec2& worldPos) {
-    if (!_gridMap || !_buildingLayer || _battleEnded) {
+    if (!_gridMap || !_buildingLayer || _battleEnded || _battlePaused || _battleBriefing) {
         clearBuildingInfo();
         return;
     }
@@ -1961,20 +2430,20 @@ void BattleScene::clearBuildingInfo() {
 // ===================================================
 
 void BattleScene::update(float dt) {
-    if (_battleEnded) return;
+    if (_battleEnded || _battlePaused || _battleBriefing) {
+        return;
+    }
 
     // 更新战斗时间
     _battleTime += dt;
 
     // 更新计时器显示
     float remainingTime = std::max(0.0f, BattleConfig::BATTLE_TIME_LIMIT - _battleTime);
-    int minutes = static_cast<int>(remainingTime) / 60;
-    int seconds = static_cast<int>(remainingTime) % 60;
-    char timeStr[16];
-    snprintf(timeStr, sizeof(timeStr), "%d:%02d", minutes, seconds);
     if (_timerLabel) {
-        _timerLabel->setString(timeStr);
+        _timerLabel->setString(formatTimeText(remainingTime));
     }
+
+    updateReplayPlayback();
 
     // 更新战斗逻辑
     updateBattle(dt);
@@ -2176,6 +2645,18 @@ void BattleScene::freezeBattleActors() {
     }
 }
 
+void BattleScene::finalizeReplay(bool isWin, int stars) {
+    if (!_recordingEnabled || _replayFinalized) {
+        return;
+    }
+    _replayFinalized = true;
+    _recording.resultWin = isWin;
+    _recording.resultStars = stars;
+    _recording.duration = _battleTime;
+    ReplayManager::getInstance()->setLastReplay(_recording);
+    ReplayManager::getInstance()->saveLastReplay();
+}
+
 // ===================================================
 // 战斗胜利
 // ===================================================
@@ -2186,6 +2667,14 @@ void BattleScene::onBattleWin() {
     CCLOG("[战斗场景] 战斗胜利！");
     AudioManager::stopBgm();
     AudioManager::playVictory();
+
+    if (_isReplay) {
+        _resultRewardCoin = 0;
+        _resultRewardDiamond = 0;
+        int stars = calculateStarCount();
+        showBattleResult(true, stars);
+        return;
+    }
 
     // 计算并发放奖励
     float destroyedRatio = _totalBuildingCount > 0
@@ -2211,9 +2700,12 @@ void BattleScene::onBattleWin() {
 
     Core::getInstance()->addResource(ResourceType::COIN, rewardCoin);
     Core::getInstance()->addResource(ResourceType::DIAMOND, rewardDiamond);
+    _resultRewardCoin = rewardCoin;
+    _resultRewardDiamond = rewardDiamond;
 
     int stars = calculateStarCount();
     Core::getInstance()->setLevelStars(getRecordLevelId(), stars);
+    finalizeReplay(true, stars);
     showBattleResult(true, stars);
 }
 
@@ -2228,7 +2720,10 @@ void BattleScene::onBattleLose() {
     AudioManager::stopBgm();
     AudioManager::playLose();
 
+    _resultRewardCoin = 0;
+    _resultRewardDiamond = 0;
     int stars = calculateStarCount();
+    finalizeReplay(false, stars);
     showBattleResult(false, stars);
 }
 
@@ -2351,6 +2846,20 @@ void BattleScene::showBattleResult(bool isWin, int stars) {
         _resultLayer = nullptr;
     }
 
+    setPausedState(false);
+    _battleBriefing = false;
+    if (_briefLayer) {
+        _briefLayer->removeFromParent();
+        _briefLayer = nullptr;
+    }
+    if (_pauseButton) {
+        _pauseButton->setEnabled(false);
+        _pauseButton->setVisible(false);
+    }
+    if (_pauseOverlay) {
+        _pauseOverlay->setVisible(false);
+    }
+
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
 
@@ -2424,7 +2933,76 @@ void BattleScene::showBattleResult(bool isWin, int stars) {
         _resultLayer->addChild(starGroup, 1);
     }
 
+    createResultStatsPanel(_resultLayer, isWin);
     createResultButtons(_resultLayer, isWin);
+}
+
+void BattleScene::createResultStatsPanel(Node* parent, bool isWin) {
+    if (!parent) {
+        return;
+    }
+
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+
+    float panelWidth = visibleSize.width * 0.55f;
+    float panelHeight = visibleSize.height * 0.2f;
+    if (panelHeight < 120.0f) {
+        panelHeight = 120.0f;
+    }
+
+    auto panel = LayerColor::create(Color4B(20, 20, 20, 200), panelWidth, panelHeight);
+    panel->setPosition(Vec2(origin.x + (visibleSize.width - panelWidth) * 0.5f,
+        origin.y + visibleSize.height * 0.28f));
+    parent->addChild(panel, 2);
+
+    float timeUsed = std::min(_battleTime, BattleConfig::BATTLE_TIME_LIMIT);
+    std::string timeLine = StringUtils::format("Time: %s / %s",
+        formatTimeText(timeUsed).c_str(),
+        formatTimeText(BattleConfig::BATTLE_TIME_LIMIT).c_str());
+
+    float destroyedRatio = _totalBuildingCount > 0
+        ? static_cast<float>(_destroyedBuildingCount) / _totalBuildingCount * 100.0f
+        : 100.0f;
+    std::string buildingLine = StringUtils::format("Buildings: %d/%d (%.0f%%)",
+        _destroyedBuildingCount, _totalBuildingCount, destroyedRatio);
+
+    std::string unitLine;
+    if (_battleMode == BattleMode::Defense) {
+        int totalEnemies = std::max(0, _defenseTotalUnits);
+        unitLine = StringUtils::format("Enemies: %d/%d defeated", _deadSoldierCount, totalEnemies);
+    }
+    else {
+        unitLine = StringUtils::format("Units: %d deployed  %d lost", _totalDeployedCount, _deadSoldierCount);
+    }
+
+    std::string rewardLine;
+    if (_isReplay) {
+        rewardLine = "Reward: -";
+    }
+    else {
+        rewardLine = isWin
+            ? StringUtils::format("Reward: +%dG +%dD", _resultRewardCoin, _resultRewardDiamond)
+            : "Reward: -";
+    }
+
+    std::string statsText = StringUtils::format("%s\n%s\n%s\n%s",
+        timeLine.c_str(),
+        buildingLine.c_str(),
+        unitLine.c_str(),
+        rewardLine.c_str());
+
+    auto label = createBattleLabel(statsText, 14);
+    label->setAnchorPoint(Vec2(0.0f, 1.0f));
+    label->setAlignment(TextHAlignment::LEFT);
+    label->setTextColor(Color4B(240, 240, 240, 255));
+    label->setPosition(Vec2(12.0f, panelHeight - 10.0f));
+    label->setWidth(panelWidth - 24.0f);
+    panel->addChild(label, 2);
+
+    auto border = DrawNode::create();
+    border->drawRect(Vec2(0, 0), Vec2(panelWidth, panelHeight), Color4F(0.8f, 0.8f, 0.8f, 1.0f));
+    panel->addChild(border, 1);
 }
 
 void BattleScene::createResultButtons(Node* parent, bool isWin) {
@@ -2508,6 +3086,32 @@ void BattleScene::createResultButtons(Node* parent, bool isWin) {
             Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
         });
         parent->addChild(nextBtn, 2);
+    }
+
+    auto replayBtn = createBattlePlainButton("Replay", 16, Size(140.0f, 36.0f), kReplayBtnNormal, kReplayBtnPressed);
+    if (replayBtn) {
+        float replayY = baseY - 58.0f;
+        float minY = origin.y + 28.0f;
+        if (replayY < minY) {
+            replayY = minY;
+        }
+        replayBtn->setPosition(Vec2(centerX, replayY));
+        bool canReplay = !_isReplay && ReplayManager::getInstance()->hasLastReplay();
+        if (!canReplay) {
+            replayBtn->setEnabled(false);
+            replayBtn->setBright(false);
+            replayBtn->setOpacity(140);
+        }
+        replayBtn->addClickEventListener([this](Ref*) {
+            AudioManager::playButtonClick();
+            const auto* replay = ReplayManager::getInstance()->getLastReplay();
+            if (!replay) {
+                return;
+            }
+            auto scene = BattleScene::createReplayScene(*replay);
+            Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
+        });
+        parent->addChild(replayBtn, 2);
     }
 }
 

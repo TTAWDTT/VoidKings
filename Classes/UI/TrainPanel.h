@@ -34,11 +34,12 @@ namespace TrainPanelConfig {
     constexpr float PANEL_PADDING = 16.0f;
     constexpr float CARD_AREA_TOP_GAP = 4.0f;
     constexpr float CARD_AREA_BOTTOM_GAP = 4.0f;
+    constexpr float DETAIL_PANEL_HEIGHT = 86.0f;
+    constexpr float DETAIL_PANEL_GAP = 8.0f;
+    constexpr float DETAIL_PANEL_PADDING = 10.0f;
 
     // 字体配置 - 清晰易读
-    constexpr const char* FONT_PATH = "fonts/arial.ttf";
-    constexpr const char* SYSTEM_FONT_NAME = "Arial";
-    constexpr const char* SYSTEM_FONT_FALLBACK = "Microsoft YaHei";
+    constexpr const char* FONT_PATH = "fonts/ScienceGothic.ttf";
     constexpr int TITLE_FONT_SIZE = 26;
     constexpr int NAME_FONT_SIZE = 16;
     constexpr int LEVEL_FONT_SIZE = 13;
@@ -46,6 +47,7 @@ namespace TrainPanelConfig {
     constexpr int BUTTON_FONT_SIZE = 12;
     constexpr int CLOSE_FONT_SIZE = 15;
     constexpr int RESOURCE_FONT_SIZE = 14;
+    constexpr int DETAIL_FONT_SIZE = 12;
     constexpr float TITLE_BAR_HEIGHT = 50.0f;
 
     // 兵种卡片配置 - 缩小尺寸
@@ -106,6 +108,9 @@ private:
     Node* _contentRoot = nullptr;           // 内容容器
     ScrollView* _unitCardArea = nullptr;          // 兵种卡片区域
     Label* _resourceLabel = nullptr;        // 资源显示
+    Node* _detailPanel = nullptr;           // 详情面板
+    LayerColor* _detailBg = nullptr;        // 详情背景
+    Label* _detailLabel = nullptr;          // 详情文本
 
     // 兵种等级信息 <兵种ID, 等级信息>
     std::map<int, UnitLevelInfo> _unitLevels;
@@ -133,8 +138,11 @@ private:
     void setupUnitCards();
     void setupCloseButton();
     void setupResourceDisplay();
+    void setupDetailPanel();
     void initUnitLevels();
     void selectUnit(int unitId);
+    void updateDetailPanel();
+    std::string buildUnitDetailText(int unitId) const;
 
     // 招募兵种（消耗金币）
     void recruitUnit(int unitId);

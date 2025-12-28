@@ -31,6 +31,11 @@ namespace PlacementConfig {
     const Color4F GRID_COLOR_OCCUPIED = Color4F(0.5f, 0.5f, 0.5f, 0.3f);       // 已占用：灰色
     const Color4F GRID_COLOR_EMPTY = Color4F(0.0f, 0.5f, 0.0f, 0.2f);          // 空闲：淡绿色
     const Color4F GRID_COLOR_FORBIDDEN = Color4F(0.3f, 0.3f, 0.3f, 0.3f);      // 禁止区域：深灰色
+
+    // 放置辅助线配置
+    const Color4F FOOTPRINT_BORDER = Color4F(0.9f, 0.9f, 0.9f, 0.9f);          // 占地边框
+    const Color4F FOOTPRINT_BORDER_BLOCKED = Color4F(1.0f, 0.4f, 0.4f, 0.9f);  // 不可放置占地边框
+    const Color4F RANGE_RING = Color4F(0.7f, 0.9f, 1.0f, 0.75f);              // 攻击范围虚线
 }
 
 // ===================================================
@@ -130,6 +135,8 @@ private:
     Sprite* _previewSprite = nullptr;       // 建筑预览精灵
     DrawNode* _gridDisplayNode = nullptr;   // 全地图格子显示节点
     DrawNode* _placementGridNode = nullptr; // 当前放置位置格子显示节点
+    DrawNode* _placementFootprintNode = nullptr; // 建筑占地轮廓
+    DrawNode* _placementRangeNode = nullptr;     // 攻击范围提示
     Node* _previewInfoPanel = nullptr;      // 预览信息面板
     Label* _previewInfoLabel = nullptr;     // 预览信息文本
 
@@ -162,6 +169,16 @@ private:
      * @param canPlace 是否可以放置
      */
     void updatePlacementGridDisplay(int gridX, int gridY, bool canPlace);
+
+    /**
+     * @brief 更新放置辅助线（占地轮廓 + 攻击范围）
+     */
+    void updatePlacementOverlays(int gridX, int gridY, bool canPlace);
+
+    /**
+     * @brief 获取当前建筑的攻击范围（非防御建筑返回0）
+     */
+    float resolveAttackRange() const;
 
     /**
      * @brief 创建预览信息面板

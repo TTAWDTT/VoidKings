@@ -18,6 +18,8 @@
 #include "Buildings/Trap.h"
 #include "UI/TrainPanel.h"
 #include "Core/Core.h"
+#include "BattleScene.h"
+#include "Share/BattleShareManager.h"
 #include "Save/SaveManager.h"
 #include "Soldier/UnitManager.h"
 #include "Utils/AudioManager.h"
@@ -29,6 +31,18 @@
 USING_NS_CC;
 
 namespace {
+const char* kBaseFont = "fonts/ScienceGothic.ttf";
+
+Label* createBaseLabel(const std::string& text, float fontSize) {
+    auto label = Label::createWithTTF(text, kBaseFont, fontSize);
+    if (!label) {
+        label = Label::create();
+        label->setString(text);
+        label->setSystemFontSize(fontSize);
+    }
+    return label;
+}
+
 constexpr float kHoverPanelPaddingX = 16.0f;
 constexpr float kHoverPanelPaddingY = 14.0f;
 constexpr float kHoverPanelMinWidth = 260.0f;
@@ -264,11 +278,14 @@ void BaseScene::initUIComponents() {
     callbacks.onAttack = [this]() { this->onAttackClicked(); };
     callbacks.onBuild = [this]() { this->onBuildClicked(); };
     callbacks.onExit = [this]() { this->onExitClicked(); };
+    callbacks.onAsync = [this]() { this->onAsyncClicked(); };
 
     _uiPanel = BaseUIPanel::create(callbacks);
     if (_uiPanel) {
         this->addChild(_uiPanel, 100);
     }
+
+    setupAsyncPanel();
 
     CCLOG("[基地场景] UI组件初始化完成");
 }
@@ -363,6 +380,400 @@ void BaseScene::onUnitTrainComplete(int unitId) {
             Core::getInstance()->getResource(ResourceType::DIAMOND)
         );
     }
+}
+
+void BaseScene::onAsyncClicked() {
+    AudioManager::playButtonClick();
+    toggleAsyncPanel();
+}
+
+void BaseScene::toggleAsyncPanel() {
+    if (_asyncPanelVisible) {
+        hideAsyncPanel();
+    }
+    else {
+        showAsyncPanel();
+    }
+}
+
+void BaseScene::showAsyncPanel() {
+    if (!_asyncPanel) {
+        setupAsyncPanel();
+    }
+    if (!_asyncPanel) {
+        return;
+    }
+    _asyncPanel->setVisible(true);
+    _asyncPanelVisible = true;
+    updateAsyncStatus("Drop opponent target_base_snapshot.json / target_replay.json into the share folder.");
+}
+
+void BaseScene::hideAsyncPanel() {
+    if (_asyncPanel) {
+        _asyncPanel->setVisible(false);
+    }
+    _asyncPanelVisible = false;
+}
+
+void BaseScene::setupAsyncPanel() {
+    if (_asyncPanel) {
+        return;
+    }
+
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+
+    auto overlay = Layout::create();
+    if (!overlay) {
+        return;
+    }
+    overlay->setBackGroundColorType(Layout::BackGroundColorType::SOLID);
+    overlay->setBackGroundColor(Color3B::BLACK);
+    overlay->setBackGroundColorOpacity(160);
+    overlay->setContentSize(visibleSize);
+    overlay->setAnchorPoint(Vec2::ZERO);
+    overlay->setPosition(origin);
+    overlay->setTouchEnabled(true);
+    overlay->setSwallowTouches(true);
+    overlay->setPropagateTouchEvents(true);
+    overlay->setVisible(false);
+    this->addChild(overlay, 400);
+    _asyncPanel = overlay;
+
+    float cardWidth = std::min(780.0f, visibleSize.width * 0.78f);
+    float cardHeight = std::min(560.0f, visibleSize.height * 0.85f);
+    auto card = LayerColor::create(Color4B(24, 24, 24, 235), cardWidth, cardHeight);
+    card->setIgnoreAnchorPointForPosition(false);
+    card->setAnchorPoint(Vec2(0.5f, 0.5f));
+    card->setPosition(Vec2(origin.x + visibleSize.width * 0.5f,
+        origin.y + visibleSize.height * 0.5f));
+    card->setName("asyncCard");
+    _asyncPanel->addChild(card, 1);
+
+    overlay->addTouchEventListener([this, card](Ref* sender, Widget::TouchEventType type) {
+        if (!_asyncPanelVisible || !card) {
+            return;
+        }
+        if (type == Widget::TouchEventType::ENDED) {
+            auto widget = dynamic_cast<Widget*>(sender);
+            if (!widget) {
+                return;
+            }
+            Vec2 worldPos = widget->getTouchEndPosition();
+            Vec2 local = card->convertToNodeSpace(worldPos);
+            Rect bounds(0.0f, 0.0f, card->getContentSize().width, card->getContentSize().height);
+            if (!bounds.containsPoint(local)) {
+                hideAsyncPanel();
+            }
+        }
+    });
+
+    auto cardBorder = DrawNode::create();
+    cardBorder->drawRect(Vec2::ZERO, Vec2(cardWidth, cardHeight), Color4F(1, 1, 1, 0.15f));
+    card->addChild(cardBorder, 2);
+
+    auto makeLabel = [](const std::string& text,
+        float fontSize,
+        const Color3B& color = Color3B::WHITE,
+        TextHAlignment alignment = TextHAlignment::LEFT,
+        TextVAlignment vAlignment = TextVAlignment::CENTER) -> Label* {
+            auto label = createBaseLabel(text, fontSize);
+            if (!label) {
+                return nullptr;
+            }
+            label->setColor(color);
+            label->setAlignment(alignment);
+            label->setVerticalAlignment(vAlignment);
+            label->setOverflow(Label::Overflow::RESIZE_HEIGHT);
+            return label;
+    };
+
+    auto title = makeLabel("ASYNC OPERATIONS", 30, Color3B(255, 255, 255), TextHAlignment::CENTER);
+    if (title) {
+        title->setPosition(Vec2(cardWidth * 0.5f, cardHeight - 32.0f));
+        card->addChild(title, 2);
+    }
+
+    auto subTitle = makeLabel("Share base snapshots and battle replays for asynchronous attacks.", 18,
+        Color3B(195, 195, 195), TextHAlignment::CENTER);
+    if (subTitle) {
+        subTitle->setPosition(Vec2(cardWidth * 0.5f, cardHeight - 64.0f));
+        card->addChild(subTitle, 2);
+    }
+
+    auto* shareMgr = BattleShareManager::getInstance();
+    std::string shareDir = shareMgr ? shareMgr->getShareDirectory() : "";
+    auto pathBg = LayerColor::create(Color4B(45, 55, 80, 230), cardWidth - 64.0f, 48.0f);
+    pathBg->setPosition(Vec2(32.0f, cardHeight - 120.0f));
+    card->addChild(pathBg);
+    auto pathLabel = makeLabel("Share directory: " + shareDir, 16, Color3B::WHITE);
+    if (pathLabel) {
+        pathLabel->setAnchorPoint(Vec2(0, 0.5f));
+        pathLabel->setPosition(Vec2(38.0f, cardHeight - 96.0f));
+        pathLabel->setDimensions(cardWidth - 80.0f, 32.0f);
+        card->addChild(pathLabel, 2);
+    }
+
+    auto note = makeLabel("Place opponent target_base_snapshot.json / target_replay.json into the directory above.", 15,
+        Color3B(185, 185, 185));
+    if (note) {
+        note->setAnchorPoint(Vec2(0, 0.5f));
+        note->setPosition(Vec2(38.0f, cardHeight - 140.0f));
+        note->setDimensions(cardWidth - 76.0f, 48.0f);
+        card->addChild(note, 2);
+    }
+
+    float sectionWidth = cardWidth - 60.0f;
+    float sectionHeight = 170.0f;
+    float sectionLeft = (cardWidth - sectionWidth) * 0.5f;
+    auto createSection = [&](const Color4B& bgColor, float topY) -> LayerColor* {
+        auto bg = LayerColor::create(bgColor, sectionWidth, sectionHeight);
+        if (!bg) {
+            return nullptr;
+        }
+        bg->setAnchorPoint(Vec2::ZERO);
+        bg->setPosition(Vec2(sectionLeft, topY - sectionHeight));
+        card->addChild(bg, 1);
+
+        auto border = DrawNode::create();
+        border->drawRect(Vec2::ZERO, Vec2(sectionWidth, sectionHeight), Color4F(1, 1, 1, 0.08f));
+        bg->addChild(border, 1);
+
+        return bg;
+    };
+
+    auto baseBox = createSection(Color4B(36, 52, 42, 230), cardHeight - 180.0f);
+    if (baseBox) {
+        float h = baseBox->getContentSize().height;
+        auto baseTitle = makeLabel("BASE SNAPSHOT", 20);
+        if (baseTitle) {
+            baseTitle->setAnchorPoint(Vec2(0, 0.5f));
+            baseTitle->setPosition(Vec2(16.0f, h - 24.0f));
+            baseBox->addChild(baseTitle, 2);
+        }
+
+        auto baseDesc = makeLabel("Export my_base_snapshot.json to share your layout; load target_base_snapshot.json to attack imported bases.",
+            15, Color3B(215, 215, 215));
+        if (baseDesc) {
+            baseDesc->setAnchorPoint(Vec2(0, 1.0f));
+            baseDesc->setDimensions(sectionWidth - 32.0f, 78.0f);
+            baseDesc->setPosition(Vec2(16.0f, h - 48.0f));
+            baseBox->addChild(baseDesc, 2);
+        }
+
+        auto exportBaseBtn = createAsyncButton("EXPORT MY BASE", [this]() {
+            handleExportBase();
+            }, Size(200.0f, 44.0f), Color4B(70, 116, 80, 255), Color4B(56, 96, 64, 255));
+        auto importBaseBtn = createAsyncButton("LOAD TARGET & ATTACK", [this]() {
+            handleImportBaseAttack();
+            }, Size(200.0f, 44.0f), Color4B(70, 92, 135, 255), Color4B(58, 76, 112, 255));
+        if (exportBaseBtn && importBaseBtn) {
+            float btnY = 36.0f;
+            exportBaseBtn->setPosition(Vec2(sectionWidth * 0.5f - 115.0f, btnY));
+            importBaseBtn->setPosition(Vec2(sectionWidth * 0.5f + 115.0f, btnY));
+            baseBox->addChild(exportBaseBtn);
+            baseBox->addChild(importBaseBtn);
+        }
+    }
+
+    auto replayBox = createSection(Color4B(44, 40, 48, 230), cardHeight - 370.0f);
+    if (replayBox) {
+        float h = replayBox->getContentSize().height;
+        auto replayTitle = makeLabel("BATTLE REPLAY", 20);
+        if (replayTitle) {
+            replayTitle->setAnchorPoint(Vec2(0, 0.5f));
+            replayTitle->setPosition(Vec2(16.0f, h - 24.0f));
+            replayBox->addChild(replayTitle, 2);
+        }
+
+        auto replayDesc = makeLabel("Export last_replay.json to share the latest battle; drop target_replay.json into the directory to watch.",
+            15, Color3B(215, 215, 215));
+        if (replayDesc) {
+            replayDesc->setAnchorPoint(Vec2(0, 1.0f));
+            replayDesc->setDimensions(sectionWidth - 32.0f, 78.0f);
+            replayDesc->setPosition(Vec2(16.0f, h - 48.0f));
+            replayBox->addChild(replayDesc, 2);
+        }
+
+        auto exportReplayBtn = createAsyncButton("EXPORT LAST REPLAY", [this]() {
+            handleExportReplay();
+            }, Size(200.0f, 44.0f), Color4B(120, 92, 50, 255), Color4B(102, 78, 40, 255));
+        auto importReplayBtn = createAsyncButton("PLAY IMPORTED REPLAY", [this]() {
+            handleImportReplay();
+            }, Size(200.0f, 44.0f), Color4B(83, 70, 120, 255), Color4B(68, 56, 98, 255));
+        if (exportReplayBtn && importReplayBtn) {
+            float btnY = 36.0f;
+            exportReplayBtn->setPosition(Vec2(sectionWidth * 0.5f - 115.0f, btnY));
+            importReplayBtn->setPosition(Vec2(sectionWidth * 0.5f + 115.0f, btnY));
+            replayBox->addChild(exportReplayBtn);
+            replayBox->addChild(importReplayBtn);
+        }
+    }
+
+    auto statusBg = LayerColor::create(Color4B(18, 18, 18, 230), cardWidth - 60.0f, 72.0f);
+    statusBg->setPosition(Vec2(30.0f, 40.0f));
+    statusBg->setName("asyncStatusBg");
+    card->addChild(statusBg, 1);
+
+    _asyncStatusLabel = createBaseLabel("", 17);
+    if (_asyncStatusLabel) {
+        _asyncStatusLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
+        _asyncStatusLabel->setAlignment(TextHAlignment::CENTER);
+        _asyncStatusLabel->setTextColor(Color4B(240, 240, 240, 255));
+        _asyncStatusLabel->setDimensions(statusBg->getContentSize().width - 40.0f, 66.0f);
+        _asyncStatusLabel->setPosition(Vec2(statusBg->getContentSize().width * 0.5f,
+            statusBg->getContentSize().height * 0.5f));
+        statusBg->addChild(_asyncStatusLabel, 2);
+    }
+
+    auto closeBtn = createAsyncButton("CLOSE", [this]() {
+        hideAsyncPanel();
+        }, Size(110.0f, 40.0f), Color4B(140, 70, 70, 255), Color4B(166, 82, 82, 255));
+    if (closeBtn) {
+        closeBtn->setPosition(Vec2(cardWidth - 70.0f, cardHeight - 34.0f));
+        card->addChild(closeBtn, 2);
+    }
+    updateAsyncStatus("Results of export/import operations will be shown here.");
+}
+
+void BaseScene::updateAsyncStatus(const std::string& text) {
+    if (_asyncStatusLabel) {
+        _asyncStatusLabel->setString(text);
+        _asyncStatusLabel->stopAllActions();
+        _asyncStatusLabel->setOpacity(255);
+        _asyncStatusLabel->runAction(Sequence::create(
+            DelayTime::create(4.0f),
+            FadeTo::create(0.25f, 210),
+            nullptr));
+    }
+}
+
+Button* BaseScene::createAsyncButton(const std::string& text,
+    const std::function<void()>& handler,
+    const Size& size,
+    const Color4B& normalColor,
+    const Color4B& pressedColor) {
+    auto button = Button::create();
+    if (!button) {
+        return nullptr;
+    }
+    button->setScale9Enabled(true);
+    button->setContentSize(size);
+    button->setAnchorPoint(Vec2(0.5f, 0.5f));
+    button->setZoomScale(0.04f);
+    button->setPressedActionEnabled(true);
+    button->setTitleText("");
+
+    auto normalBg = LayerColor::create(normalColor, size.width, size.height);
+    normalBg->setIgnoreAnchorPointForPosition(false);
+    normalBg->setAnchorPoint(Vec2(0.5f, 0.5f));
+    normalBg->setPosition(Vec2(size.width * 0.5f, size.height * 0.5f));
+    normalBg->setName("btnBg");
+    button->addChild(normalBg, -1);
+
+    auto titleLabel = createBaseLabel(text, 18);
+    if (titleLabel) {
+        titleLabel->setPosition(Vec2(size.width * 0.5f, size.height * 0.5f));
+        titleLabel->setTextColor(Color4B::WHITE);
+        button->addChild(titleLabel, 1);
+    }
+
+    auto applyColor = [normalBg](const Color4B& color) {
+        if (!normalBg) {
+            return;
+        }
+        normalBg->setColor(Color3B(color.r, color.g, color.b));
+        normalBg->setOpacity(color.a);
+    };
+
+    button->addTouchEventListener([applyColor, normalColor, pressedColor](Ref*, Widget::TouchEventType type) {
+        if (type == Widget::TouchEventType::BEGAN) {
+            applyColor(pressedColor);
+        }
+        else if (type == Widget::TouchEventType::ENDED || type == Widget::TouchEventType::CANCELED) {
+            applyColor(normalColor);
+        }
+        });
+
+    button->addClickEventListener([handler](Ref*) {
+        if (handler) {
+            handler();
+        }
+        });
+    return button;
+}
+
+void BaseScene::handleExportBase() {
+    auto* shareMgr = BattleShareManager::getInstance();
+    if (!shareMgr) {
+        updateAsyncStatus("Share manager unavailable.");
+        return;
+    }
+    std::string path;
+    if (shareMgr->exportPlayerBaseSnapshot(&path)) {
+        updateAsyncStatus("Base snapshot exported to: " + path);
+    }
+    else {
+        updateAsyncStatus("Export failed. Please confirm the base is loaded.");
+    }
+}
+
+void BaseScene::handleImportBaseAttack() {
+    auto* shareMgr = BattleShareManager::getInstance();
+    if (!shareMgr) {
+        updateAsyncStatus("Share manager unavailable.");
+        return;
+    }
+    BaseSnapshot snapshot;
+    if (!shareMgr->loadIncomingSnapshot(&snapshot)) {
+        updateAsyncStatus("Failed to load target_base_snapshot.json.");
+        return;
+    }
+    shareMgr->setActiveTargetSnapshot(snapshot);
+    auto deployUnits = UnitManager::getInstance()->getTrainedUnits();
+    bool allowDefault = deployUnits.empty();
+    auto scene = BattleScene::createSnapshotScene(snapshot, deployUnits, allowDefault);
+    if (!scene) {
+        updateAsyncStatus("Failed to create battle scene from the snapshot.");
+        return;
+    }
+    updateAsyncStatus("Target base loaded. Ready to attack.");
+    Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
+}
+
+void BaseScene::handleExportReplay() {
+    auto* shareMgr = BattleShareManager::getInstance();
+    if (!shareMgr) {
+        updateAsyncStatus("Share manager unavailable.");
+        return;
+    }
+    std::string path;
+    if (shareMgr->exportLastReplay(&path)) {
+        updateAsyncStatus("Replay exported to: " + path);
+    }
+    else {
+        updateAsyncStatus("Export failed: finish a battle first.");
+    }
+}
+
+void BaseScene::handleImportReplay() {
+    auto* shareMgr = BattleShareManager::getInstance();
+    if (!shareMgr) {
+        updateAsyncStatus("Share manager unavailable.");
+        return;
+    }
+    BattleReplay replay;
+    if (!shareMgr->loadIncomingReplay(&replay)) {
+        updateAsyncStatus("Failed to load target_replay.json.");
+        return;
+    }
+    auto scene = BattleScene::createReplayScene(replay);
+    if (!scene) {
+        updateAsyncStatus("Unable to create replay scene.");
+        return;
+    }
+    updateAsyncStatus("Replay file loaded. Ready to play.");
+    Director::getInstance()->replaceScene(TransitionFade::create(0.5f, scene));
 }
 
 // ==================== 基地建筑初始化 ====================
@@ -510,10 +921,7 @@ void BaseScene::initHoverInfo() {
     border->setName("hoverBorder");
     _hoverInfoPanel->addChild(border, 1);
 
-    _hoverInfoLabel = Label::createWithTTF("", "fonts/ScienceGothic.ttf", 18);
-    if (!_hoverInfoLabel) {
-        _hoverInfoLabel = Label::createWithSystemFont("", "Arial", 18);
-    }
+    _hoverInfoLabel = createBaseLabel("", 18);
     _hoverInfoLabel->setAnchorPoint(Vec2(0, 1));
     _hoverInfoLabel->setAlignment(TextHAlignment::LEFT);
     _hoverInfoLabel->setTextColor(Color4B(255, 255, 255, 255));
@@ -560,10 +968,7 @@ void BaseScene::setupHoverUpgradeUI() {
     _hoverUpgradeBorder->setName("hoverUpgradeBorder");
     _hoverUpgradeNode->addChild(_hoverUpgradeBorder, 1);
 
-    _hoverUpgradeLabel = Label::createWithTTF("UP", "fonts/ScienceGothic.ttf", 10);
-    if (!_hoverUpgradeLabel) {
-        _hoverUpgradeLabel = Label::createWithSystemFont("UP", "Arial", 10);
-    }
+    _hoverUpgradeLabel = createBaseLabel("UP", 10);
     _hoverUpgradeLabel->setName("hoverUpgradeLabel");
     _hoverUpgradeLabel->setColor(Color3B::WHITE);
     _hoverUpgradeNode->addChild(_hoverUpgradeLabel, 2);
@@ -599,10 +1004,7 @@ void BaseScene::setupHoverUpgradeUI() {
         );
         toastRoot->addChild(border, 1);
 
-        auto toastLabel = Label::createWithTTF("Level up!", "fonts/ScienceGothic.ttf", 12);
-        if (!toastLabel) {
-            toastLabel = Label::createWithSystemFont("Level up!", "Arial", 12);
-        }
+        auto toastLabel = createBaseLabel("Level up!", 12);
         toastLabel->setPosition(Vec2(0.0f, 0.0f));
         toastLabel->setColor(Color3B::WHITE);
         toastRoot->addChild(toastLabel, 2);
@@ -665,10 +1067,7 @@ void BaseScene::setupHoverSellUI() {
     _hoverSellBorder->setName("hoverSellBorder");
     _hoverSellNode->addChild(_hoverSellBorder, 1);
 
-    _hoverSellLabel = Label::createWithTTF("SELL", "fonts/ScienceGothic.ttf", 10);
-    if (!_hoverSellLabel) {
-        _hoverSellLabel = Label::createWithSystemFont("SELL", "Arial", 10);
-    }
+    _hoverSellLabel = createBaseLabel("SELL", 10);
     _hoverSellLabel->setName("hoverSellLabel");
     _hoverSellLabel->setColor(Color3B::WHITE);
     _hoverSellNode->addChild(_hoverSellLabel, 2);
@@ -984,10 +1383,7 @@ void BaseScene::playCollectEffect(ResourceType type, int amount, const Vec2& wor
         ? StringUtils::format("Gold +%d", amount)
         : StringUtils::format("Diamond +%d", amount);
 
-    auto label = Label::createWithTTF(text, "fonts/ScienceGothic.ttf", 16);
-    if (!label) {
-        label = Label::createWithSystemFont(text, "Arial", 16);
-    }
+    auto label = createBaseLabel(text, 16);
     label->setPosition(worldPos + Vec2(0.0f, 12.0f));
     label->setColor(type == ResourceType::COIN ? Color3B(255, 220, 90) : Color3B(130, 210, 255));
     _effectLayer->addChild(label, 6);

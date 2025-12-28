@@ -155,6 +155,7 @@
     <ClCompile Include="..\Classes\AppDelegate.cpp" />
     <ClCompile Include="..\Classes\Core\Core.cpp" />
     <ClCompile Include="..\Classes\Save\SaveManager.cpp" />
+    <ClCompile Include="..\Classes\Replay\ReplayManager.cpp" />
     <ClCompile Include="..\Classes\HelloWorldScene.cpp" />
     <ClCompile Include="..\Classes\Scenes\BattleScene.cpp" />
     <ClCompile Include="..\Classes\Scenes\LevelSelectScene.cpp" />
@@ -164,6 +165,7 @@
     <ClCompile Include="..\Classes\Scenes\Components\PlacementManager.cpp" />
     <ClCompile Include="..\Classes\Scenes\Components\BaseUIPanel.cpp" />
     <ClCompile Include="..\Classes\Scenes\Components\GridBackground.cpp" />
+    <ClCompile Include="..\Classes\Share\BattleShareManager.cpp" />
     <ClCompile Include="..\Classes\Soldier\Soldier.cpp" />
     <ClCompile Include="..\Classes\Soldier\UnitManager.cpp" />
     <ClCompile Include="..\Classes\Buildings\DefenceBuilding.cpp" />
@@ -184,6 +186,7 @@
     <ClInclude Include="..\Classes\AppDelegate.h" />
     <ClInclude Include="..\Classes\Core\Core.h" />
     <ClInclude Include="..\Classes\Save\SaveManager.h" />
+    <ClInclude Include="..\Classes\Replay\ReplayManager.h" />
     <ClInclude Include="..\Classes\HelloWorldScene.h" />
     <ClInclude Include="..\Classes\Scenes\BattleScene.h" />
     <ClInclude Include="..\Classes\Scenes\LevelSelectScene.h" />
@@ -193,6 +196,7 @@
     <ClInclude Include="..\Classes\Scenes\Components\PlacementManager.h" />
     <ClInclude Include="..\Classes\Scenes\Components\BaseUIPanel.h" />
     <ClInclude Include="..\Classes\Scenes\Components\GridBackground.h" />
+    <ClInclude Include="..\Classes\Share\BattleShareManager.h" />
     <ClInclude Include="..\Classes\Soldier\Soldier.h" />
     <ClInclude Include="..\Classes\Soldier\UnitData.h" />
     <ClInclude Include="..\Classes\Soldier\UnitManager.h" />

@@ -14,6 +14,18 @@
 #include <algorithm>
 
 namespace {
+const char* kLevelFont = "fonts/ScienceGothic.ttf";
+
+Label* createLevelLabel(const std::string& text, float fontSize) {
+    auto label = Label::createWithTTF(text, kLevelFont, fontSize);
+    if (!label) {
+        label = Label::create();
+        label->setString(text);
+        label->setSystemFontSize(fontSize);
+    }
+    return label;
+}
+
 Node* createLevelNumberNode(int levelId, float targetWidth, float targetHeight) {
     std::string levelText = std::to_string(levelId);
     if (levelText.empty()) {
@@ -297,7 +309,7 @@ void LevelSelectScene::setupTitle() {
         LevelSelectConfig::TITLE_FONT_SIZE
     );
     if (!_titleLabel) {
-        _titleLabel = Label::createWithSystemFont("SELECT LEVEL", "Arial", LevelSelectConfig::TITLE_FONT_SIZE);
+        _titleLabel = createLevelLabel("SELECT LEVEL", LevelSelectConfig::TITLE_FONT_SIZE);
     }
 
     _titleLabel->setAnchorPoint(Vec2(0.5f, 1.0f));
@@ -359,7 +371,7 @@ void LevelSelectScene::setupModeButton() {
 
     _modeButtonLabel = Label::createWithTTF("", "fonts/ScienceGothic.ttf", 16);
     if (!_modeButtonLabel) {
-        _modeButtonLabel = Label::createWithSystemFont("", "Arial", 16);
+        _modeButtonLabel = createLevelLabel("", 16);
     }
     _modeButtonLabel->setPosition(Vec2::ZERO);
     _modeButtonLabel->setColor(Color3B::WHITE);
@@ -489,7 +501,7 @@ Node* LevelSelectScene::createLevelButton(const LevelInfo& level, int index) {
                 26
             );
             if (!numLabel) {
-                numLabel = Label::createWithSystemFont(std::to_string(level.displayId), "Arial", 24);
+                numLabel = createLevelLabel(std::to_string(level.displayId), 24);
             }
             numLabel->setPosition(Vec2(size / 2, size / 2 + 6.0f));
             numLabel->setColor(Color3B::WHITE);
@@ -505,10 +517,7 @@ Node* LevelSelectScene::createLevelButton(const LevelInfo& level, int index) {
         for (int s = level.starCount; s < 3; ++s) {
             starStr += "-";
         }
-        auto starLabel = Label::createWithTTF(starStr, "fonts/arial.ttf", 10);
-        if (!starLabel) {
-            starLabel = Label::createWithSystemFont(starStr, "Arial", 10);
-        }
+        auto starLabel = createLevelLabel(starStr, 10);
         starLabel->setPosition(Vec2(size / 2, size * 0.22f));
         starLabel->setColor(Color3B::YELLOW);
         node->addChild(starLabel, 2);
@@ -627,7 +636,7 @@ void LevelSelectScene::setupUnitPreview() {
         12
     );
     if (!previewTitle) {
-        previewTitle = Label::createWithSystemFont("UNITS:", "Arial", 12);
+        previewTitle = createLevelLabel("UNITS:", 12);
     }
     previewTitle->setAnchorPoint(Vec2(0, 0.5f));
     previewTitle->setPosition(Vec2(
@@ -673,7 +682,7 @@ void LevelSelectScene::updateUnitPreview() {
             10
         );
         if (!defenseLabel) {
-            defenseLabel = Label::createWithSystemFont("Defense mode - no deployment", "Arial", 10);
+            defenseLabel = createLevelLabel("Defense mode - no deployment", 10);
         }
         defenseLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
         defenseLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, baseY + size / 2));
@@ -690,7 +699,7 @@ void LevelSelectScene::updateUnitPreview() {
             10
         );
         if (!noUnitLabel) {
-            noUnitLabel = Label::createWithSystemFont("No units trained.", "Arial", 10);
+            noUnitLabel = createLevelLabel("No units trained.", 10);
         }
         noUnitLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
         noUnitLabel->setPosition(Vec2(origin.x + visibleSize.width / 2, baseY + size / 2));
@@ -761,7 +770,7 @@ Node* LevelSelectScene::createUnitPreviewIcon(int unitId, int count) {
         10
     );
     if (!countLabel) {
-        countLabel = Label::createWithSystemFont("x" + std::to_string(count), "Arial", 10);
+        countLabel = createLevelLabel("x" + std::to_string(count), 10);
     }
     countLabel->setPosition(Vec2(size / 2, 10));
     countLabel->setColor(Color3B::YELLOW);

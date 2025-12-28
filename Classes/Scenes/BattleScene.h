@@ -17,6 +17,8 @@
 #include "Soldier/Soldier.h"
 #include "Buildings/DefenceBuilding.h"
 #include "Buildings/ProductionBuilding.h"
+#include "Replay/ReplayManager.h"
+#include "Share/BattleShareManager.h"
 #include <vector>
 #include <map>
 
@@ -65,6 +67,10 @@ public:
      * @param useDefaultUnits 是否允许使用默认兵种
      */
     static Scene* createScene(int levelId = 1, const std::map<int, int>& units = {}, bool useDefaultUnits = true, bool defenseMode = false);
+    static Scene* createSnapshotScene(const BaseSnapshot& snapshot,
+        const std::map<int, int>& units = {},
+        bool useDefaultUnits = true);
+    static Scene* createReplayScene(const BattleReplay& replay);
 
     virtual bool init() override;
     virtual void update(float dt) override;
@@ -111,14 +117,29 @@ private:
     bool _enemyBaseDestroyed = false;               // 敌方基地是否已摧毁
     float _battleTime = 0.0f;                       // 战斗时间
     bool _battleEnded = false;                      // 战斗是否结束
+    bool _battlePaused = false;                     // 战斗是否暂停
+    bool _battleBriefing = false;                   // 是否处于战前简报
     int _destroyedBuildingCount = 0;                // 已摧毁的建筑数量
     int _totalBuildingCount = 0;                    // 总建筑数量
     int _totalDeployedCount = 0;                    // 已部署的总兵种数
     int _deadSoldierCount = 0;                      // 已死亡的兵种数
+    int _resultRewardCoin = 0;                      // 结算金币奖励
+    int _resultRewardDiamond = 0;                   // 结算钻石奖励
+    bool _isReplay = false;                         // 是否回放模式
+    bool _recordingEnabled = false;                 // 是否记录回放
+    bool _replayFinalized = false;                  // 回放是否已保存
+    size_t _replayEventIndex = 0;                   // 回放事件索引
+    BattleReplay _recording;                        // 录制数据
+    BattleReplay _replayData;                       // 回放数据
+    bool _hasReplayData = false;                    // 是否加载回放数据
+    bool _useSnapshotLayout = false;                // 是否使用基地快照布局
+    BaseSnapshot _snapshotLayout;                   // 当前基地快照
 
     // ==================== UI组件 ====================
     Label* _timerLabel = nullptr;                   // 计时器
     Label* _progressLabel = nullptr;                // 进度显示
+    Button* _pauseButton = nullptr;                 // 暂停按钮
+    Node* _pauseOverlay = nullptr;                  // 暂停遮罩
     Node* _unitDeployArea = nullptr;                // 单位部署区域
     std::map<int, Node*> _deployButtons;            // 部署按钮缓存
     int _selectedUnitId = -1;                       // 当前选中的单位ID
@@ -131,6 +152,7 @@ private:
     DrawNode* _hoverFootprintNode = nullptr;        // 占地实线框
     Node* _hoveredBuilding = nullptr;               // 当前悬浮建筑
     Node* _resultLayer = nullptr;                   // 结算展示层
+    Node* _briefLayer = nullptr;                    // 战前简报层
 
     // ==================== 初始化方法 ====================
     void initGridMap();
@@ -138,6 +160,11 @@ private:
     void initUI();
     void initTouchListener();
     void initHoverInfo();
+    void initReplayState();
+    void setupPauseControls(float topY);
+    void setPausedState(bool paused);
+    void showBattleBriefing();
+    void hideBattleBriefing();
 
     // ==================== 关卡初始化 ====================
     void createLevel1();  // 创建第1关
@@ -159,6 +186,8 @@ private:
     void createDefenseLevel5();
     void createDefenseLevel6();
     void createDefenseBaseLayout(int towerLevel);
+    void createSnapshotLayout();
+    void buildSnapshotLayout(const BaseSnapshot& snapshot);
     void createEnemyBase(int gridX, int gridY, int level = 0);
     void createDefenseTower(int gridX, int gridY, int type, int level = 0);
     void createSpikeTrap(int gridX, int gridY);
@@ -208,6 +237,11 @@ private:
     int calculateStarCount() const;
     void showBattleResult(bool isWin, int stars);
     void createResultButtons(Node* parent, bool isWin);
+    void createResultStatsPanel(Node* parent, bool isWin);
+    void recordDeployEvent(int unitId, int unitLevel, int gridX, int gridY);
+    void updateReplayPlayback();
+    void deployReplaySoldier(const ReplayDeployEvent& event);
+    void finalizeReplay(bool isWin, int stars);
 
     int getDefenseLevelIndex() const;
     int getRewardLevel() const;

@@ -51,6 +51,7 @@ list(APPEND GAME_SOURCE
      Classes/HelloWorldScene.cpp
      Classes/Core/Core.cpp
      Classes/Save/SaveManager.cpp
+     Classes/Replay/ReplayManager.cpp
      Classes/Scenes/MainMenuScene.cpp
      Classes/Scenes/BaseScene.cpp
      Classes/Scenes/BattleScene.cpp
@@ -59,6 +60,7 @@ list(APPEND GAME_SOURCE
      Classes/Scenes/Components/PlacementManager.cpp
      Classes/Scenes/Components/BaseUIPanel.cpp
      Classes/Scenes/Components/GridBackground.cpp
+     Classes/Share/BattleShareManager.cpp
      Classes/Buildings/DefenceBuilding.cpp
      Classes/Buildings/ProductionBuilding.cpp
      Classes/Buildings/StorageBuilding.cpp
@@ -79,6 +81,8 @@ list(APPEND GAME_HEADER
      Classes/HelloWorldScene.h
      Classes/Core/Core.h
      Classes/Save/SaveManager.h
+     Classes/Share/BattleShareManager.h
+     Classes/Replay/ReplayManager.h
      Classes/Scenes/MainMenuScene.h
      Classes/Scenes/BaseScene.h
      Classes/Scenes/BattleScene.h

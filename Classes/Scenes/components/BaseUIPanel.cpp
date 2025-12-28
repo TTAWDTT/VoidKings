@@ -119,9 +119,10 @@ void BaseUIPanel::setupButtons() {
     }
 
     _exitButton = Button::create("UI/exit.png");
+    float lastY = startY - 2 * (btnHeight + spacing);
     if (_exitButton) {
         _exitButton->setScale(scale);
-        _exitButton->setPosition(Vec2(buttonX, startY - 2 * (btnHeight + spacing)));
+        _exitButton->setPosition(Vec2(buttonX, lastY));
         applyPressStyle(_exitButton);
         _exitButton->addClickEventListener([this](Ref* sender) {
             AudioManager::playButtonCancel();
@@ -132,6 +133,55 @@ void BaseUIPanel::setupButtons() {
         auto exitTip = createTooltip("Exit", Size(60, 30));
         bindTooltip(_exitButton, exitTip);
         bindHoverEffect(_exitButton);
+    }
+
+    _asyncButton = Button::create();
+    if (_asyncButton) {
+        const Size btnSize(120.0f, 44.0f);
+        float asyncY = lastY - (btnHeight + spacing) - 10.0f;
+        _asyncButton->setScale9Enabled(true);
+        _asyncButton->setContentSize(btnSize);
+        _asyncButton->setAnchorPoint(Vec2(0.5f, 0.5f));
+        _asyncButton->setPosition(Vec2(buttonX, asyncY));
+        _asyncButton->setTitleText("Async");
+        _asyncButton->setTitleFontName("fonts/ScienceGothic.ttf");
+        _asyncButton->setTitleFontSize(18);
+        _asyncButton->setTitleColor(Color3B::WHITE);
+        _asyncButton->setPressedActionEnabled(true);
+        _asyncButton->setZoomScale(0.05f);
+        _asyncButton->setSwallowTouches(true);
+
+        auto bg = LayerColor::create(Color4B(40, 60, 80, 235), btnSize.width, btnSize.height);
+        bg->setIgnoreAnchorPointForPosition(false);
+        bg->setAnchorPoint(Vec2(0.5f, 0.5f));
+        bg->setPosition(Vec2(btnSize.width * 0.5f, btnSize.height * 0.5f));
+        _asyncButton->addChild(bg, -1);
+
+        auto border = DrawNode::create();
+        border->drawRect(Vec2(-btnSize.width / 2, -btnSize.height / 2),
+            Vec2(btnSize.width / 2, btnSize.height / 2),
+            Color4F(0.8f, 0.9f, 1.0f, 0.4f));
+        _asyncButton->addChild(border, 1);
+
+        _asyncButton->addTouchEventListener([bg](Ref*, Widget::TouchEventType type) {
+            if (!bg) return;
+            if (type == Widget::TouchEventType::BEGAN) {
+                bg->setColor(Color3B(25, 40, 60));
+            }
+            else if (type == Widget::TouchEventType::ENDED || type == Widget::TouchEventType::CANCELED) {
+                bg->setColor(Color3B(40, 60, 80));
+            }
+            });
+
+        _asyncButton->addClickEventListener([this](Ref*) {
+            AudioManager::playButtonClick();
+            if (_callbacks.onAsync) _callbacks.onAsync();
+            });
+        this->addChild(_asyncButton);
+
+        auto shareTip = createTooltip("Async Ops", Size(90, 30));
+        bindTooltip(_asyncButton, shareTip);
+        bindHoverEffect(_asyncButton);
     }
 }
 
@@ -152,6 +202,7 @@ void BaseUIPanel::setButtonsEnabled(bool enabled) {
     applyState(_attackButton);
     applyState(_buildButton);
     applyState(_exitButton);
+    applyState(_asyncButton);
 }
 
 void BaseUIPanel::setupResourcePanel() {

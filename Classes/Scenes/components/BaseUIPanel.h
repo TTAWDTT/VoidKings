@@ -39,6 +39,7 @@ struct BaseUICallbacks {
     std::function<void()> onAttack;     // 进攻按钮回调
     std::function<void()> onBuild;      // 建造按钮回调
     std::function<void()> onExit;       // 退出按钮回调
+    std::function<void()> onAsync;      // 异步分享面板
 };
 
 // ===================================================
@@ -79,6 +80,7 @@ private:
     Button* _attackButton = nullptr;
     Button* _buildButton = nullptr;
     Button* _exitButton = nullptr;
+    Button* _asyncButton = nullptr;
     Label* _goldLabel = nullptr;
     Label* _diamondLabel = nullptr;
     Node* _idCardPanel = nullptr;

@@ -14,6 +14,63 @@
 #include "Utils/AudioManager.h"
 #include <algorithm>
 #include <memory>
+#include <string>
+
+namespace {
+const char* kShopFont = "fonts/ScienceGothic.ttf";
+
+Label* createShopLabel(const std::string& text, float fontSize) {
+    auto label = Label::createWithTTF(text, kShopFont, fontSize);
+    if (!label) {
+        label = Label::create();
+        label->setString(text);
+        label->setSystemFontSize(fontSize);
+    }
+    return label;
+}
+
+float getFirstFloatValue(const std::vector<float>& values, float fallback) {
+    if (values.empty()) {
+        return fallback;
+    }
+    return values.front();
+}
+
+int getFirstIntValue(const std::vector<int>& values, int fallback) {
+    if (values.empty()) {
+        return fallback;
+    }
+    return values.front();
+}
+
+std::string toCategoryName(BuildingCategory category) {
+    switch (category) {
+    case BuildingCategory::Defence:
+        return "Defense";
+    case BuildingCategory::Production:
+        return "Production";
+    case BuildingCategory::Storage:
+        return "Storage";
+    case BuildingCategory::Trap:
+        return "Trap";
+    default:
+        return "Unknown";
+    }
+}
+
+std::string buildTargetText(bool ground, bool sky) {
+    if (ground && sky) {
+        return "Ground/Air";
+    }
+    if (ground) {
+        return "Ground";
+    }
+    if (sky) {
+        return "Air";
+    }
+    return "-";
+}
+} // namespace
 
  // ===================================================
  // �����ͳ�ʼ��
@@ -51,6 +108,7 @@ bool BuildShopPanel::init(
     setupBackground();
     setupPanel();
     setupTitle();
+    setupDetailPanel();
     setupBuildingGrid();
     setupCloseButton();
 
@@ -146,7 +204,7 @@ void BuildShopPanel::setupTitle() {
     _panel->addChild(titleBg);
 
     // ��������
-    _titleLabel = Label::createWithSystemFont("Building Shop", "Arial", BuildShopConfig::TITLE_FONT_SIZE);
+    _titleLabel = createShopLabel("Building Shop", BuildShopConfig::TITLE_FONT_SIZE);
     _titleLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
     _titleLabel->setPosition(
         BuildShopConfig::PANEL_SIZE.width / 2,
@@ -158,6 +216,43 @@ void BuildShopPanel::setupTitle() {
 
 // ===================================================
 // ���ý������񲼾�
+// ===================================================
+// ===================================================
+// 详情提示面板
+// ===================================================
+void BuildShopPanel::setupDetailPanel() {
+    if (!_panel) {
+        return;
+    }
+
+    _detailPanel = Node::create();
+    _detailPanel->setAnchorPoint(Vec2(0.5f, 0.5f));
+    _detailPanel->setIgnoreAnchorPointForPosition(false);
+    _detailPanel->setVisible(false);
+    _panel->addChild(_detailPanel, 6);
+
+    _detailBg = LayerColor::create(
+        Color4B(15, 15, 15, 220),
+        BuildShopConfig::DETAIL_MIN_WIDTH,
+        BuildShopConfig::DETAIL_MIN_HEIGHT
+    );
+    _detailBg->setAnchorPoint(Vec2(0.5f, 0.5f));
+    _detailBg->setIgnoreAnchorPointForPosition(false);
+    _detailPanel->addChild(_detailBg, 0);
+
+    auto border = DrawNode::create();
+    border->setName("detailBorder");
+    _detailPanel->addChild(border, 1);
+
+    _detailLabel = createShopLabel("", 12);
+    _detailLabel->setAnchorPoint(Vec2(0.0f, 1.0f));
+    _detailLabel->setAlignment(TextHAlignment::LEFT);
+    _detailLabel->setTextColor(Color4B::WHITE);
+    _detailPanel->addChild(_detailLabel, 2);
+}
+
+// ===================================================
+// ???y?????????
 // ===================================================
 void BuildShopPanel::setupBuildingGrid() {
     _gridContainer = Node::create();
@@ -246,7 +341,7 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
     }
 
     // �������ƣ���С���壩
-    auto nameLabel = Label::createWithSystemFont(option.name, "Arial", 10);
+    auto nameLabel = createShopLabel(option.name, 10);
     nameLabel->setPosition(Vec2(0, -20));
     nameLabel->setColor(option.canBuild ? Color3B::WHITE : Color3B::GRAY);
     nameLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
@@ -254,7 +349,7 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
     // ������ʾ
     char costText[32];
     snprintf(costText, sizeof(costText), "%d", option.cost);
-    auto costLabel = Label::createWithSystemFont(costText, "Arial", 9);
+    auto costLabel = createShopLabel(costText, 9);
     costLabel->setPosition(Vec2(8, -28));
     costLabel->setColor(option.canBuild ? Color3B::YELLOW : Color3B::GRAY);
     costLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
@@ -273,7 +368,7 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
     // �ߴ���Ϣ
     char sizeText[32];
     snprintf(sizeText, sizeof(sizeText), "%dx%d", option.gridWidth, option.gridHeight);
-    auto sizeLabel = Label::createWithSystemFont(sizeText, "Arial", 9);
+    auto sizeLabel = createShopLabel(sizeText, 9);
     sizeLabel->setPosition(Vec2(0, -40));
     sizeLabel->setColor(option.canBuild ? Color3B(210, 210, 210) : Color3B::GRAY);
     sizeLabel->setAnchorPoint(Vec2(0.5f, 0.5f));
@@ -281,7 +376,7 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
 
     // ������ɽ��죬����"����"��ǩ
     if (!option.canBuild) {
-        auto lockedLabel = Label::createWithSystemFont("Owned", "Arial", 9);
+        auto lockedLabel = createShopLabel("Owned", 9);
         lockedLabel->setPosition(Vec2(0, 25));
         lockedLabel->setColor(Color3B::RED);
         itemNode->addChild(lockedLabel, 3);
@@ -336,7 +431,7 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
     bool canBuild = option.canBuild;
     auto hoverState = std::make_shared<bool>(false);
     auto hoverListener = EventListenerMouse::create();
-    hoverListener->onMouseMove = [this, itemNode, bg, border, itemWidth, itemHeight, borderColor, bgColor, hoverState, canBuild](EventMouse* event) {
+    hoverListener->onMouseMove = [this, itemNode, bg, border, itemWidth, itemHeight, borderColor, bgColor, hoverState, canBuild, optionCopy](EventMouse* event) {
         if (!canBuild) {
             return;
         }
@@ -354,6 +449,8 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
                 Vec2(itemWidth / 2, itemHeight / 2),
                 Color4F(0.9f, 0.9f, 0.9f, 1.0f));
             *hoverState = true;
+            Vec2 worldPos = parent->convertToWorldSpace(itemNode->getPosition());
+            showDetailPanel(optionCopy, worldPos);
         }
         else if (!inside && *hoverState) {
             bg->setColor(Color3B(bgColor.r, bgColor.g, bgColor.b));
@@ -362,6 +459,11 @@ Node* BuildShopPanel::createBuildingGridItem(const BuildingOption& option, int r
                 Vec2(itemWidth / 2, itemHeight / 2),
                 borderColor);
             *hoverState = false;
+            hideDetailPanel();
+        }
+        else if (inside && *hoverState) {
+            Vec2 worldPos = parent->convertToWorldSpace(itemNode->getPosition());
+            showDetailPanel(optionCopy, worldPos);
         }
     };
     _eventDispatcher->addEventListenerWithSceneGraphPriority(hoverListener, itemNode);
@@ -381,6 +483,7 @@ void BuildShopPanel::setupCloseButton() {
     }
 
     closeBtn->setTitleText("Close");
+    closeBtn->setTitleFontName(kShopFont);
     closeBtn->setTitleFontSize(14);
     closeBtn->setTitleColor(Color3B::WHITE);
     closeBtn->setPosition(Vec2(
@@ -389,7 +492,7 @@ void BuildShopPanel::setupCloseButton() {
     ));
 
     closeBtn->setPressedActionEnabled(true);
-    closeBtn->setZoomScale(0.05f);
+    closeBtn->setZoomScale(0.06f);
     closeBtn->setSwallowTouches(true);
 
     closeBtn->addClickEventListener([this](Ref* sender) {
@@ -405,6 +508,117 @@ void BuildShopPanel::setupCloseButton() {
 
 // ===================================================
 // ��ʾ���
+// ===================================================
+// ===================================================
+// 构建详情文本
+// ===================================================
+std::string BuildShopPanel::buildDetailText(const BuildingOption& option) const {
+    std::string text = StringUtils::format("%s\nType: %s\nCost: %dG  Size: %dx%d",
+        option.name.c_str(),
+        toCategoryName(option.category).c_str(),
+        option.cost,
+        option.gridWidth,
+        option.gridHeight);
+
+    auto* manager = BuildingManager::getInstance();
+    manager->loadConfigs();
+    int configId = option.configId > 0 ? option.configId : option.type;
+
+    if (option.category == BuildingCategory::Defence) {
+        const DefenceBuildingConfig* config = manager->getDefenceConfig(configId);
+        if (config) {
+            float hp = getFirstFloatValue(config->HP, 0.0f);
+            float atk = getFirstFloatValue(config->ATK, 0.0f);
+            float range = getFirstFloatValue(config->ATK_RANGE, 0.0f);
+            float speed = getFirstFloatValue(config->ATK_SPEED, 0.0f);
+            std::string target = buildTargetText(config->GROUND_ABLE, config->SKY_ABLE);
+            text += StringUtils::format("\nHP: %.0f\nATK: %.0f  Range: %.0f\nRate: %.2fs  Target: %s",
+                hp, atk, range, speed, target.c_str());
+        }
+    }
+    else if (option.category == BuildingCategory::Production) {
+        const ProductionBuildingConfig* config = manager->getProductionConfig(configId);
+        if (config) {
+            float hp = getFirstFloatValue(config->HP, 0.0f);
+            int gold = getFirstIntValue(config->PRODUCE_GOLD, 0);
+            int elixir = getFirstIntValue(config->PRODUCE_ELIXIR, 0);
+            int goldCap = getFirstIntValue(config->STORAGE_GOLD_CAPACITY, 0);
+            int elixirCap = getFirstIntValue(config->STORAGE_ELIXIR_CAPACITY, 0);
+            text += StringUtils::format("\nHP: %.0f\nOutput: G+%d E+%d\nStorage: G+%d E+%d",
+                hp, gold, elixir, goldCap, elixirCap);
+        }
+    }
+    else if (option.category == BuildingCategory::Storage) {
+        const StorageBuildingConfig* config = manager->getStorageConfig(configId);
+        if (config) {
+            float hp = getFirstFloatValue(config->HP, 0.0f);
+            int gold = getFirstIntValue(config->ADD_STORAGE_GOLD_CAPACITY, 0);
+            int elixir = getFirstIntValue(config->ADD_STORAGE_ELIXIR_CAPACITY, 0);
+            text += StringUtils::format("\nHP: %.0f\nCapacity: G+%d E+%d",
+                hp, gold, elixir);
+        }
+    }
+    else if (option.category == BuildingCategory::Trap) {
+        text += "\nTrigger: Contact\nEffect: Single-use damage";
+    }
+
+    return text;
+}
+
+// ===================================================
+// 显示/隐藏详情提示
+// ===================================================
+void BuildShopPanel::showDetailPanel(const BuildingOption& option, const Vec2& worldPos) {
+    if (!_detailPanel || !_detailBg || !_detailLabel || !_panel) {
+        return;
+    }
+
+    std::string detailText = buildDetailText(option);
+    _detailLabel->setString(detailText);
+    _detailLabel->setWidth(BuildShopConfig::DETAIL_MIN_WIDTH - BuildShopConfig::DETAIL_PADDING * 2);
+
+    Size textSize = _detailLabel->getContentSize();
+    float width = std::max(BuildShopConfig::DETAIL_MIN_WIDTH, textSize.width + BuildShopConfig::DETAIL_PADDING * 2);
+    float height = std::max(BuildShopConfig::DETAIL_MIN_HEIGHT, textSize.height + BuildShopConfig::DETAIL_PADDING * 2);
+    _detailBg->setContentSize(Size(width, height));
+    _detailLabel->setPosition(Vec2(-width * 0.5f + BuildShopConfig::DETAIL_PADDING,
+        height * 0.5f - BuildShopConfig::DETAIL_PADDING));
+
+    auto border = dynamic_cast<DrawNode*>(_detailPanel->getChildByName("detailBorder"));
+    if (border) {
+        border->clear();
+        border->drawRect(Vec2(-width * 0.5f, -height * 0.5f),
+            Vec2(width * 0.5f, height * 0.5f),
+            Color4F(0.8f, 0.8f, 0.8f, 1.0f));
+    }
+
+    Vec2 localPos = _panel->convertToNodeSpace(worldPos);
+    float offsetX = BuildShopConfig::GRID_ITEM_SIZE * 0.6f + width * 0.5f;
+    Vec2 desired = localPos + Vec2(offsetX, 0.0f);
+
+    float minX = width * 0.5f + 8.0f;
+    float maxX = BuildShopConfig::PANEL_SIZE.width - width * 0.5f - 8.0f;
+    float minY = height * 0.5f + 8.0f;
+    float maxY = BuildShopConfig::PANEL_SIZE.height - height * 0.5f - 8.0f;
+
+    if (desired.x > maxX) {
+        desired.x = localPos.x - offsetX;
+    }
+
+    float clampedX = std::max(minX, std::min(maxX, desired.x));
+    float clampedY = std::max(minY, std::min(maxY, desired.y));
+    _detailPanel->setPosition(Vec2(clampedX, clampedY));
+    _detailPanel->setVisible(true);
+}
+
+void BuildShopPanel::hideDetailPanel() {
+    if (_detailPanel) {
+        _detailPanel->setVisible(false);
+    }
+}
+
+// ===================================================
+// ??????
 // ===================================================
 void BuildShopPanel::show() {
     this->setVisible(true);
@@ -429,6 +643,7 @@ void BuildShopPanel::show() {
 // ===================================================
 void BuildShopPanel::hide() {
     _isShowing = false;
+    hideDetailPanel();
 
     if (_background) {
         _background->stopAllActions();

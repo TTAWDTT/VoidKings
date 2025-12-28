@@ -35,39 +35,13 @@
 
 namespace {
 const char* kMenuFont = "fonts/ScienceGothic.ttf";
-const char* kFallbackFont = "Arial";
-
-const char* getCjkFontName() {
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
-    return "Microsoft YaHei";
-#elif (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
-    return "DroidSansFallback";
-#elif (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-    return "PingFang SC";
-#else
-    return "Arial";
-#endif
-}
-
-bool hasNonAscii(const std::string& text) {
-    for (unsigned char ch : text) {
-        if (ch >= 0x80) {
-            return true;
-        }
-    }
-    return false;
-}
 
 Label* createMenuLabel(const std::string& text, float fontSize) {
-    if (hasNonAscii(text)) {
-        auto label = Label::createWithSystemFont(text, getCjkFontName(), fontSize);
-        if (label) {
-            return label;
-        }
-    }
     auto label = Label::createWithTTF(text, kMenuFont, fontSize);
     if (!label) {
-        label = Label::createWithSystemFont(text, kFallbackFont, fontSize);
+        label = Label::create();
+        label->setString(text);
+        label->setSystemFontSize(fontSize);
     }
     return label;
 }
@@ -184,7 +158,7 @@ void MainMenuScene::createHeadLogo()
 {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     auto origin = Director::getInstance()->getVisibleOrigin();
-    headLogo = Label::createWithTTF("Void Kings", "fonts/Marker Felt.ttf", 48);
+    headLogo = Label::createWithTTF("Void Kings", "fonts/ScienceGothic.ttf", 48);
     headLogo->setTextColor(Color4B(255, 200, 50, 255));
     headLogo->setAnchorPoint(Vec2(0.5f, 1.0f));
     headLogo->setPosition(Vec2(origin.x + visibleSize.width / 2,
@@ -209,7 +183,49 @@ void MainMenuScene::createOtherThings()
         return;
     }
 
-    // 创建动画
+    _dinosaurSprite = dinosaur;
+    _dinoBaseScale = 4.0f;
+    _dinosaurSprite->setScale(_dinoBaseScale);
+    _dinosaurSprite->setAnchorPoint(Vec2(1.0f, 0.0f)); // 右下角锚点
+
+    // 位置：右下角，留边距
+    float margin = 24.0f;
+    _dinoBasePos = Vec2(origin.x + visibleSize.width - margin,
+        origin.y + margin);
+    _dinosaurSprite->setPosition(_dinoBasePos);
+
+    // 添加到场景（不是mainMenuLayer，而是直接添加到Scene）
+    this->addChild(_dinosaurSprite, 5);
+
+    // 播放默认待机动画
+    startDinoIdle();
+
+    // 点击彩蛋
+    auto touchListener = EventListenerTouchOneByOne::create();
+    touchListener->setSwallowTouches(false);
+    touchListener->onTouchBegan = [this](Touch* touch, Event*) {
+        if (!_dinosaurSprite || !_dinosaurSprite->getParent()) {
+            return false;
+        }
+        Vec2 localPos = _dinosaurSprite->getParent()->convertToNodeSpace(touch->getLocation());
+        return _dinosaurSprite->getBoundingBox().containsPoint(localPos);
+    };
+    touchListener->onTouchEnded = [this](Touch*, Event*) {
+        onDinoTapped();
+    };
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(touchListener, _dinosaurSprite);
+}
+
+void MainMenuScene::startDinoIdle() {
+    if (!_dinosaurSprite) {
+        return;
+    }
+
+    _dinosaurSprite->stopAllActions();
+    _dinosaurSprite->setScale(_dinoBaseScale);
+    _dinosaurSprite->setPosition(_dinoBasePos);
+
+    // 重新构建动画帧，避免状态错乱
     Animation* anim = Animation::create();
     for (int j = 0; j < 4; j++) {
         for (int k = 0; k < 6; k++) {
@@ -224,26 +240,107 @@ void MainMenuScene::createOtherThings()
     }
     anim->setDelayPerUnit(0.1f);
 
-    // 配置精灵并播放动画
-    dinosaur->setScale(4.0f);
-    dinosaur->setAnchorPoint(Vec2(1.0f, 0.0f)); // 右下角锚点
-    
-    // 位置：右下角，留边距
-    float margin = 24.0f;
-    dinosaur->setPosition(Vec2(origin.x + visibleSize.width - margin,
-                               origin.y + margin));
-
-    // 添加到场景（不是mainMenuLayer，而是直接添加到Scene）
-    this->addChild(dinosaur, 5);
-
-    // 播放循环动画
-    dinosaur->runAction(RepeatForever::create(Animate::create(anim)));
+    if (!anim->getFrames().empty()) {
+        _dinosaurSprite->runAction(RepeatForever::create(Animate::create(anim)));
+    }
 
     // 轻微上下浮动，增加呼吸感
     auto bobUp = EaseSineInOut::create(MoveBy::create(1.4f, Vec2(0.0f, 5.0f)));
     auto bobDown = EaseSineInOut::create(MoveBy::create(1.4f, Vec2(0.0f, -5.0f)));
-    dinosaur->runAction(RepeatForever::create(Sequence::create(bobUp, bobDown, nullptr)));
+    _dinosaurSprite->runAction(RepeatForever::create(Sequence::create(bobUp, bobDown, nullptr)));
+}
 
+void MainMenuScene::onDinoTapped() {
+    if (_dinoEasterActive) {
+        return;
+    }
+    _dinoTapCount++;
+
+    if (_dinoTapCount == 3) {
+        showDinoToast("Keep tapping...");
+    }
+    else if (_dinoTapCount == 5) {
+        showDinoToast("Almost there...");
+    }
+    else if (_dinoTapCount >= 6) {
+        triggerDinoEasterEgg();
+    }
+}
+
+void MainMenuScene::showDinoToast(const std::string& text) {
+    if (!_dinosaurSprite) {
+        return;
+    }
+    auto label = createMenuLabel(text, 20);
+    if (!label) {
+        return;
+    }
+    label->setOpacity(0);
+    Vec2 pos = _dinosaurSprite->getPosition() + Vec2(-140.0f, 110.0f);
+    label->setPosition(pos);
+    this->addChild(label, 8);
+
+    auto fadeIn = FadeTo::create(0.15f, 255);
+    auto stay = DelayTime::create(0.7f);
+    auto fadeOut = FadeTo::create(0.25f, 0);
+    label->runAction(Sequence::create(fadeIn, stay, fadeOut, RemoveSelf::create(), nullptr));
+}
+
+void MainMenuScene::triggerDinoEasterEgg() {
+    if (!_dinosaurSprite || _dinoEasterActive) {
+        return;
+    }
+    _dinoEasterActive = true;
+    _dinoTapCount = 0;
+
+    _dinosaurSprite->stopAllActions();
+
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    auto origin = Director::getInstance()->getVisibleOrigin();
+    Vec2 centerPos(origin.x + visibleSize.width * 0.5f, origin.y + visibleSize.height * 0.2f);
+    float roarScale = _dinoBaseScale * 1.2f;
+
+    auto spawnCoins = [this, centerPos]() {
+        for (int i = 0; i < 6; ++i) {
+            auto coin = Sprite::create("source/coin/coin_0001.png");
+            if (!coin) {
+                continue;
+            }
+            float offsetX = RandomHelper::random_real(-60.0f, 60.0f);
+            float offsetY = RandomHelper::random_real(-10.0f, 40.0f);
+            coin->setPosition(centerPos + Vec2(offsetX, offsetY));
+            coin->setScale(0.8f);
+            this->addChild(coin, 7);
+
+            auto moveUp = MoveBy::create(0.6f, Vec2(0.0f, 80.0f));
+            auto fadeOut = FadeTo::create(0.6f, 0);
+            coin->runAction(Sequence::create(Spawn::create(moveUp, fadeOut, nullptr),
+                RemoveSelf::create(), nullptr));
+        }
+    };
+
+    // 彩蛋动作：冲到中间咆哮再返回
+    auto moveIn = MoveTo::create(0.5f, centerPos);
+    auto scaleUp = ScaleTo::create(0.5f, roarScale);
+    auto roar = CallFunc::create([this, spawnCoins]() {
+        AudioManager::playButtonClick();
+        showDinoToast("ROAR!");
+        spawnCoins();
+    });
+    auto moveBack = MoveTo::create(0.6f, _dinoBasePos);
+    auto scaleBack = ScaleTo::create(0.6f, _dinoBaseScale);
+    auto reset = CallFunc::create([this]() {
+        _dinoEasterActive = false;
+        startDinoIdle();
+    });
+
+    _dinosaurSprite->runAction(Sequence::create(
+        Spawn::create(moveIn, scaleUp, nullptr),
+        roar,
+        DelayTime::create(0.6f),
+        Spawn::create(moveBack, scaleBack, nullptr),
+        reset,
+        nullptr));
 }
 
 void MainMenuScene::createModalOverlay()
@@ -272,7 +369,7 @@ Button* MainMenuScene::createIconButton(
     auto button = Button::create("btn_normal.png", "btn_pressed.png");
     button->setScale9Enabled(true);
     button->setPressedActionEnabled(true);
-    button->setZoomScale(0.05f);
+    button->setZoomScale(0.06f);
     button->setSwallowTouches(true);
 
     // 文字
@@ -358,7 +455,7 @@ Button* MainMenuScene::createTextButton(
     button->setTitleFontSize(20);
     button->setTitleText(title);
     button->setPressedActionEnabled(true);
-    button->setZoomScale(0.05f);
+    button->setZoomScale(0.06f);
     button->setSwallowTouches(true);
     button->addTouchEventListener(callback);
     return button;
@@ -754,10 +851,7 @@ void MainMenuScene::createSaveLayer()
     saveLayer->addChild(panel, 1);
     savePanel = panel;
 
-    auto title = Label::createWithTTF("Save Slots", "fonts/ScienceGothic.ttf", 32);
-    if (!title) {
-        title = Label::createWithSystemFont("Save Slots", "Arial", 32);
-    }
+    auto title = createMenuLabel("Save Slots", 32);
     title->setPosition(Vec2(0, panelHeight / 2 - 20));
     panel->addChild(title, 2);
 
@@ -778,10 +872,7 @@ void MainMenuScene::createSaveLayer()
         float y = rowStartY - i * rowSpacing;
 
         std::string labelText = StringUtils::format("Slot %d: Empty", slot);
-        auto label = Label::createWithTTF(labelText, "fonts/ScienceGothic.ttf", 18);
-        if (!label) {
-            label = Label::createWithSystemFont(labelText, "Arial", 18);
-        }
+        auto label = createMenuLabel(labelText, 18);
         label->setAnchorPoint(Vec2(0, 0.5f));
         label->setPosition(Vec2(labelX, y));
         panel->addChild(label, 2);

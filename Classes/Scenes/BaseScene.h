@@ -95,6 +95,9 @@ private:
     PlacementManager* _placementManager = nullptr; // 建筑放置管理器组件
     TrainPanel* _trainPanel = nullptr;             // 训练面板    
     Node* _effectLayer = nullptr;                  // 特效层
+    Node* _asyncPanel = nullptr;                   // 异步分享面板
+    Label* _asyncStatusLabel = nullptr;            // 状态提示
+    bool _asyncPanelVisible = false;               // 面板是否可见
 
     // ==================== 悬浮信息 ====================
     Node* _hoverInfoPanel = nullptr;               // 悬浮信息面板
@@ -188,6 +191,7 @@ private:
      * @param unitId 完成训练的兵种ID
      */
     void onUnitTrainComplete(int unitId);
+    void onAsyncClicked();
 
     // ==================== 建筑创建方法 ====================
 
@@ -274,6 +278,22 @@ private:
     bool getUpgradeInfo(Node* building, int& currentLevel, int& maxLevel, int& cost, ResourceType& resource, bool& isBase) const;
     int getSavedBuildingIndex(Node* building) const;
     void syncBaseBuildingLevel();
+
+    // ==================== 异步攻防面板 ====================
+    void toggleAsyncPanel();
+    void showAsyncPanel();
+    void hideAsyncPanel();
+    void setupAsyncPanel();
+    void updateAsyncStatus(const std::string& text);
+    Button* createAsyncButton(const std::string& text,
+        const std::function<void()>& handler,
+        const Size& size = Size(220.0f, 42.0f),
+        const Color4B& normalColor = Color4B(60, 60, 60, 230),
+        const Color4B& pressedColor = Color4B(90, 90, 90, 255));
+    void handleExportBase();
+    void handleImportBaseAttack();
+    void handleExportReplay();
+    void handleImportReplay();
 };
 
 #endif // __BASE_SCENE_H__

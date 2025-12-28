@@ -38,6 +38,11 @@ namespace BuildShopConfig {
 
     // 关闭按钮配置
     constexpr float CLOSE_BUTTON_BOTTOM = 30.0f;
+
+    // 详情提示配置
+    constexpr float DETAIL_MIN_WIDTH = 200.0f;
+    constexpr float DETAIL_MIN_HEIGHT = 90.0f;
+    constexpr float DETAIL_PADDING = 10.0f;
 }
 
 // ===================================================
@@ -97,6 +102,9 @@ private:
     LayerColor* _panel = nullptr;           // 主面板
     Label* _titleLabel = nullptr;           // 标题
     Node* _gridContainer = nullptr;         // 网格容器
+    Node* _detailPanel = nullptr;           // 详情提示面板
+    LayerColor* _detailBg = nullptr;        // 详情背景
+    Label* _detailLabel = nullptr;          // 详情文本
 
     // 建筑选项列表
     std::vector<BuildingOption> _buildingOptions;
@@ -114,6 +122,10 @@ private:
     void setupTitle();
     void setupBuildingGrid();
     void setupCloseButton();
+    void setupDetailPanel();
+    void showDetailPanel(const BuildingOption& option, const Vec2& worldPos);
+    void hideDetailPanel();
+    std::string buildDetailText(const BuildingOption& option) const;
 
     /**
      * @brief 初始化建筑选项

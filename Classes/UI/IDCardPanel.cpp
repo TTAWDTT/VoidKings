@@ -266,7 +266,12 @@ Node* IDCardPanel::createPanel(Node* backgroundLayer)
 
     auto upgradeLabel = Label::createWithTTF("UP", "fonts/ScienceGothic.ttf", 10);
     if (!upgradeLabel) {
-        upgradeLabel = Label::createWithSystemFont("UP", "Arial", 10);
+        upgradeLabel = Label::createWithTTF("UP", "fonts/ScienceGothic.ttf", 10);
+        if (!upgradeLabel) {
+            upgradeLabel = Label::create();
+            upgradeLabel->setString("UP");
+            upgradeLabel->setSystemFontSize(10);
+        }
     }
     upgradeLabel->setName("baseUpgradeLabel");
     upgradeLabel->setColor(Color3B::WHITE);
@@ -305,7 +310,12 @@ Node* IDCardPanel::createPanel(Node* backgroundLayer)
 
         auto toastLabel = Label::createWithTTF("Level up!", "fonts/ScienceGothic.ttf", 12);
         if (!toastLabel) {
-            toastLabel = Label::createWithSystemFont("Level up!", "Arial", 12);
+            toastLabel = Label::createWithTTF("Level up!", "fonts/ScienceGothic.ttf", 12);
+            if (!toastLabel) {
+                toastLabel = Label::create();
+                toastLabel->setString("Level up!");
+                toastLabel->setSystemFontSize(12);
+            }
         }
         toastLabel->setPosition(Vec2(0.0f, 0.0f));
         toastLabel->setColor(Color3B::WHITE);

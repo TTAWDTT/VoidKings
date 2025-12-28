@@ -52,6 +52,10 @@ protected:
 	void switchToLayer(Node* targetLayer);
 	void animateMenuButtons();
 	void animatePanel(Node* panel);
+	void startDinoIdle();
+	void onDinoTapped();
+	void triggerDinoEasterEgg();
+	void showDinoToast(const std::string& text);
 	Button* createIconButton(
 		const std::string& title,
 		const std::string& iconPath,
@@ -75,6 +79,11 @@ private:
 	Node* rulePanel = nullptr;
 	Node* savePanel = nullptr;
 	Label* headLogo = nullptr;
+	Sprite* _dinosaurSprite = nullptr;
+	Vec2 _dinoBasePos = Vec2::ZERO;
+	float _dinoBaseScale = 1.0f;
+	int _dinoTapCount = 0;
+	bool _dinoEasterActive = false;
 	std::vector<Button*> menuButtons;
 	Vector<Sprite*> backgroundList;
 	int currentBgIndex = 0;

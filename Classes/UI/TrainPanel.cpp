@@ -129,38 +129,36 @@ ContentCenterInfo getContentCenterInfo(const std::string& path) {
 
 Label* createTrainLabel(const std::string& text, float fontSize) {
     Label* label = nullptr;
-    const bool hasNonAscii = std::any_of(text.begin(), text.end(), [](unsigned char ch) {
-        return ch >= 0x80;
-    });
-
-    // 优先使用更清晰的TTF字体，非ASCII文本优先走系统字体避免缺字
-    if (!hasNonAscii) {
-        if (TrainPanelConfig::FONT_PATH[0] != '\0') {
-            label = Label::createWithTTF(text, TrainPanelConfig::FONT_PATH, fontSize);
-        }
-        if (!label && TrainPanelConfig::SYSTEM_FONT_NAME[0] != '\0') {
-            label = Label::createWithSystemFont(text, TrainPanelConfig::SYSTEM_FONT_NAME, fontSize);
-        }
-        if (!label && TrainPanelConfig::SYSTEM_FONT_FALLBACK[0] != '\0') {
-            label = Label::createWithSystemFont(text, TrainPanelConfig::SYSTEM_FONT_FALLBACK, fontSize);
-        }
-    }
-    else {
-        if (TrainPanelConfig::SYSTEM_FONT_FALLBACK[0] != '\0') {
-            label = Label::createWithSystemFont(text, TrainPanelConfig::SYSTEM_FONT_FALLBACK, fontSize);
-        }
-        if (!label && TrainPanelConfig::SYSTEM_FONT_NAME[0] != '\0') {
-            label = Label::createWithSystemFont(text, TrainPanelConfig::SYSTEM_FONT_NAME, fontSize);
-        }
-        if (!label && TrainPanelConfig::FONT_PATH[0] != '\0') {
-            label = Label::createWithTTF(text, TrainPanelConfig::FONT_PATH, fontSize);
-        }
+    if (TrainPanelConfig::FONT_PATH[0] != '\0') {
+        label = Label::createWithTTF(text, TrainPanelConfig::FONT_PATH, fontSize);
     }
     if (!label) {
         label = Label::create();
         label->setString(text);
+        label->setSystemFontSize(fontSize);
     }
     return label;
+}
+
+float getFloatAt(const std::vector<float>& values, int index, float fallback) {
+    if (values.empty()) {
+        return fallback;
+    }
+    if (index >= 0 && static_cast<size_t>(index) < values.size()) {
+        return values[static_cast<size_t>(index)];
+    }
+    return values.back();
+}
+
+std::string formatPriority(TargetPriority priority) {
+    switch (priority) {
+    case TargetPriority::RESOURCE:
+        return "Resource";
+    case TargetPriority::DEFENSE:
+        return "Defense";
+    default:
+        return "Any";
+    }
 }
 } // namespace
 
@@ -209,6 +207,7 @@ bool TrainPanel::init(
     setupBackground();
     setupPanel();
     setupTitle();
+    setupDetailPanel();
     setupUnitCards();
     setupCloseButton();
     setupResourceDisplay();
@@ -346,6 +345,59 @@ void TrainPanel::setupTitle() {
 // ===================================================
 // 兵种卡片区域设置
 // ===================================================
+// ===================================================
+// 详情面板设置
+// ===================================================
+void TrainPanel::setupDetailPanel() {
+    if (!_contentRoot) {
+        return;
+    }
+
+    Size contentSize = _contentRoot->getContentSize();
+    float closeButtonTop = TrainPanelConfig::CLOSE_BUTTON_BOTTOM
+        + TrainPanelConfig::CLOSE_BUTTON_HEIGHT * 0.5f;
+    float detailBottom = closeButtonTop + TrainPanelConfig::DETAIL_PANEL_GAP;
+    float detailCenterY = detailBottom + TrainPanelConfig::DETAIL_PANEL_HEIGHT * 0.5f;
+
+    _detailPanel = Node::create();
+    _detailPanel->setPosition(Vec2(contentSize.width * 0.5f, detailCenterY));
+    _contentRoot->addChild(_detailPanel, 3);
+
+    _detailBg = LayerColor::create(
+        Color4B(45, 45, 45, 255),
+        contentSize.width - TrainPanelConfig::DETAIL_PANEL_PADDING * 2.0f,
+        TrainPanelConfig::DETAIL_PANEL_HEIGHT
+    );
+    _detailBg->setAnchorPoint(Vec2(0.5f, 0.5f));
+    _detailBg->setIgnoreAnchorPointForPosition(false);
+    _detailPanel->addChild(_detailBg, 0);
+
+    auto border = DrawNode::create();
+    border->drawRect(
+        Vec2(-_detailBg->getContentSize().width * 0.5f, -_detailBg->getContentSize().height * 0.5f),
+        Vec2(_detailBg->getContentSize().width * 0.5f, _detailBg->getContentSize().height * 0.5f),
+        Color4F(0.8f, 0.8f, 0.8f, 1.0f)
+    );
+    _detailPanel->addChild(border, 1);
+
+    _detailLabel = createTrainLabel("", TrainPanelConfig::DETAIL_FONT_SIZE);
+    _detailLabel->setAnchorPoint(Vec2(0.0f, 1.0f));
+    _detailLabel->setAlignment(TextHAlignment::LEFT);
+    _detailLabel->setTextColor(Color4B::WHITE);
+    _detailLabel->setDimensions(
+        _detailBg->getContentSize().width - TrainPanelConfig::DETAIL_PANEL_PADDING * 2.0f,
+        _detailBg->getContentSize().height - TrainPanelConfig::DETAIL_PANEL_PADDING * 2.0f
+    );
+    _detailLabel->setPosition(Vec2(
+        -_detailBg->getContentSize().width * 0.5f + TrainPanelConfig::DETAIL_PANEL_PADDING,
+        _detailBg->getContentSize().height * 0.5f - TrainPanelConfig::DETAIL_PANEL_PADDING
+    ));
+    _detailPanel->addChild(_detailLabel, 2);
+}
+
+// ===================================================
+// 兵种卡片区域设置
+// ===================================================
 void TrainPanel::setupUnitCards() {
     if (!_contentRoot) {
         return;
@@ -356,7 +408,9 @@ void TrainPanel::setupUnitCards() {
         - TrainPanelConfig::CARD_AREA_TOP_GAP;
     float closeButtonTop = TrainPanelConfig::CLOSE_BUTTON_BOTTOM
         + TrainPanelConfig::CLOSE_BUTTON_HEIGHT * 0.5f;
-    float bottomY = closeButtonTop + TrainPanelConfig::CARD_AREA_BOTTOM_GAP;
+    float detailBottom = closeButtonTop + TrainPanelConfig::DETAIL_PANEL_GAP;
+    float detailTop = detailBottom + TrainPanelConfig::DETAIL_PANEL_HEIGHT;
+    float bottomY = detailTop + TrainPanelConfig::DETAIL_PANEL_GAP + TrainPanelConfig::CARD_AREA_BOTTOM_GAP;
     float scrollHeight = topY - bottomY;
     if (scrollHeight < 0.0f) {
         scrollHeight = 0.0f;
@@ -485,6 +539,8 @@ void TrainPanel::refreshUnitCards() {
             }
         }
     }
+
+    updateDetailPanel();
 }
 
 // ===================================================
@@ -873,6 +929,80 @@ void TrainPanel::selectUnit(int unitId) {
         }
     }
 
+    updateDetailPanel();
+}
+
+// ===================================================
+// 招募兵种（消耗金币）
+// ===================================================
+// ===================================================
+// 详情信息更新
+// ===================================================
+void TrainPanel::updateDetailPanel() {
+    if (!_detailLabel) {
+        return;
+    }
+    if (_selectedUnitId == -1) {
+        _detailLabel->setString("Select a unit to view stats.");
+        return;
+    }
+    _detailLabel->setString(buildUnitDetailText(_selectedUnitId));
+}
+
+std::string TrainPanel::buildUnitDetailText(int unitId) const {
+    const UnitConfig* config = UnitManager::getInstance()->getConfig(unitId);
+    if (!config) {
+        return "Unit data not available.";
+    }
+
+    int levelIndex = UnitManager::getInstance()->getUnitLevel(unitId);
+    int maxIndex = std::max(0, config->MAXLEVEL);
+    int displayLevel = levelIndex + 1;
+    int displayMax = maxIndex + 1;
+
+    float hp = getFloatAt(config->HP, levelIndex, 0.0f);
+    float atk = getFloatAt(config->ATK, levelIndex, 0.0f);
+    float range = getFloatAt(config->RANGE, levelIndex, 0.0f);
+    float speed = getFloatAt(config->SPEED, levelIndex, 0.0f);
+
+    float attackInterval = config->anim_attack_delay * config->anim_attack_frames;
+    if (attackInterval < 0.2f) {
+        attackInterval = 0.2f;
+    }
+    float dps = attackInterval > 0.0f ? (atk / attackInterval) : atk;
+
+    std::string role = config->ISREMOTE ? "Ranged" : "Melee";
+    std::string moveType = config->ISFLY ? "Air" : "Ground";
+    std::string priority = formatPriority(config->aiType);
+
+    std::string text = StringUtils::format(
+        "%s  Lv.%d/%d\nHP: %.0f  ATK: %.0f  Range: %.0f\nSpeed: %.0f  DPS: %.1f  CD: %.2fs\nRole: %s  Type: %s  Priority: %s",
+        config->name.c_str(),
+        displayLevel,
+        displayMax,
+        hp,
+        atk,
+        range,
+        speed,
+        dps,
+        attackInterval,
+        role.c_str(),
+        moveType.c_str(),
+        priority.c_str()
+    );
+
+    if (levelIndex < maxIndex) {
+        float nextHp = getFloatAt(config->HP, levelIndex + 1, hp);
+        float nextAtk = getFloatAt(config->ATK, levelIndex + 1, atk);
+        float nextRange = getFloatAt(config->RANGE, levelIndex + 1, range);
+        text += StringUtils::format("\nNext: +HP %.0f  +ATK %.0f  +Range %.0f",
+            nextHp - hp, nextAtk - atk, nextRange - range);
+    }
+    else {
+        text += "\nNext: MAX";
+    }
+
+    return text;
 }
 
 // ===================================================
@@ -1049,6 +1179,7 @@ void TrainPanel::show() {
 
     updateResourceDisplay();
     refreshUnitCards();
+    updateDetailPanel();
     if (_unitCardArea) {
         _unitCardArea->jumpToTop();
     }
